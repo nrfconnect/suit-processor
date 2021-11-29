@@ -1,0 +1,16 @@
+;
+; Copyright (c) 2022 Nordic Semiconductor ASA
+;
+; SPDX-License-Identifier: Apache-2.0
+;
+
+SUIT_Chunk_Digests = [
+    chunk-size: uint,
+    + SUIT_Digest
+]
+suit-parameter-custom-chunk-digests = -10
+SUIT_Parameters //= (suit-parameter-custom-chunk-digests
+    => bstr .cbor SUIT_Chunk_Digests)
+
+suit-directive-custom-copy-chunks = -10
+SUIT_Directive //= (suit-directive-custom-copy-chunks, SUIT_Rep_Policy)

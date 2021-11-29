@@ -1,0 +1,15 @@
+;
+; Copyright (c) 2022 Nordic Semiconductor ASA
+;
+; SPDX-License-Identifier: Apache-2.0
+;
+
+Temp_Component_ID_Elems = [
+    'temp',
+    UID: bstr,
+    Size: bstr .cbor uint,
+    Align: bstr .cbor uint,
+    ?Context: bstr,
+]
+
+Component_ID //= Temp_Component_ID

@@ -30,33 +30,22 @@ int suit_plat_authenticate(enum suit_cose_alg alg_id, struct zcbor_string *key_i
  *
  *  If so, return a component handle for it.
  *
- *  @param[in]  parts  The component ID as an array of strings.
- *  @param[in]  num_parts  The number of strings in @p parts.
+ *  @param[in]  component_id  The CBOR-encoded component identifier.
  *  @param[in]  key_ids  The keys the current manifest was authenticated
  *                       against. This is to check that the manifest is
  *                       authorized to handle the given component ID.
  *  @param[in]  num_key_ids  The number of members in the @p key_ids list.
- *  @param[in]  properties  The properties we need the component to support.
  *  @param[out] component_handle  A reference for use with other functions in
  *                                this API, instead of always passing the
  *                                @p parts.
  */
-int suit_plat_get_component_handle(struct zcbor_string *parts, size_t num_parts,
-		struct zcbor_string **key_ids, size_t num_key_ids,
-		enum suit_component_properties properties,
+int suit_plat_get_component_handle(struct zcbor_string *component_id,
+		cbor_string_type_t **key_ids, size_t num_key_ids,
 		suit_component_t *component_handle);
-
-/** Return current slot for this component.
- *
- *  @param[in]  component_handle  Reference to the component.
- *  @param[out] slot  The current slot of the component.
- */
-int suit_plat_get_component_slot(suit_component_t component_handle,
-		unsigned int *slot);
 
 /** Return the properties of the given component. */
 int suit_plat_get_component_properties(suit_component_t component_handle,
-		enum suit_component_properties *properties);
+		struct suit_component_properties *properties);
 
 /** Check the provided payload against the provided digest */
 int suit_plat_check_image_match(enum suit_cose_alg alg_id,
