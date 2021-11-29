@@ -12,6 +12,7 @@
 #include <stddef.h>
 #include <string.h>
 #include "cbor_decode.h"
+#include "suit_types.h"
 
 #define DEFAULT_MAX_QTY 3
 
@@ -21,7 +22,7 @@ struct SUIT_Component_Identifier {
 };
 
 struct SUIT_Components {
- 	struct SUIT_Component_Identifier _SUIT_Components__SUIT_Component_Identifier[3];
+ 	struct SUIT_Component_Identifier _SUIT_Components__SUIT_Component_Identifier[SUIT_MAX_NUM_COMPONENTS];
 	uint32_t _SUIT_Components__SUIT_Component_Identifier_count;
 };
 
@@ -308,7 +309,7 @@ struct COSE_Signature {
 
 struct COSE_Sign {
  	struct empty_Headers _COSE_Sign__empty_Headers;
-	struct COSE_Signature _COSE_Sign_signatures__COSE_Signature[3];
+	struct COSE_Signature _COSE_Sign_signatures__COSE_Signature[SUIT_MAX_NUM_SIGNERS];
 	uint32_t _COSE_Sign_signatures__COSE_Signature_count;
 };
 
