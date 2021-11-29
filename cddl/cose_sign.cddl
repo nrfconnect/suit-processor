@@ -1,0 +1,54 @@
+; Adapted from the CDDL fragments in RFC 8152 (https://datatracker.ietf.org/doc/html/rfc8152)
+
+Headers = (
+	protected : bstr .cbor header_map,
+	unprotected : {}
+)
+
+empty_Headers = (
+	protected : '',
+	unprotected : {}
+)
+
+header_map = {
+	alg_id: 1 => supported_algs,
+	key_id: 4 => bstr,
+}
+
+supported_algs //= (ES256: -7)
+
+COSE_Sign_Tagged = #6.98(COSE_Sign)
+
+COSE_Sign = [
+	empty_Headers,
+	payload : nil, ; Currently, only nil payload is used in SUIT
+	signatures : [+ COSE_Signature]
+]
+
+COSE_Signature =  [
+	Headers,
+	signature : bstr
+]
+
+COSE_Sign1_Tagged = #6.18(COSE_Sign1)
+
+COSE_Sign1 = [
+	Headers,
+	payload : nil, ; Currently, only nil payload is used in SUIT
+	signature : bstr
+]
+
+Sig_structure = [
+	context : "Signature",
+	body_protected : '',
+	sign_protected : bstr .cbor header_map,
+	external_aad : '',
+	payload : bstr
+]
+
+Sig_structure1 = [
+	context : "Signature1",
+	body_protected : bstr .cbor header_map,
+	external_aad : '',
+	payload : bstr
+]

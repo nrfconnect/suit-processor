@@ -1,0 +1,182 @@
+; Adapted from draft-ietf-suit-manifest-16 (https://datatracker.ietf.org/doc/html/draft-ietf-suit-manifest-16)
+; This is meant to be used in the firmware implementation.
+; For that reason it has been simplified for that use case:
+;
+; Removed unused COSE types
+; Removed unused extensions
+; Remove the possibility of severing payload-fetch and install.
+; Force making suit-text severable.
+; Remove all hash algs except sha256
+; Remove most of text comprehension since the firmware isn't supposed to understand the text.
+; Remove cbor-pen support
+; Remove suit-directive-run-sequence since strict-order is not supported.
+; Remove suit-directive-swap
+;
+
+SUIT_Envelope_Tagged = #6.107(SUIT_Envelope)
+SUIT_Envelope = {
+  suit-authentication-wrapper => bstr .cbor SUIT_Authentication,
+  suit-manifest  => bstr .cbor SUIT_Manifest,
+  SUIT_Severable_Manifest_Members,
+  1*5 SUIT_Integrated_Payload,
+}
+
+SUIT_Authentication = [
+  bstr .cbor SUIT_Digest,
+  1*2 bstr .cbor SUIT_Authentication_Block
+]
+
+SUIT_Digest = [
+  suit-digest-algorithm-id : suit-cose-hash-algs,
+  suit-digest-bytes : bstr,
+]
+
+SUIT_Authentication_Block /= COSE_Sign1_Tagged ; Multiple signers should be implemented via multiple auth blocks rather than multi-signature COSE_Sign blocks.
+
+SUIT_Severable_Manifest_Members = (
+  ? suit-text => bstr .cbor SUIT_Text_Map,
+)
+
+SUIT_Integrated_Payload = (suit-integrated-payload-key => bstr)
+suit-integrated-payload-key = tstr
+
+SUIT_Manifest_Tagged = #6.1070(SUIT_Manifest)
+
+SUIT_Manifest = {
+  suit-manifest-version         => 1,
+  suit-manifest-sequence-number => uint,
+  suit-common                   => bstr .cbor SUIT_Common,
+  ? suit-reference-uri          => tstr,
+  SUIT_Severable_Members_Choice,
+  SUIT_Unseverable_Members,
+}
+
+SUIT_Unseverable_Members = (
+  ? suit-validate => bstr .cbor SUIT_Command_Sequence,
+  ? suit-load => bstr .cbor SUIT_Command_Sequence,
+  ? suit-run => bstr .cbor SUIT_Command_Sequence,
+)
+
+SUIT_Severable_Members_Choice = (
+  ? suit-payload-fetch => bstr .cbor SUIT_Command_Sequence,
+  ? suit-install => bstr .cbor SUIT_Command_Sequence,
+  ? suit-text => SUIT_Digest,
+)
+
+SUIT_Common = {
+  ? suit-components             => SUIT_Components,
+  ? suit-common-sequence        => bstr .cbor SUIT_Common_Sequence,
+}
+
+SUIT_Components           = [ 1*4 SUIT_Component_Identifier ]
+
+suit-cose-hash-algs /= cose-alg-sha-256
+
+SUIT_Component_Identifier =  [* bstr]
+
+SUIT_Common_Sequence = [
+  + ( SUIT_Condition // SUIT_Common_Commands )
+]
+
+SUIT_Common_Commands //= (suit-directive-set-component-index,  IndexArg)
+SUIT_Common_Commands //= (suit-directive-override-parameters,
+  {+ SUIT_Parameters})
+
+IndexArg /= uint
+IndexArg /= bool
+IndexArg /= [+uint]
+
+SUIT_Command_Sequence = [ + (
+  SUIT_Condition // SUIT_Directive
+) ]
+
+SUIT_Condition //= (suit-condition-vendor-identifier, SUIT_Rep_Policy)
+SUIT_Condition //= (suit-condition-class-identifier,  SUIT_Rep_Policy)
+SUIT_Condition //= (suit-condition-device-identifier, SUIT_Rep_Policy)
+SUIT_Condition //= (suit-condition-image-match,       SUIT_Rep_Policy)
+SUIT_Condition //= (suit-condition-component-slot,    SUIT_Rep_Policy)
+SUIT_Condition //= (suit-condition-abort,             SUIT_Rep_Policy)
+
+SUIT_Directive //= (suit-directive-set-component-index,  IndexArg)
+SUIT_Directive //= (suit-directive-try-each, SUIT_Directive_Try_Each_Argument)
+SUIT_Directive //= (suit-directive-override-parameters, {+ SUIT_Parameters})
+SUIT_Directive //= (suit-directive-fetch,             SUIT_Rep_Policy)
+SUIT_Directive //= (suit-directive-copy,              SUIT_Rep_Policy)
+SUIT_Directive //= (suit-directive-run,               SUIT_Rep_Policy)
+
+SUIT_Directive_Try_Each_Argument = [
+  2* bstr .cbor SUIT_Command_Sequence,
+  ?nil
+]
+
+SUIT_Rep_Policy = uint .bits suit-reporting-bits
+
+suit-reporting-bits = &(
+  suit-send-record-success : 0,
+  suit-send-record-failure : 1,
+  suit-send-sysinfo-success : 2,
+  suit-send-sysinfo-failure : 3
+)
+
+SUIT_Parameters //= (suit-parameter-vendor-identifier => RFC4122_UUID)
+SUIT_Parameters //= (suit-parameter-class-identifier => RFC4122_UUID)
+SUIT_Parameters //= (suit-parameter-image-digest => bstr .cbor SUIT_Digest)
+SUIT_Parameters //= (suit-parameter-image-size => uint)
+SUIT_Parameters //= (suit-parameter-component-slot => uint)
+SUIT_Parameters //= (suit-parameter-uri => tstr)
+SUIT_Parameters //= (suit-parameter-source-component => uint)
+SUIT_Parameters //= (suit-parameter-device-identifier => RFC4122_UUID)
+
+RFC4122_UUID = bstr .size 16
+
+SUIT_Text_Map = {
+  * uint => tstr,
+  * SUIT_Component_Identifier => {
+    * uint => tstr
+  }
+}
+
+suit-authentication-wrapper = 2
+suit-manifest = 3
+
+cose-alg-sha-256 = -16
+
+suit-manifest-version = 1
+suit-manifest-sequence-number = 2
+suit-common = 3
+suit-reference-uri = 4
+suit-payload-fetch = 8
+suit-install = 9
+suit-validate = 10
+suit-load = 11
+suit-run = 12
+suit-text = 13
+
+suit-components = 2
+suit-common-sequence = 4
+
+suit-command-custom = nint
+
+suit-condition-vendor-identifier = 1
+suit-condition-class-identifier  = 2
+suit-condition-image-match       = 3
+suit-condition-component-slot    = 5
+suit-condition-abort                    = 14
+suit-condition-device-identifier        = 24
+
+suit-directive-set-component-index      = 12
+suit-directive-try-each                 = 15
+suit-directive-override-parameters      = 20
+suit-directive-fetch                    = 21
+suit-directive-copy                     = 22
+suit-directive-run                      = 23
+
+suit-parameter-vendor-identifier = 1
+suit-parameter-class-identifier  = 2
+suit-parameter-image-digest      = 3
+suit-parameter-component-slot    = 5
+suit-parameter-soft-failure      = 13
+suit-parameter-image-size        = 14
+suit-parameter-uri               = 21
+suit-parameter-source-component  = 22
+suit-parameter-device-identifier = 24
