@@ -47,8 +47,8 @@ typedef struct SUIT_Manifest suit_manifest_t;
 typedef unsigned int suit_component_t; ///! Handle to more easily refer to a component.
 
 enum suit_bool {
-	suit_bool_false = 0x2a17644c, // 10 1010 0001 0111 0110 0100 0100 1100
-	suit_bool_true = 0x713cf9c6, // 111 0001 0011 1100 1111 1001 1100 0110
+	suit_bool_false = 0x2a17644c, ///! 10 1010 0001 0111 0110 0100 0100 1100
+	suit_bool_true = 0x713cf9c6, ///! 111 0001 0011 1100 1111 1001 1100 0110
 };
 
 enum suit_manifest_step {
@@ -102,10 +102,10 @@ struct suit_processor_state {
 	suit_manifest_t manifest;
 	enum suit_bool manifest_validated;
 	enum suit_manifest_step previous_step;
-	unsigned int component_indices[SUIT_MAX_NUM_COMPONENTS]; // Current component(s)
+	unsigned int component_indices[SUIT_MAX_NUM_COMPONENTS]; ///! Current component(s)
 	size_t num_component_indices;
 	struct suit_manifest_params components[SUIT_MAX_NUM_COMPONENTS];
-	bool soft_failure; // suit-parameter-soft-failure
+	enum suit_bool soft_failure; ///! suit-parameter-soft-failure
 };
 
 static inline void suit_reset_state(struct suit_processor_state *state)
@@ -116,12 +116,24 @@ static inline void suit_reset_state(struct suit_processor_state *state)
 	state->manifest_authenticated = suit_bool_false;
 	state->manifest_decoded = suit_bool_false;
 	state->manifest_validated = suit_bool_false;
+	state->soft_failure = suit_bool_false;
 }
 
-enum suit_component_properties {
+enum suit_component_mode {
 	suit_comp_writable = 1,
 	suit_comp_readable = 2,
 	suit_comp_runnable = 4,
+};
+
+struct suit_component_properties {
+	unsigned int component_handle;
+
+	enum suit_component_mode mode; ///! The RWX mode of the current slot of the component.
+	unsigned int read_size; ///! The size of the current contents in the current slot.
+	unsigned int write_size; ///! The capacity of the current slot.
+	unsigned int address; ///! The address of the start of the current slot of the component.
+	unsigned int slot; ///! The current slot number.
+	unsigned int driver; ///! The ID of the driver to use to interface with the component.
 };
 
 /** https://www.iana.org/assignments/cose/cose.xhtml */
