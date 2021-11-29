@@ -10,6 +10,7 @@
 #include <string.h>
 #include "zcbor_decode.h"
 #include "manifest_decode.h"
+#include "suit_types.h"
 
 #if DEFAULT_MAX_QTY != 3
 #error "The type file was generated with a different default_max_qty than this file"
@@ -78,7 +79,7 @@ static bool decode_SUIT_Components(
 {
 	zcbor_print("%s\r\n", __func__);
 
-	bool tmp_result = (((zcbor_list_start_decode(state) && ((zcbor_multi_decode(1, 4, &(*result)._SUIT_Components__SUIT_Component_Identifier_count, (zcbor_decoder_t *)decode_SUIT_Component_Identifier, state, (&(*result)._SUIT_Components__SUIT_Component_Identifier), sizeof(struct SUIT_Component_Identifier))) || (zcbor_list_map_end_force_decode(state), false)) && zcbor_list_end_decode(state))));
+	bool tmp_result = (((zcbor_list_start_decode(state) && ((zcbor_multi_decode(1, SUIT_MAX_NUM_COMPONENTS, &(*result)._SUIT_Components__SUIT_Component_Identifier_count, (zcbor_decoder_t *)decode_SUIT_Component_Identifier, state, (&(*result)._SUIT_Components__SUIT_Component_Identifier), sizeof(struct SUIT_Component_Identifier))) || (zcbor_list_map_end_force_decode(state), false)) && zcbor_list_end_decode(state))));
 
 	if (!tmp_result)
 		zcbor_trace();

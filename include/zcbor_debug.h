@@ -2,6 +2,8 @@
  * Copyright (c) 2020 Nordic Semiconductor ASA
  *
  * SPDX-License-Identifier: Apache-2.0
+ *
+ * Copied from zcbor version 0.5.1
  */
 
 #ifndef ZCBOR_DEBUG_H__
