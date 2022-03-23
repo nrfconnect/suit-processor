@@ -13,8 +13,8 @@
 
 /** Check the provided payload against the provided digest */
 int suit_plat_check_digest(enum suit_cose_alg alg_id,
-		cbor_string_type_t *digest,
-		cbor_string_type_t *payload);
+		struct zcbor_string *digest,
+		struct zcbor_string *payload);
 
 /** Authenticate the given payload against the given signature.
  *
@@ -23,8 +23,8 @@ int suit_plat_check_digest(enum suit_cose_alg alg_id,
  *  @param[in]  signature  The signature to check.
  *  @param[in]  payload  The payload that is signed by the @p signature.
  */
-int suit_plat_authenticate(enum suit_cose_alg alg_id, cbor_string_type_t *key_id,
-		cbor_string_type_t signature, cbor_string_type_t *payload);
+int suit_plat_authenticate(enum suit_cose_alg alg_id, struct zcbor_string *key_id,
+		struct zcbor_string signature, struct zcbor_string *payload);
 
 /** Check that the given component ID exists, is valid, and is authorized.
  *
@@ -41,8 +41,8 @@ int suit_plat_authenticate(enum suit_cose_alg alg_id, cbor_string_type_t *key_id
  *                                this API, instead of always passing the
  *                                @p parts.
  */
-int suit_plat_get_component_handle(cbor_string_type_t *parts, size_t num_parts,
-		cbor_string_type_t **key_ids, size_t num_key_ids,
+int suit_plat_get_component_handle(struct zcbor_string *parts, size_t num_parts,
+		struct zcbor_string **key_ids, size_t num_key_ids,
 		enum suit_component_properties properties,
 		suit_component_t *component_handle);
 
@@ -60,19 +60,19 @@ int suit_plat_get_component_properties(suit_component_t component_handle,
 
 /** Check the provided payload against the provided digest */
 int suit_plat_check_image_match(enum suit_cose_alg alg_id,
-		cbor_string_type_t *digest, size_t image_size,
+		struct zcbor_string *digest, size_t image_size,
 		suit_component_t image_handle);
 
 /** Check whether the given vendor ID applies to the given component. */
-int suit_plat_check_vid(cbor_string_type_t *vid_uuid,
+int suit_plat_check_vid(struct zcbor_string *vid_uuid,
 		suit_component_t component_handle);
 
 /** Check whether the given class ID applies to the given component. */
-int suit_plat_check_cid(cbor_string_type_t *cid_uuid,
+int suit_plat_check_cid(struct zcbor_string *cid_uuid,
 		suit_component_t component_handle);
 
 /** Check whether the given device ID applies to the given component. */
-int suit_plat_check_did(cbor_string_type_t *did_uuid,
+int suit_plat_check_did(struct zcbor_string *did_uuid,
 		suit_component_t component_handle);
 
 /** Check that the provided sequence number is recent enough. */
@@ -82,10 +82,10 @@ int suit_plat_check_sequence_num(unsigned int seq_num);
 int suit_plat_commit_sequence_num(unsigned int seq_num);
 
 /** Check that the given fetch operation can be performed. */
-int suit_plat_check_fetch(suit_component_t dst_handle, cbor_string_type_t uri);
+int suit_plat_check_fetch(suit_component_t dst_handle, struct zcbor_string uri);
 
 /** Fetch the payload from the given @p uri in to @p dst. */
-int suit_plat_fetch(suit_component_t dst_handle, cbor_string_type_t uri);
+int suit_plat_fetch(suit_component_t dst_handle, struct zcbor_string uri);
 
 /** Check that the given copy operation can be performed. */
 int suit_plat_check_copy(suit_component_t dst_handle, suit_component_t src_handle);
@@ -100,10 +100,10 @@ int suit_plat_check_swap(suit_component_t dst_handle, suit_component_t src_handl
 int suit_plat_swap(suit_component_t dst_handle, suit_component_t src_handle);
 
 /** Check that the given run operation can be performed. */
-int suit_plat_check_run(suit_component_t image_handle, cbor_string_type_t *run_args);
+int suit_plat_check_run(suit_component_t image_handle, struct zcbor_string *run_args);
 
 /** Run the given image. */
-int suit_plat_run(suit_component_t image_handle, cbor_string_type_t *run_args);
+int suit_plat_run(suit_component_t image_handle, struct zcbor_string *run_args);
 
 /** File a report on a command result. */
 int suit_plat_report(unsigned int rep_policy, struct suit_report *report);
