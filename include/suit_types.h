@@ -10,18 +10,23 @@
 #include <stdint.h>
 #include <string.h>
 #include "cbor_common.h"
-#include "manifest_decode_types.h"
+#include "manifest_types.h"
 
 
 #define SUIT_MAX_NUM_SIGNERS 3  ///! The maximum number of signers.
 #define SUIT_MAX_NUM_COMPONENTS 16  ///! The maximum number of components referenced in the manifest.
 #define SUIT_MAX_COMMAND_ARGS 3 ///! The maximum number of arguments consumed by a single command.
 
-#define SUIT_ERR_SUCCESS 0
-#define SUIT_ERR_WAIT 128
-#define SUIT_ERR_DECODING 129
-#define SUIT_ERR_AUTHENTICATION 130
-#define SUIT_ERR_VERIFICATION 131
+#define SUIT_SUCCESS 0
+#define SUIT_ERR_TAMP 3
+#define SUIT_ERR_ORDER 4
+#define SUIT_ERR_WAIT 5
+#define SUIT_ERR_DECODING 6
+#define SUIT_ERR_AUTHENTICATION 7
+#define SUIT_ERR_VERIFICATION 8
+#define SUIT_ERR_UNAVAILABLE 9
+#define SUIT_ZCBOR_ERR_OFFSET 128
+#define ZCBOR_ERR_TO_SUIT_ERR(zcbor_err) ((zcbor_err) + SUIT_ZCBOR_ERR_OFFSET)
 
 /** The envelope contains the manifest and its signature plus a few other things.
  *
@@ -51,13 +56,16 @@ enum suit_bool {
 	suit_bool_true = 0x713cf9c6, ///! 111 0001 0011 1100 1111 1001 1100 0110
 };
 
+#define SUIT_NUM_STEPS 5
+
 enum suit_manifest_step {
-	NO_STEP,
+	SUIT_NO_STEP,
 	SUIT_PAYLOAD_FETCH,
 	SUIT_INSTALL,
 	SUIT_VALIDATE,
 	SUIT_LOAD,
 	SUIT_RUN,
+	SUIT_LAST_STEP,
 };
 
 struct suit_manifest_params {
@@ -68,10 +76,10 @@ struct suit_manifest_params {
 	struct SUIT_Digest *image_digest;
 	unsigned int image_size;
 	unsigned int component_slot;
-	cbor_string_type_t *uri;
+	struct zcbor_string *uri;
 	unsigned int source_component;
-	cbor_string_type_t *fetch_args;
-	cbor_string_type_t *run_args;
+	struct zcbor_string *fetch_args;
+	struct zcbor_string *run_args;
 	struct suit_parameter_device_identifier *did;
 
 	bool vid_set;
@@ -95,15 +103,16 @@ struct suit_processor_state {
 	enum suit_bool envelope_decoded;
 	suit_manifest_envelope_t envelope;
 	enum suit_bool envelope_validated;
-	cbor_string_type_t *key_ids[SUIT_MAX_NUM_SIGNERS];
+	struct zcbor_string *key_ids[SUIT_MAX_NUM_SIGNERS];
 	size_t num_key_ids;
 	enum suit_bool manifest_decoded;
 	enum suit_bool manifest_authenticated;
 	suit_manifest_t manifest;
 	enum suit_bool manifest_validated;
 	enum suit_manifest_step previous_step;
-	unsigned int component_indices[SUIT_MAX_NUM_COMPONENTS]; ///! Current component(s)
-	size_t num_component_indices;
+	suit_component_t components[SUIT_MAX_NUM_COMPONENTS];
+	size_t num_components;
+	bool current_components[SUIT_MAX_NUM_COMPONENTS];
 	struct suit_manifest_params components[SUIT_MAX_NUM_COMPONENTS];
 	enum suit_bool soft_failure; ///! suit-parameter-soft-failure
 };
@@ -143,7 +152,7 @@ enum suit_cose_alg {
 };
 
 struct suit_arg {
-	union{cbor_string_type_t *bstr; unsigned int uint;} arg;
+	union{struct zcbor_string *bstr; unsigned int uint;} arg;
 	enum{bstr, uint} arg_type;
 };
 
@@ -153,7 +162,7 @@ struct suit_report {
 	unsigned int command; ///! The identifier of the condition or directive
 	struct suit_arg argv[SUIT_MAX_COMMAND_ARGS];
 	size_t nargs;
-	cbor_string_type_t *addititional_info;
+	struct zcbor_string *addititional_info;
 };
 
 #endif /* SUIT_TYPES_H__ */

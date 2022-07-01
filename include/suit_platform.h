@@ -21,10 +21,10 @@ int suit_plat_check_digest(enum suit_cose_alg alg_id,
  *  @param[in]  alg_id  The signature verification algorithm to use.
  *  @param[in]  key_id  The key to check the signature with.
  *  @param[in]  signature  The signature to check.
- *  @param[in]  payload  The payload that is signed by the @p signature.
+ *  @param[in]  digest  The digest that is signed by the @p signature.
  */
 int suit_plat_authenticate(enum suit_cose_alg alg_id, struct zcbor_string *key_id,
-		struct zcbor_string signature, struct zcbor_string *payload);
+		struct zcbor_string *signature, struct zcbor_string *digest);
 
 /** Check that the given component ID exists, is valid, and is authorized.
  *
@@ -40,7 +40,7 @@ int suit_plat_authenticate(enum suit_cose_alg alg_id, struct zcbor_string *key_i
  *                                @p parts.
  */
 int suit_plat_get_component_handle(struct zcbor_string *component_id,
-		cbor_string_type_t **key_ids, size_t num_key_ids,
+		struct zcbor_string **key_ids, size_t num_key_ids,
 		suit_component_t *component_handle);
 
 /** Return the properties of the given component. */
