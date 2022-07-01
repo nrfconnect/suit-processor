@@ -13,12 +13,17 @@
 
 /** Set the current component indices. This decides which component(s)
  *  are affected by subsequent commands. */
-int suit_directive_set_component_indices(struct suit_processor_state *state,
-		component_handle *component_indices, size_t num_component_indices);
+int suit_directive_set_current_components(struct suit_processor_state *state,
+		struct IndexArg_ *index_arg);
 
-/** To be used with try-each and run-sequence. */
+
+/** suit-directive-try-each */
+int suit_directive_try_each(struct suit_processor_state *state,
+		struct SUIT_Directive_Try_Each_Argument *try_each_arg);
+
+/** suit-directive-run-sequence */
 int suit_directive_run_sequence(struct suit_processor_state *state,
-		cbor_string_type_t *command_sequence);
+		struct zcbor_string *command_sequence);
 
 /** Copy the parameters in @p new_parameters (that are set) into the parameter
  *  list of the current component(s). */
