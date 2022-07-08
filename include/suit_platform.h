@@ -71,10 +71,16 @@ int suit_plat_check_sequence_num(unsigned int seq_num);
 int suit_plat_commit_sequence_num(unsigned int seq_num);
 
 /** Check that the given fetch operation can be performed. */
-int suit_plat_check_fetch(suit_component_t dst_handle, struct zcbor_string uri);
+int suit_plat_check_fetch(suit_component_t dst_handle, struct zcbor_string *uri, struct zcbor_string *fetch_args);
 
-/** Fetch the payload from the given @p uri in to @p dst. */
-int suit_plat_fetch(suit_component_t dst_handle, struct zcbor_string uri);
+/** Fetch the payload from the given @p uri into @p dst. */
+int suit_plat_fetch(suit_component_t dst_handle, struct zcbor_string *uri, struct zcbor_string *fetch_args);
+
+/** Check that the given fetch operation can be performed. */
+int suit_plat_check_fetch_integrated(suit_component_t dst_handle, struct zcbor_string *payload, struct zcbor_string *fetch_args);
+
+/** Fetch the given integrated payload into @p dst. */
+int suit_plat_fetch_integrated(suit_component_t dst_handle, struct zcbor_string *payload, struct zcbor_string *fetch_args);
 
 /** Check that the given copy operation can be performed. */
 int suit_plat_check_copy(suit_component_t dst_handle, suit_component_t src_handle);

@@ -17,14 +17,32 @@
 #define SUIT_MAX_NUM_COMPONENTS 16  ///! The maximum number of components referenced in the manifest.
 #define SUIT_MAX_COMMAND_ARGS 3 ///! The maximum number of arguments consumed by a single command.
 
-#define SUIT_SUCCESS 0
-#define SUIT_ERR_TAMP 3
-#define SUIT_ERR_ORDER 4
-#define SUIT_ERR_WAIT 5
-#define SUIT_ERR_DECODING 6
-#define SUIT_ERR_AUTHENTICATION 7
-#define SUIT_ERR_VERIFICATION 8
-#define SUIT_ERR_UNAVAILABLE 9
+/** Errors from the suit API
+ *
+ * See also https://www.ietf.org/archive/id/draft-ietf-suit-manifest-17.html#name-manifest-processor-setup
+ * for more error conditions.
+ */
+#define SUIT_SUCCESS                      0
+#define SUIT_FAIL_CONDITION               1 // Test failed (e.g. Vendor ID/Class ID).
+#define SUIT_ERR_TAMP                     3 // Tampering detected in processing.
+#define SUIT_ERR_ORDER                    4
+#define SUIT_ERR_WAIT                     5
+#define SUIT_ERR_DECODING                 6
+#define SUIT_ERR_AUTHENTICATION           7 // Envelope authentication failed.
+#define SUIT_ERR_MANIFEST_VERIFICATION    8 // Manifest (cryptographic) verification failed.
+#define SUIT_ERR_MANIFEST_VALIDATION      9 // Manifest validation failed (rule broken).
+#define SUIT_ERR_PAYLOAD_VERIFICATION     10 // Payload verification failed.
+#define SUIT_ERR_UNAVAILABLE_PAYLOAD      11 // Payload not available.
+#define SUIT_ERR_UNAVAILABLE_COMMAND_SEQ  12 // Command sequence not available. (FATAL?)
+#define SUIT_ERR_UNAVAILABLE_PARAMETER    13 // Required parameter not supplied.
+#define SUIT_ERR_UNSUPPORTED_COMMAND      14 // Unsupported command encountered.
+#define SUIT_ERR_UNSUPPORTED_PARAMETER    15 // Unsupported parameter encountered.
+#define SUIT_ERR_UNSUPPORTED_COMPONENT_ID 16 // Unsupported Component Identifier encountered.
+#define SUIT_ERR_MISSING_COMPONENT        17 // Missing required component from a Component Set.
+#define SUIT_ERR_CRASH                    18 // Application crashed when executed.
+#define SUIT_ERR_TIMEOUT                  19 // Watchdog timeout occurred.
+
+
 #define SUIT_ZCBOR_ERR_OFFSET 128
 #define ZCBOR_ERR_TO_SUIT_ERR(zcbor_err) ((zcbor_err) + SUIT_ZCBOR_ERR_OFFSET)
 
@@ -69,18 +87,18 @@ enum suit_manifest_step {
 };
 
 struct suit_manifest_params {
-	unsigned int component_handle;
+	suit_component_t component_handle;
 
-	struct suit_parameter_vendor_identifier *vid;
-	struct suit_parameter_class_identifier *cid;
-	struct SUIT_Digest *image_digest;
-	unsigned int image_size;
+	struct zcbor_string vid;
+	struct zcbor_string cid;
+	struct SUIT_Digest image_digest;
+	size_t image_size;
 	unsigned int component_slot;
-	struct zcbor_string *uri;
+	struct zcbor_string uri;
 	unsigned int source_component;
-	struct zcbor_string *fetch_args;
-	struct zcbor_string *run_args;
-	struct suit_parameter_device_identifier *did;
+	// struct zcbor_string fetch_args;
+	// struct zcbor_string run_args;
+	struct zcbor_string did;
 
 	bool vid_set;
 	bool cid_set;
@@ -89,8 +107,8 @@ struct suit_manifest_params {
 	bool component_slot_set;
 	bool uri_set;
 	bool source_component_set;
-	bool fetch_args_set;
-	bool run_args_set;
+	// bool fetch_args_set;
+	// bool run_args_set;
 	bool did_set;
 };
 
@@ -110,7 +128,7 @@ struct suit_processor_state {
 	suit_manifest_t manifest;
 	enum suit_bool manifest_validated;
 	enum suit_manifest_step previous_step;
-	suit_component_t components[SUIT_MAX_NUM_COMPONENTS];
+	enum suit_bool dry_run;
 	size_t num_components;
 	bool current_components[SUIT_MAX_NUM_COMPONENTS];
 	struct suit_manifest_params components[SUIT_MAX_NUM_COMPONENTS];
@@ -125,6 +143,7 @@ static inline void suit_reset_state(struct suit_processor_state *state)
 	state->manifest_authenticated = suit_bool_false;
 	state->manifest_decoded = suit_bool_false;
 	state->manifest_validated = suit_bool_false;
+	state->dry_run = suit_bool_true;
 	state->soft_failure = suit_bool_false;
 }
 
@@ -135,7 +154,7 @@ enum suit_component_mode {
 };
 
 struct suit_component_properties {
-	unsigned int component_handle;
+	suit_component_t component_handle;
 
 	enum suit_component_mode mode; ///! The RWX mode of the current slot of the component.
 	unsigned int read_size; ///! The size of the current contents in the current slot.
@@ -164,5 +183,12 @@ struct suit_report {
 	size_t nargs;
 	struct zcbor_string *addititional_info;
 };
+
+
+static inline bool suit_compare_zcbor_strings(struct zcbor_string *str1, struct zcbor_string *str2)
+{
+	return (str1->len == str2->len) && (memcmp(str1->value, str2->value, str1->len) == 0);
+}
+
 
 #endif /* SUIT_TYPES_H__ */
