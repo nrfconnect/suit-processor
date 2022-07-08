@@ -16,7 +16,6 @@
 int suit_directive_set_current_components(struct suit_processor_state *state,
 		struct IndexArg_ *index_arg);
 
-
 /** suit-directive-try-each */
 int suit_directive_try_each(struct suit_processor_state *state,
 		struct SUIT_Directive_Try_Each_Argument *try_each_arg);
