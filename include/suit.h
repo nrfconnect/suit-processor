@@ -10,7 +10,6 @@
 #include "suit_types.h"
 #include <stdint.h>
 
-
 /** Decode the string into a manifest envelope and validate the data structure.
  */
 int suit_decode_envelope(uint8_t manifest_str, size_t manifest_len,
