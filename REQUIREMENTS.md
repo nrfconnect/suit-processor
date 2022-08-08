@@ -8,11 +8,11 @@ Any text in _italics_ is quoted from the provided link.
 
 # Requirements covered by zcbor-generated code
 
-## Requirements from manifest16[^manifest]:
+## Requirements from manifest18[^manifest]:
 
- * _no custom commands are permitted in the common sequence._ ([6.2](https://www.ietf.org/archive/id/draft-ietf-suit-manifest-16.html#name-required-checks))
- * _The suit-authentication-wrapper MUST come before any element in the SUIT_Envelope, regardless of canonical encoding of CBOR. All validators MUST reject any SUIT_Envelope that begins with any element other than a suit-authentication-wrapper (NOTE: key delegation MAY relax this requirement to include a delegation structure as well)._ ([8.3](https://www.ietf.org/archive/id/draft-ietf-suit-manifest-16.html#name-authenticated-manifests))
- * Full CDDL ([Appendix A](https://www.ietf.org/archive/id/draft-ietf-suit-manifest-16.html#name-a-full-cddl))
+ * _no custom commands are permitted in the common sequence._ ([6.2](https://www.ietf.org/archive/id/draft-ietf-suit-manifest-18.html#name-required-checks))
+ * _The suit-authentication-wrapper MUST come before any element in the SUIT_Envelope, regardless of canonical encoding of CBOR. A SUIT_Envelope that has not had authentication information added MUST still contain the suit-authentication-wrapper element, but the content MUST be a list containing only the SUIT_Digest._ ([8.3](https://www.ietf.org/archive/id/draft-ietf-suit-manifest-18.html#name-authenticated-manifests))
+ * Full CDDL ([Appendix A](https://www.ietf.org/archive/id/draft-ietf-suit-manifest-18.html#name-a-full-cddl))
 
 ## Requirements from information model[^info_model]:
 
@@ -30,15 +30,15 @@ Any text in _italics_ is quoted from the provided link.
 
 # Requirements covered by device code in suit-manifest-processor
 
-## Requirements from manifest16[^manifest]:
+## Requirements from manifest18[^manifest]:
 
- * _All payloads must be validated prior to loading._ ([4.2](https://www.ietf.org/archive/id/draft-ietf-suit-manifest-16.html#name-suit-workflow-model))
- * _All loaded images must be validated prior to execution._ ([4.2](https://www.ietf.org/archive/id/draft-ietf-suit-manifest-16.html#name-suit-workflow-model))
- * _The manifest processor SHOULD check that the common sequence contains at least one Check Vendor Identifier command and at least one Check Class Identifier command._ ([6.2](https://www.ietf.org/archive/id/draft-ietf-suit-manifest-16.html#name-required-checks))
- * _Executing an update MUST either result in an error, or a verifiably correct system state._ ([6.3](https://www.ietf.org/archive/id/draft-ietf-suit-manifest-16.html#name-interpreter-fundamental-pro))
- * _Executing a Trusted Invocation MUST either result in an error, or an invoked image._ ([6.3](https://www.ietf.org/archive/id/draft-ietf-suit-manifest-16.html#name-interpreter-fundamental-pro))
- * _Executing the same manifest on multiple Recipients MUST result in the same system state._ ([6.3](https://www.ietf.org/archive/id/draft-ietf-suit-manifest-16.html#name-interpreter-fundamental-pro))
- * _The suit-authentication-wrapper MUST come before any element in the SUIT_Envelope, regardless of canonical encoding of CBOR. All validators MUST reject any SUIT_Envelope that begins with any element other than a suit-authentication-wrapper (NOTE: key delegation MAY relax this requirement to include a delegation structure as well)._ ([8.3](https://www.ietf.org/archive/id/draft-ietf-suit-manifest-16.html#name-authenticated-manifests))
+ * _All payloads must be validated prior to loading._ ([4.2](https://www.ietf.org/archive/id/draft-ietf-suit-manifest-18.html#name-suit-workflow-model))
+ * _All loaded images must be validated prior to execution._ ([4.2](https://www.ietf.org/archive/id/draft-ietf-suit-manifest-18.html#name-suit-workflow-model))
+ * _The manifest processor SHOULD check that the common sequence contains at least one Check Vendor Identifier command and at least one Check Class Identifier command._ ([6.2](https://www.ietf.org/archive/id/draft-ietf-suit-manifest-18.html#name-required-checks))
+ * _Executing an update MUST either result in an error, or a verifiably correct system state._ ([6.3](https://www.ietf.org/archive/id/draft-ietf-suit-manifest-18.html#name-interpreter-fundamental-pro))
+ * _Executing a Trusted Invocation MUST either result in an error, or an invoked image._ ([6.3](https://www.ietf.org/archive/id/draft-ietf-suit-manifest-18.html#name-interpreter-fundamental-pro))
+ * _Executing the same manifest on multiple Recipients MUST result in the same system state._ ([6.3](https://www.ietf.org/archive/id/draft-ietf-suit-manifest-18.html#name-interpreter-fundamental-pro))
+ * _The suit-authentication-wrapper MUST come before any element in the SUIT_Envelope, regardless of canonical encoding of CBOR. A SUIT_Envelope that has not had authentication information added MUST still contain the suit-authentication-wrapper element, but the content MUST be a list containing only the SUIT_Digest._ ([8.3](https://www.ietf.org/archive/id/draft-ietf-suit-manifest-18.html#name-authenticated-manifests))
 
 ## Requirements from information model[^info_model]:
 
@@ -64,12 +64,12 @@ Any text in _italics_ is quoted from the provided link.
 
  * Regardless of the modifications to the CDDL used to build the suit-mp, or to generate the manifest, the build system should contain a step where the manifest is validated against a (largely) unmodified version of the Full CDDL.
 
-## Requirements from manifest16[^manifest]:
+## Requirements from manifest18[^manifest]:
 
- * _All payloads must be validated prior to loading._ ([4.2](https://www.ietf.org/archive/id/draft-ietf-suit-manifest-16.html#name-suit-workflow-model))
- * _All loaded images must be validated prior to execution._ ([4.2](https://www.ietf.org/archive/id/draft-ietf-suit-manifest-16.html#name-suit-workflow-model))
- * _The suit-authentication-wrapper MUST come before any element in the SUIT_Envelope, regardless of canonical encoding of CBOR. All validators MUST reject any SUIT_Envelope that begins with any element other than a suit-authentication-wrapper (NOTE: key delegation MAY relax this requirement to include a delegation structure as well)._ ([8.3](https://www.ietf.org/archive/id/draft-ietf-suit-manifest-16.html#name-authenticated-manifests))
- * _A SUIT_Envelope that has not had authentication information added MUST still contain the suit-authentication-wrapper element, but the content MUST be a list containing only the SUIT_Digest._ ([8.3](https://www.ietf.org/archive/id/draft-ietf-suit-manifest-16.html#name-authenticated-manifests))
+ * _All payloads must be validated prior to loading._ ([4.2](https://www.ietf.org/archive/id/draft-ietf-suit-manifest-18.html#name-suit-workflow-model))
+ * _All loaded images must be validated prior to execution._ ([4.2](https://www.ietf.org/archive/id/draft-ietf-suit-manifest-18.html#name-suit-workflow-model))
+ * _The suit-authentication-wrapper MUST come before any element in the SUIT_Envelope, regardless of canonical encoding of CBOR. A SUIT_Envelope that has not had authentication information added MUST still contain the suit-authentication-wrapper element, but the content MUST be a list containing only the SUIT_Digest._ ([8.3](https://www.ietf.org/archive/id/draft-ietf-suit-manifest-18.html#name-authenticated-manifests))
+ * _A SUIT_Envelope that has not had authentication information added MUST still contain the suit-authentication-wrapper element, but the content MUST be a list containing only the SUIT_Digest._ ([8.3](https://www.ietf.org/archive/id/draft-ietf-suit-manifest-18.html#name-authenticated-manifests))
 
 ## Requirements from information model[^info_model]:
 
@@ -80,11 +80,11 @@ Any text in _italics_ is quoted from the provided link.
 
 # Requirements covered by user
 
-## Requirements from manifest16[^manifest]:
+## Requirements from manifest18[^manifest]:
 
- * _The author MUST ensure that all parameters consumed by a command are set prior to invoking that command. Where Component Index = True, this means that the parameters consumed by each command MUST have been set for each Component._ ([7](https://www.ietf.org/archive/id/draft-ietf-suit-manifest-16.html#name-creating-manifests))
- * _A signing application MUST verify the suit-manifest element against the SUIT_Digest prior to signing._ ([8.3](https://www.ietf.org/archive/id/draft-ietf-suit-manifest-16.html#name-authenticated-manifests))
- * _All SUIT_Component_Identifiers present in suit-text MUST also be present in suit-common._ ([8.4.4](https://www.ietf.org/archive/id/draft-ietf-suit-manifest-16.html#name-suit-text))
+ * _The author MUST ensure that all parameters consumed by a command are set prior to invoking that command. Where Component Index = True, this means that the parameters consumed by each command MUST have been set for each Component._ ([7](https://www.ietf.org/archive/id/draft-ietf-suit-manifest-18.html#name-creating-manifests))
+ * _A signing application MUST verify the suit-manifest element against the SUIT_Digest prior to signing._ ([8.3](https://www.ietf.org/archive/id/draft-ietf-suit-manifest-18.html#name-authenticated-manifests))
+ * _All SUIT_Component_Identifiers present in suit-text MUST also be present in suit-common._ ([8.4.4](https://www.ietf.org/archive/id/draft-ietf-suit-manifest-18.html#name-suit-text))
 
 ## Requirements from information model[^info_model]:
 
@@ -98,4 +98,4 @@ Any text in _italics_ is quoted from the provided link.
 # References
 
 [^info_model]: IETF RFC 9124 - A Manifest Information Model for Firmware Updates in Internet of Things (IoT) Devices - https://datatracker.ietf.org/doc/rfc9124/
-[^manifest]: IETF draft-ietf-suit-manifest-16 - A Concise Binary Object Representation (CBOR)-based Serialization Format for the Software Updates for Internet of Things (SUIT) Manifest - https://datatracker.ietf.org/doc/html/draft-ietf-suit-manifest-16
+[^manifest]: IETF draft-ietf-suit-manifest-18 - A Concise Binary Object Representation (CBOR)-based Serialization Format for the Software Updates for Internet of Things (SUIT) Manifest - https://datatracker.ietf.org/doc/html/draft-ietf-suit-manifest-18
