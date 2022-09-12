@@ -73,9 +73,12 @@ static int try_each(struct suit_processor_state *state, struct SUIT_Directive_Tr
 int suit_directive_try_each(struct suit_processor_state *state, struct SUIT_Directive_Try_Each_Argument *try_each_arg)
 {
 	int ret;
-	bool current_components_backup[state->num_components];
+	bool current_components_backup[SUIT_MAX_NUM_COMPONENTS];
 	memcpy(&current_components_backup, &state->current_components,
-		state->num_components * sizeof(bool));
+		SUIT_MAX_NUM_COMPONENTS * sizeof(bool));
+	if (state->num_components > SUIT_MAX_NUM_COMPONENTS) {
+		return SUIT_ERR_DECODING;
+	}
 
 	for (int i = 0; i < state->num_components; i++) {
 		state->current_components[i] = false;
