@@ -40,7 +40,7 @@ int suit_plat_authenticate(enum suit_cose_alg alg_id, struct zcbor_string *key_i
  *                                @p parts.
  */
 int suit_plat_get_component_handle(struct zcbor_string *component_id,
-		struct zcbor_string **key_ids, size_t num_key_ids,
+		struct zcbor_string *key_ids[SUIT_MAX_NUM_SIGNERS], size_t num_key_ids,
 		suit_component_t *component_handle);
 
 /** Return the properties of the given component. */
