@@ -1,9 +1,4 @@
 /*
- * Copyright (c) 2022 Nordic Semiconductor ASA
- *
- * SPDX-License-Identifier: Apache-2.0
- */
-/*
  * Generated using zcbor version 0.5.1
  * https://github.com/NordicSemiconductor/zcbor
  * Generated with a --default-max-qty of 3
@@ -15,7 +10,6 @@
 #include <string.h>
 #include "zcbor_decode.h"
 #include "manifest_decode.h"
-#include "suit_types.h"
 
 #if DEFAULT_MAX_QTY != 3
 #error "The type file was generated with a different default_max_qty than this file"
@@ -27,29 +21,36 @@ static bool decode_repeated_SUIT_Common_suit_components(zcbor_state_t *state, st
 static bool decode_repeated_SUIT_Common_suit_common_sequence(zcbor_state_t *state, struct SUIT_Common_suit_common_sequence *result);
 static bool decode_SUIT_Common(zcbor_state_t *state, struct SUIT_Common *result);
 static bool decode_repeated_SUIT_Manifest_suit_reference_uri(zcbor_state_t *state, struct SUIT_Manifest_suit_reference_uri *result);
+static bool decode_repeated_SUIT_Unseverable_Members_suit_validate(zcbor_state_t *state, struct SUIT_Unseverable_Members_suit_validate *result);
+static bool decode_repeated_SUIT_Unseverable_Members_suit_load(zcbor_state_t *state, struct SUIT_Unseverable_Members_suit_load *result);
+static bool decode_repeated_SUIT_Unseverable_Members_suit_run(zcbor_state_t *state, struct SUIT_Unseverable_Members_suit_run *result);
+static bool decode_SUIT_Unseverable_Members(zcbor_state_t *state, struct SUIT_Unseverable_Members_ *result);
 static bool decode_repeated_SUIT_Severable_Members_Choice_suit_payload_fetch(zcbor_state_t *state, struct SUIT_Severable_Members_Choice_suit_payload_fetch *result);
 static bool decode_repeated_SUIT_Severable_Members_Choice_suit_install(zcbor_state_t *state, struct SUIT_Severable_Members_Choice_suit_install *result);
 static bool decode_SUIT_Digest(zcbor_state_t *state, struct SUIT_Digest *result);
 static bool decode_repeated_SUIT_Severable_Members_Choice_suit_text(zcbor_state_t *state, struct SUIT_Severable_Members_Choice_suit_text *result);
 static bool decode_SUIT_Severable_Members_Choice(zcbor_state_t *state, struct SUIT_Severable_Members_Choice_ *result);
-static bool decode_repeated_SUIT_Unseverable_Members_suit_validate(zcbor_state_t *state, struct SUIT_Unseverable_Members_suit_validate *result);
-static bool decode_repeated_SUIT_Unseverable_Members_suit_load(zcbor_state_t *state, struct SUIT_Unseverable_Members_suit_load *result);
-static bool decode_repeated_SUIT_Unseverable_Members_suit_run(zcbor_state_t *state, struct SUIT_Unseverable_Members_suit_run *result);
-static bool decode_SUIT_Unseverable_Members(zcbor_state_t *state, struct SUIT_Unseverable_Members_ *result);
 static bool decode_IndexArg(zcbor_state_t *state, struct IndexArg_ *result);
 static bool decode_SUIT_Directive_Try_Each_Argument(zcbor_state_t *state, struct SUIT_Directive_Try_Each_Argument *result);
 static bool decode_SUIT_Parameters(zcbor_state_t *state, struct SUIT_Parameters_ *result);
 static bool decode_repeated___suit_directive_override_parameters_map__SUIT_Parameters(zcbor_state_t *state, struct __suit_directive_override_parameters_map__SUIT_Parameters *result);
+static bool decode_SUIT_Directive_Try_Each_Argument_Common(zcbor_state_t *state, struct SUIT_Directive_Try_Each_Argument_Common *result);
 static bool decode_repeated_SUIT_Common_Sequence_union(zcbor_state_t *state, struct SUIT_Common_Sequence_union_ *result);
 static bool decode_repeated_SUIT_Command_Sequence_union(zcbor_state_t *state, struct SUIT_Command_Sequence_union_ *result);
+static bool decode_repeated_header_map_key_id(zcbor_state_t *state, struct header_map_key_id *result);
 static bool decode_header_map(zcbor_state_t *state, struct header_map *result);
 static bool decode_Headers(zcbor_state_t *state, struct Headers *result);
 static bool decode_COSE_Sign1(zcbor_state_t *state, struct COSE_Sign1 *result);
 static bool decode_COSE_Sign1_Tagged(zcbor_state_t *state, struct COSE_Sign1 *result);
 static bool decode_repeated_SUIT_Authentication_Block_bstr(zcbor_state_t *state, struct SUIT_Authentication_Block_bstr *result);
 static bool decode_SUIT_Authentication(zcbor_state_t *state, struct SUIT_Authentication *result);
-static bool decode_repeated_SUIT_Text_Map_uinttstr(zcbor_state_t *state, struct SUIT_Text_Map_uinttstr *result);
-static bool decode_repeated_SUIT_Component_Identifier_uinttstr(zcbor_state_t *state, struct SUIT_Component_Identifier_uinttstr *result);
+static bool decode_repeated_SUIT_Text_Component_Keys_suit_text_vendor_name(zcbor_state_t *state, struct SUIT_Text_Component_Keys_suit_text_vendor_name *result);
+static bool decode_repeated_SUIT_Text_Component_Keys_suit_text_model_name(zcbor_state_t *state, struct SUIT_Text_Component_Keys_suit_text_model_name *result);
+static bool decode_repeated_SUIT_Text_Component_Keys_suit_text_vendor_domain(zcbor_state_t *state, struct SUIT_Text_Component_Keys_suit_text_vendor_domain *result);
+static bool decode_repeated_SUIT_Text_Component_Keys_suit_text_model_info(zcbor_state_t *state, struct SUIT_Text_Component_Keys_suit_text_model_info *result);
+static bool decode_repeated_SUIT_Text_Component_Keys_suit_text_component_description(zcbor_state_t *state, struct SUIT_Text_Component_Keys_suit_text_component_description *result);
+static bool decode_repeated_SUIT_Text_Component_Keys_suit_text_component_version(zcbor_state_t *state, struct SUIT_Text_Component_Keys_suit_text_component_version *result);
+static bool decode_SUIT_Text_Component_Keys(zcbor_state_t *state, struct SUIT_Text_Component_Keys_ *result);
 static bool decode_repeated_SUIT_Text_Map_SUIT_Component_Identifier(zcbor_state_t *state, struct SUIT_Text_Map_SUIT_Component_Identifier_ *result);
 static bool decode_SUIT_Text_Map(zcbor_state_t *state, struct SUIT_Text_Map *result);
 static bool decode_repeated_SUIT_Severable_Manifest_Members_suit_text(zcbor_state_t *state, struct SUIT_Severable_Manifest_Members_suit_text *result);
@@ -71,7 +72,7 @@ static bool decode_SUIT_Component_Identifier(
 {
 	zcbor_print("%s\r\n", __func__);
 
-	bool tmp_result = (((zcbor_list_start_decode(state) && ((zcbor_multi_decode(0, 3, &(*result)._SUIT_Component_Identifier_bstr_count, (zcbor_decoder_t *)zcbor_bstr_decode, state, (&(*result)._SUIT_Component_Identifier_bstr), sizeof(struct zcbor_string))) || (zcbor_list_map_end_force_decode(state), false)) && zcbor_list_end_decode(state))));
+	bool tmp_result = (((zcbor_list_start_decode(state) && ((zcbor_multi_decode(1, 3, &(*result)._SUIT_Component_Identifier_bstr_count, (zcbor_decoder_t *)zcbor_bstr_decode, state, (&(*result)._SUIT_Component_Identifier_bstr), sizeof(struct zcbor_string))) || (zcbor_list_map_end_force_decode(state), false)) && zcbor_list_end_decode(state))));
 
 	if (!tmp_result)
 		zcbor_trace();
@@ -84,7 +85,7 @@ static bool decode_SUIT_Components(
 {
 	zcbor_print("%s\r\n", __func__);
 
-	bool tmp_result = (((zcbor_list_start_decode(state) && ((zcbor_multi_decode(1, SUIT_MAX_NUM_COMPONENTS, &(*result)._SUIT_Components__SUIT_Component_Identifier_count, (zcbor_decoder_t *)decode_SUIT_Component_Identifier, state, (&(*result)._SUIT_Components__SUIT_Component_Identifier), sizeof(struct SUIT_Component_Identifier))) || (zcbor_list_map_end_force_decode(state), false)) && zcbor_list_end_decode(state))));
+	bool tmp_result = (((zcbor_list_start_decode(state) && ((zcbor_multi_decode(1, 4, &(*result)._SUIT_Components__SUIT_Component_Identifier_count, (zcbor_decoder_t *)decode_SUIT_Component_Identifier, state, (&(*result)._SUIT_Components__SUIT_Component_Identifier), sizeof(struct SUIT_Component_Identifier))) || (zcbor_list_map_end_force_decode(state), false)) && zcbor_list_end_decode(state))));
 
 	if (!tmp_result)
 		zcbor_trace();
@@ -148,12 +149,69 @@ static bool decode_repeated_SUIT_Manifest_suit_reference_uri(
 	return tmp_result;
 }
 
+static bool decode_repeated_SUIT_Unseverable_Members_suit_validate(
+		zcbor_state_t *state, struct SUIT_Unseverable_Members_suit_validate *result)
+{
+	zcbor_print("%s\r\n", __func__);
+
+	bool tmp_result = ((((zcbor_uint32_expect(state, (7))))
+	&& (zcbor_bstr_decode(state, (&(*result)._SUIT_Unseverable_Members_suit_validate)))));
+
+	if (!tmp_result)
+		zcbor_trace();
+
+	return tmp_result;
+}
+
+static bool decode_repeated_SUIT_Unseverable_Members_suit_load(
+		zcbor_state_t *state, struct SUIT_Unseverable_Members_suit_load *result)
+{
+	zcbor_print("%s\r\n", __func__);
+
+	bool tmp_result = ((((zcbor_uint32_expect(state, (8))))
+	&& (zcbor_bstr_decode(state, (&(*result)._SUIT_Unseverable_Members_suit_load)))));
+
+	if (!tmp_result)
+		zcbor_trace();
+
+	return tmp_result;
+}
+
+static bool decode_repeated_SUIT_Unseverable_Members_suit_run(
+		zcbor_state_t *state, struct SUIT_Unseverable_Members_suit_run *result)
+{
+	zcbor_print("%s\r\n", __func__);
+
+	bool tmp_result = ((((zcbor_uint32_expect(state, (9))))
+	&& (zcbor_bstr_decode(state, (&(*result)._SUIT_Unseverable_Members_suit_run)))));
+
+	if (!tmp_result)
+		zcbor_trace();
+
+	return tmp_result;
+}
+
+static bool decode_SUIT_Unseverable_Members(
+		zcbor_state_t *state, struct SUIT_Unseverable_Members_ *result)
+{
+	zcbor_print("%s\r\n", __func__);
+
+	bool tmp_result = (((zcbor_present_decode(&((*result)._SUIT_Unseverable_Members_suit_validate_present), (zcbor_decoder_t *)decode_repeated_SUIT_Unseverable_Members_suit_validate, state, (&(*result)._SUIT_Unseverable_Members_suit_validate))
+	&& zcbor_present_decode(&((*result)._SUIT_Unseverable_Members_suit_load_present), (zcbor_decoder_t *)decode_repeated_SUIT_Unseverable_Members_suit_load, state, (&(*result)._SUIT_Unseverable_Members_suit_load))
+	&& zcbor_present_decode(&((*result)._SUIT_Unseverable_Members_suit_run_present), (zcbor_decoder_t *)decode_repeated_SUIT_Unseverable_Members_suit_run, state, (&(*result)._SUIT_Unseverable_Members_suit_run)))));
+
+	if (!tmp_result)
+		zcbor_trace();
+
+	return tmp_result;
+}
+
 static bool decode_repeated_SUIT_Severable_Members_Choice_suit_payload_fetch(
 		zcbor_state_t *state, struct SUIT_Severable_Members_Choice_suit_payload_fetch *result)
 {
 	zcbor_print("%s\r\n", __func__);
 
-	bool tmp_result = ((((zcbor_uint32_expect(state, (8))))
+	bool tmp_result = ((((zcbor_uint32_expect(state, (16))))
 	&& (zcbor_bstr_decode(state, (&(*result)._SUIT_Severable_Members_Choice_suit_payload_fetch)))));
 
 	if (!tmp_result)
@@ -167,7 +225,7 @@ static bool decode_repeated_SUIT_Severable_Members_Choice_suit_install(
 {
 	zcbor_print("%s\r\n", __func__);
 
-	bool tmp_result = ((((zcbor_uint32_expect(state, (9))))
+	bool tmp_result = ((((zcbor_uint32_expect(state, (17))))
 	&& (zcbor_bstr_decode(state, (&(*result)._SUIT_Severable_Members_Choice_suit_install)))));
 
 	if (!tmp_result)
@@ -195,7 +253,7 @@ static bool decode_repeated_SUIT_Severable_Members_Choice_suit_text(
 {
 	zcbor_print("%s\r\n", __func__);
 
-	bool tmp_result = ((((zcbor_uint32_expect(state, (13))))
+	bool tmp_result = ((((zcbor_uint32_expect(state, (23))))
 	&& (decode_SUIT_Digest(state, (&(*result)._SUIT_Severable_Members_Choice_suit_text)))));
 
 	if (!tmp_result)
@@ -212,63 +270,6 @@ static bool decode_SUIT_Severable_Members_Choice(
 	bool tmp_result = (((zcbor_present_decode(&((*result)._SUIT_Severable_Members_Choice_suit_payload_fetch_present), (zcbor_decoder_t *)decode_repeated_SUIT_Severable_Members_Choice_suit_payload_fetch, state, (&(*result)._SUIT_Severable_Members_Choice_suit_payload_fetch))
 	&& zcbor_present_decode(&((*result)._SUIT_Severable_Members_Choice_suit_install_present), (zcbor_decoder_t *)decode_repeated_SUIT_Severable_Members_Choice_suit_install, state, (&(*result)._SUIT_Severable_Members_Choice_suit_install))
 	&& zcbor_present_decode(&((*result)._SUIT_Severable_Members_Choice_suit_text_present), (zcbor_decoder_t *)decode_repeated_SUIT_Severable_Members_Choice_suit_text, state, (&(*result)._SUIT_Severable_Members_Choice_suit_text)))));
-
-	if (!tmp_result)
-		zcbor_trace();
-
-	return tmp_result;
-}
-
-static bool decode_repeated_SUIT_Unseverable_Members_suit_validate(
-		zcbor_state_t *state, struct SUIT_Unseverable_Members_suit_validate *result)
-{
-	zcbor_print("%s\r\n", __func__);
-
-	bool tmp_result = ((((zcbor_uint32_expect(state, (10))))
-	&& (zcbor_bstr_decode(state, (&(*result)._SUIT_Unseverable_Members_suit_validate)))));
-
-	if (!tmp_result)
-		zcbor_trace();
-
-	return tmp_result;
-}
-
-static bool decode_repeated_SUIT_Unseverable_Members_suit_load(
-		zcbor_state_t *state, struct SUIT_Unseverable_Members_suit_load *result)
-{
-	zcbor_print("%s\r\n", __func__);
-
-	bool tmp_result = ((((zcbor_uint32_expect(state, (11))))
-	&& (zcbor_bstr_decode(state, (&(*result)._SUIT_Unseverable_Members_suit_load)))));
-
-	if (!tmp_result)
-		zcbor_trace();
-
-	return tmp_result;
-}
-
-static bool decode_repeated_SUIT_Unseverable_Members_suit_run(
-		zcbor_state_t *state, struct SUIT_Unseverable_Members_suit_run *result)
-{
-	zcbor_print("%s\r\n", __func__);
-
-	bool tmp_result = ((((zcbor_uint32_expect(state, (12))))
-	&& (zcbor_bstr_decode(state, (&(*result)._SUIT_Unseverable_Members_suit_run)))));
-
-	if (!tmp_result)
-		zcbor_trace();
-
-	return tmp_result;
-}
-
-static bool decode_SUIT_Unseverable_Members(
-		zcbor_state_t *state, struct SUIT_Unseverable_Members_ *result)
-{
-	zcbor_print("%s\r\n", __func__);
-
-	bool tmp_result = (((zcbor_present_decode(&((*result)._SUIT_Unseverable_Members_suit_validate_present), (zcbor_decoder_t *)decode_repeated_SUIT_Unseverable_Members_suit_validate, state, (&(*result)._SUIT_Unseverable_Members_suit_validate))
-	&& zcbor_present_decode(&((*result)._SUIT_Unseverable_Members_suit_load_present), (zcbor_decoder_t *)decode_repeated_SUIT_Unseverable_Members_suit_load, state, (&(*result)._SUIT_Unseverable_Members_suit_load))
-	&& zcbor_present_decode(&((*result)._SUIT_Unseverable_Members_suit_run_present), (zcbor_decoder_t *)decode_repeated_SUIT_Unseverable_Members_suit_run, state, (&(*result)._SUIT_Unseverable_Members_suit_run)))));
 
 	if (!tmp_result)
 		zcbor_trace();
@@ -331,10 +332,14 @@ static bool decode_SUIT_Parameters(
 	&& (zcbor_tstr_decode(state, (&(*result)._SUIT_Parameters_suit_parameter_uri))))))
 	|| (((*result)._SUIT_Parameters_choice == _SUIT_Parameters_suit_parameter_source_component) && (((1)
 	&& (zcbor_uint32_decode(state, (&(*result)._SUIT_Parameters_suit_parameter_source_component))))))
+	|| (((*result)._SUIT_Parameters_choice == _SUIT_Parameters_suit_parameter_run_args) && (((1)
+	&& (zcbor_bstr_decode(state, (&(*result)._SUIT_Parameters_suit_parameter_run_args))))))
 	|| (((*result)._SUIT_Parameters_choice == _SUIT_Parameters_suit_parameter_device_identifier) && (((1)
 	&& (zcbor_bstr_decode(state, (&(*result)._SUIT_Parameters_suit_parameter_device_identifier)))
 	&& ((((((*result)._SUIT_Parameters_suit_parameter_device_identifier.len >= 16)
-	&& ((*result)._SUIT_Parameters_suit_parameter_device_identifier.len <= 16)) || (zcbor_error(state, ZCBOR_ERR_WRONG_RANGE), false))) || (zcbor_error(state, ZCBOR_ERR_WRONG_RANGE), false)))))) || (zcbor_error(state, ZCBOR_ERR_WRONG_VALUE), false))))));
+	&& ((*result)._SUIT_Parameters_suit_parameter_device_identifier.len <= 16)) || (zcbor_error(state, ZCBOR_ERR_WRONG_RANGE), false))) || (zcbor_error(state, ZCBOR_ERR_WRONG_RANGE), false)))))
+	|| (((*result)._SUIT_Parameters_choice == _SUIT_Parameters_suit_parameter_soft_failure) && (((1)
+	&& (zcbor_bool_decode(state, (&(*result)._SUIT_Parameters_suit_parameter_soft_failure))))))) || (zcbor_error(state, ZCBOR_ERR_WRONG_VALUE), false))))));
 
 	if (!tmp_result)
 		zcbor_trace();
@@ -348,6 +353,20 @@ static bool decode_repeated___suit_directive_override_parameters_map__SUIT_Param
 	zcbor_print("%s\r\n", __func__);
 
 	bool tmp_result = (((decode_SUIT_Parameters(state, (&(*result).___suit_directive_override_parameters_map__SUIT_Parameters)))));
+
+	if (!tmp_result)
+		zcbor_trace();
+
+	return tmp_result;
+}
+
+static bool decode_SUIT_Directive_Try_Each_Argument_Common(
+		zcbor_state_t *state, struct SUIT_Directive_Try_Each_Argument_Common *result)
+{
+	zcbor_print("%s\r\n", __func__);
+
+	bool tmp_result = (((zcbor_list_start_decode(state) && ((zcbor_multi_decode(2, 3, &(*result)._SUIT_Directive_Try_Each_Argument_Common_SUIT_Common_Sequence_bstr_count, (zcbor_decoder_t *)zcbor_bstr_decode, state, (&(*result)._SUIT_Directive_Try_Each_Argument_Common_SUIT_Common_Sequence_bstr), sizeof(struct zcbor_string))
+	&& zcbor_present_decode(&((*result)._SUIT_Directive_Try_Each_Argument_Common_nil_present), (zcbor_decoder_t *)zcbor_nil_expect, state, NULL)) || (zcbor_list_map_end_force_decode(state), false)) && zcbor_list_end_decode(state))));
 
 	if (!tmp_result)
 		zcbor_trace();
@@ -385,6 +404,20 @@ static bool decode_repeated_SUIT_Command_Sequence_union(
 	return tmp_result;
 }
 
+static bool decode_repeated_header_map_key_id(
+		zcbor_state_t *state, struct header_map_key_id *result)
+{
+	zcbor_print("%s\r\n", __func__);
+
+	bool tmp_result = ((((zcbor_uint32_expect(state, (4))))
+	&& (zcbor_bstr_decode(state, (&(*result)._header_map_key_id)))));
+
+	if (!tmp_result)
+		zcbor_trace();
+
+	return tmp_result;
+}
+
 static bool decode_header_map(
 		zcbor_state_t *state, struct header_map *result)
 {
@@ -392,8 +425,7 @@ static bool decode_header_map(
 
 	bool tmp_result = (((zcbor_map_start_decode(state) && (((((zcbor_uint32_expect(state, (1))))
 	&& (zcbor_int32_expect(state, (-7))))
-	&& (((zcbor_uint32_expect(state, (4))))
-	&& (zcbor_bstr_decode(state, (&(*result)._header_map_key_id))))) || (zcbor_list_map_end_force_decode(state), false)) && zcbor_map_end_decode(state))));
+	&& zcbor_present_decode(&((*result)._header_map_key_id_present), (zcbor_decoder_t *)decode_repeated_header_map_key_id, state, (&(*result)._header_map_key_id))) || (zcbor_list_map_end_force_decode(state), false)) && zcbor_map_end_decode(state))));
 
 	if (!tmp_result)
 		zcbor_trace();
@@ -477,13 +509,13 @@ static bool decode_SUIT_Authentication(
 	return tmp_result;
 }
 
-static bool decode_repeated_SUIT_Text_Map_uinttstr(
-		zcbor_state_t *state, struct SUIT_Text_Map_uinttstr *result)
+static bool decode_repeated_SUIT_Text_Component_Keys_suit_text_vendor_name(
+		zcbor_state_t *state, struct SUIT_Text_Component_Keys_suit_text_vendor_name *result)
 {
 	zcbor_print("%s\r\n", __func__);
 
-	bool tmp_result = ((((zcbor_uint32_decode(state, (&(*result)._SUIT_Text_Map_uinttstr_key))))
-	&& (zcbor_tstr_decode(state, (&(*result)._SUIT_Text_Map_uinttstr)))));
+	bool tmp_result = ((((zcbor_uint32_expect(state, (1))))
+	&& (zcbor_tstr_decode(state, (&(*result)._SUIT_Text_Component_Keys_suit_text_vendor_name)))));
 
 	if (!tmp_result)
 		zcbor_trace();
@@ -491,13 +523,87 @@ static bool decode_repeated_SUIT_Text_Map_uinttstr(
 	return tmp_result;
 }
 
-static bool decode_repeated_SUIT_Component_Identifier_uinttstr(
-		zcbor_state_t *state, struct SUIT_Component_Identifier_uinttstr *result)
+static bool decode_repeated_SUIT_Text_Component_Keys_suit_text_model_name(
+		zcbor_state_t *state, struct SUIT_Text_Component_Keys_suit_text_model_name *result)
 {
 	zcbor_print("%s\r\n", __func__);
 
-	bool tmp_result = ((((zcbor_uint32_decode(state, (&(*result)._SUIT_Text_Map_SUIT_Component_Identifier_uinttstr_key))))
-	&& (zcbor_tstr_decode(state, (&(*result)._SUIT_Component_Identifier_uinttstr)))));
+	bool tmp_result = ((((zcbor_uint32_expect(state, (2))))
+	&& (zcbor_tstr_decode(state, (&(*result)._SUIT_Text_Component_Keys_suit_text_model_name)))));
+
+	if (!tmp_result)
+		zcbor_trace();
+
+	return tmp_result;
+}
+
+static bool decode_repeated_SUIT_Text_Component_Keys_suit_text_vendor_domain(
+		zcbor_state_t *state, struct SUIT_Text_Component_Keys_suit_text_vendor_domain *result)
+{
+	zcbor_print("%s\r\n", __func__);
+
+	bool tmp_result = ((((zcbor_uint32_expect(state, (3))))
+	&& (zcbor_tstr_decode(state, (&(*result)._SUIT_Text_Component_Keys_suit_text_vendor_domain)))));
+
+	if (!tmp_result)
+		zcbor_trace();
+
+	return tmp_result;
+}
+
+static bool decode_repeated_SUIT_Text_Component_Keys_suit_text_model_info(
+		zcbor_state_t *state, struct SUIT_Text_Component_Keys_suit_text_model_info *result)
+{
+	zcbor_print("%s\r\n", __func__);
+
+	bool tmp_result = ((((zcbor_uint32_expect(state, (4))))
+	&& (zcbor_tstr_decode(state, (&(*result)._SUIT_Text_Component_Keys_suit_text_model_info)))));
+
+	if (!tmp_result)
+		zcbor_trace();
+
+	return tmp_result;
+}
+
+static bool decode_repeated_SUIT_Text_Component_Keys_suit_text_component_description(
+		zcbor_state_t *state, struct SUIT_Text_Component_Keys_suit_text_component_description *result)
+{
+	zcbor_print("%s\r\n", __func__);
+
+	bool tmp_result = ((((zcbor_uint32_expect(state, (5))))
+	&& (zcbor_tstr_decode(state, (&(*result)._SUIT_Text_Component_Keys_suit_text_component_description)))));
+
+	if (!tmp_result)
+		zcbor_trace();
+
+	return tmp_result;
+}
+
+static bool decode_repeated_SUIT_Text_Component_Keys_suit_text_component_version(
+		zcbor_state_t *state, struct SUIT_Text_Component_Keys_suit_text_component_version *result)
+{
+	zcbor_print("%s\r\n", __func__);
+
+	bool tmp_result = ((((zcbor_uint32_expect(state, (6))))
+	&& (zcbor_tstr_decode(state, (&(*result)._SUIT_Text_Component_Keys_suit_text_component_version)))));
+
+	if (!tmp_result)
+		zcbor_trace();
+
+	return tmp_result;
+}
+
+static bool decode_SUIT_Text_Component_Keys(
+		zcbor_state_t *state, struct SUIT_Text_Component_Keys_ *result)
+{
+	zcbor_print("%s\r\n", __func__);
+
+	bool tmp_result = (((zcbor_present_decode(&((*result)._SUIT_Text_Component_Keys_suit_text_vendor_name_present), (zcbor_decoder_t *)decode_repeated_SUIT_Text_Component_Keys_suit_text_vendor_name, state, (&(*result)._SUIT_Text_Component_Keys_suit_text_vendor_name))
+	&& zcbor_present_decode(&((*result)._SUIT_Text_Component_Keys_suit_text_model_name_present), (zcbor_decoder_t *)decode_repeated_SUIT_Text_Component_Keys_suit_text_model_name, state, (&(*result)._SUIT_Text_Component_Keys_suit_text_model_name))
+	&& zcbor_present_decode(&((*result)._SUIT_Text_Component_Keys_suit_text_vendor_domain_present), (zcbor_decoder_t *)decode_repeated_SUIT_Text_Component_Keys_suit_text_vendor_domain, state, (&(*result)._SUIT_Text_Component_Keys_suit_text_vendor_domain))
+	&& zcbor_present_decode(&((*result)._SUIT_Text_Component_Keys_suit_text_model_info_present), (zcbor_decoder_t *)decode_repeated_SUIT_Text_Component_Keys_suit_text_model_info, state, (&(*result)._SUIT_Text_Component_Keys_suit_text_model_info))
+	&& zcbor_present_decode(&((*result)._SUIT_Text_Component_Keys_suit_text_component_description_present), (zcbor_decoder_t *)decode_repeated_SUIT_Text_Component_Keys_suit_text_component_description, state, (&(*result)._SUIT_Text_Component_Keys_suit_text_component_description))
+	&& zcbor_present_decode(&((*result)._SUIT_Text_Component_Keys_suit_text_component_version_present), (zcbor_decoder_t *)decode_repeated_SUIT_Text_Component_Keys_suit_text_component_version, state, (&(*result)._SUIT_Text_Component_Keys_suit_text_component_version)))));
 
 	if (!tmp_result)
 		zcbor_trace();
@@ -511,7 +617,7 @@ static bool decode_repeated_SUIT_Text_Map_SUIT_Component_Identifier(
 	zcbor_print("%s\r\n", __func__);
 
 	bool tmp_result = ((((decode_SUIT_Component_Identifier(state, (&(*result)._SUIT_Text_Map_SUIT_Component_Identifier_key))))
-	&& (zcbor_map_start_decode(state) && ((zcbor_multi_decode(0, 3, &(*result)._SUIT_Component_Identifier_uinttstr_count, (zcbor_decoder_t *)decode_repeated_SUIT_Component_Identifier_uinttstr, state, (&(*result)._SUIT_Component_Identifier_uinttstr), sizeof(struct SUIT_Component_Identifier_uinttstr))) || (zcbor_list_map_end_force_decode(state), false)) && zcbor_map_end_decode(state))));
+	&& (zcbor_map_start_decode(state) && ((((decode_SUIT_Text_Component_Keys(state, (&(*result)._SUIT_Text_Map_SUIT_Component_Identifier__SUIT_Text_Component_Keys))))) || (zcbor_list_map_end_force_decode(state), false)) && zcbor_map_end_decode(state))));
 
 	if (!tmp_result)
 		zcbor_trace();
@@ -524,8 +630,7 @@ static bool decode_SUIT_Text_Map(
 {
 	zcbor_print("%s\r\n", __func__);
 
-	bool tmp_result = (((zcbor_map_start_decode(state) && ((zcbor_multi_decode(0, 3, &(*result)._SUIT_Text_Map_uinttstr_count, (zcbor_decoder_t *)decode_repeated_SUIT_Text_Map_uinttstr, state, (&(*result)._SUIT_Text_Map_uinttstr), sizeof(struct SUIT_Text_Map_uinttstr))
-	&& zcbor_multi_decode(0, 3, &(*result)._SUIT_Text_Map_SUIT_Component_Identifier_count, (zcbor_decoder_t *)decode_repeated_SUIT_Text_Map_SUIT_Component_Identifier, state, (&(*result)._SUIT_Text_Map_SUIT_Component_Identifier), sizeof(struct SUIT_Text_Map_SUIT_Component_Identifier_))) || (zcbor_list_map_end_force_decode(state), false)) && zcbor_map_end_decode(state))));
+	bool tmp_result = (((zcbor_map_start_decode(state) && ((zcbor_multi_decode(0, 3, &(*result)._SUIT_Text_Map_SUIT_Component_Identifier_count, (zcbor_decoder_t *)decode_repeated_SUIT_Text_Map_SUIT_Component_Identifier, state, (&(*result)._SUIT_Text_Map_SUIT_Component_Identifier), sizeof(struct SUIT_Text_Map_SUIT_Component_Identifier_))) || (zcbor_list_map_end_force_decode(state), false)) && zcbor_map_end_decode(state))));
 
 	if (!tmp_result)
 		zcbor_trace();
@@ -539,7 +644,7 @@ static bool decode_repeated_SUIT_Severable_Manifest_Members_suit_text(
 	zcbor_print("%s\r\n", __func__);
 	bool int_res;
 
-	bool tmp_result = ((((zcbor_uint32_expect(state, (13))))
+	bool tmp_result = ((((zcbor_uint32_expect(state, (23))))
 	&& (zcbor_bstr_start_decode(state, &(*result)._SUIT_Severable_Manifest_Members_suit_text)
 	&& (int_res = (((decode_SUIT_Text_Map(state, (&(*result)._SUIT_Severable_Manifest_Members_suit_text_cbor))))), zcbor_bstr_end_decode(state), int_res))));
 
@@ -616,8 +721,10 @@ static bool decode_SUIT_Common_Commands(
 
 	bool tmp_result = (((((zcbor_int_decode(state, &(*result)._SUIT_Common_Commands_choice, sizeof((*result)._SUIT_Common_Commands_choice)))) && ((((((*result)._SUIT_Common_Commands_choice == _SUIT_Common_Commands___suit_directive_set_component_index) && ((((1)
 	&& ((decode_IndexArg(state, (&(*result)._SUIT_Common_Commands___suit_directive_set_component_index__IndexArg))))))))
+	|| (((*result)._SUIT_Common_Commands_choice == _SUIT_Common_Commands___suit_directive_try_each) && ((((1)
+	&& ((decode_SUIT_Directive_Try_Each_Argument_Common(state, (&(*result)._SUIT_Common_Commands___suit_directive_try_each__SUIT_Directive_Try_Each_Argument_Common))))))))
 	|| (((*result)._SUIT_Common_Commands_choice == _SUIT_Common_Commands___suit_directive_override_parameters) && ((((1)
-	&& ((zcbor_map_start_decode(state) && ((zcbor_multi_decode(1, 3, &(*result).___suit_directive_override_parameters_map__SUIT_Parameters_count, (zcbor_decoder_t *)decode_repeated___suit_directive_override_parameters_map__SUIT_Parameters, state, (&(*result).___suit_directive_override_parameters_map__SUIT_Parameters), sizeof(struct __suit_directive_override_parameters_map__SUIT_Parameters))) || (zcbor_list_map_end_force_decode(state), false)) && zcbor_map_end_decode(state)))))))) || (zcbor_error(state, ZCBOR_ERR_WRONG_VALUE), false))))));
+	&& ((zcbor_map_start_decode(state) && ((zcbor_multi_decode(1, 6, &(*result).___suit_directive_override_parameters_map__SUIT_Parameters_count, (zcbor_decoder_t *)decode_repeated___suit_directive_override_parameters_map__SUIT_Parameters, state, (&(*result).___suit_directive_override_parameters_map__SUIT_Parameters), sizeof(struct __suit_directive_override_parameters_map__SUIT_Parameters))) || (zcbor_list_map_end_force_decode(state), false)) && zcbor_map_end_decode(state)))))))) || (zcbor_error(state, ZCBOR_ERR_WRONG_VALUE), false))))));
 
 	if (!tmp_result)
 		zcbor_trace();
@@ -635,7 +742,7 @@ static bool decode_SUIT_Directive(
 	|| (((*result)._SUIT_Directive_choice == _SUIT_Directive___suit_directive_try_each) && ((((1)
 	&& ((decode_SUIT_Directive_Try_Each_Argument(state, (&(*result)._SUIT_Directive___suit_directive_try_each__SUIT_Directive_Try_Each_Argument))))))))
 	|| (((*result)._SUIT_Directive_choice == _SUIT_Directive___suit_directive_override_parameters) && ((((1)
-	&& ((zcbor_map_start_decode(state) && ((zcbor_multi_decode(1, 3, &(*result).___suit_directive_override_parameters_map__SUIT_Parameters_count, (zcbor_decoder_t *)decode_repeated___suit_directive_override_parameters_map__SUIT_Parameters, state, (&(*result).___suit_directive_override_parameters_map__SUIT_Parameters), sizeof(struct __suit_directive_override_parameters_map__SUIT_Parameters))) || (zcbor_list_map_end_force_decode(state), false)) && zcbor_map_end_decode(state)))))))
+	&& ((zcbor_map_start_decode(state) && ((zcbor_multi_decode(1, 6, &(*result).___suit_directive_override_parameters_map__SUIT_Parameters_count, (zcbor_decoder_t *)decode_repeated___suit_directive_override_parameters_map__SUIT_Parameters, state, (&(*result).___suit_directive_override_parameters_map__SUIT_Parameters), sizeof(struct __suit_directive_override_parameters_map__SUIT_Parameters))) || (zcbor_list_map_end_force_decode(state), false)) && zcbor_map_end_decode(state)))))))
 	|| (((*result)._SUIT_Directive_choice == _SUIT_Directive___suit_directive_fetch) && ((((1)
 	&& ((zcbor_uint32_decode(state, (&(*result)._SUIT_Directive___suit_directive_fetch__SUIT_Rep_Policy)))
 	&& ((((!((*result)._SUIT_Directive___suit_directive_fetch__SUIT_Rep_Policy & ~((1 << _suit_reporting_bits_suit_send_record_success) | (1 << _suit_reporting_bits_suit_send_record_failure) | (1 << _suit_reporting_bits_suit_send_sysinfo_success) | (1 << _suit_reporting_bits_suit_send_sysinfo_failure)))) || (zcbor_error(state, ZCBOR_ERR_WRONG_RANGE), false))) || (zcbor_error(state, ZCBOR_ERR_WRONG_RANGE), false)))))))
@@ -722,8 +829,8 @@ static bool decode_SUIT_Manifest(
 	&& (zcbor_bstr_start_decode(state, &(*result)._SUIT_Manifest_suit_common)
 	&& (int_res = (((decode_SUIT_Common(state, (&(*result)._SUIT_Manifest_suit_common_cbor))))), zcbor_bstr_end_decode(state), int_res)))
 	&& zcbor_present_decode(&((*result)._SUIT_Manifest_suit_reference_uri_present), (zcbor_decoder_t *)decode_repeated_SUIT_Manifest_suit_reference_uri, state, (&(*result)._SUIT_Manifest_suit_reference_uri))
-	&& ((decode_SUIT_Severable_Members_Choice(state, (&(*result)._SUIT_Manifest__SUIT_Severable_Members_Choice))))
-	&& ((decode_SUIT_Unseverable_Members(state, (&(*result)._SUIT_Manifest__SUIT_Unseverable_Members))))) || (zcbor_list_map_end_force_decode(state), false)) && zcbor_map_end_decode(state))));
+	&& ((decode_SUIT_Unseverable_Members(state, (&(*result)._SUIT_Manifest__SUIT_Unseverable_Members))))
+	&& ((decode_SUIT_Severable_Members_Choice(state, (&(*result)._SUIT_Manifest__SUIT_Severable_Members_Choice))))) || (zcbor_list_map_end_force_decode(state), false)) && zcbor_map_end_decode(state))));
 
 	if (!tmp_result)
 		zcbor_trace();
