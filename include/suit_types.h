@@ -9,7 +9,7 @@
 
 #include <stdint.h>
 #include <string.h>
-#include "cbor_common.h"
+#include "zcbor_common.h"
 #include "manifest_types.h"
 
 
@@ -96,8 +96,7 @@ struct suit_manifest_params {
 	unsigned int component_slot;
 	struct zcbor_string uri;
 	unsigned int source_component;
-	// struct zcbor_string fetch_args;
-	// struct zcbor_string run_args;
+	struct zcbor_string run_args;
 	struct zcbor_string did;
 
 	bool vid_set;
@@ -107,14 +106,15 @@ struct suit_manifest_params {
 	bool component_slot_set;
 	bool uri_set;
 	bool source_component_set;
-	// bool fetch_args_set;
-	// bool run_args_set;
+	bool run_args_set;
 	bool did_set;
 };
 
 static inline void suit_reset_params(struct suit_manifest_params *params)
 {
-	memset(params, sizeof(*params), 0);
+	suit_component_t bak = params->component_handle;
+	memset(params, 0, sizeof(*params));
+	params->component_handle = bak;
 }
 
 struct suit_processor_state {
@@ -137,7 +137,7 @@ struct suit_processor_state {
 
 static inline void suit_reset_state(struct suit_processor_state *state)
 {
-	memset(state, sizeof(*state), 0);
+	memset(state, 0, sizeof(*state));
 	state->envelope_decoded = suit_bool_false;
 	state->envelope_validated = suit_bool_false;
 	state->manifest_authenticated = suit_bool_false;
