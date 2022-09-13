@@ -13,7 +13,7 @@
 #include <suit_types.h>
 #include <suit_condition.h>
 #include <suit_directive.h>
-
+#include <suit_platform.h>
 
 
 typedef union {
@@ -23,13 +23,16 @@ typedef union {
 
 int suit_validate_common_sequence(struct suit_processor_state *state, struct zcbor_string *cmd_seq_str)
 {
-
+	// SUS: Return statement required
+	return SUIT_SUCCESS;
 }
 
 
 int suit_validate_command_sequence(struct suit_processor_state *state, struct zcbor_string *cmd_seq_str)
 {
 	state->dry_run = suit_bool_true;
+	// SUS: Return statement required
+	return SUIT_SUCCESS;
 }
 
 
@@ -37,26 +40,36 @@ int suit_run_command_sequence(struct suit_processor_state *state, struct zcbor_s
 {
 	size_t decoded_len;
 	suit_command_t result;
-	ZCBOR_STATE_D(d_state, 1, cmd_seq_str.value, cmd_seq_str.len, 1);
+	ZCBOR_STATE_D(d_state, 1, cmd_seq_str->value, cmd_seq_str->len, 1);
 
-	int ret = zcbor_list_start_decode(d_state);
+	bool success = zcbor_list_start_decode(d_state);
 
-	if (ret != ZCBOR_SUCCESS) {
-		return ZCBOR_ERR_TO_SUIT_ERR(ret);
+	if (!success) {
+		int ret = zcbor_peek_error(d_state);
+		return ZCBOR_ERR_TO_SUIT_ERR((ret != ZCBOR_SUCCESS) ? ret : ZCBOR_ERR_UNKNOWN);
 	}
 	if (d_state->indefinite_length_array) {
 		return SUIT_ERR_DECODING;
 	}
 
-	for (int i = 0; i < d_state->elem_count, i++) {
-		if (ret = cbor_decode_SUIT_Condition(
+	// SUS: Each command brings a single argument, passed as an elemnt inside the array,
+	//      thus the number of commands is the half of the number of array elements.
+	if (d_state->elem_count % 2 == 1) {
+		return SUIT_ERR_DECODING;
+	}
+
+	for (int i = 0; i < d_state->elem_count / 2; i++) {
+		if (cbor_decode_SUIT_Condition(
 			d_state->payload, d_state->payload_end - d_state->payload,
 			&result.condition, &decoded_len) == ZCBOR_SUCCESS) {
 			int retval;
 
 			if (i == 0) {
-				/* Each sequence should begin with a set-component-index command.*/
-				return SUIT_ERR_MANIFEST_VALIDATION;
+				/* If there is only one component, it is valid to skip the set-component-index command */
+				if (state->num_components != 1) {
+					/* Each sequence should begin with a set-component-index command */
+					return SUIT_ERR_MANIFEST_VALIDATION;
+				}
 			}
 
 			for (int j = 0; j < state->num_components; j++) {
@@ -95,22 +108,24 @@ int suit_run_command_sequence(struct suit_processor_state *state, struct zcbor_s
 			continue;
 		}
 
-		if (ret = cbor_decode_SUIT_Directive(
+		if (cbor_decode_SUIT_Directive(
 			d_state->payload, d_state->payload_end - d_state->payload,
 			&result.directive, &decoded_len) == ZCBOR_SUCCESS) {
 			int retval;
 
 			if (i == 0) {
-				if (result.directive._SUIT_Directive_choice
-					!= _SUIT_Directive___suit_directive_set_component_index) {
-					/* Each sequence should begin with a set-component-identifier command.*/
+				/* If there is only one component, it is valid to skip the set-component-index command */
+				if ((state->num_components != 1) &&
+					(result.directive._SUIT_Directive_choice
+					!= _SUIT_Directive___suit_directive_set_component_index)) {
+					/* Each sequence should begin with a set-component-index command */
 					return SUIT_ERR_MANIFEST_VALIDATION;
 				}
 			}
 
 			switch (result.directive._SUIT_Directive_choice) {
 			case _SUIT_Directive___suit_directive_set_component_index:
-				retval = set_current_components(state,
+				retval = suit_directive_set_current_components(state,
 					&result.directive._SUIT_Directive___suit_directive_set_component_index__IndexArg);
 				break;
 			case _SUIT_Directive___suit_directive_try_each:

@@ -4,12 +4,16 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+#include <suit_types.h>
+#include <suit_platform.h>
+#include <suit_directive.h>
+
 
 int suit_directive_set_current_components(struct suit_processor_state *state, struct IndexArg_ *index_arg)
 {
 	/* Disable all components. */
 	for (int i = 0; i < state->num_components; i++) {
-		state->components[i] = false;
+		state->current_components[i] = false;
 	}
 
 	/* Single component. */
@@ -50,7 +54,7 @@ static int try_each(struct suit_processor_state *state, struct SUIT_Directive_Tr
 
 	for (int i = 0; i < try_each_arg->_SUIT_Directive_Try_Each_Argument_SUIT_Command_Sequence_bstr_count; i++) {
 		state->soft_failure = suit_bool_true;
-		ret = suit_run_command_sequence(state, &try_each_arg->_SUIT_Directive_Try_Each_Argument_SUIT_Command_Sequence_bstr[i]);
+		ret = suit_directive_run_sequence(state, &try_each_arg->_SUIT_Directive_Try_Each_Argument_SUIT_Command_Sequence_bstr[i]);
 
 		if ((ret == SUIT_FAIL_CONDITION) && (state->soft_failure == suit_bool_true)) {
 			if (try_each_arg->_SUIT_Directive_Try_Each_Argument_nil_present) {

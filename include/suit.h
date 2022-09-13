@@ -12,7 +12,7 @@
 
 /** Decode the string into a manifest envelope and validate the data structure.
  */
-int suit_decode_envelope(uint8_t manifest_str, size_t manifest_len,
+int suit_decode_envelope(uint8_t *manifest_str, size_t manifest_len,
 	struct suit_processor_state *state);
 
 /** Validate higher level rules, such as those outlined in the SUIT information
