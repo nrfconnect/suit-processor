@@ -8,11 +8,13 @@
 #include <manifest_decode.h>
 #include <suit_types.h>
 #include <suit_platform.h>
+#include <suit_command_seq.h>
+#include <suit_platform.h>
 
 
 /** Decode the string into a manifest envelope and validate the data structure.
  */
-int suit_decode_envelope(uint8_t envelope_str, size_t envelope_len,
+int suit_decode_envelope(uint8_t *envelope_str, size_t envelope_len,
 	struct suit_processor_state *state)
 {
 	state->envelope_decoded = suit_bool_false;
@@ -25,7 +27,7 @@ int suit_decode_envelope(uint8_t envelope_str, size_t envelope_len,
 
 	size_t decoded_len;
 	int ret = cbor_decode_SUIT_Envelope_Tagged(
-		envelope_str, envelope_len, state->envelope, &decoded_len);
+		envelope_str, envelope_len, &state->envelope, &decoded_len);
 
 	if (ret != ZCBOR_SUCCESS || decoded_len != envelope_len) {
 		state->envelope_decoded = suit_bool_false;
@@ -53,25 +55,33 @@ int suit_validate_envelope(struct suit_processor_state *state)
 	}
 
 	struct SUIT_Authentication *auth = &state->envelope._SUIT_Envelope_suit_authentication_wrapper_cbor;
-	enum suit_bool results[auth->_SUIT_Authentication_Block_bstr_count * 2] = {suit_bool_false}; /* Use every other entry as canary */
+	enum suit_bool results[auth->_SUIT_Authentication_Block_bstr_count * 2]; /* Use every other entry as canary */
+	// SUS: Variable-sized object cannot be initialized through assignment.
+	for (size_t i = 0; i < auth->_SUIT_Authentication_Block_bstr_count * 2; i++) {
+		results[i] = suit_bool_false;
+	}
 	unsigned int num_ok = 0;
 
-	if (sizeof(results) == 0) {
+	if (auth->_SUIT_Authentication_Block_bstr_count == 0) {
 		return SUIT_ERR_MANIFEST_VERIFICATION;
 	}
 
-	for (int i = 0; i < sizeof(results) / 2; i++) {
+	for (int i = 0; i < auth->_SUIT_Authentication_Block_bstr_count; i++) {
 		struct COSE_Sign1 *block = &auth->_SUIT_Authentication_Block_bstr[i]._SUIT_Authentication_Block_bstr_cbor;
 
 		int ret = suit_plat_authenticate(
 			suit_cose_es256,
-			&block->_COSE_Sign1__Headers._Headers_protected_cbor._header_map_key_id,
+			(block->_COSE_Sign1__Headers._Headers_protected_cbor._header_map_key_id_present ?
+				&block->_COSE_Sign1__Headers._Headers_protected_cbor._header_map_key_id._header_map_key_id:
+				(struct zcbor_string *)NULL
+			),
 			&block->_COSE_Sign1_signature,
 			&auth->_SUIT_Authentication_SUIT_Digest_bstr);
 
 		if (ret != SUIT_SUCCESS) {
 			results[i * 2] = suit_bool_false;
-			return ret;
+			// SUS: Information leak, about the authentication block # that failed.
+			//return ret;
 		}
 
 		if (ret == SUIT_SUCCESS) {
@@ -79,7 +89,7 @@ int suit_validate_envelope(struct suit_processor_state *state)
 		}
 	}
 
-	for (int i = 0; i < sizeof(results) / 2; i++) {
+	for (int i = 0; i < auth->_SUIT_Authentication_Block_bstr_count; i++) {
 		if (results[i * 2] != suit_bool_true) {
 			goto tamp;
 		}
@@ -96,10 +106,10 @@ int suit_validate_envelope(struct suit_processor_state *state)
 		goto tamp;
 	}
 
-	if (num_ok && (num_ok == sizeof(results))) {
+	if (num_ok && (num_ok == auth->_SUIT_Authentication_Block_bstr_count)) {
 		int ret = suit_plat_check_digest(suit_cose_sha256,
 			&auth->_SUIT_Authentication_SUIT_Digest_bstr_cbor._SUIT_Digest_suit_digest_bytes,
-			state->envelope._SUIT_Envelope_suit_manifest);
+			&state->envelope._SUIT_Envelope_suit_manifest);
 
 		if (ret != SUIT_SUCCESS) {
 			state->envelope_validated = suit_bool_false;
@@ -107,7 +117,8 @@ int suit_validate_envelope(struct suit_processor_state *state)
 		}
 
 		if (ret == SUIT_SUCCESS) {
-			results[i * 2] = suit_bool_true;
+			// SUS: The index (i * 2) is outside the array with results.
+			//results[i * 2] = suit_bool_true;
 			state->envelope_validated = suit_bool_true;
 			return SUIT_SUCCESS;
 		}
@@ -127,11 +138,11 @@ int suit_decode_manifest(struct suit_processor_state *state)
 		return SUIT_ERR_ORDER;
 	}
 
-	state->envelope_decoded = suit_bool_false;
-	state->envelope_validated = suit_bool_false;
+	state->manifest_decoded = suit_bool_false;
+	state->manifest_validated = suit_bool_false;
 
-	if (state->envelope_decoded != suit_bool_false
-		|| state->envelope_validated != suit_bool_false) {
+	if (state->manifest_decoded != suit_bool_false
+		|| state->manifest_validated != suit_bool_false) {
 		return SUIT_ERR_TAMP;
 	}
 
@@ -230,6 +241,8 @@ static struct zcbor_string *get_command_seq(struct suit_processor_state *state,
 				return &unseverable->_SUIT_Unseverable_Members_suit_run._SUIT_Unseverable_Members_suit_run;
 			}
 			return NULL;
+		default:
+			return NULL;
 	}
 	return NULL;
 }
@@ -243,9 +256,9 @@ int suit_validate_manifest(struct suit_processor_state *state)
 		return SUIT_ERR_ORDER;
 	}
 
-	state->envelope_validated = suit_bool_false;
+	state->manifest_validated = suit_bool_false;
 
-	if (state->envelope_validated != suit_bool_false) {
+	if (state->manifest_validated != suit_bool_false) {
 		return SUIT_ERR_TAMP;
 	}
 
@@ -255,25 +268,26 @@ int suit_validate_manifest(struct suit_processor_state *state)
 		CHECK_RET(ret, break);
 	} while (0);
 
-	if (state->manifest._SUIT_Manifest__SUIT_Severable_Members_Choice._SUIT_Severable_Members_Choice_suit_text_present
-		&& state->envelope._SUIT_Envelope__SUIT_Severable_Manifest_Members._SUIT_Severable_Manifest_Members_suit_text_present) {
+	/* If the text field inside the envelope is present and the text field is severed from the manifest, verify the digest */
+	while (state->envelope._SUIT_Envelope__SUIT_Severable_Manifest_Members._SUIT_Severable_Manifest_Members_suit_text_present
+		&& state->manifest._SUIT_Manifest__SUIT_Severable_Members_Choice._SUIT_Severable_Members_Choice_suit_text_present) {
 
 		int ret = suit_plat_check_digest(suit_cose_sha256,
 			&state->manifest._SUIT_Manifest__SUIT_Severable_Members_Choice._SUIT_Severable_Members_Choice_suit_text._SUIT_Severable_Members_Choice_suit_text._SUIT_Digest_suit_digest_bytes,
 			&state->envelope._SUIT_Envelope__SUIT_Severable_Manifest_Members._SUIT_Severable_Manifest_Members_suit_text._SUIT_Severable_Manifest_Members_suit_text);
-
 		CHECK_RET(ret, break);
 	}
 
-	if (!state->manifest._SUIT_Manifest__SUIT_Severable_Members_Choice._SUIT_Severable_Members_Choice_suit_text_present
-		&& state->envelope._SUIT_Envelope__SUIT_Severable_Manifest_Members._SUIT_Severable_Manifest_Members_suit_text_present) {
-		/* Text appears in envelope but not in manifest, so it is not signed. */
+	/* If the text field inside the envelope is present and the text field is not present inside the manifest, invalidate the envelope */
+	if (state->envelope._SUIT_Envelope__SUIT_Severable_Manifest_Members._SUIT_Severable_Manifest_Members_suit_text_present
+		&& (!state->manifest._SUIT_Manifest__SUIT_Severable_Members_Choice._SUIT_Severable_Members_Choice_suit_text_present)) {
+		/* Text appears in envelope but not in manifest, so it is not signed */
 		return SUIT_ERR_MANIFEST_VALIDATION;
 	}
 
 	struct SUIT_Common *common = &state->manifest._SUIT_Manifest_suit_common_cbor;
 
-	if (common->_SUIT_Common_suit_common_sequence_present){
+	while (common->_SUIT_Common_suit_common_sequence_present){
 		int ret = suit_validate_common_sequence(&common->_SUIT_Common_suit_common_sequence._SUIT_Common_suit_common_sequence);
 
 		CHECK_RET(ret, break);
@@ -283,9 +297,9 @@ int suit_validate_manifest(struct suit_processor_state *state)
 		struct zcbor_string component_id;
 		for (int i = 0; i < common->_SUIT_Common_suit_components._SUIT_Common_suit_components._SUIT_Components__SUIT_Component_Identifier_count; i++) {
 			get_component_id_str(&component_id,
-				common->_SUIT_Common_suit_components._SUIT_Common_suit_components._SUIT_Components__SUIT_Component_Identifier[i]._SUIT_Component_Identifier_bstr[0],
+				&common->_SUIT_Common_suit_components._SUIT_Common_suit_components._SUIT_Components__SUIT_Component_Identifier[i]._SUIT_Component_Identifier_bstr[0],
 				common->_SUIT_Common_suit_components._SUIT_Common_suit_components._SUIT_Components__SUIT_Component_Identifier[i]._SUIT_Component_Identifier_bstr_count);
-			int ret = suit_plat_get_component_handle(&component_id, &state->key_ids, state->num_key_ids, &state->component_indices[i]);
+			int ret = suit_plat_get_component_handle(&component_id, &state->key_ids, state->num_key_ids, &state->components[i].component_handle);
 
 			CHECK_RET(ret, continue);
 		}
@@ -320,11 +334,12 @@ int suit_validate_manifest(struct suit_processor_state *state)
 		int ret = SUIT_ERR_TAMP;
 
 		if (step_seq == NULL) {
-			return SUIT_ERR_UNAVAILABLE_COMMAND_SEQ;
+			/* The lack of a command sequence (i.e. fetch step) does not invalidate the whole manifest */
+			ret = SUIT_SUCCESS;
 		}
 
 		if (step_seq != NULL) {
-			ret = suit_run_command_sequence(step_seq);
+			ret = suit_run_command_sequence(state, step_seq);
 		}
 
 		if (ret != SUIT_SUCCESS) {
@@ -339,6 +354,7 @@ int suit_validate_manifest(struct suit_processor_state *state)
 	} else if (num_dry_run_steps == SUIT_NUM_STEPS) {
 		state->manifest_validated = suit_bool_true;
 		state->dry_run = suit_bool_false;
+		return SUIT_SUCCESS;
 	}
 
 tamp:
@@ -364,7 +380,7 @@ int suit_process_manifest(struct suit_processor_state *state,
 	}
 
 	if (step_seq != NULL) {
-		return suit_run_command_sequence(step_seq);
+		return suit_run_command_sequence(state, step_seq);
 	}
 
 tamp:
