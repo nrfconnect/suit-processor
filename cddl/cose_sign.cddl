@@ -12,7 +12,7 @@ empty_Headers = (
 
 header_map = {
 	alg_id: 1 => supported_algs,
-	key_id: 4 => bstr,
+	? key_id: 4 => bstr,
 }
 
 supported_algs //= (ES256: -7)
