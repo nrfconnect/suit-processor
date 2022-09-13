@@ -27,7 +27,8 @@ int suit_directive_run_sequence(struct suit_processor_state *state,
 /** Copy the parameters in @p new_parameters (that are set) into the parameter
  *  list of the current component(s). */
 int suit_directive_override_parameters(struct suit_processor_state *state,
-		struct suit_manifest_params *new_parameters);
+		struct __suit_directive_override_parameters_map__SUIT_Parameters *params,
+		uint_fast32_t param_count);
 
 /** Fetch a payload based on the configured parameters. */
 int suit_directive_fetch(struct suit_processor_state *state);

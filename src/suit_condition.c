@@ -4,6 +4,10 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+#include <suit_types.h>
+#include <suit_platform.h>
+
+
 int suit_condition_vendor_identifier(struct suit_processor_state *state,
 		struct suit_manifest_params *component_params)
 {
