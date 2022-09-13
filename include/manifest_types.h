@@ -89,6 +89,27 @@ struct SUIT_Manifest_suit_reference_uri {
 	struct zcbor_string _SUIT_Manifest_suit_reference_uri;
 };
 
+struct SUIT_Unseverable_Members_suit_validate {
+	struct zcbor_string _SUIT_Unseverable_Members_suit_validate;
+};
+
+struct SUIT_Unseverable_Members_suit_load {
+	struct zcbor_string _SUIT_Unseverable_Members_suit_load;
+};
+
+struct SUIT_Unseverable_Members_suit_run {
+	struct zcbor_string _SUIT_Unseverable_Members_suit_run;
+};
+
+struct SUIT_Unseverable_Members_ {
+	struct SUIT_Unseverable_Members_suit_validate _SUIT_Unseverable_Members_suit_validate;
+	uint_fast32_t _SUIT_Unseverable_Members_suit_validate_present;
+	struct SUIT_Unseverable_Members_suit_load _SUIT_Unseverable_Members_suit_load;
+	uint_fast32_t _SUIT_Unseverable_Members_suit_load_present;
+	struct SUIT_Unseverable_Members_suit_run _SUIT_Unseverable_Members_suit_run;
+	uint_fast32_t _SUIT_Unseverable_Members_suit_run_present;
+};
+
 struct SUIT_Severable_Members_Choice_suit_payload_fetch {
 	struct zcbor_string _SUIT_Severable_Members_Choice_suit_payload_fetch;
 };
@@ -114,35 +135,14 @@ struct SUIT_Severable_Members_Choice_ {
 	uint_fast32_t _SUIT_Severable_Members_Choice_suit_text_present;
 };
 
-struct SUIT_Unseverable_Members_suit_validate {
-	struct zcbor_string _SUIT_Unseverable_Members_suit_validate;
-};
-
-struct SUIT_Unseverable_Members_suit_load {
-	struct zcbor_string _SUIT_Unseverable_Members_suit_load;
-};
-
-struct SUIT_Unseverable_Members_suit_run {
-	struct zcbor_string _SUIT_Unseverable_Members_suit_run;
-};
-
-struct SUIT_Unseverable_Members_ {
-	struct SUIT_Unseverable_Members_suit_validate _SUIT_Unseverable_Members_suit_validate;
-	uint_fast32_t _SUIT_Unseverable_Members_suit_validate_present;
-	struct SUIT_Unseverable_Members_suit_load _SUIT_Unseverable_Members_suit_load;
-	uint_fast32_t _SUIT_Unseverable_Members_suit_load_present;
-	struct SUIT_Unseverable_Members_suit_run _SUIT_Unseverable_Members_suit_run;
-	uint_fast32_t _SUIT_Unseverable_Members_suit_run_present;
-};
-
 struct SUIT_Manifest {
 	uint32_t _SUIT_Manifest_suit_manifest_sequence_number;
 	struct zcbor_string _SUIT_Manifest_suit_common;
 	struct SUIT_Common _SUIT_Manifest_suit_common_cbor;
 	struct SUIT_Manifest_suit_reference_uri _SUIT_Manifest_suit_reference_uri;
 	uint_fast32_t _SUIT_Manifest_suit_reference_uri_present;
-	struct SUIT_Severable_Members_Choice_ _SUIT_Manifest__SUIT_Severable_Members_Choice;
 	struct SUIT_Unseverable_Members_ _SUIT_Manifest__SUIT_Unseverable_Members;
+	struct SUIT_Severable_Members_Choice_ _SUIT_Manifest__SUIT_Severable_Members_Choice;
 };
 
 struct IndexArg_ {
@@ -192,7 +192,13 @@ struct SUIT_Parameters_ {
 			uint32_t _SUIT_Parameters_suit_parameter_source_component;
 		};
 		struct {
+			struct zcbor_string _SUIT_Parameters_suit_parameter_run_args;
+		};
+		struct {
 			struct zcbor_string _SUIT_Parameters_suit_parameter_device_identifier;
+		};
+		struct {
+			bool _SUIT_Parameters_suit_parameter_soft_failure;
 		};
 	};
 	enum {
@@ -203,7 +209,9 @@ struct SUIT_Parameters_ {
 		_SUIT_Parameters_suit_parameter_component_slot = 5,
 		_SUIT_Parameters_suit_parameter_uri = 21,
 		_SUIT_Parameters_suit_parameter_source_component = 22,
+		_SUIT_Parameters_suit_parameter_run_args = 23,
 		_SUIT_Parameters_suit_parameter_device_identifier = 24,
+		_SUIT_Parameters_suit_parameter_soft_failure = 13,
 	} _SUIT_Parameters_choice;
 };
 
@@ -220,7 +228,7 @@ struct SUIT_Directive_ {
 			struct SUIT_Directive_Try_Each_Argument _SUIT_Directive___suit_directive_try_each__SUIT_Directive_Try_Each_Argument;
 		};
 		struct {
-			struct __suit_directive_override_parameters_map__SUIT_Parameters ___suit_directive_override_parameters_map__SUIT_Parameters[3];
+			struct __suit_directive_override_parameters_map__SUIT_Parameters ___suit_directive_override_parameters_map__SUIT_Parameters[6];
 			uint_fast32_t ___suit_directive_override_parameters_map__SUIT_Parameters_count;
 		};
 		struct {
@@ -243,18 +251,28 @@ struct SUIT_Directive_ {
 	} _SUIT_Directive_choice;
 };
 
+struct SUIT_Directive_Try_Each_Argument_Common {
+	struct zcbor_string _SUIT_Directive_Try_Each_Argument_Common_SUIT_Common_Sequence_bstr[3];
+	uint_fast32_t _SUIT_Directive_Try_Each_Argument_Common_SUIT_Common_Sequence_bstr_count;
+	uint_fast32_t _SUIT_Directive_Try_Each_Argument_Common_nil_present;
+};
+
 struct SUIT_Common_Commands_ {
 	union {
 		struct {
 			struct IndexArg_ _SUIT_Common_Commands___suit_directive_set_component_index__IndexArg;
 		};
 		struct {
-			struct __suit_directive_override_parameters_map__SUIT_Parameters ___suit_directive_override_parameters_map__SUIT_Parameters[3];
+			struct SUIT_Directive_Try_Each_Argument_Common _SUIT_Common_Commands___suit_directive_try_each__SUIT_Directive_Try_Each_Argument_Common;
+		};
+		struct {
+			struct __suit_directive_override_parameters_map__SUIT_Parameters ___suit_directive_override_parameters_map__SUIT_Parameters[6];
 			uint_fast32_t ___suit_directive_override_parameters_map__SUIT_Parameters_count;
 		};
 	};
 	enum {
 		_SUIT_Common_Commands___suit_directive_set_component_index = 12,
+		_SUIT_Common_Commands___suit_directive_try_each = 15,
 		_SUIT_Common_Commands___suit_directive_override_parameters = 20,
 	} _SUIT_Common_Commands_choice;
 };
@@ -291,8 +309,13 @@ struct SUIT_Command_Sequence {
 	uint_fast32_t _SUIT_Command_Sequence_union_count;
 };
 
-struct header_map {
+struct header_map_key_id {
 	struct zcbor_string _header_map_key_id;
+};
+
+struct header_map {
+	struct header_map_key_id _header_map_key_id;
+	uint_fast32_t _header_map_key_id_present;
 };
 
 struct Headers {
@@ -317,25 +340,51 @@ struct SUIT_Authentication {
 	uint_fast32_t _SUIT_Authentication_Block_bstr_count;
 };
 
-struct SUIT_Text_Map_uinttstr {
-	uint32_t _SUIT_Text_Map_uinttstr_key;
-	struct zcbor_string _SUIT_Text_Map_uinttstr;
+struct SUIT_Text_Component_Keys_suit_text_vendor_name {
+	struct zcbor_string _SUIT_Text_Component_Keys_suit_text_vendor_name;
 };
 
-struct SUIT_Component_Identifier_uinttstr {
-	uint32_t _SUIT_Text_Map_SUIT_Component_Identifier_uinttstr_key;
-	struct zcbor_string _SUIT_Component_Identifier_uinttstr;
+struct SUIT_Text_Component_Keys_suit_text_model_name {
+	struct zcbor_string _SUIT_Text_Component_Keys_suit_text_model_name;
+};
+
+struct SUIT_Text_Component_Keys_suit_text_vendor_domain {
+	struct zcbor_string _SUIT_Text_Component_Keys_suit_text_vendor_domain;
+};
+
+struct SUIT_Text_Component_Keys_suit_text_model_info {
+	struct zcbor_string _SUIT_Text_Component_Keys_suit_text_model_info;
+};
+
+struct SUIT_Text_Component_Keys_suit_text_component_description {
+	struct zcbor_string _SUIT_Text_Component_Keys_suit_text_component_description;
+};
+
+struct SUIT_Text_Component_Keys_suit_text_component_version {
+	struct zcbor_string _SUIT_Text_Component_Keys_suit_text_component_version;
+};
+
+struct SUIT_Text_Component_Keys_ {
+	struct SUIT_Text_Component_Keys_suit_text_vendor_name _SUIT_Text_Component_Keys_suit_text_vendor_name;
+	uint_fast32_t _SUIT_Text_Component_Keys_suit_text_vendor_name_present;
+	struct SUIT_Text_Component_Keys_suit_text_model_name _SUIT_Text_Component_Keys_suit_text_model_name;
+	uint_fast32_t _SUIT_Text_Component_Keys_suit_text_model_name_present;
+	struct SUIT_Text_Component_Keys_suit_text_vendor_domain _SUIT_Text_Component_Keys_suit_text_vendor_domain;
+	uint_fast32_t _SUIT_Text_Component_Keys_suit_text_vendor_domain_present;
+	struct SUIT_Text_Component_Keys_suit_text_model_info _SUIT_Text_Component_Keys_suit_text_model_info;
+	uint_fast32_t _SUIT_Text_Component_Keys_suit_text_model_info_present;
+	struct SUIT_Text_Component_Keys_suit_text_component_description _SUIT_Text_Component_Keys_suit_text_component_description;
+	uint_fast32_t _SUIT_Text_Component_Keys_suit_text_component_description_present;
+	struct SUIT_Text_Component_Keys_suit_text_component_version _SUIT_Text_Component_Keys_suit_text_component_version;
+	uint_fast32_t _SUIT_Text_Component_Keys_suit_text_component_version_present;
 };
 
 struct SUIT_Text_Map_SUIT_Component_Identifier_ {
 	struct SUIT_Component_Identifier _SUIT_Text_Map_SUIT_Component_Identifier_key;
-	struct SUIT_Component_Identifier_uinttstr _SUIT_Component_Identifier_uinttstr[3];
-	uint_fast32_t _SUIT_Component_Identifier_uinttstr_count;
+	struct SUIT_Text_Component_Keys_ _SUIT_Text_Map_SUIT_Component_Identifier__SUIT_Text_Component_Keys;
 };
 
 struct SUIT_Text_Map {
-	struct SUIT_Text_Map_uinttstr _SUIT_Text_Map_uinttstr[3];
-	uint_fast32_t _SUIT_Text_Map_uinttstr_count;
 	struct SUIT_Text_Map_SUIT_Component_Identifier_ _SUIT_Text_Map_SUIT_Component_Identifier[3];
 	uint_fast32_t _SUIT_Text_Map_SUIT_Component_Identifier_count;
 };
