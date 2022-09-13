@@ -165,23 +165,23 @@ int suit_directive_override_parameters(struct suit_processor_state *state,
 
 
 static int plat_fetch(struct suit_processor_state *state, suit_component_t dst_handle,
-			struct zcbor_string *uri, struct zcbor_string *fetch_args)
+			struct zcbor_string *uri)
 {
 	if (state->dry_run != suit_bool_false) {
-		return suit_plat_check_fetch(dst_handle, uri, fetch_args);
+		return suit_plat_check_fetch(dst_handle, uri);
 	} else {
-		return suit_plat_fetch(dst_handle, uri, fetch_args);
+		return suit_plat_fetch(dst_handle, uri);
 	}
 }
 
 
 static int plat_fetch_integrated(struct suit_processor_state *state, suit_component_t dst_handle,
-			struct zcbor_string *payload, struct zcbor_string *fetch_args)
+			struct zcbor_string *payload)
 {
 	if (state->dry_run != suit_bool_false) {
-		return suit_plat_check_fetch_integrated(dst_handle, payload, fetch_args);
+		return suit_plat_check_fetch_integrated(dst_handle, payload);
 	} else {
-		return suit_plat_fetch_integrated(dst_handle, payload, fetch_args);
+		return suit_plat_fetch_integrated(dst_handle, payload);
 	}
 }
 
@@ -197,25 +197,18 @@ int suit_directive_fetch(struct suit_processor_state *state)
 
 			bool integrated = false;
 			int ret;
-			struct zcbor_string *fetch_args = NULL;
 
-			if (state->components[i].fetch_args_set) {
-				fetch_args = &state->components[i].fetch_args;
-			}
-
-			for (int j = 0; j < state->envelope._SUIT_Envelope__SUIT_Integrated_Payload_count: j++) {
+			for (int j = 0; j < state->envelope._SUIT_Envelope__SUIT_Integrated_Payload_count; j++) {
 				if (suit_compare_zcbor_strings(&state->envelope._SUIT_Envelope__SUIT_Integrated_Payload[j]._SUIT_Envelope__SUIT_Integrated_Payload._SUIT_Integrated_Payload_suit_integrated_payload_key_key, &state->components[i].uri)) {
 					ret = plat_fetch_integrated(state,
 						state->components[i].component_handle,
-						&state->envelope._SUIT_Envelope__SUIT_Integrated_Payload[j]._SUIT_Envelope__SUIT_Integrated_Payload._SUIT_Integrated_Payload_suit_integrated_payload_key,
-						fetch_args);
+						&state->envelope._SUIT_Envelope__SUIT_Integrated_Payload[j]._SUIT_Envelope__SUIT_Integrated_Payload._SUIT_Integrated_Payload_suit_integrated_payload_key);
 					integrated = true;
 				}
 			}
 
 			if (!integrated) {
-				ret = plat_fetch(state, state->components[i].component_handle,
-					state->components[i].uri, fetch_args);
+				ret = plat_fetch(state, state->components[i].component_handle, &state->components[i].uri);
 			}
 
 			if (ret != SUIT_SUCCESS) {
