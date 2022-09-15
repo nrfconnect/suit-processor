@@ -35,14 +35,6 @@ static bool decode_SUIT_Directive_Try_Each_Argument(zcbor_state_t *state, struct
 static bool decode_SUIT_Parameters(zcbor_state_t *state, struct SUIT_Parameters_ *result);
 static bool decode_repeated___suit_directive_override_parameters_map__SUIT_Parameters(zcbor_state_t *state, struct __suit_directive_override_parameters_map__SUIT_Parameters *result);
 static bool decode_SUIT_Directive_Try_Each_Argument_Common(zcbor_state_t *state, struct SUIT_Directive_Try_Each_Argument_Common *result);
-static bool decode_repeated_SUIT_Common_Sequence_union(zcbor_state_t *state, struct SUIT_Common_Sequence_union_ *result);
-static bool decode_repeated_SUIT_Command_Sequence_union(zcbor_state_t *state, struct SUIT_Command_Sequence_union_ *result);
-static bool decode_repeated_header_map_key_id(zcbor_state_t *state, struct header_map_key_id *result);
-static bool decode_header_map(zcbor_state_t *state, struct header_map *result);
-static bool decode_Headers(zcbor_state_t *state, struct Headers *result);
-static bool decode_COSE_Sign1(zcbor_state_t *state, struct COSE_Sign1 *result);
-static bool decode_COSE_Sign1_Tagged(zcbor_state_t *state, struct COSE_Sign1 *result);
-static bool decode_repeated_SUIT_Authentication_Block_bstr(zcbor_state_t *state, struct SUIT_Authentication_Block_bstr *result);
 static bool decode_SUIT_Authentication(zcbor_state_t *state, struct SUIT_Authentication *result);
 static bool decode_repeated_SUIT_Text_Component_Keys_suit_text_vendor_name(zcbor_state_t *state, struct SUIT_Text_Component_Keys_suit_text_vendor_name *result);
 static bool decode_repeated_SUIT_Text_Component_Keys_suit_text_model_name(zcbor_state_t *state, struct SUIT_Text_Component_Keys_suit_text_model_name *result);
@@ -58,6 +50,8 @@ static bool decode_SUIT_Severable_Manifest_Members_suit_text(zcbor_state_t *stat
 static bool decode_SUIT_Integrated_Payload_suit_integrated_payload_key(zcbor_state_t *state, struct SUIT_Integrated_Payload_suit_integrated_payload_key *result);
 static bool decode_repeated_SUIT_Envelope__SUIT_Integrated_Payload(zcbor_state_t *state, struct SUIT_Envelope__SUIT_Integrated_Payload *result);
 static bool decode_SUIT_Envelope(zcbor_state_t *state, struct SUIT_Envelope *result);
+static bool decode_repeated_SUIT_Common_Sequence_union(zcbor_state_t *state, struct SUIT_Common_Sequence_union_ *result);
+static bool decode_repeated_SUIT_Command_Sequence_union(zcbor_state_t *state, struct SUIT_Command_Sequence_union_ *result);
 static bool decode_SUIT_Common_Commands(zcbor_state_t *state, struct SUIT_Common_Commands_ *result);
 static bool decode_SUIT_Directive(zcbor_state_t *state, struct SUIT_Directive_ *result);
 static bool decode_SUIT_Condition(zcbor_state_t *state, struct SUIT_Condition_ *result);
@@ -374,125 +368,6 @@ static bool decode_SUIT_Directive_Try_Each_Argument_Common(
 	return tmp_result;
 }
 
-static bool decode_repeated_SUIT_Common_Sequence_union(
-		zcbor_state_t *state, struct SUIT_Common_Sequence_union_ *result)
-{
-	zcbor_print("%s\r\n", __func__);
-	bool int_res;
-
-	bool tmp_result = (((zcbor_union_start_code(state) && (int_res = ((((decode_SUIT_Condition(state, (&(*result)._SUIT_Common_Sequence_union__SUIT_Condition)))) && (((*result)._SUIT_Common_Sequence_union_choice = _SUIT_Common_Sequence_union__SUIT_Condition) || 1))
-	|| (zcbor_union_elem_code(state) && (((decode_SUIT_Common_Commands(state, (&(*result)._SUIT_Common_Sequence_union__SUIT_Common_Commands)))) && (((*result)._SUIT_Common_Sequence_union_choice = _SUIT_Common_Sequence_union__SUIT_Common_Commands) || 1)))), zcbor_union_end_code(state), int_res))));
-
-	if (!tmp_result)
-		zcbor_trace();
-
-	return tmp_result;
-}
-
-static bool decode_repeated_SUIT_Command_Sequence_union(
-		zcbor_state_t *state, struct SUIT_Command_Sequence_union_ *result)
-{
-	zcbor_print("%s\r\n", __func__);
-	bool int_res;
-
-	bool tmp_result = (((zcbor_union_start_code(state) && (int_res = ((((decode_SUIT_Condition(state, (&(*result)._SUIT_Command_Sequence_union__SUIT_Condition)))) && (((*result)._SUIT_Command_Sequence_union_choice = _SUIT_Command_Sequence_union__SUIT_Condition) || 1))
-	|| (zcbor_union_elem_code(state) && (((decode_SUIT_Directive(state, (&(*result)._SUIT_Command_Sequence_union__SUIT_Directive)))) && (((*result)._SUIT_Command_Sequence_union_choice = _SUIT_Command_Sequence_union__SUIT_Directive) || 1)))), zcbor_union_end_code(state), int_res))));
-
-	if (!tmp_result)
-		zcbor_trace();
-
-	return tmp_result;
-}
-
-static bool decode_repeated_header_map_key_id(
-		zcbor_state_t *state, struct header_map_key_id *result)
-{
-	zcbor_print("%s\r\n", __func__);
-
-	bool tmp_result = ((((zcbor_uint32_expect(state, (4))))
-	&& (zcbor_bstr_decode(state, (&(*result)._header_map_key_id)))));
-
-	if (!tmp_result)
-		zcbor_trace();
-
-	return tmp_result;
-}
-
-static bool decode_header_map(
-		zcbor_state_t *state, struct header_map *result)
-{
-	zcbor_print("%s\r\n", __func__);
-
-	bool tmp_result = (((zcbor_map_start_decode(state) && (((((zcbor_uint32_expect(state, (1))))
-	&& (zcbor_int32_expect(state, (-7))))
-	&& zcbor_present_decode(&((*result)._header_map_key_id_present), (zcbor_decoder_t *)decode_repeated_header_map_key_id, state, (&(*result)._header_map_key_id))) || (zcbor_list_map_end_force_decode(state), false)) && zcbor_map_end_decode(state))));
-
-	if (!tmp_result)
-		zcbor_trace();
-
-	return tmp_result;
-}
-
-static bool decode_Headers(
-		zcbor_state_t *state, struct Headers *result)
-{
-	zcbor_print("%s\r\n", __func__);
-	bool int_res;
-
-	bool tmp_result = (((((zcbor_bstr_start_decode(state, &(*result)._Headers_protected)
-	&& (int_res = (((decode_header_map(state, (&(*result)._Headers_protected_cbor))))), zcbor_bstr_end_decode(state), int_res)))
-	&& ((zcbor_map_start_decode(state) && zcbor_map_end_decode(state))))));
-
-	if (!tmp_result)
-		zcbor_trace();
-
-	return tmp_result;
-}
-
-static bool decode_COSE_Sign1(
-		zcbor_state_t *state, struct COSE_Sign1 *result)
-{
-	zcbor_print("%s\r\n", __func__);
-
-	bool tmp_result = (((zcbor_list_start_decode(state) && ((((decode_Headers(state, (&(*result)._COSE_Sign1__Headers))))
-	&& ((zcbor_nil_expect(state, NULL)))
-	&& ((zcbor_bstr_decode(state, (&(*result)._COSE_Sign1_signature))))) || (zcbor_list_map_end_force_decode(state), false)) && zcbor_list_end_decode(state))));
-
-	if (!tmp_result)
-		zcbor_trace();
-
-	return tmp_result;
-}
-
-static bool decode_COSE_Sign1_Tagged(
-		zcbor_state_t *state, struct COSE_Sign1 *result)
-{
-	zcbor_print("%s\r\n", __func__);
-
-	bool tmp_result = ((zcbor_tag_expect(state, 18)
-	&& (decode_COSE_Sign1(state, (&(*result))))));
-
-	if (!tmp_result)
-		zcbor_trace();
-
-	return tmp_result;
-}
-
-static bool decode_repeated_SUIT_Authentication_Block_bstr(
-		zcbor_state_t *state, struct SUIT_Authentication_Block_bstr *result)
-{
-	zcbor_print("%s\r\n", __func__);
-	bool int_res;
-
-	bool tmp_result = (((zcbor_bstr_start_decode(state, &(*result)._SUIT_Authentication_Block_bstr)
-	&& (int_res = (((decode_COSE_Sign1_Tagged(state, (&(*result)._SUIT_Authentication_Block_bstr_cbor))))), zcbor_bstr_end_decode(state), int_res))));
-
-	if (!tmp_result)
-		zcbor_trace();
-
-	return tmp_result;
-}
-
 static bool decode_SUIT_Authentication(
 		zcbor_state_t *state, struct SUIT_Authentication *result)
 {
@@ -501,7 +376,7 @@ static bool decode_SUIT_Authentication(
 
 	bool tmp_result = (((zcbor_list_start_decode(state) && ((((zcbor_bstr_start_decode(state, &(*result)._SUIT_Authentication_SUIT_Digest_bstr)
 	&& (int_res = (((decode_SUIT_Digest(state, (&(*result)._SUIT_Authentication_SUIT_Digest_bstr_cbor))))), zcbor_bstr_end_decode(state), int_res)))
-	&& zcbor_multi_decode(1, 2, &(*result)._SUIT_Authentication_Block_bstr_count, (zcbor_decoder_t *)decode_repeated_SUIT_Authentication_Block_bstr, state, (&(*result)._SUIT_Authentication_Block_bstr), sizeof(struct SUIT_Authentication_Block_bstr))) || (zcbor_list_map_end_force_decode(state), false)) && zcbor_list_end_decode(state))));
+	&& zcbor_multi_decode(1, 2, &(*result)._SUIT_Authentication_bstr_count, (zcbor_decoder_t *)zcbor_bstr_decode, state, (&(*result)._SUIT_Authentication_bstr), sizeof(struct zcbor_string))) || (zcbor_list_map_end_force_decode(state), false)) && zcbor_list_end_decode(state))));
 
 	if (!tmp_result)
 		zcbor_trace();
@@ -707,6 +582,36 @@ static bool decode_SUIT_Envelope(
 	&& (zcbor_bstr_decode(state, (&(*result)._SUIT_Envelope_suit_manifest))))
 	&& ((decode_SUIT_Severable_Manifest_Members_suit_text(state, (&(*result)._SUIT_Envelope__SUIT_Severable_Manifest_Members))))
 	&& zcbor_multi_decode(1, 5, &(*result)._SUIT_Envelope__SUIT_Integrated_Payload_count, (zcbor_decoder_t *)decode_repeated_SUIT_Envelope__SUIT_Integrated_Payload, state, (&(*result)._SUIT_Envelope__SUIT_Integrated_Payload), sizeof(struct SUIT_Envelope__SUIT_Integrated_Payload))) || (zcbor_list_map_end_force_decode(state), false)) && zcbor_map_end_decode(state))));
+
+	if (!tmp_result)
+		zcbor_trace();
+
+	return tmp_result;
+}
+
+static bool decode_repeated_SUIT_Common_Sequence_union(
+		zcbor_state_t *state, struct SUIT_Common_Sequence_union_ *result)
+{
+	zcbor_print("%s\r\n", __func__);
+	bool int_res;
+
+	bool tmp_result = (((zcbor_union_start_code(state) && (int_res = ((((decode_SUIT_Condition(state, (&(*result)._SUIT_Common_Sequence_union__SUIT_Condition)))) && (((*result)._SUIT_Common_Sequence_union_choice = _SUIT_Common_Sequence_union__SUIT_Condition) || 1))
+	|| (zcbor_union_elem_code(state) && (((decode_SUIT_Common_Commands(state, (&(*result)._SUIT_Common_Sequence_union__SUIT_Common_Commands)))) && (((*result)._SUIT_Common_Sequence_union_choice = _SUIT_Common_Sequence_union__SUIT_Common_Commands) || 1)))), zcbor_union_end_code(state), int_res))));
+
+	if (!tmp_result)
+		zcbor_trace();
+
+	return tmp_result;
+}
+
+static bool decode_repeated_SUIT_Command_Sequence_union(
+		zcbor_state_t *state, struct SUIT_Command_Sequence_union_ *result)
+{
+	zcbor_print("%s\r\n", __func__);
+	bool int_res;
+
+	bool tmp_result = (((zcbor_union_start_code(state) && (int_res = ((((decode_SUIT_Condition(state, (&(*result)._SUIT_Command_Sequence_union__SUIT_Condition)))) && (((*result)._SUIT_Command_Sequence_union_choice = _SUIT_Command_Sequence_union__SUIT_Condition) || 1))
+	|| (zcbor_union_elem_code(state) && (((decode_SUIT_Directive(state, (&(*result)._SUIT_Command_Sequence_union__SUIT_Directive)))) && (((*result)._SUIT_Command_Sequence_union_choice = _SUIT_Command_Sequence_union__SUIT_Directive) || 1)))), zcbor_union_end_code(state), int_res))));
 
 	if (!tmp_result)
 		zcbor_trace();

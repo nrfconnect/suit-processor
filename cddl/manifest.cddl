@@ -6,6 +6,7 @@
 ; Limited the number of possible integrated payloads to 5
 ; Limited the number of possible authentication blocks to 2
 ; Removed unused COSE types
+; Removed COSE authentication block from manifest CDDL - defined and parsed by Cose CDDL
 ; Remove the possibility of severing payload-fetch and install.
 ; Force making suit-text severable.
 ; Limited the number of possible component identifiers to 4
@@ -31,7 +32,7 @@ SUIT_Envelope = {
 
 SUIT_Authentication = [
   bstr .cbor SUIT_Digest,
-  1*2 bstr .cbor SUIT_Authentication_Block
+  1*2 bstr ; .cbor SUIT_Authentication_Block
 ]
 
 SUIT_Digest = [
@@ -44,7 +45,7 @@ SUIT_Digest = [
 ; SUIT_Authentication_Block /= COSE_Mac_Tagged
 ; SUIT_Authentication_Block /= COSE_Sign_Tagged
 ; SUIT_Authentication_Block /= COSE_Mac0_Tagged
-SUIT_Authentication_Block /= COSE_Sign1_Tagged
+; SUIT_Authentication_Block /= COSE_Sign1_Tagged
 
 SUIT_Severable_Manifest_Members = (
 ;  ? suit-payload-fetch => bstr .cbor SUIT_Command_Sequence,
