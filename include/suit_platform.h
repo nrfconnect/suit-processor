@@ -21,10 +21,10 @@ int suit_plat_check_digest(enum suit_cose_alg alg_id,
  *  @param[in]  alg_id  The signature verification algorithm to use.
  *  @param[in]  key_id  The key to check the signature with.
  *  @param[in]  signature  The signature to check.
- *  @param[in]  digest  The digest that is signed by the @p signature.
+ *  @param[in]  data  The data that is signed by the @p signature.
  */
 int suit_plat_authenticate(enum suit_cose_alg alg_id, struct zcbor_string *key_id,
-		struct zcbor_string *signature, struct zcbor_string *digest);
+		struct zcbor_string *signature, struct zcbor_string *data);
 
 /** Check that the given component ID exists, is valid, and is authorized.
  *

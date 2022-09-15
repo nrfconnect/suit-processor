@@ -10,6 +10,25 @@
 #include <suit_platform.h>
 #include <suit_command_seq.h>
 #include <suit_platform.h>
+#include <cose_encode.h>
+#include <cose_decode.h>
+
+/** Calculate the length of the CBOR byte string header
+ */
+static size_t header_len(size_t num_elems)
+{
+	if (num_elems <= 23) {
+		return 1;
+	} else if (num_elems <= 255) {
+		return 2;
+	} else if (num_elems <= 0xFFFF) {
+		return 3;
+	} else if (num_elems <= 0xFFFFFFFF) {
+		return 5;
+	} else {
+		return 9;
+	}
+}
 
 
 /** Decode the string into a manifest envelope and validate the data structure.
@@ -47,6 +66,84 @@ int suit_decode_envelope(uint8_t *envelope_str, size_t envelope_len,
 }
 
 
+static int cose_verify_digest(struct zcbor_string * digest_btsr, struct zcbor_string * data_bstr)
+{
+	/* Include CBOR header (type, length) in digest calculation */
+	size_t offset = header_len(data_bstr->len);
+	struct zcbor_string data_bytes = {
+		.value = data_bstr->value - offset,
+		.len = data_bstr->len + offset,
+	};
+
+	return suit_plat_check_digest(
+		/* Value enforced by the input CDDL (manifest.cddl, suit-cose-hash-algs /= cose-alg-sha-256) */
+		suit_cose_sha256,
+		digest_btsr,
+		&data_bytes);
+}
+
+
+static int cose_authenticate_digest(struct suit_processor_state *state, struct zcbor_string * COSE_Sign1_bstr, struct zcbor_string * digest_bstr)
+{
+	uint8_t signed_data[SUIT_SUIT_SIG_STRUCTURE1_MAX_LENGTH];
+	size_t signed_data_size = 0;
+
+	/* Decode COSE_Sign1 structure */
+	struct COSE_Sign1 cose_sign1_struct;
+	size_t cose_sign1_struct_size = 0;
+
+	int ret = cbor_decode_COSE_Sign1_Tagged(
+		COSE_Sign1_bstr->value,
+		COSE_Sign1_bstr->len,
+		&cose_sign1_struct,
+		&cose_sign1_struct_size);
+	if ((ret != ZCBOR_SUCCESS) || (cose_sign1_struct_size != COSE_Sign1_bstr->len)) {
+		return SUIT_ERR_DECODING;
+	}
+
+	/* Construct Sig_structure1 structure */
+	struct Sig_structure1 signature;
+	signature._Sig_structure1_body_protected = cose_sign1_struct._COSE_Sign1__Headers._Headers_protected;
+	signature._Sig_structure1_payload = *digest_bstr;
+
+	/* Encode Sig_structure1 structure as byte string */
+	memset(signed_data, 0, sizeof(signed_data));
+	ret = cbor_encode_Sig_structure1(
+		signed_data, sizeof(signed_data),
+		&signature,
+		&signed_data_size);
+	if (ret != ZCBOR_SUCCESS) {
+		return SUIT_ERR_DECODING;
+	}
+
+	struct zcbor_string signed_bstr = {
+		.value = signed_data,
+		.len = signed_data_size,
+	};
+
+	/* Authenticate data using platform API */
+	ret = suit_plat_authenticate(
+		/* Value enforced by the input CDDL (cose_sign.cddl, supported_algs //= (ES256: -7)) */
+		suit_cose_es256,
+		(cose_sign1_struct._COSE_Sign1__Headers._Headers_protected_cbor._header_map_key_id_present ?
+			&cose_sign1_struct._COSE_Sign1__Headers._Headers_protected_cbor._header_map_key_id._header_map_key_id:
+			(struct zcbor_string *)NULL),
+		/* Pass signature, specific for the key */
+		&cose_sign1_struct._COSE_Sign1_signature,
+		/* Authenticate Signature1 structure, including both algorithm ID and digest bytes of the manifest */
+		&signed_bstr);
+
+	/* Store the key IDs that authenticated the digest */
+	if (ret == SUIT_SUCCESS) {
+		if (cose_sign1_struct._COSE_Sign1__Headers._Headers_protected_cbor._header_map_key_id_present) {
+			state->key_ids[state->num_key_ids++] = &cose_sign1_struct._COSE_Sign1__Headers._Headers_protected_cbor._header_map_key_id._header_map_key_id;
+		}
+	}
+
+	return ret;
+}
+
+
 int suit_validate_envelope(struct suit_processor_state *state)
 {
 	if (state->envelope_decoded != suit_bool_true
@@ -66,18 +163,14 @@ int suit_validate_envelope(struct suit_processor_state *state)
 		return SUIT_ERR_MANIFEST_VERIFICATION;
 	}
 
-	for (int i = 0; i < auth->_SUIT_Authentication_Block_bstr_count; i++) {
-		struct COSE_Sign1 *block = &auth->_SUIT_Authentication_Block_bstr[i]._SUIT_Authentication_Block_bstr_cbor;
-
-		int ret = suit_plat_authenticate(
-			suit_cose_es256,
-			(block->_COSE_Sign1__Headers._Headers_protected_cbor._header_map_key_id_present ?
-				&block->_COSE_Sign1__Headers._Headers_protected_cbor._header_map_key_id._header_map_key_id:
-				(struct zcbor_string *)NULL
-			),
-			&block->_COSE_Sign1_signature,
+	/* Iterate through (key, signature) pairs */
+	for (int i = 0; i < auth->_SUIT_Authentication_bstr_count; i++) {
+		int ret = cose_authenticate_digest(
+			state,
+			&auth->_SUIT_Authentication_bstr[i],
 			&auth->_SUIT_Authentication_SUIT_Digest_bstr);
 
+		/* If authentication for any key fails, drop the envelope */
 		if (ret != SUIT_SUCCESS) {
 			results[i * 2] = suit_bool_false;
 			// SUS: Information leak, about the authentication block # that failed.
@@ -89,7 +182,7 @@ int suit_validate_envelope(struct suit_processor_state *state)
 		}
 	}
 
-	for (int i = 0; i < auth->_SUIT_Authentication_Block_bstr_count; i++) {
+	for (int i = 0; i < auth->_SUIT_Authentication_bstr_count; i++) {
 		if (results[i * 2] != suit_bool_true) {
 			goto tamp;
 		}
@@ -106,8 +199,9 @@ int suit_validate_envelope(struct suit_processor_state *state)
 		goto tamp;
 	}
 
-	if (num_ok && (num_ok == auth->_SUIT_Authentication_Block_bstr_count)) {
-		int ret = suit_plat_check_digest(suit_cose_sha256,
+	if (num_ok && (num_ok == auth->_SUIT_Authentication_bstr_count)) {
+		/* Check the manifest digest against authenticated value */
+		int ret = cose_verify_digest(
 			&auth->_SUIT_Authentication_SUIT_Digest_bstr_cbor._SUIT_Digest_suit_digest_bytes,
 			&state->envelope._SUIT_Envelope_suit_manifest);
 
@@ -182,22 +276,6 @@ int suit_decode_manifest(struct suit_processor_state *state)
 	} \
  \
 	goto tamp;
-
-
-static size_t header_len(size_t num_elems)
-{
-	if (num_elems <= 23) {
-		return 1;
-	} else if (num_elems <= 255) {
-		return 2;
-	} else if (num_elems <= 0xFFFF) {
-		return 3;
-	} else if (num_elems <= 0xFFFFFFFF) {
-		return 5;
-	} else {
-		return 9;
-	}
-}
 
 
 static void get_component_id_str(struct zcbor_string *out_component_id,
