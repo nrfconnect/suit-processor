@@ -277,67 +277,11 @@ struct SUIT_Common_Commands_ {
 	} _SUIT_Common_Commands_choice;
 };
 
-struct SUIT_Common_Sequence_union_ {
-	union {
-		struct SUIT_Condition_ _SUIT_Common_Sequence_union__SUIT_Condition;
-		struct SUIT_Common_Commands_ _SUIT_Common_Sequence_union__SUIT_Common_Commands;
-	};
-	enum {
-		_SUIT_Common_Sequence_union__SUIT_Condition,
-		_SUIT_Common_Sequence_union__SUIT_Common_Commands,
-	} _SUIT_Common_Sequence_union_choice;
-};
-
-struct SUIT_Common_Sequence {
-	struct SUIT_Common_Sequence_union_ _SUIT_Common_Sequence_union[3];
-	uint_fast32_t _SUIT_Common_Sequence_union_count;
-};
-
-struct SUIT_Command_Sequence_union_ {
-	union {
-		struct SUIT_Condition_ _SUIT_Command_Sequence_union__SUIT_Condition;
-		struct SUIT_Directive_ _SUIT_Command_Sequence_union__SUIT_Directive;
-	};
-	enum {
-		_SUIT_Command_Sequence_union__SUIT_Condition,
-		_SUIT_Command_Sequence_union__SUIT_Directive,
-	} _SUIT_Command_Sequence_union_choice;
-};
-
-struct SUIT_Command_Sequence {
-	struct SUIT_Command_Sequence_union_ _SUIT_Command_Sequence_union[3];
-	uint_fast32_t _SUIT_Command_Sequence_union_count;
-};
-
-struct header_map_key_id {
-	struct zcbor_string _header_map_key_id;
-};
-
-struct header_map {
-	struct header_map_key_id _header_map_key_id;
-	uint_fast32_t _header_map_key_id_present;
-};
-
-struct Headers {
-	struct zcbor_string _Headers_protected;
-	struct header_map _Headers_protected_cbor;
-};
-
-struct COSE_Sign1 {
-	struct Headers _COSE_Sign1__Headers;
-	struct zcbor_string _COSE_Sign1_signature;
-};
-
-struct SUIT_Authentication_Block_bstr {
-	struct zcbor_string _SUIT_Authentication_Block_bstr;
-	struct COSE_Sign1 _SUIT_Authentication_Block_bstr_cbor;
-};
-
 struct SUIT_Authentication {
 	struct zcbor_string _SUIT_Authentication_SUIT_Digest_bstr;
 	struct SUIT_Digest _SUIT_Authentication_SUIT_Digest_bstr_cbor;
-	struct SUIT_Authentication_Block_bstr _SUIT_Authentication_Block_bstr[2];
-	uint_fast32_t _SUIT_Authentication_Block_bstr_count;
+	struct zcbor_string _SUIT_Authentication_bstr[2];
+	uint_fast32_t _SUIT_Authentication_bstr_count;
 };
 
 struct SUIT_Text_Component_Keys_suit_text_vendor_name {
@@ -415,6 +359,38 @@ struct SUIT_Envelope {
 	struct SUIT_Severable_Manifest_Members_suit_text_ _SUIT_Envelope__SUIT_Severable_Manifest_Members;
 	struct SUIT_Envelope__SUIT_Integrated_Payload _SUIT_Envelope__SUIT_Integrated_Payload[5];
 	uint_fast32_t _SUIT_Envelope__SUIT_Integrated_Payload_count;
+};
+
+struct SUIT_Common_Sequence_union_ {
+	union {
+		struct SUIT_Condition_ _SUIT_Common_Sequence_union__SUIT_Condition;
+		struct SUIT_Common_Commands_ _SUIT_Common_Sequence_union__SUIT_Common_Commands;
+	};
+	enum {
+		_SUIT_Common_Sequence_union__SUIT_Condition,
+		_SUIT_Common_Sequence_union__SUIT_Common_Commands,
+	} _SUIT_Common_Sequence_union_choice;
+};
+
+struct SUIT_Common_Sequence {
+	struct SUIT_Common_Sequence_union_ _SUIT_Common_Sequence_union[3];
+	uint_fast32_t _SUIT_Common_Sequence_union_count;
+};
+
+struct SUIT_Command_Sequence_union_ {
+	union {
+		struct SUIT_Condition_ _SUIT_Command_Sequence_union__SUIT_Condition;
+		struct SUIT_Directive_ _SUIT_Command_Sequence_union__SUIT_Directive;
+	};
+	enum {
+		_SUIT_Command_Sequence_union__SUIT_Condition,
+		_SUIT_Command_Sequence_union__SUIT_Directive,
+	} _SUIT_Command_Sequence_union_choice;
+};
+
+struct SUIT_Command_Sequence {
+	struct SUIT_Command_Sequence_union_ _SUIT_Command_Sequence_union[3];
+	uint_fast32_t _SUIT_Command_Sequence_union_count;
 };
 
 
