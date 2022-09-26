@@ -50,7 +50,7 @@ int suit_directive_set_current_components(struct suit_processor_state *state, st
 static int try_each(struct suit_processor_state *state, struct SUIT_Directive_Try_Each_Argument *try_each_arg)
 {
 	enum suit_bool soft_failure = state->soft_failure;
-	int ret;
+	int ret = SUIT_SUCCESS;
 
 	for (int i = 0; i < try_each_arg->_SUIT_Directive_Try_Each_Argument_SUIT_Command_Sequence_bstr_count; i++) {
 		state->soft_failure = suit_bool_true;
@@ -72,7 +72,7 @@ static int try_each(struct suit_processor_state *state, struct SUIT_Directive_Tr
 
 int suit_directive_try_each(struct suit_processor_state *state, struct SUIT_Directive_Try_Each_Argument *try_each_arg)
 {
-	int ret;
+	int ret = SUIT_SUCCESS;
 	bool current_components_backup[SUIT_MAX_NUM_COMPONENTS];
 	memcpy(&current_components_backup, &state->current_components,
 		SUIT_MAX_NUM_COMPONENTS * sizeof(bool));

@@ -36,6 +36,9 @@ static size_t header_len(size_t num_elems)
 int suit_decode_envelope(uint8_t *envelope_str, size_t envelope_len,
 	struct suit_processor_state *state)
 {
+	size_t decoded_len = 0;
+	int ret;
+
 	state->envelope_decoded = suit_bool_false;
 	state->envelope_validated = suit_bool_false;
 
@@ -44,8 +47,7 @@ int suit_decode_envelope(uint8_t *envelope_str, size_t envelope_len,
 		goto tamp;
 	}
 
-	size_t decoded_len;
-	int ret = cbor_decode_SUIT_Envelope_Tagged(
+	ret = cbor_decode_SUIT_Envelope_Tagged(
 		envelope_str, envelope_len, &state->envelope, &decoded_len);
 
 	if ((ret != ZCBOR_SUCCESS) || (decoded_len != envelope_len)) {
@@ -246,6 +248,9 @@ tamp:
 
 int suit_decode_manifest(struct suit_processor_state *state)
 {
+	size_t decoded_len = 0;
+	int ret;
+
 	if (state->envelope_decoded != suit_bool_true
 		|| state->envelope_validated != suit_bool_true) {
 		return SUIT_ERR_ORDER;
@@ -259,8 +264,7 @@ int suit_decode_manifest(struct suit_processor_state *state)
 		goto tamp;
 	}
 
-	size_t decoded_len;
-	int ret = cbor_decode_SUIT_Manifest(
+	ret = cbor_decode_SUIT_Manifest(
 		state->envelope._SUIT_Envelope_suit_manifest.value,
 		state->envelope._SUIT_Envelope_suit_manifest.len,
 		&state->manifest, &decoded_len);
@@ -346,6 +350,9 @@ static struct zcbor_string *get_command_seq(struct suit_processor_state *state,
 
 int suit_validate_manifest(struct suit_processor_state *state)
 {
+	struct SUIT_Common *common = NULL;
+	unsigned int num_dry_run_steps = 0;
+
 	if (state->envelope_decoded != suit_bool_true
 		|| state->envelope_validated != suit_bool_true
 		|| state->manifest_decoded != suit_bool_true) {
@@ -385,7 +392,7 @@ int suit_validate_manifest(struct suit_processor_state *state)
 	}
 
 	/* Verify common sequence */
-	struct SUIT_Common *common = &state->manifest._SUIT_Manifest_suit_common_cbor;
+	common = &state->manifest._SUIT_Manifest_suit_common_cbor;
 
 	/* Verify list of components */
 	if (common->_SUIT_Common_suit_components_present){
@@ -434,7 +441,6 @@ int suit_validate_manifest(struct suit_processor_state *state)
 
 	/* Execute dry run over all manifest members */
 	state->dry_run = suit_bool_true;
-	unsigned int num_dry_run_steps = 0;
 
 	for (enum suit_manifest_step step = SUIT_NO_STEP + 1; step < SUIT_LAST_STEP; step++) {
 		struct zcbor_string *step_seq = get_command_seq(state, step);
