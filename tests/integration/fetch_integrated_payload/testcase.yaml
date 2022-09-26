@@ -1,0 +1,4 @@
+tests:
+  suit-processor.integration.fetch_integrated_payload:
+    platform_allow: nrf52840dk_nrf52840
+    tags: suit-processor integrated-payload fetch
