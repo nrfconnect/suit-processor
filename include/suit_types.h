@@ -13,8 +13,8 @@
 #include "manifest_types.h"
 
 
-#define SUIT_MAX_NUM_SIGNERS 3  ///! The maximum number of signers.
-#define SUIT_MAX_NUM_COMPONENTS 16  ///! The maximum number of components referenced in the manifest.
+#define SUIT_MAX_NUM_SIGNERS 2  ///! The maximum number of signers.
+#define SUIT_MAX_NUM_COMPONENTS 4  ///! The maximum number of components referenced in the manifest.
 #define SUIT_MAX_COMMAND_ARGS 3 ///! The maximum number of arguments consumed by a single command.
 #define SUIT_SUIT_SIG_STRUCTURE1_MAX_LENGTH 55 ///! The maximum length of the Sig_structure1 structure. Current value allows to store only 256-bit long digests.
 
