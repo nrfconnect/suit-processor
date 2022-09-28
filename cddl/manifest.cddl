@@ -10,7 +10,7 @@
 ; Remove the possibility of severing payload-fetch and install.
 ; Force making suit-text severable.
 ; Limited the number of possible component identifiers to 4
-; Limited the length of component identifiers to 3 strings
+; Limited the length of component identifiers to 5 strings
 ; Remove all hash algs except sha256
 ; Remove most of text comprehension since the firmware isn't supposed to understand the text.
 ; Remove suit-directive-run-sequence since strict-order is not supported.
@@ -106,7 +106,7 @@ suit-cose-hash-algs /= cose-alg-sha-256
 ; suit-cose-hash-algs /= cose-alg-sha-512
 ; suit-cose-hash-algs /= cose-alg-shake256
 
-SUIT_Component_Identifier =  [ 1*3 bstr]
+SUIT_Component_Identifier =  [ 1*5 bstr]
 
 SUIT_Common_Sequence = [
   + ( SUIT_Condition // SUIT_Common_Commands )
