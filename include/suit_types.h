@@ -137,35 +137,6 @@ struct suit_processor_state {
 	enum suit_bool soft_failure; ///! suit-parameter-soft-failure
 };
 
-static inline void suit_reset_state(struct suit_processor_state *state)
-{
-	memset(state, 0, sizeof(*state));
-	state->envelope_decoded = suit_bool_false;
-	state->envelope_validated = suit_bool_false;
-	state->manifest_authenticated = suit_bool_false;
-	state->manifest_decoded = suit_bool_false;
-	state->manifest_validated = suit_bool_false;
-	state->dry_run = suit_bool_true;
-	state->soft_failure = suit_bool_false;
-}
-
-enum suit_component_mode {
-	suit_comp_writable = 1,
-	suit_comp_readable = 2,
-	suit_comp_runnable = 4,
-};
-
-struct suit_component_properties {
-	suit_component_t component_handle;
-
-	enum suit_component_mode mode; ///! The RWX mode of the current slot of the component.
-	unsigned int read_size; ///! The size of the current contents in the current slot.
-	unsigned int write_size; ///! The capacity of the current slot.
-	unsigned int address; ///! The address of the start of the current slot of the component.
-	unsigned int slot; ///! The current slot number.
-	unsigned int driver; ///! The ID of the driver to use to interface with the component.
-};
-
 /** https://www.iana.org/assignments/cose/cose.xhtml */
 enum suit_cose_alg {
 	suit_cose_sha256 = -16,

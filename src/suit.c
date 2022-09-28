@@ -31,6 +31,21 @@ static size_t header_len(size_t num_elems)
 }
 
 
+/** Reset the iternal state of the SUIT manifest processor.
+ */
+void suit_reset_state(struct suit_processor_state *state)
+{
+	memset(state, 0, sizeof(*state));
+	state->envelope_decoded = suit_bool_false;
+	state->envelope_validated = suit_bool_false;
+	state->manifest_authenticated = suit_bool_false;
+	state->manifest_decoded = suit_bool_false;
+	state->manifest_validated = suit_bool_false;
+	state->dry_run = suit_bool_true;
+	state->soft_failure = suit_bool_false;
+	suit_plat_reset_components();
+}
+
 /** Decode the string into a manifest envelope and validate the data structure.
  */
 int suit_decode_envelope(uint8_t *envelope_str, size_t envelope_len,
