@@ -10,6 +10,10 @@
 #include "suit_types.h"
 #include <stdint.h>
 
+/** Reset the iternal state of the SUIT manifest processor.
+ */
+void suit_reset_state(struct suit_processor_state *state);
+
 /** Decode the string into a manifest envelope and validate the data structure.
  */
 int suit_decode_envelope(uint8_t *manifest_str, size_t manifest_len,
