@@ -301,11 +301,19 @@ tamp:
 
 
 static void get_component_id_str(struct zcbor_string *out_component_id,
-	const struct zcbor_string *first_bstr, uint_fast32_t num_bstrs)
+	const struct SUIT_Component_Identifier * component_id)
 {
-	size_t extra_header_len = header_len(first_bstr->len) + header_len(num_bstrs);
-	out_component_id->value = first_bstr->value - extra_header_len;
-	out_component_id->len = first_bstr->len + extra_header_len;
+	const struct zcbor_string * first_bstr = &component_id->_SUIT_Component_Identifier_bstr[0];
+	size_t extra_header_len = header_len(component_id->_SUIT_Component_Identifier_bstr_count);
+	size_t payload_len = 0;
+
+	for (size_t i = 0; i < component_id->_SUIT_Component_Identifier_bstr_count; i++) {
+		payload_len += header_len(component_id->_SUIT_Component_Identifier_bstr[i].len);
+		payload_len += component_id->_SUIT_Component_Identifier_bstr[i].len;
+	}
+
+	out_component_id->value = first_bstr->value - extra_header_len - header_len(first_bstr->len);
+	out_component_id->len = extra_header_len + payload_len;
 }
 
 
@@ -406,8 +414,7 @@ int suit_validate_manifest(struct suit_processor_state *state)
 		for (int i = 0; i < common->_SUIT_Common_suit_components._SUIT_Common_suit_components._SUIT_Components__SUIT_Component_Identifier_count; i++) {
 			/* Zip list of strings into a single ZCBOR string */
 			get_component_id_str(&component_id,
-				&common->_SUIT_Common_suit_components._SUIT_Common_suit_components._SUIT_Components__SUIT_Component_Identifier[i]._SUIT_Component_Identifier_bstr[0],
-				common->_SUIT_Common_suit_components._SUIT_Common_suit_components._SUIT_Components__SUIT_Component_Identifier[i]._SUIT_Component_Identifier_bstr_count);
+				&common->_SUIT_Common_suit_components._SUIT_Common_suit_components._SUIT_Components__SUIT_Component_Identifier[i]);
 			int ret = suit_plat_get_component_handle(&component_id, state->key_ids, state->num_key_ids, &state->components[i].component_handle);
 
 			/* Increase the number of valid component indexes / handles */
