@@ -86,19 +86,7 @@ int suit_condition_component_slot(struct suit_processor_state *state,
 		return SUIT_SUCCESS;
 	}
 
-	struct suit_component_properties props;
-	int err = suit_plat_get_component_properties(
-		component_params->component_handle, &props);
-
-	if (err != SUIT_SUCCESS) {
-		return err;
-	}
-
-	if (props.slot == component_params->component_slot) {
-		return SUIT_SUCCESS;
-	} else {
-		return SUIT_FAIL_CONDITION;
-	}
+	return suit_plat_check_slot(component_params->component_handle, component_params->component_slot);
 }
 
 

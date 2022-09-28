@@ -11,6 +11,9 @@
 #include <stdint.h>
 
 
+/** Reset all loaded component properties and handles assigned to them. */
+void suit_plat_reset_components(void);
+
 /** Check the provided payload against the provided digest */
 int suit_plat_check_digest(enum suit_cose_alg alg_id,
 		struct zcbor_string *digest,
@@ -43,14 +46,13 @@ int suit_plat_get_component_handle(struct zcbor_string *component_id,
 		struct zcbor_string *key_ids[SUIT_MAX_NUM_SIGNERS], size_t num_key_ids,
 		suit_component_t *component_handle);
 
-/** Return the properties of the given component. */
-int suit_plat_get_component_properties(suit_component_t component_handle,
-		struct suit_component_properties *properties);
-
 /** Check the provided payload against the provided digest */
 int suit_plat_check_image_match(enum suit_cose_alg alg_id,
 		struct zcbor_string *digest, size_t image_size,
 		suit_component_t image_handle);
+
+/** Check whether the given slot is active for the given component. */
+int suit_plat_check_slot(suit_component_t component_handle, unsigned int slot);
 
 /** Check whether the given vendor ID applies to the given component. */
 int suit_plat_check_vid(struct zcbor_string *vid_uuid,
