@@ -10,8 +10,9 @@ set(ZCBOR_DIR "${CMAKE_CURRENT_BINARY_DIR}")
 # Generate and add COSE parser code
 set(ZCBOR_COMMAND_COSE
   ${ZCBOR_COMMAND}
+    code
     -c "${CMAKE_CURRENT_LIST_DIR}/cddl/cose_sign.cddl"
-    code -d -e
+    -d -e
     -t COSE_Sign1_Tagged Sig_structure1
     --output-cmake cose.cmake
     --copy-sources
@@ -45,8 +46,9 @@ target_include_directories(cose PUBLIC
 # Generate and add SUIT envelope parser code
 set(ZCBOR_COMMAND_MANIFEST
   ${ZCBOR_COMMAND}
+    code
     -c "${CMAKE_CURRENT_LIST_DIR}/cddl/manifest.cddl"
-    code -d
+    -d
     -t SUIT_Envelope_Tagged SUIT_Manifest SUIT_Common_Sequence SUIT_Command_Sequence
        SUIT_Condition SUIT_Directive SUIT_Common_Commands
     --output-cmake manifest.cmake
