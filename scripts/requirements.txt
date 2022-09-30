@@ -1,1 +1,1 @@
-zcbor
+git+https://github.com/NordicSemiconductor/zcbor@main#egg=zcbor
