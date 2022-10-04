@@ -1,0 +1,5 @@
+name: suit-processor
+
+build:
+  cmake: ncs
+  kconfig: Kconfig
