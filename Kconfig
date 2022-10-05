@@ -1,23 +1,10 @@
 # Copyright (c) 2022 Nordic Semiconductor ASA
 # SPDX-License-Identifier: Apache-2.0
 
-config ZEPHYR_SUIT_PROCESSOR_MODULE
-	bool
-
 config SUIT_PROCESSOR
 	bool "SUIT Manifest Processor library"
 	help
 	  Library for processing SUIT envelope 
-
-if SUIT_PROCESSOR
-
-# This is just a test, use real configs here
-config SUIT_PROCESSOR_EXAMPLE
-	bool "Example config for suit-processor"
-	help
-	  Do whatever you like
-
-endif # SUIT_PROCESSOR
 
 config APP_LINK_WITH_SUIT_PROCESSOR_INTERFACE
 	bool
