@@ -1,0 +1,27 @@
+/*
+ * Copyright (c) 2022 Nordic Semiconductor ASA
+ *
+ * SPDX-License-Identifier: LicenseRef-Nordic-5-Clause
+ */
+
+/ {
+	rng_sim: rng_sim {
+		status = "okay";
+		compatible = "zephyr,native-posix-rng";
+		label = "ENTROPY_0";
+	};
+
+	chosen {
+		zephyr,entropy = &rng_sim;
+		zephyr,console = &uart137;
+	};
+};
+
+&ram3x_cpusec {
+        status = "okay";
+};
+
+&uart137 {
+        status = "okay";
+        memory-regions = <&ram3x_cpusec>;
+};

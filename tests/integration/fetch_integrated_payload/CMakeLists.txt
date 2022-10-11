@@ -10,6 +10,7 @@ find_package(Zephyr REQUIRED HINTS $ENV{ZEPHYR_BASE})
 
 project(integration_test_fetch_integrated_payload)
 include(../../cmake/test_template.cmake)
+add_subdirectory("${CMAKE_CURRENT_LIST_DIR}/../common" "${PROJECT_BINARY_DIR}/test_common")
 
 # Include basic platform implementation
 add_subdirectory("../platform/psa_crypto" "${PROJECT_BINARY_DIR}/suit_plat")
