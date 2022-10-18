@@ -18,6 +18,6 @@ fi
 echo "Generating SUIT envelope..."
 suit-tool create -i sample.json -o sample.suit
 suit-tool sign -m sample.suit -k key_private.pem -o sample_signed.suit
-./generate_ctab.py sample_signed.suit
+zcbor convert -c ../../../../cddl/manifest.cddl -i ./sample_signed.suit --input-as cbor -t SUIT_Envelope_Tagged -o sample_signed.suit.c --c-code-var-name manifest --c-code-columns 8
 
 echo "Done."
