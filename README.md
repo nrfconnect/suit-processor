@@ -28,3 +28,5 @@ Please make sure that the environment variable `$ZEPHYR_BASE` is set prior to ru
 
 To set up the environment to all tests, follow [nRF Connect SDK Getting Started Guide](https://developer.nordicsemi.com/nRF_Connect_SDK/doc/latest/nrf/getting_started.html), or see the workflow in the [`.github`](.github) directory.
 Alternatively, to run only integration tests, you may follow [Zephyr's Getting Started Guide](https://docs.zephyrproject.org/latest/getting_started/index.html).
+
+PR test
