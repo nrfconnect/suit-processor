@@ -65,7 +65,9 @@ int suit_decode_envelope(uint8_t *envelope_str, size_t envelope_len,
 	ret = cbor_decode_SUIT_Envelope_Tagged(
 		envelope_str, envelope_len, &state->envelope, &decoded_len);
 
-	if ((ret != ZCBOR_SUCCESS) || (decoded_len != envelope_len)) {
+	/* For development, condition on expected envelope size was modified. 
+	   Now envelope_len represents max allowed size of envelope */
+	if ((ret != ZCBOR_SUCCESS) || (decoded_len > envelope_len)) {
 		state->envelope_decoded = suit_bool_false;
 		return ZCBOR_ERR_TO_SUIT_ERR(ret);
 	}
