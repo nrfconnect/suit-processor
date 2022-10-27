@@ -251,9 +251,9 @@ void test_suit_validate_manifest(void)
 	 *   - Check RUN command from the run step
 	 */
 	__wrap_suit_plat_check_sequence_num_ExpectAndReturn(1, SUIT_SUCCESS);
-	__wrap_suit_plat_get_component_handle_ExpectComplexArgsAndReturn(&exp_component_id, state.key_ids, 0, NULL, SUIT_SUCCESS);
-	__wrap_suit_plat_get_component_handle_IgnoreArg_component_handle();
-	__wrap_suit_plat_get_component_handle_ReturnThruPtr_component_handle(&component_handle);
+	__wrap_suit_plat_create_component_handle_ExpectComplexArgsAndReturn(&exp_component_id, state.key_ids, 0, NULL, SUIT_SUCCESS);
+	__wrap_suit_plat_create_component_handle_IgnoreArg_component_handle();
+	__wrap_suit_plat_create_component_handle_ReturnThruPtr_component_handle(&component_handle);
 
 	__wrap_suit_plat_check_digest_ExpectComplexArgsAndReturn(suit_cose_sha256, &exp_text_digest, &exp_text_payload, SUIT_SUCCESS);
 	__wrap_suit_plat_check_fetch_integrated_ExpectComplexArgsAndReturn(ASSIGNED_COMPONENT_HANDLE, &exp_image_payload, SUIT_SUCCESS);

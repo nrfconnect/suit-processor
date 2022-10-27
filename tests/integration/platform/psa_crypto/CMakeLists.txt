@@ -13,7 +13,8 @@ target_include_directories(suit_plat_psa_crypto PRIVATE
 target_sources(suit_plat_psa_crypto PRIVATE
   src/suit_plat_state.c
   src/suit_plat_crypto_psa.c
-  src/suit_plat_properties.c
+  src/suit_plat_components.c
+  src/suit_plat_component_impl_selector.c
   src/suit_plat_commands.c
   src/suit_plat_rambuf.c
   )
