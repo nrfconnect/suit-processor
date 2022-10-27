@@ -69,7 +69,7 @@
  */
 typedef struct SUIT_Envelope suit_manifest_envelope_t;
 typedef struct SUIT_Manifest suit_manifest_t;
-typedef unsigned int suit_component_t; ///! Handle to more easily refer to a component.
+typedef intptr_t suit_component_t; ///! Handle to more easily refer to a component.
 
 enum suit_bool {
 	suit_bool_false = 0x2a17644c, ///! 10 1010 0001 0111 0110 0100 0100 1100

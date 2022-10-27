@@ -432,7 +432,7 @@ int suit_validate_manifest(struct suit_processor_state *state)
 			/* Zip list of strings into a single ZCBOR string */
 			get_component_id_str(&component_id,
 				&common->_SUIT_Common_suit_components._SUIT_Common_suit_components._SUIT_Components__SUIT_Component_Identifier[i]);
-			int ret = suit_plat_get_component_handle(&component_id, state->key_ids, state->num_key_ids, &state->components[i].component_handle);
+			int ret = suit_plat_create_component_handle(&component_id, state->key_ids, state->num_key_ids, &state->components[i].component_handle);
 
 			/* Increase the number of valid component indexes / handles */
 			state->num_components++;
