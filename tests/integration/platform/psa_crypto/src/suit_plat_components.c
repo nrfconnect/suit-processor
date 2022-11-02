@@ -20,7 +20,7 @@ static inline suit_component_t handle_from_component(const struct suit_plat_comp
 
 /** Resolve component handle into component structure.
  *
- * @details The component handle is considered as valid if it's value
+ * @details The component handle is considered as valid if its value
  *	    points to the component array element and the element has
  *	    an implementation assigned.
  */

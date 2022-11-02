@@ -14,7 +14,6 @@ struct suit_component_impl * suit_component_select_impl(struct zcbor_string *com
 
 	res = zcbor_list_start_decode(state);
 	res = res && zcbor_bstr_decode(state, &component_type);
-	(void)zcbor_list_end_decode(state);
 	if ((!res) || (component_type.len != 1)) {
 		return NULL;
 	}

@@ -29,14 +29,8 @@ typedef int (*suit_component_run_t)(suit_component_t handle, struct zcbor_string
 /** Get the address for direct read operations and return the number of bytes available. */
 typedef size_t (*suit_component_read_address_t)(suit_component_t handle, uint8_t **read_address);
 
-/** Check if the vendor ID matches with the component. */
-typedef int (*suit_component_check_vid_t)(suit_component_t handle, struct zcbor_string *vid_uuid);
-
-/** Check if the class ID matches with the component. */
-typedef int (*suit_component_check_cid_t)(suit_component_t handle, struct zcbor_string *cid_uuid);
-
-/** Check if the device ID matches with the component. */
-typedef int (*suit_component_check_did_t)(suit_component_t handle, struct zcbor_string *did_uuid);
+/** Check if a vendor/class/device ID matches with the component. */
+typedef int (*suit_component_check_uuid_t)(suit_component_t handle, struct zcbor_string *did_uuid);
 
 /** Check if the slot number matches with the active slot. */
 typedef int (*suit_component_check_slot_t)(suit_component_t handle, unsigned int slot);
@@ -58,9 +52,9 @@ struct suit_component_impl {
 	suit_component_run_t run;
 	suit_component_read_address_t read_address;
 
-	suit_component_check_vid_t check_vid;
-	suit_component_check_cid_t check_cid;
-	suit_component_check_did_t check_did;
+	suit_component_check_uuid_t check_vid;
+	suit_component_check_uuid_t check_cid;
+	suit_component_check_uuid_t check_did;
 	suit_component_check_slot_t check_slot;
 	suit_component_fetch_integrated_t fetch_integrated;
 };
