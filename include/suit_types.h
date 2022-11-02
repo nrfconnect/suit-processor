@@ -158,7 +158,7 @@ struct suit_report {
 };
 
 
-static inline bool suit_compare_zcbor_strings(struct zcbor_string *str1, struct zcbor_string *str2)
+static inline bool suit_compare_zcbor_strings(const struct zcbor_string *str1, const struct zcbor_string *str2)
 {
 	return (str1 != NULL) && (str2 != NULL) && (str1->len == str2->len) && (memcmp(str1->value, str2->value, str1->len) == 0);
 }
