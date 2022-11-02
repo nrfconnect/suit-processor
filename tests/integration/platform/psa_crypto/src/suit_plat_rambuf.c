@@ -6,11 +6,13 @@ static uint8_t membuf[256];  ///! The memory buffer, holding the component conte
 static size_t read_size;  ///! The size of the current contents in the current slot.
 static size_t dry_read_size;  ///! The size of the current contents in the current slot while dry running commands.
 
+/** The value of UUID5("nordicsemi.no"). */
 static const uint8_t vid_uuid_raw[] = {
 	0x2B, 0xDC, 0x1C, 0x07, 0xE0, 0xD1, 0x54, 0x84,
 	0xBE, 0x50, 0x63, 0x17, 0x4D, 0x5A, 0x74, 0xC3,
 };
 
+/** The value of UUID5("nRF5420_cpuapp"). */
 static const uint8_t cid_uuid_raw[] = {
 	0x85, 0x20, 0xEA, 0x9C, 0x51, 0x5E, 0x57, 0x79,
 	0x8B, 0x5F, 0xBD, 0xAD, 0x67, 0xDE, 0xC7, 0xD9,
@@ -118,7 +120,7 @@ static size_t read_address(suit_component_t handle, uint8_t **read_address)
 
 static int check_vid(suit_component_t handle, struct zcbor_string *vid_uuid)
 {
-	struct zcbor_string exp_vid_uuid = {
+	static const struct zcbor_string exp_vid_uuid = {
 		.value = vid_uuid_raw,
 		.len = sizeof(vid_uuid_raw),
 	};
@@ -128,7 +130,7 @@ static int check_vid(suit_component_t handle, struct zcbor_string *vid_uuid)
 
 static int check_cid(suit_component_t handle, struct zcbor_string *cid_uuid)
 {
-	struct zcbor_string exp_cid_uuid = {
+	static const struct zcbor_string exp_cid_uuid = {
 		.value = cid_uuid_raw,
 		.len = sizeof(cid_uuid_raw),
 	};
