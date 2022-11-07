@@ -1,0 +1,70 @@
+@startuml
+
+state decode_envelope
+decode_envelope: cbor_parse(envelope_tagged)
+
+state invalid_envelope
+invalid_envelope: envelope_decoded = false
+invalid_envelope: envelope_validated = false
+invalid_envelope: manifest_decoded = false
+invalid_envelope: manifest_validated = false
+
+state validate_envelope
+validate_envelope: envelope_decoded = true
+validate_envelope: cose_authenticate_digest(manifest_digest)
+
+state decode_manifest
+decode_manifest: envelope_validated = true
+decode_manifest: cbor_parse(manifest)
+
+state validate_manifest {
+  state invalidate_manifest
+  invalidate_manifest: manifest_validated = false
+
+  state manifest_decoded
+  manifest_decoded: manifest_decoded = true
+  
+  state check_seq_num
+  check_seq_num: suit_plat_check_sequence_num()
+  
+  state check_severed_fields
+  check_severed_fields: suit_plat_check_digest(envelope_text)
+  
+  state create_component_handles
+  create_component_handles: suit_plat_create_component_handle(component_id, keys)
+  
+  state validate_seqs
+  validate_seqs: suit_validate_common_sequence()
+  validate_seqs: suit_validate_command_sequence(SUIT_PAYLOAD_FETCH .. SUIT_RUN)
+  
+  state dry_run_seqs
+  dry_run_seqs: state.dry_run = true
+  dry_run_seqs: suit_run_common_sequence()
+  dry_run_seqs: suit_run_command_sequence(SUIT_PAYLOAD_FETCH .. SUIT_RUN)
+  dry_run_seqs: state.dry_run = false
+
+}
+
+manifest_decoded -down-> check_seq_num : Succeeded
+check_seq_num -down-> check_severed_fields : Succeeded
+check_severed_fields -down-> create_component_handles : Succeeded
+create_component_handles -down-> validate_seqs : Succeeded
+validate_seqs -down-> dry_run_seqs : Succeeded
+
+manifest_decoded -up-> invalidate_manifest : Failed
+check_seq_num -up-> invalidate_manifest : Failed
+check_severed_fields -up-> invalidate_manifest : Failed
+create_component_handles -up-> invalidate_manifest : Failed
+validate_seqs -up-> invalidate_manifest : Failed
+dry_run_seqs -up-> invalidate_manifest : Failed
+invalidate_manifest -left-> invalid_envelope
+
+invalid_envelope -right-> decode_envelope
+decode_envelope -right-> validate_envelope : Succeeded
+decode_envelope -down-> invalid_envelope : Failed
+validate_envelope -right-> decode_manifest: Succeeded
+validate_envelope --> invalid_envelope : Failed
+decode_manifest -right-> manifest_decoded: Succeeded
+decode_manifest --> invalid_envelope : Failed
+
+@enduml

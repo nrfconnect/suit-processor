@@ -1,0 +1,134 @@
+@startuml
+
+participant suit_processor
+participant suit_platform
+
+
+... inside validate_manifest(..) process ...
+
+suit_processor -> suit_platform : suit_plat_create_component_handle(component_id: zstr, keys: array)
+activate suit_platform
+create collections suit_platform_component
+suit_platform -> suit_platform_component ** : create(component_id, keys)
+suit_platform <-- suit_platform_component : new_handle
+participant component_impl_selector
+
+participant component_impl
+participant suit_component_driver
+
+suit_platform -> component_impl_selector : suit_component_select_impl(component_id, keys, new_handle)
+activate component_impl_selector
+suit_platform <-- component_impl_selector : success
+deactivate component_impl_selector
+suit_platform -> suit_platform_component : set_impl(impl)
+
+suit_platform -> component_impl : component->impl->init(new_handle)
+activate component_impl
+component_impl -> suit_platform_component : suit_plat_component_impl_data_set(impl_data)
+suit_platform <-- component_impl : success
+deactivate component_impl
+
+suit_processor <-- suit_platform : new_handle
+deactivate suit_platform
+
+... inside run_common_seq(..) ...
+
+suit_processor -> suit_platform : suit_plat_check_vid(vid, handle)
+activate suit_platform
+suit_platform -> suit_platform_component : suit_plat_component_impl_get(handle)
+suit_platform <-- suit_platform_component : impl
+suit_platform -> component_impl: impl->check_vid(vid, handle)
+activate component_impl
+component_impl -> suit_platform_component : suit_plat_component_id_get(handle)
+component_impl <-- suit_platform_component : component_id
+
+component_impl -> component_impl : decode_vid(component_id)
+
+component_impl -> component_impl : memcmp(..)
+
+suit_platform <-- component_impl: success
+deactivate component_impl
+suit_processor <-- suit_platform : success
+deactivate suit_platform
+
+... inside run_command_seq(SUIT_PAYLOAD_FETCH) ...
+
+suit_processor -> suit_platform : suit_plat_fetch_integrated(handle, payload)
+activate suit_platform
+suit_platform -> suit_platform_component : suit_plat_component_impl_get(handle)
+suit_platform <-- suit_platform_component : impl
+
+suit_platform -> component_impl : impl->fetch_integrated(handle, payload)
+activate component_impl
+component_impl -> suit_platform_component : suit_plat_component_impl_set(handle, payload)
+
+suit_platform <-- component_impl: success
+deactivate component_impl
+suit_processor <-- suit_platform : success
+deactivate suit_platform
+
+... inside run_command_seq(SUIT_INSTALL) ...
+
+suit_processor -> suit_platform : suit_plat_copy(dst_handle, src_handle)
+activate suit_platform
+suit_platform -> suit_platform_component : suit_plat_component_impl_get(src_handle)
+suit_platform <-- suit_platform_component : src_impl
+suit_platform -> suit_platform_component : suit_plat_component_impl_get(dst_handle)
+suit_platform <-- suit_platform_component : dst_impl
+
+suit_platform -> component_impl : src_impl->read_address(src_handle)
+activate component_impl
+component_impl -> suit_platform_component : suit_plat_component_id_get(handle)
+component_impl <-- suit_platform_component : component_id
+component_impl -> component_impl : decode_address_and_size(component_id)
+suit_platform <-- component_impl : read_address, size
+deactivate component_impl
+
+suit_platform -> component_impl : dst_impl->write(dst_handle, read_address, size)
+activate component_impl
+component_impl -> suit_component_driver : write(read_address, size)
+activate suit_component_driver
+component_impl <-- suit_component_driver : success
+deactivate suit_component_driver
+suit_platform <-- component_impl: success
+deactivate component_impl
+suit_processor <-- suit_platform : success
+deactivate suit_platform
+
+... inside run_command_seq(SUIT_RUN) ...
+
+suit_processor -> suit_platform : suit_plat_run(handle, args)
+activate suit_platform
+suit_platform -> suit_platform_component : suit_plat_component_impl_get(handle)
+suit_platform <-- suit_platform_component : impl
+suit_platform -> component_impl : impl->run(handle, args)
+activate component_impl
+
+component_impl -> suit_platform_component : suit_plat_component_id_get(handle)
+component_impl <-- suit_platform_component : component_id
+component_impl -> component_impl : decode_cpu_and_address(component_id)
+component_impl -> suit_component_driver : run(cpu_id, start_address)
+activate suit_component_driver
+component_impl <--suit_component_driver : success
+deactivate suit_component_driver
+suit_platform <-- component_impl : success
+deactivate component_impl
+suit_processor <-- suit_platform : success
+deactivate suit_platform
+
+... before reboot(..) ...
+
+[-> suit_processor : suit_reset_state()
+suit_processor -> suit_platform: reset_components()
+activate suit_platform
+suit_platform -> suit_platform_component : suit_plat_component_impl_get(handle)
+suit_platform <-- suit_platform_component : impl
+
+suit_platform -> component_impl : impl->release(handle)
+activate component_impl
+suit_platform <-- component_impl
+deactivate component_impl
+suit_platform -> suit_platform_component !! : delete
+suit_processor <-- suit_platform
+deactivate suit_platform
+@enduml

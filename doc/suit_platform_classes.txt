@@ -1,0 +1,115 @@
+@startuml
+
+class SuitPlatform
+
+class SuitPlatformCommands
+class SuitPlatformCrypto
+class SuitPlatformComponents
+class SuitPlatformState
+
+SuitPlatform *-- SuitPlatformCommands
+SuitPlatform *-- SuitPlatformCrypto
+SuitPlatform *-- SuitPlatformComponents
+SuitPlatform *-- SuitPlatformState
+
+class SuitPlatformCommands
+SuitPlatformCommands : +check_slot(handle: int, slot: int)
+SuitPlatformCommands : +check_vid(vid_uuid, handle: int)
+SuitPlatformCommands : +check_cid(cid_uuid, handle: int)
+SuitPlatformCommands : +check_did(did_uuid, handle: int)
+
+' SuitPlatformCommands : +check_fetch(handle: int, uri: zstr)
+SuitPlatformCommands : +fetch(handle: int, uri: zstr)
+' SuitPlatformCommands : +check_fetch_integrated(handle: int, payload: zstr)
+SuitPlatformCommands : +fetch_integrated(handle: int, payload: zstr)
+' SuitPlatformCommands : +check_copy(dst_handle: int, src_handle: int)
+SuitPlatformCommands : +copy(dst_handle: int, src_handle: int)
+' SuitPlatformCommands : +check_swap(dst_handle: int, src_handle: int)
+SuitPlatformCommands : +swap(dst_handle: int, src_handle: int)
+' SuitPlatformCommands : +check_run(handle: int, run_args: zstr)
+SuitPlatformCommands : +run(handle: int, run_args: zstr)
+
+abstract class SuitPlatformCrypto
+SuitPlatformCrypto : +check_digest(alg_id: int, digest: zstr, payload: zstr)
+SuitPlatformCrypto : +authenticate(alg_id: int, key_id: zstr, signature: zstr, data: zstr)
+SuitPlatformCrypto : +check_image_match(alg_id: int, digest: zstr, image_size: int, image_handle: int)
+
+class SuitPlatformCryptoPsa
+SuitPlatformCryptoPsa : -psa_key_id: int
+SuitPlatformCrypto <|-- SuitPlatformCryptoPsa
+
+abstract class SuitPlatformState
+SuitPlatformState : +check_sequence_num(seq_num: int)
+SuitPlatformState : +commit_sequence_num(seq_num: int)
+SuitPlatformState : +report(rep_policy: int, report: struct)
+SuitPlatformState : +set_state(state_id: int, state: ptr, state_len: int)
+SuitPlatformState : +get_state(state_id: int, state: ptr, state_len: int)
+
+
+class SuitPlatformStateNvs
+SuitPlatformState <|-- SuitPlatformStateNvs
+SuitPlatformStateNvs : -nvs_keys:enum
+
+class SuitPlatformComponents
+SuitPlatformComponents : -handle_from_component(component: struct)
+SuitPlatformComponents : -component_from_handle(handle: int)
+SuitPlatformComponents : +reset_components()
+SuitPlatformComponents : +create_component_handle(component_id: zstr, key_ids: array, num_key_ids: int, handle: int)
+
+class PlatformComponent
+PlatformComponent : -impl: PlatformComponentImpl
+PlatformComponent : -impl_data: ptr
+PlatformComponent : -component_id: zstr
+PlatformComponent : -key_ids: array
+PlatformComponent : +impl_get(handle: int)
+PlatformComponent : +impl_data_set(handle: int, impl_data: ptr)
+PlatformComponent : +impl_data_get(handle: int, impl_data: ptr)
+PlatformComponent : +id_get(handle: int, component_id: zstr)
+PlatformComponent : +keys_get(handle: int, key_ids: array)
+
+
+PlatformComponent o-- PlatformComponentImpl
+
+abstract class PlatformComponentImpl
+PlatformComponentImpl : #init()
+PlatformComponentImpl : #release()
+PlatformComponentImpl : #read()
+PlatformComponentImpl : #write()
+PlatformComponentImpl : #run()
+PlatformComponentImpl : #read_address()
+PlatformComponentImpl : #check_vid()
+PlatformComponentImpl : #check_cid()
+PlatformComponentImpl : #check_did()
+PlatformComponentImpl : #check_slot()
+PlatformComponentImpl : #fetch_integrated()
+
+class PlatformComponentImplRambuf
+PlatformComponentImpl <|-- PlatformComponentImplRambuf
+PlatformComponentImplRambuf : +read()
+PlatformComponentImplRambuf : +write()
+PlatformComponentImplRambuf : +read_address()
+
+class PlatformComponentImplExtmem
+PlatformComponentImpl <|-- PlatformComponentImplExtmem
+PlatformComponentImplExtmem : +read()
+PlatformComponentImplExtmem : +write()
+
+class SuitPlatformComponentSelector
+SuitPlatformComponentSelector : +select_impl(component_id: zstr, key_ids: array, num_key_ids: int, handle: int)
+
+
+class PlatformComponentImplMram
+PlatformComponentImpl <|-- PlatformComponentImplMram
+PlatformComponentImplMram : +read()
+PlatformComponentImplMram : +write()
+PlatformComponentImplMram : +run()
+PlatformComponentImplMram : +read_address()
+
+SuitPlatformComponents "1..1" --> SuitPlatformComponentSelector : select_impl() 
+SuitPlatformComponentSelector ..> PlatformComponentImpl : selects
+SuitPlatformComponents "1..*" *-- PlatformComponent
+
+SuitPlatformCrypto ..> PlatformComponent : uses
+SuitPlatformCommands ..> PlatformComponent : uses
+
+@enduml
