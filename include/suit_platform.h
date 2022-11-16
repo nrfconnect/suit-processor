@@ -31,7 +31,7 @@ int suit_plat_authenticate(enum suit_cose_alg alg_id, struct zcbor_string *key_i
 
 /** Check that the given component ID exists, is valid, and is authorized.
  *
- *  If so, return a component handle for it.
+ *  If so, create and return a component handle for it.
  *
  *  @param[in]  component_id  The CBOR-encoded component identifier.
  *  @param[in]  key_ids  The keys the current manifest was authenticated
@@ -42,7 +42,7 @@ int suit_plat_authenticate(enum suit_cose_alg alg_id, struct zcbor_string *key_i
  *                                this API, instead of always passing the
  *                                @p parts.
  */
-int suit_plat_get_component_handle(struct zcbor_string *component_id,
+int suit_plat_create_component_handle(struct zcbor_string *component_id,
 		struct zcbor_string *key_ids[SUIT_MAX_NUM_SIGNERS], size_t num_key_ids,
 		suit_component_t *component_handle);
 

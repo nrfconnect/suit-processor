@@ -12,9 +12,10 @@ set(ZCBOR_COMMAND_COSE
   ${ZCBOR_COMMAND}
     code -d -e
     -c "${CMAKE_CURRENT_LIST_DIR}/cddl/cose_sign.cddl"
-    -t COSE_Sign1_Tagged Sig_structure1
     --output-cmake cose.cmake
     --copy-sources
+    -d -e
+    -t COSE_Sign1_Tagged Sig_structure1    
 )
 if(NOT EXISTS "${ZCBOR_DIR}/cose.cmake")
 execute_process(
@@ -45,12 +46,13 @@ target_include_directories(cose PUBLIC
 # Generate and add SUIT envelope parser code
 set(ZCBOR_COMMAND_MANIFEST
   ${ZCBOR_COMMAND}
-    code -d
+    code
     -c "${CMAKE_CURRENT_LIST_DIR}/cddl/manifest.cddl"
-    -t SUIT_Envelope_Tagged SUIT_Manifest SUIT_Common_Sequence SUIT_Command_Sequence
-       SUIT_Condition SUIT_Directive SUIT_Common_Commands
     --output-cmake manifest.cmake
     --copy-sources
+    -t SUIT_Envelope_Tagged SUIT_Manifest SUIT_Common_Sequence SUIT_Command_Sequence
+       SUIT_Condition SUIT_Directive SUIT_Common_Commands
+    -d
 )
 if(NOT EXISTS "${ZCBOR_DIR}/manifest.cmake")
 execute_process(

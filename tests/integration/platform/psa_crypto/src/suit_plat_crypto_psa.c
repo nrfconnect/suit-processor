@@ -4,9 +4,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-#include <stdint.h>
-#include <suit_platform.h>
 #include <psa/crypto.h>
+#include <suit_platform.h>
 #include <suit_platform_internal.h>
 
 
@@ -19,7 +18,6 @@
 #endif
 
 
-/** Check the provided payload against the provided digest */
 int suit_plat_check_digest(enum suit_cose_alg alg_id,
 		struct zcbor_string *digest,
 		struct zcbor_string *payload)
@@ -65,14 +63,6 @@ int suit_plat_check_digest(enum suit_cose_alg alg_id,
 	return SUIT_ERR_AUTHENTICATION;
 }
 
-
-/** Authenticate the given payload against the given signature.
- *
- *  @param[in]  alg_id  The signature verification algorithm to use.
- *  @param[in]  key_id  The key to check the signature with.
- *  @param[in]  signature  The signature to check.
- *  @param[in]  data  The data that is signed by the @p signature.
- */
 int suit_plat_authenticate(enum suit_cose_alg alg_id, struct zcbor_string *key_id,
 		struct zcbor_string *signature, struct zcbor_string *data)
 {
@@ -100,66 +90,33 @@ int suit_plat_authenticate(enum suit_cose_alg alg_id, struct zcbor_string *key_i
 	return SUIT_ERR_AUTHENTICATION;
 }
 
-/** Check the provided payload against the provided digest */
 int suit_plat_check_image_match(enum suit_cose_alg alg_id,
 		struct zcbor_string *digest, size_t image_size,
 		suit_component_t image_handle)
 {
-	psa_hash_operation_t operation = PSA_HASH_OPERATION_INIT;
-	psa_status_t status = PSA_ERROR_GENERIC_ERROR;
-	psa_algorithm_t psa_alg;
-	struct suit_component_properties properties;
+	const struct suit_component_impl *impl = suit_plat_component_impl_get(image_handle);
 	uint8_t * read_address = NULL;
 	size_t read_size = 0;
+	struct zcbor_string payload;
 
-	/* Find the properties (including driver) for the component. */
-	if (suit_plat_get_component_properties(image_handle, &properties) != SUIT_SUCCESS) {
+	/* Check the component implementation. */
+	if (impl == NULL) {
 		return SUIT_ERR_UNSUPPORTED_COMPONENT_ID;
 	}
 
 	/* Check if the driver supports direct read mode. */
-	if (((properties.mode & suit_comp_readable) == 0) ||
-	    (properties.driver->read_address == NULL)) {
+	if (impl->read_address == NULL) {
 		return SUIT_ERR_UNSUPPORTED_COMPONENT_ID;
 	}
 
 	/* Get the pointer to the readable data. */
-	read_size = properties.driver->read_address(image_handle, &read_address);
+	read_size = impl->read_address(image_handle, &read_address);
 	if (read_size < image_size) {
 		return SUIT_ERR_UNAVAILABLE_PAYLOAD;
 	}
 
-	/* Find the PSA hash ID */
-	switch (alg_id) {
-		case suit_cose_sha256:
-			psa_alg = PSA_ALG_SHA_256;
-			break;
-		default:
-			return SUIT_ERR_DECODING;
-	}
+	payload.value = read_address;
+	payload.len = image_size;
 
-	/* Verify digest length */
-	if (digest->len != PSA_HASH_LENGTH(psa_alg)) {
-		return SUIT_ERR_DECODING;
-	}
-
-	/* Calculate digest over input component */
-	status = psa_hash_setup(&operation, psa_alg);
-	if (status == PSA_SUCCESS) {
-		status = psa_hash_update(&operation, read_address, image_size);
-	}
-
-	/* Verify the digest */
-	if (status == PSA_SUCCESS) {
-		status = psa_hash_verify(&operation, digest->value, digest->len);
-	}
-
-	if (status == PSA_SUCCESS) {
-		return SUIT_SUCCESS;
-	} 
-
-	/* Clean up hash operation context */
-	psa_hash_abort(&operation);
-
-	return SUIT_ERR_PAYLOAD_VERIFICATION;
+	return suit_plat_check_digest(alg_id, digest, &payload);
 }

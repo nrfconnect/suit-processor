@@ -86,13 +86,13 @@ int __check_digest_callback(enum suit_cose_alg alg_id, struct zcbor_string* dige
 }
 int __authenticate_callback(enum suit_cose_alg alg_id, struct zcbor_string* key_id, struct zcbor_string* signature, struct zcbor_string* data, int cmock_num_calls);
 
-#define __wrap_suit_plat_get_component_handle_ExpectComplexArgsAndReturn(component_id, key_ids, num_key_ids, component_handle, cmock_retval) { \
+#define __wrap_suit_plat_create_component_handle_ExpectComplexArgsAndReturn(component_id, key_ids, num_key_ids, component_handle, cmock_retval) { \
 	extern complex_arg_q_t __get_component_handle_callback_queue; \
 	push_complex_arg(component_id, assert_zcbor_string, __get_component_handle_callback_queue); \
 	push_retval_arg(cmock_retval, __get_component_handle_callback_queue); \
-	__wrap_suit_plat_get_component_handle_AddCallback(__get_component_handle_callback); \
-	__wrap_suit_plat_get_component_handle_ExpectAndReturn(component_id, key_ids, num_key_ids, component_handle, cmock_retval); \
-	__wrap_suit_plat_get_component_handle_IgnoreArg_component_id(); \
+	__wrap_suit_plat_create_component_handle_AddCallback(__get_component_handle_callback); \
+	__wrap_suit_plat_create_component_handle_ExpectAndReturn(component_id, key_ids, num_key_ids, component_handle, cmock_retval); \
+	__wrap_suit_plat_create_component_handle_IgnoreArg_component_id(); \
 }
 int __get_component_handle_callback(struct zcbor_string* component_id, struct zcbor_string** key_ids, size_t num_key_ids, suit_component_t* component_handle, int cmock_num_calls);
 

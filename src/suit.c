@@ -65,7 +65,9 @@ int suit_decode_envelope(uint8_t *envelope_str, size_t envelope_len,
 	ret = cbor_decode_SUIT_Envelope_Tagged(
 		envelope_str, envelope_len, &state->envelope, &decoded_len);
 
-	if ((ret != ZCBOR_SUCCESS) || (decoded_len != envelope_len)) {
+	/* For development, condition on expected envelope size was modified. 
+	   Now envelope_len represents max allowed size of envelope */
+	if ((ret != ZCBOR_SUCCESS) || (decoded_len > envelope_len)) {
 		state->envelope_decoded = suit_bool_false;
 		return ZCBOR_ERR_TO_SUIT_ERR(ret);
 	}
@@ -430,7 +432,7 @@ int suit_validate_manifest(struct suit_processor_state *state)
 			/* Zip list of strings into a single ZCBOR string */
 			get_component_id_str(&component_id,
 				&common->_SUIT_Common_suit_components._SUIT_Common_suit_components._SUIT_Components__SUIT_Component_Identifier[i]);
-			int ret = suit_plat_get_component_handle(&component_id, state->key_ids, state->num_key_ids, &state->components[i].component_handle);
+			int ret = suit_plat_create_component_handle(&component_id, state->key_ids, state->num_key_ids, &state->components[i].component_handle);
 
 			/* Increase the number of valid component indexes / handles */
 			state->num_components++;
