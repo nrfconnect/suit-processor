@@ -21,7 +21,7 @@ typedef union {
 	struct SUIT_Directive_ directive;
 } suit_command_t;
 
-int suit_validate_common_sequence(struct suit_processor_state *state, struct zcbor_string *cmd_seq_str)
+int suit_validate_shared_sequence(struct suit_processor_state *state, struct zcbor_string *cmd_seq_str)
 {
 	size_t decoded_len;
 	suit_command_t result;
@@ -105,7 +105,7 @@ int suit_validate_common_sequence(struct suit_processor_state *state, struct zcb
 				break;
 			case _SUIT_Directive___suit_directive_fetch:
 			case _SUIT_Directive___suit_directive_copy:
-			case _SUIT_Directive___suit_directive_run:
+			case _SUIT_Directive___suit_directive_invoke:
 			default:
 				retval = SUIT_ERR_MANIFEST_VALIDATION;
 				break;
@@ -211,7 +211,7 @@ int suit_validate_command_sequence(struct suit_processor_state *state, struct zc
 			case _SUIT_Directive___suit_directive_override_parameters:
 			case _SUIT_Directive___suit_directive_fetch:
 			case _SUIT_Directive___suit_directive_copy:
-			case _SUIT_Directive___suit_directive_run:
+			case _SUIT_Directive___suit_directive_invoke:
 				retval = SUIT_SUCCESS;
 				break;
 			default:
@@ -334,8 +334,8 @@ int suit_run_command_sequence(struct suit_processor_state *state, struct zcbor_s
 			case _SUIT_Directive___suit_directive_copy:
 				retval = suit_directive_copy(state);
 				break;
-			case _SUIT_Directive___suit_directive_run:
-				retval = suit_directive_run(state);
+			case _SUIT_Directive___suit_directive_invoke:
+				retval = suit_directive_invoke(state);
 				break;
 			default:
 				retval = SUIT_ERR_DECODING;
@@ -360,7 +360,7 @@ int suit_run_command_sequence(struct suit_processor_state *state, struct zcbor_s
 }
 
 
-int suit_run_common_sequence(struct suit_processor_state *state, struct zcbor_string *cmd_seq_str)
+int suit_run_shared_sequence(struct suit_processor_state *state, struct zcbor_string *cmd_seq_str)
 {
 	int err = SUIT_SUCCESS;
 

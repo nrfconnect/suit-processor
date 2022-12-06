@@ -36,9 +36,8 @@ int suit_directive_set_current_components(struct suit_processor_state *state, st
 		for (int i = 0; i < index_arg->_IndexArg__uint_uint_count; i++) {
 			state->current_components[index_arg->_IndexArg__uint_uint[i]] = true;
 		}
-	/* All components (if true) or no components (if false - do nothing). */
-	} else if (index_arg->_IndexArg_choice == _IndexArg_bool
-		&& index_arg->_IndexArg_bool) {
+	/* All components (if true). The false value is not allowed by CDDL. */
+	} else if (index_arg->_IndexArg_choice == _IndexArg_bool) {
 		/* Enable all components. */
 		for (int i = 0; i < state->num_components; i++) {
 			state->current_components[i] = true;
@@ -265,28 +264,28 @@ int suit_directive_swap(struct suit_processor_state *state)
 }
 
 
-static int plat_run(struct suit_processor_state *state, suit_component_t image_handle,
-		struct zcbor_string *run_args)
+static int plat_invoke(struct suit_processor_state *state, suit_component_t image_handle,
+		struct zcbor_string *invoke_args)
 {
 	if (state->dry_run != suit_bool_false) {
-		return suit_plat_check_run(image_handle, run_args);
+		return suit_plat_check_invoke(image_handle, invoke_args);
 	} else {
-		return suit_plat_run(image_handle, run_args);
+		return suit_plat_invoke(image_handle, invoke_args);
 	}
 }
 
 
-int suit_directive_run(struct suit_processor_state *state)
+int suit_directive_invoke(struct suit_processor_state *state)
 {
 	for (int i = 0; i < state->num_components; i++) {
 		if (state->current_components[i]) {
-			struct zcbor_string *run_args = NULL;
+			struct zcbor_string *invoke_args = NULL;
 
-			if (state->components[i].run_args_set) {
-				run_args = &state->components[i].run_args;
+			if (state->components[i].invoke_args_set) {
+				invoke_args = &state->components[i].invoke_args;
 			}
 
-			int ret = plat_run(state, state->components[i].component_handle, run_args);
+			int ret = plat_invoke(state, state->components[i].component_handle, invoke_args);
 
 			if (ret != SUIT_SUCCESS) {
 				return ret;
