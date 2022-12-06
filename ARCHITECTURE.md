@@ -88,7 +88,7 @@ Whenever a manifest needs somewhere arbitrary to put a payload while performing 
 "Temporary" means the component will live only until the current invokation of the manifest is complete, either
 
  * During the update (during suit-payload-fetch + suit-install), or
- * During secure boot (during suit-validate + suit-load + suit-run)
+ * During secure boot (during suit-validate + suit-load + suit-invoke)
 
 The manifest can request a temporary component by using the following component ID:
 
@@ -177,4 +177,4 @@ This means that they must be stored in __internal storage__.
 ## References
 
 [^info_model]: IETF RFC 9124 - A Manifest Information Model for Firmware Updates in Internet of Things (IoT) Devices - https://datatracker.ietf.org/doc/rfc9124/
-[^manifest]: IETF draft-ietf-suit-manifest-16 - A Concise Binary Object Representation (CBOR)-based Serialization Format for the Software Updates for Internet of Things (SUIT) Manifest - https://datatracker.ietf.org/doc/html/draft-ietf-suit-manifest-16
+[^manifest]: IETF draft-ietf-suit-manifest-21 - A Concise Binary Object Representation (CBOR)-based Serialization Format for the Software Updates for Internet of Things (SUIT) Manifest - https://datatracker.ietf.org/doc/html/draft-ietf-suit-manifest-21

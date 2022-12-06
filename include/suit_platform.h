@@ -96,11 +96,11 @@ int suit_plat_check_swap(suit_component_t dst_handle, suit_component_t src_handl
 /** Swap a payload from @p src_handle to @p dst_handle. */
 int suit_plat_swap(suit_component_t dst_handle, suit_component_t src_handle);
 
-/** Check that the given run operation can be performed. */
-int suit_plat_check_run(suit_component_t image_handle, struct zcbor_string *run_args);
+/** Check that the given invoke operation can be performed. */
+int suit_plat_check_invoke(suit_component_t image_handle, struct zcbor_string *invoke_args);
 
-/** Run the given image. */
-int suit_plat_run(suit_component_t image_handle, struct zcbor_string *run_args);
+/** Invoke the given image. */
+int suit_plat_invoke(suit_component_t image_handle, struct zcbor_string *invoke_args);
 
 /** File a report on a command result. */
 int suit_plat_report(unsigned int rep_policy, struct suit_report *report);

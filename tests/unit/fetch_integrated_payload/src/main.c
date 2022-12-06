@@ -248,7 +248,7 @@ void test_suit_validate_manifest(void)
 	 * - Verify digest of the severed text field
 	 * - Execute dry-run commands for each command sequence present in the manifest
 	 *   - Check FETCH (integrated) command from the install step
-	 *   - Check RUN command from the run step
+	 *   - Check INVOKE command from the invoke step
 	 */
 	__wrap_suit_plat_check_sequence_num_ExpectAndReturn(1, SUIT_SUCCESS);
 	__wrap_suit_plat_create_component_handle_ExpectComplexArgsAndReturn(&exp_component_id, state.key_ids, 0, NULL, SUIT_SUCCESS);
@@ -257,7 +257,7 @@ void test_suit_validate_manifest(void)
 
 	__wrap_suit_plat_check_digest_ExpectComplexArgsAndReturn(suit_cose_sha256, &exp_text_digest, &exp_text_payload, SUIT_SUCCESS);
 	__wrap_suit_plat_check_fetch_integrated_ExpectComplexArgsAndReturn(ASSIGNED_COMPONENT_HANDLE, &exp_image_payload, SUIT_SUCCESS);
-	__wrap_suit_plat_check_run_ExpectAndReturn(ASSIGNED_COMPONENT_HANDLE, NULL, SUIT_SUCCESS);
+	__wrap_suit_plat_check_invoke_ExpectAndReturn(ASSIGNED_COMPONENT_HANDLE, NULL, SUIT_SUCCESS);
 
 	int err = suit_validate_manifest(&state);
 	TEST_ASSERT_EQUAL(SUIT_SUCCESS, err);
@@ -283,7 +283,7 @@ void test_suit_process_step_payload_fetch(void)
 void test_suit_process_step_install(void)
 {
 	/* SUIT_INSTALL should:
-	 * - execute the common sequence (VID and CID checks),
+	 * - execute the shared sequence (VID and CID checks),
 	 * - copy the integrated payload into executable slot through FETCH (integrated) command
 	 * - verify the image digest in the executable slot
 	 */
@@ -299,7 +299,7 @@ void test_suit_process_step_install(void)
 void test_suit_process_step_validate(void)
 {
 	/* SUIT_VALIDATE should:
-	 * - execute the common sequence (VID and CID checks)
+	 * - execute the shared sequence (VID and CID checks)
 	 * - verify the image digest in the executable slot.
 	 */
 	__wrap_suit_plat_check_vid_ExpectComplexArgsAndReturn(&exp_vid_uuid, ASSIGNED_COMPONENT_HANDLE, SUIT_SUCCESS);
@@ -317,18 +317,18 @@ void test_suit_process_step_load(void)
 	TEST_ASSERT_EQUAL(SUIT_ERR_UNAVAILABLE_COMMAND_SEQ, err);
 }
 
-void test_suit_process_step_run(void)
+void test_suit_process_step_invoke(void)
 {
-	/* SUIT_RUN should:
-	 * - execute the common sequence (VID and CID checks)
-	 * - execute the RUN command.
+	/* SUIT_INVOKE should:
+	 * - execute the shared sequence (VID and CID checks)
+	 * - execute the INVOKE command.
 	 * The image validity is expected to be checked in the SUIT_VALIDATE step.
 	 */
 	__wrap_suit_plat_check_vid_ExpectComplexArgsAndReturn(&exp_vid_uuid, ASSIGNED_COMPONENT_HANDLE, SUIT_SUCCESS);
 	__wrap_suit_plat_check_cid_ExpectComplexArgsAndReturn(&exp_cid_uuid, ASSIGNED_COMPONENT_HANDLE, SUIT_SUCCESS);
-	__wrap_suit_plat_run_ExpectAndReturn(ASSIGNED_COMPONENT_HANDLE, NULL, SUIT_SUCCESS);
+	__wrap_suit_plat_invoke_ExpectAndReturn(ASSIGNED_COMPONENT_HANDLE, NULL, SUIT_SUCCESS);
 
-	int err = suit_process_manifest(&state, SUIT_RUN);
+	int err = suit_process_manifest(&state, SUIT_INVOKE);
 	TEST_ASSERT_EQUAL(SUIT_SUCCESS, err);
 }
 

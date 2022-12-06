@@ -39,8 +39,8 @@ int suit_directive_copy(struct suit_processor_state *state);
 /** Swap a payload based on the configured parameters. */
 int suit_directive_swap(struct suit_processor_state *state);
 
-/** Run/boot a component based on the configured parameters. */
-int suit_directive_run(struct suit_processor_state *state);
+/** Invoke/boot a component based on the configured parameters. */
+int suit_directive_invoke(struct suit_processor_state *state);
 
 
 #endif /* SUIT_DIRECTIVE_H__ */
