@@ -361,9 +361,9 @@ static struct zcbor_string *get_command_seq(struct suit_processor_state *state,
 				return &unseverable->_SUIT_Unseverable_Members_suit_load._SUIT_Unseverable_Members_suit_load;
 			}
 			return NULL;
-		case SUIT_RUN:
-			if (unseverable->_SUIT_Unseverable_Members_suit_run_present) {
-				return &unseverable->_SUIT_Unseverable_Members_suit_run._SUIT_Unseverable_Members_suit_run;
+		case SUIT_INVOKE:
+			if (unseverable->_SUIT_Unseverable_Members_suit_invoke_present) {
+				return &unseverable->_SUIT_Unseverable_Members_suit_invoke._SUIT_Unseverable_Members_suit_invoke;
 			}
 			return NULL;
 		default:
@@ -441,9 +441,9 @@ int suit_validate_manifest(struct suit_processor_state *state)
 		}
 	}
 
-	/* Verify common command sequence */
-	while (common->_SUIT_Common_suit_common_sequence_present){
-		int ret = suit_validate_common_sequence(state, &common->_SUIT_Common_suit_common_sequence._SUIT_Common_suit_common_sequence);
+	/* Verify shared command sequence */
+	while (common->_SUIT_Common_suit_shared_sequence_present){
+		int ret = suit_validate_shared_sequence(state, &common->_SUIT_Common_suit_shared_sequence._SUIT_Common_suit_shared_sequence);
 
 		CHECK_RET(ret, break);
 	}
@@ -476,9 +476,9 @@ int suit_validate_manifest(struct suit_processor_state *state)
 		}
 
 		if (step_seq != NULL) {
-			/* Execute common command sequence */
-			while (common->_SUIT_Common_suit_common_sequence_present){
-				ret = suit_run_common_sequence(state, &common->_SUIT_Common_suit_common_sequence._SUIT_Common_suit_common_sequence);
+			/* Execute shared command sequence */
+			while (common->_SUIT_Common_suit_shared_sequence_present){
+				ret = suit_run_shared_sequence(state, &common->_SUIT_Common_suit_shared_sequence._SUIT_Common_suit_shared_sequence);
 
 				CHECK_RET(ret, break);
 			}
@@ -523,10 +523,10 @@ int suit_process_manifest(struct suit_processor_state *state,
 	}
 
 	if (step_seq != NULL) {
-		/* Execute common command sequence */
+		/* Execute shared command sequence */
 		struct SUIT_Common *common = &state->manifest._SUIT_Manifest_suit_common_cbor;
-		while (common->_SUIT_Common_suit_common_sequence_present){
-			int ret = suit_run_common_sequence(state, &common->_SUIT_Common_suit_common_sequence._SUIT_Common_suit_common_sequence);
+		while (common->_SUIT_Common_suit_shared_sequence_present){
+			int ret = suit_run_shared_sequence(state, &common->_SUIT_Common_suit_shared_sequence._SUIT_Common_suit_shared_sequence);
 
 			CHECK_RET(ret, break);
 		}

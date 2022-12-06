@@ -37,7 +37,7 @@ int suit_check_sequence_num(struct suit_processor_state *state);
  */
 int suit_check_components(struct suit_processor_state *state);
 
-/** Check all command sequences (including the common sequence).
+/** Check all command sequences (including the shared sequence).
  *
  *  Check that all components have a payload and a digest.
  *  Check that, if the component list is longer than 1, all sequences start with

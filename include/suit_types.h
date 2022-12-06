@@ -84,7 +84,7 @@ enum suit_manifest_step {
 	SUIT_INSTALL,
 	SUIT_VALIDATE,
 	SUIT_LOAD,
-	SUIT_RUN,
+	SUIT_INVOKE,
 	SUIT_LAST_STEP,
 };
 
@@ -98,7 +98,7 @@ struct suit_manifest_params {
 	unsigned int component_slot;
 	struct zcbor_string uri;
 	unsigned int source_component;
-	struct zcbor_string run_args;
+	struct zcbor_string invoke_args;
 	struct zcbor_string did;
 
 	bool vid_set;
@@ -108,7 +108,7 @@ struct suit_manifest_params {
 	bool component_slot_set;
 	bool uri_set;
 	bool source_component_set;
-	bool run_args_set;
+	bool invoke_args_set;
 	bool did_set;
 };
 
