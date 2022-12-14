@@ -28,7 +28,7 @@ SUIT_Envelope = {
   suit-authentication-wrapper => bstr .cbor SUIT_Authentication,
   suit-manifest  => bstr .cbor SUIT_Manifest,
   SUIT_Severable_Manifest_Members,
-  1*5 SUIT_Integrated_Payload,
+  0*5 SUIT_Integrated_Payload,
 ;  * $$SUIT_Envelope_Extensions,
 }
 
