@@ -509,10 +509,10 @@ tamp:
 int suit_process_manifest(struct suit_processor_state *state,
 	enum suit_manifest_step step)
 {
-	if (state->envelope_decoded != suit_bool_true
+	if ( state->envelope_decoded != suit_bool_true
 		|| state->envelope_validated != suit_bool_true
-		|| state->envelope_decoded != suit_bool_true
-		|| state->envelope_validated != suit_bool_true) {
+		|| state->manifest_decoded != suit_bool_true
+		|| state->manifest_validated != suit_bool_true) {
 		return SUIT_ERR_ORDER;
 	}
 
