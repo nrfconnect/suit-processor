@@ -13,7 +13,7 @@
 ; Limited the length of component identifiers to 5 strings
 ; Remove all hash algs except sha256
 ; Remove most of text comprehension since the firmware isn't supposed to understand the text.
-; Remove suit-directive-run-sequence since strict-order is not supported.
+; Remove strict-order parameter as parallel execution is not supported.
 ; Remove custom command sequence extensions.
 ; Remove suit-directive-swap
 ; Remove cbor-pen support
@@ -21,6 +21,7 @@
 ; Set the maximum number of parameters inside suit-directive-override-parameters to 6
 ; Remove suit-parameter-content and suit-condition-check-content (not yet supported)
 ; Remove suit-directive-write (not yet supported)
+; Set the maximum number of try-each cases 5
 ;
 
 SUIT_Envelope_Tagged = #6.107(SUIT_Envelope)
@@ -109,8 +110,8 @@ SUIT_Shared_Sequence = [
 ]
 
 SUIT_Shared_Commands //= (suit-directive-set-component-index,  IndexArg)
-; SUIT_Shared_Commands //= (suit-directive-run-sequence,
-;   bstr .cbor SUIT_Shared_Sequence)
+SUIT_Shared_Commands //= (suit-directive-run-sequence,
+  bstr .cbor SUIT_Shared_Sequence)
 SUIT_Shared_Commands //= (suit-directive-try-each,
   SUIT_Directive_Try_Each_Argument_Shared)
 SUIT_Shared_Commands //= (suit-directive-override-parameters,
@@ -122,7 +123,7 @@ IndexArg /= [+uint]
 
 
 SUIT_Directive_Try_Each_Argument_Shared = [
-    2* bstr .cbor SUIT_Shared_Sequence,
+    2*5 bstr .cbor SUIT_Shared_Sequence,
     ?nil
 ]
 
@@ -141,8 +142,8 @@ SUIT_Condition //= (suit-condition-abort,             SUIT_Rep_Policy)
 
 ; SUIT_Directive //= (suit-directive-write,             SUIT_Rep_Policy)
 SUIT_Directive //= (suit-directive-set-component-index,  IndexArg)
-; SUIT_Directive //= (suit-directive-run-sequence,
-;     bstr .cbor SUIT_Command_Sequence)
+SUIT_Directive //= (suit-directive-run-sequence,
+    bstr .cbor SUIT_Command_Sequence)
 SUIT_Directive //= (suit-directive-try-each,
     SUIT_Directive_Try_Each_Argument)
 SUIT_Directive //= (suit-directive-override-parameters,
@@ -153,7 +154,7 @@ SUIT_Directive //= (suit-directive-copy,              SUIT_Rep_Policy)
 SUIT_Directive //= (suit-directive-invoke,            SUIT_Rep_Policy)
 
 SUIT_Directive_Try_Each_Argument = [
-  2* bstr .cbor SUIT_Command_Sequence,
+  2*5 bstr .cbor SUIT_Command_Sequence,
   ?nil
 ]
 
@@ -264,7 +265,7 @@ suit-directive-copy                     = 22
 suit-directive-invoke                   = 23
 
 ; suit-directive-swap                     = 31
-; suit-directive-run-sequence             = 32
+suit-directive-run-sequence             = 32
 
 suit-parameter-vendor-identifier = 1
 suit-parameter-class-identifier  = 2
