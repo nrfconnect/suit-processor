@@ -4,7 +4,6 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-
 #include <stdint.h>
 #include <zcbor_decode.h>
 #include <zcbor_common.h>
@@ -14,373 +13,221 @@
 #include <suit_condition.h>
 #include <suit_directive.h>
 #include <suit_platform.h>
+#include <suit_seq_exec.h>
 
 
-typedef union {
-	struct SUIT_Condition_ condition;
-	struct SUIT_Directive_ directive;
-} suit_command_t;
+static int suit_validate_single_command(struct suit_processor_state *state, suit_command_t *command, bool is_shared_sequence)
+{
+	int retval = SUIT_ERR_DECODING;
+
+	if (command->type == SUIT_COMMAND_CONDITION) {
+		switch (command->condition._SUIT_Condition_choice) {
+		case _SUIT_Condition___suit_condition_vendor_identifier:
+		case _SUIT_Condition___suit_condition_class_identifier:
+		case _SUIT_Condition___suit_condition_device_identifier:
+		case _SUIT_Condition___suit_condition_image_match:
+		case _SUIT_Condition___suit_condition_component_slot:
+		case _SUIT_Condition___suit_condition_abort:
+			SUIT_DBG("Found valid condition: %d\r\n", command->condition._SUIT_Condition_choice);
+			retval = SUIT_SUCCESS;
+			break;
+		default:
+			SUIT_ERR("Found invalid condition: %d\r\n", command->condition._SUIT_Condition_choice);
+			retval = SUIT_ERR_MANIFEST_VALIDATION;
+			break;
+		}
+	}
+
+	else if (command->type == SUIT_COMMAND_DIRECTIVE) {
+		switch (command->directive._SUIT_Directive_choice) {
+		case _SUIT_Directive___suit_directive_set_component_index:
+			retval = suit_directive_set_current_components(state,
+				&command->directive._SUIT_Directive___suit_directive_set_component_index__IndexArg);
+			if (retval == SUIT_ERR_DECODING) {
+				retval = SUIT_ERR_MANIFEST_VALIDATION;
+			}
+			break;
+		case _SUIT_Directive___suit_directive_override_parameters:
+			SUIT_DBG("Found valid directive: %d\r\n", command->directive._SUIT_Directive_choice);
+			retval = SUIT_SUCCESS;
+			break;
+		/* It is safe to call directive-run-sequence as well as directive-try-each during validation,
+		 * because they only parses the command string and populates the execution stack.
+		 */
+		case _SUIT_Directive___suit_directive_try_each:
+			SUIT_DBG("Found valid directive: %d\r\n", command->directive._SUIT_Directive_choice);
+			retval = suit_directive_try_each(state, &command->directive._SUIT_Directive___suit_directive_try_each__SUIT_Directive_Try_Each_Argument, true);
+			break;
+		case _SUIT_Directive___suit_directive_run_sequence:
+			SUIT_DBG("Validating run-sequence directive: %d\r\n", command->directive._SUIT_Directive_choice);
+			retval = suit_directive_run_sequence(state,
+				&command->directive._SUIT_Directive___suit_directive_run_sequence_SUIT_Command_Sequence_bstr);
+			break;
+		case _SUIT_Directive___suit_directive_fetch:
+		case _SUIT_Directive___suit_directive_copy:
+		case _SUIT_Directive___suit_directive_invoke:
+			if (!is_shared_sequence) {
+				SUIT_DBG("Found valid directive: %d\r\n", command->directive._SUIT_Directive_choice);
+				retval = SUIT_SUCCESS;
+				break;
+			}
+			/* fall-through in case of shared command sequence */
+		default:
+			SUIT_ERR("Found invalid directive: %d\r\n", command->directive._SUIT_Directive_choice);
+			retval = SUIT_ERR_MANIFEST_VALIDATION;
+			break;
+		}
+	}
+
+	SUIT_DBG("Single command validated (status: %d)\r\n", retval);
+
+	return retval;
+}
+
+static inline int suit_validate_single_shared_command(struct suit_processor_state *state, suit_command_t *command)
+{
+	return suit_validate_single_command(state, command, true);
+}
+
+static inline int suit_validate_single_common_command(struct suit_processor_state *state, suit_command_t *command)
+{
+	return suit_validate_single_command(state, command, false);
+}
+
+
+static int suit_run_single_command(struct suit_processor_state *state, suit_command_t *command)
+{
+	int retval = SUIT_ERR_DECODING;
+
+	if (command->type == SUIT_COMMAND_CONDITION) {
+		for (int j = 0; j < state->num_components; j++) {
+			if (state->current_components[j]) {
+				switch (command->condition._SUIT_Condition_choice) {
+				case _SUIT_Condition___suit_condition_vendor_identifier:
+					retval = suit_condition_vendor_identifier(state, &state->components[j]);
+					break;
+				case _SUIT_Condition___suit_condition_class_identifier:
+					retval = suit_condition_class_identifier(state, &state->components[j]);
+					break;
+				case _SUIT_Condition___suit_condition_device_identifier:
+					retval = suit_condition_device_identifier(state, &state->components[j]);
+					break;
+				case _SUIT_Condition___suit_condition_image_match:
+					retval = suit_condition_image_match(state, &state->components[j]);
+					break;
+				case _SUIT_Condition___suit_condition_component_slot:
+					retval = suit_condition_component_slot(state, &state->components[j]);
+					break;
+				case _SUIT_Condition___suit_condition_abort:
+					retval = suit_condition_abort(state, &state->components[j]);
+					break;
+				default:
+					retval = SUIT_ERR_DECODING;
+					break;
+				}
+
+				/* If a condition for any of the selected components failed,
+				 * the whole condition should fail.
+				 */
+				if (retval != SUIT_SUCCESS) {
+					break;
+				}
+			}
+		}
+	}
+
+	else if (command->type == SUIT_COMMAND_DIRECTIVE) {
+		switch (command->directive._SUIT_Directive_choice) {
+		case _SUIT_Directive___suit_directive_set_component_index:
+			retval = suit_directive_set_current_components(state,
+				&command->directive._SUIT_Directive___suit_directive_set_component_index__IndexArg);
+			break;
+		case _SUIT_Directive___suit_directive_try_each:
+			retval = suit_directive_try_each(state, &command->directive._SUIT_Directive___suit_directive_try_each__SUIT_Directive_Try_Each_Argument, false);
+			break;
+		case _SUIT_Directive___suit_directive_override_parameters:
+			retval = suit_directive_override_parameters(state,
+				command->directive.___suit_directive_override_parameters_map__SUIT_Parameters,
+				command->directive.___suit_directive_override_parameters_map__SUIT_Parameters_count);
+			break;
+		case _SUIT_Directive___suit_directive_run_sequence:
+			retval = suit_directive_run_sequence(state,
+				&command->directive._SUIT_Directive___suit_directive_run_sequence_SUIT_Command_Sequence_bstr);
+			break;
+		case _SUIT_Directive___suit_directive_fetch:
+			retval = suit_directive_fetch(state);
+			break;
+		case _SUIT_Directive___suit_directive_copy:
+			retval = suit_directive_copy(state);
+			break;
+		case _SUIT_Directive___suit_directive_invoke:
+			retval = suit_directive_invoke(state);
+			break;
+		default:
+			retval = SUIT_ERR_DECODING;
+			break;
+		}
+	}
+
+	SUIT_DBG("Single command executed (status: %d)\r\n", retval);
+
+	return retval;
+}
+
 
 int suit_validate_shared_sequence(struct suit_processor_state *state, struct zcbor_string *cmd_seq_str)
 {
-	size_t decoded_len;
-	suit_command_t result;
-	ZCBOR_STATE_D(d_state, 1, cmd_seq_str->value, cmd_seq_str->len, 1);
+	int retval = suit_seq_exec_schedule(state, cmd_seq_str, suit_bool_false);
 
-	bool success = zcbor_list_start_decode(d_state);
-
-	if (!success) {
-		int ret = zcbor_peek_error(d_state);
-		return ZCBOR_ERR_TO_SUIT_ERR((ret != ZCBOR_SUCCESS) ? ret : ZCBOR_ERR_UNKNOWN);
-	}
-
-	if (d_state->indefinite_length_array) {
-		return SUIT_ERR_DECODING;
-	}
-
-	/* Each command brings a single argument, passed as an element inside the array,
-	   thus the number of commands is the half of the number of array elements */
-	if (d_state->elem_count % 2 == 1) {
-		return SUIT_ERR_DECODING;
-	}
-
-	for (int i = 0; i < d_state->elem_count / 2; i++) {
-		if (cbor_decode_SUIT_Condition(
-			d_state->payload, d_state->payload_end - d_state->payload,
-			&result.condition, &decoded_len) == ZCBOR_SUCCESS) {
-			int retval;
-
-			if (i == 0) {
-				/* If there is only one component, it is valid to skip the set-component-index command */
-				if (state->num_components != 1) {
-					/* Each sequence should begin with a set-component-index command */
-					return SUIT_ERR_MANIFEST_VALIDATION;
-				}
-			}
-
-			for (int j = 0; j < state->num_components; j++) {
-				if (state->current_components[j]) {
-					switch (result.condition._SUIT_Condition_choice) {
-					case _SUIT_Condition___suit_condition_vendor_identifier:
-					case _SUIT_Condition___suit_condition_class_identifier:
-					case _SUIT_Condition___suit_condition_device_identifier:
-					case _SUIT_Condition___suit_condition_image_match:
-					case _SUIT_Condition___suit_condition_component_slot:
-					case _SUIT_Condition___suit_condition_abort:
-						retval = SUIT_SUCCESS;
-						break;
-					default:
-						retval = SUIT_ERR_MANIFEST_VALIDATION;
-						break;
-					}
-					if (retval != SUIT_SUCCESS) {
-						return retval;
-					}
-				}
-			}
-			d_state->payload += decoded_len;
-			continue;
+	while (retval == SUIT_ERR_AGAIN) {
+		retval = suit_seq_exec_step(state, suit_validate_single_shared_command);
+		if (retval != SUIT_ERR_AGAIN) {
+			/* Drop a single element and pass the returned value through the execution stack.
+			 * If the last element on the stack is dropped, this API will return the error code
+			 * passed as an argument.
+			 * If there are still elements on the stack, this API will return SUIT_ERR_AGAIN.
+			 */
+			retval = suit_seq_exec_finalize(state, retval);
 		}
-
-		if (cbor_decode_SUIT_Directive(
-			d_state->payload, d_state->payload_end - d_state->payload,
-			&result.directive, &decoded_len) == ZCBOR_SUCCESS) {
-			int retval;
-
-			if (i == 0) {
-				/* If there is only one component, it is valid to skip the set-component-index command */
-				if ((state->num_components != 1) &&
-				    (result.directive._SUIT_Directive_choice
-					!= _SUIT_Directive___suit_directive_set_component_index)) {
-					/* Each sequence should begin with a set-component-index command */
-					return SUIT_ERR_MANIFEST_VALIDATION;
-				}
-			}
-
-			switch (result.directive._SUIT_Directive_choice) {
-			case _SUIT_Directive___suit_directive_set_component_index:
-			case _SUIT_Directive___suit_directive_try_each:
-			case _SUIT_Directive___suit_directive_override_parameters:
-				retval = SUIT_SUCCESS;
-				break;
-			case _SUIT_Directive___suit_directive_fetch:
-			case _SUIT_Directive___suit_directive_copy:
-			case _SUIT_Directive___suit_directive_invoke:
-			default:
-				retval = SUIT_ERR_MANIFEST_VALIDATION;
-				break;
-			}
-			if (retval != SUIT_SUCCESS) {
-				return retval;
-			}
-			d_state->payload += decoded_len;
-			continue;
-		}
-
-		/* Should not come here. */
-		return SUIT_ERR_DECODING;
 	}
 
-	if (d_state->payload == d_state->payload_end) {
-		return SUIT_SUCCESS;
-	}
-
-	return SUIT_ERR_DECODING;
+	return retval;
 }
-
 
 int suit_validate_command_sequence(struct suit_processor_state *state, struct zcbor_string *cmd_seq_str)
 {
-	size_t decoded_len;
-	suit_command_t result;
-	ZCBOR_STATE_D(d_state, 1, cmd_seq_str->value, cmd_seq_str->len, 1);
+	int retval = suit_seq_exec_schedule(state, cmd_seq_str, suit_bool_false);
 
-	bool success = zcbor_list_start_decode(d_state);
-
-	if (!success) {
-		int ret = zcbor_peek_error(d_state);
-		return ZCBOR_ERR_TO_SUIT_ERR((ret != ZCBOR_SUCCESS) ? ret : ZCBOR_ERR_UNKNOWN);
-	}
-
-	if (d_state->indefinite_length_array) {
-		return SUIT_ERR_DECODING;
-	}
-
-	/* Each command brings a single argument, passed as an element inside the array,
-	   thus the number of commands is the half of the number of array elements */
-	if (d_state->elem_count % 2 == 1) {
-		return SUIT_ERR_DECODING;
-	}
-
-	for (int i = 0; i < d_state->elem_count / 2; i++) {
-		if (cbor_decode_SUIT_Condition(
-			d_state->payload, d_state->payload_end - d_state->payload,
-			&result.condition, &decoded_len) == ZCBOR_SUCCESS) {
-			int retval;
-
-			if (i == 0) {
-				/* If there is only one component, it is valid to skip the set-component-index command */
-				if (state->num_components != 1) {
-					/* Each sequence should begin with a set-component-index command */
-					return SUIT_ERR_MANIFEST_VALIDATION;
-				}
-			}
-
-			for (int j = 0; j < state->num_components; j++) {
-				if (state->current_components[j]) {
-					switch (result.condition._SUIT_Condition_choice) {
-					case _SUIT_Condition___suit_condition_vendor_identifier:
-					case _SUIT_Condition___suit_condition_class_identifier:
-					case _SUIT_Condition___suit_condition_device_identifier:
-					case _SUIT_Condition___suit_condition_image_match:
-					case _SUIT_Condition___suit_condition_component_slot:
-					case _SUIT_Condition___suit_condition_abort:
-						retval = SUIT_SUCCESS;
-						break;
-					default:
-						retval = SUIT_ERR_MANIFEST_VALIDATION;
-						break;
-					}
-					if (retval != SUIT_SUCCESS) {
-						return retval;
-					}
-				}
-			}
-			d_state->payload += decoded_len;
-			continue;
+	while (retval == SUIT_ERR_AGAIN) {
+		retval = suit_seq_exec_step(state, suit_validate_single_common_command);
+		if (retval != SUIT_ERR_AGAIN) {
+			/* Drop a single element and pass the returned value through the execution stack.
+			 * If the last element on the stack is dropped, this API will return the error code
+			 * passed as an argument.
+			 * If there are still elements on the stack, this API will return SUIT_ERR_AGAIN.
+			 */
+			retval = suit_seq_exec_finalize(state, retval);
 		}
-
-		if (cbor_decode_SUIT_Directive(
-			d_state->payload, d_state->payload_end - d_state->payload,
-			&result.directive, &decoded_len) == ZCBOR_SUCCESS) {
-			int retval;
-
-			if (i == 0) {
-				/* If there is only one component, it is valid to skip the set-component-index command */
-				if ((state->num_components != 1) &&
-				    (result.directive._SUIT_Directive_choice
-					!= _SUIT_Directive___suit_directive_set_component_index)) {
-					/* Each sequence should begin with a set-component-index command */
-					return SUIT_ERR_MANIFEST_VALIDATION;
-				}
-			}
-
-			switch (result.directive._SUIT_Directive_choice) {
-			case _SUIT_Directive___suit_directive_set_component_index:
-			case _SUIT_Directive___suit_directive_try_each:
-			case _SUIT_Directive___suit_directive_override_parameters:
-			case _SUIT_Directive___suit_directive_fetch:
-			case _SUIT_Directive___suit_directive_copy:
-			case _SUIT_Directive___suit_directive_invoke:
-				retval = SUIT_SUCCESS;
-				break;
-			default:
-				retval = SUIT_ERR_MANIFEST_VALIDATION;
-				break;
-			}
-			if (retval != SUIT_SUCCESS) {
-				return retval;
-			}
-			d_state->payload += decoded_len;
-			continue;
-		}
-
-		/* Should not come here. */
-		return SUIT_ERR_DECODING;
 	}
 
-	if (d_state->payload == d_state->payload_end) {
-		return SUIT_SUCCESS;
-	}
-
-	return SUIT_ERR_DECODING;
+	return retval;
 }
-
 
 int suit_run_command_sequence(struct suit_processor_state *state, struct zcbor_string *cmd_seq_str)
 {
-	size_t decoded_len;
-	suit_command_t result;
-	ZCBOR_STATE_D(d_state, 1, cmd_seq_str->value, cmd_seq_str->len, 1);
+	int retval = suit_seq_exec_schedule(state, cmd_seq_str, suit_bool_false);
 
-	bool success = zcbor_list_start_decode(d_state);
-
-	if (!success) {
-		int ret = zcbor_peek_error(d_state);
-		return ZCBOR_ERR_TO_SUIT_ERR((ret != ZCBOR_SUCCESS) ? ret : ZCBOR_ERR_UNKNOWN);
-	}
-
-	for (int i = 0; i < d_state->elem_count / 2; i++) {
-		if (cbor_decode_SUIT_Condition(
-			d_state->payload, d_state->payload_end - d_state->payload,
-			&result.condition, &decoded_len) == ZCBOR_SUCCESS) {
-			int retval;
-
-			if (i == 0) {
-				/* If there is only one component, it is valid to skip the set-component-index command */
-				if (state->num_components != 1) {
-					/* Each sequence should begin with a set-component-index command */
-					return SUIT_ERR_MANIFEST_VALIDATION;
-				}
-			}
-
-			for (int j = 0; j < state->num_components; j++) {
-				if (state->current_components[j]) {
-					switch (result.condition._SUIT_Condition_choice) {
-					case _SUIT_Condition___suit_condition_vendor_identifier:
-						retval = suit_condition_vendor_identifier(state, &state->components[j]);
-						break;
-					case _SUIT_Condition___suit_condition_class_identifier:
-						retval = suit_condition_class_identifier(state, &state->components[j]);
-						break;
-					case _SUIT_Condition___suit_condition_device_identifier:
-						retval = suit_condition_device_identifier(state, &state->components[j]);
-						break;
-					case _SUIT_Condition___suit_condition_image_match:
-						retval = suit_condition_image_match(state, &state->components[j]);
-						break;
-					case _SUIT_Condition___suit_condition_component_slot:
-						retval = suit_condition_component_slot(state, &state->components[j]);
-						break;
-					case _SUIT_Condition___suit_condition_abort:
-						retval = suit_condition_abort(state, &state->components[j]);
-						break;
-					default:
-						retval = SUIT_ERR_DECODING;
-						break;
-					}
-					if ((retval != SUIT_SUCCESS)
-						&& !((retval == SUIT_FAIL_CONDITION)
-							&& (state->soft_failure == suit_bool_true))) {
-						return retval;
-					}
-				}
-			}
-			d_state->payload += decoded_len;
-			continue;
+	while (retval == SUIT_ERR_AGAIN) {
+		retval = suit_seq_exec_step(state, suit_run_single_command);
+		if (retval != SUIT_ERR_AGAIN) {
+			/* Drop a single element and pass the returned value through the execution stack.
+			 * If the last element on the stack is dropped, this API will return the error code
+			 * passed as an argument.
+			 * If there are still elements on the stack, this API will return SUIT_ERR_AGAIN.
+			 */
+			retval = suit_seq_exec_finalize(state, retval);
 		}
-
-		if (cbor_decode_SUIT_Directive(
-			d_state->payload, d_state->payload_end - d_state->payload,
-			&result.directive, &decoded_len) == ZCBOR_SUCCESS) {
-			int retval;
-
-			if (i == 0) {
-				/* If there is only one component, it is valid to skip the set-component-index command */
-				if ((state->num_components != 1) &&
-					(result.directive._SUIT_Directive_choice
-					!= _SUIT_Directive___suit_directive_set_component_index)) {
-					/* Each sequence should begin with a set-component-index command */
-					return SUIT_ERR_MANIFEST_VALIDATION;
-				}
-			}
-
-			switch (result.directive._SUIT_Directive_choice) {
-			case _SUIT_Directive___suit_directive_set_component_index:
-				retval = suit_directive_set_current_components(state,
-					&result.directive._SUIT_Directive___suit_directive_set_component_index__IndexArg);
-				break;
-			case _SUIT_Directive___suit_directive_try_each:
-				retval = suit_directive_try_each(state, &result.directive._SUIT_Directive___suit_directive_try_each__SUIT_Directive_Try_Each_Argument);
-				break;
-			case _SUIT_Directive___suit_directive_override_parameters:
-				retval = suit_directive_override_parameters(state,
-					result.directive.___suit_directive_override_parameters_map__SUIT_Parameters,
-					result.directive.___suit_directive_override_parameters_map__SUIT_Parameters_count);
-				break;
-			case _SUIT_Directive___suit_directive_fetch:
-				retval = suit_directive_fetch(state);
-				break;
-			case _SUIT_Directive___suit_directive_copy:
-				retval = suit_directive_copy(state);
-				break;
-			case _SUIT_Directive___suit_directive_invoke:
-				retval = suit_directive_invoke(state);
-				break;
-			default:
-				retval = SUIT_ERR_DECODING;
-				break;
-			}
-			if (retval != SUIT_SUCCESS) {
-				return retval;
-			}
-			d_state->payload += decoded_len;
-			continue;
-		}
-
-		/* Should not come here. */
-		return SUIT_ERR_DECODING;
 	}
 
-	if (d_state->payload == d_state->payload_end) {
-		return SUIT_SUCCESS;
-	}
-
-	return SUIT_ERR_DECODING;
-}
-
-
-int suit_run_shared_sequence(struct suit_processor_state *state, struct zcbor_string *cmd_seq_str)
-{
-	int err = SUIT_SUCCESS;
-
-	/* Reset SUIT parameters */
-	for (int i = 0; i < state->num_components; i++) {
-		suit_reset_params(&state->components[i]);
-	}
-
-	/* If there is only one component - set it as an active one */
-	if (state->num_components == 1) {
-		struct IndexArg_ index_arg = {
-			._IndexArg_uint = 0,
-			._IndexArg_choice = _IndexArg_uint,
-		};
-		err = suit_directive_set_current_components(state, &index_arg);
-	}
-
-	if (err == SUIT_SUCCESS) {
-		err = suit_run_command_sequence(state, cmd_seq_str);
-	}
-
-	return err;
+	return retval;
 }

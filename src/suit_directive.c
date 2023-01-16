@@ -7,6 +7,7 @@
 #include <suit_types.h>
 #include <suit_platform.h>
 #include <suit_directive.h>
+#include <suit_seq_exec.h>
 
 
 int suit_directive_set_current_components(struct suit_processor_state *state, struct IndexArg_ *index_arg)
@@ -46,65 +47,142 @@ int suit_directive_set_current_components(struct suit_processor_state *state, st
 	return SUIT_SUCCESS;
 }
 
-static int try_each(struct suit_processor_state *state, struct SUIT_Directive_Try_Each_Argument *try_each_arg)
+static int try_each(struct suit_processor_state *state, struct SUIT_Directive_Try_Each_Argument *try_each_arg, bool validate)
 {
-	enum suit_bool soft_failure = state->soft_failure;
-	int ret = SUIT_SUCCESS;
+	struct suit_seq_exec_state *seq_exec_state;
+	struct zcbor_string *command_sequence = NULL;
 
-	for (int i = 0; i < try_each_arg->_SUIT_Directive_Try_Each_Argument_SUIT_Command_Sequence_bstr_count; i++) {
-		state->soft_failure = suit_bool_true;
-		ret = suit_directive_run_sequence(state, &try_each_arg->_SUIT_Directive_Try_Each_Argument_SUIT_Command_Sequence_bstr[i]);
+	int retval = suit_seq_exec_state_get(state, &seq_exec_state);
+	if (retval != SUIT_SUCCESS) {
+		return retval;
+	}
 
-		if ((ret == SUIT_FAIL_CONDITION) && (state->soft_failure == suit_bool_true)) {
-			if (try_each_arg->_SUIT_Directive_Try_Each_Argument_nil_present) {
-				ret = SUIT_SUCCESS;
-			}
+	if (seq_exec_state->cmd_exec_state != SUIT_SEQ_EXEC_DEFAULT_STATE) {
+		if (seq_exec_state->retval == SUIT_FAIL_SOFT_CONDITION) {
+			SUIT_DBG("Try sequence finished with soft failure.\r\n");
+			/* Handle soft condition failure - go to the next try sequence. */
+			seq_exec_state->retval = SUIT_SUCCESS;
+		} else if ((validate) && (seq_exec_state->retval == SUIT_SUCCESS) &&
+			   (seq_exec_state->cmd_exec_state < try_each_arg->_SUIT_Directive_Try_Each_Argument_SUIT_Command_Sequence_bstr_count)) {
+			SUIT_DBG("Try sequence validated.\r\n", seq_exec_state->retval);
+			/* In case of validation - go to the next sequence if the current one succeeds. */
 		} else {
-			break;
+			SUIT_DBG("Try sequence finished. Status: %d.\r\n", seq_exec_state->retval);
+			return seq_exec_state->retval;
 		}
 	}
 
-	state->soft_failure = soft_failure;
 
-	return ret;
+	if (seq_exec_state->cmd_exec_state < try_each_arg->_SUIT_Directive_Try_Each_Argument_SUIT_Command_Sequence_bstr_count) {
+		SUIT_DBG("Try the next command sequence.\r\n");
+		command_sequence = &try_each_arg->_SUIT_Directive_Try_Each_Argument_SUIT_Command_Sequence_bstr[seq_exec_state->cmd_exec_state];
+		seq_exec_state->cmd_exec_state++;
+		return suit_seq_exec_schedule(state, command_sequence, suit_bool_true);
+	}
+
+	/* If the end of the list reached - verify if there is an empty element at the end.
+	 * If we came here, it means all command sequences in the try-each block failed.
+	 */
+	if (try_each_arg->_SUIT_Directive_Try_Each_Argument_nil_present) {
+		return SUIT_SUCCESS;
+	}
+
+	/* Cannot use SUIT_FAIL_CONDITION.
+	 * If used, the outer try-each will treat it as a soft condition failure.
+	 */
+	return SUIT_ERR_CRASH;
 }
 
-int suit_directive_try_each(struct suit_processor_state *state, struct SUIT_Directive_Try_Each_Argument *try_each_arg)
+
+int suit_directive_try_each(struct suit_processor_state *state, struct SUIT_Directive_Try_Each_Argument *try_each_arg, bool validate)
 {
-	int ret = SUIT_SUCCESS;
-	bool current_components_backup[SUIT_MAX_NUM_COMPONENTS];
-	memcpy(&current_components_backup, &state->current_components,
-		SUIT_MAX_NUM_COMPONENTS * sizeof(bool));
-	if (state->num_components > SUIT_MAX_NUM_COMPONENTS) {
+	struct suit_seq_exec_state *seq_exec_state;
+	size_t component_idx;
+
+	/* Implement checks enforced by the CDDL, so the nested non-compliant
+	 * sequence will not slip through.
+	 */
+	if (try_each_arg->_SUIT_Directive_Try_Each_Argument_SUIT_Command_Sequence_bstr_count < 2) {
 		return SUIT_ERR_DECODING;
 	}
 
-	for (int i = 0; i < state->num_components; i++) {
-		state->current_components[i] = false;
+	/* Get the current component index. */
+	int retval = suit_seq_exec_component_idx_get(state, &component_idx);
+	if (retval != SUIT_SUCCESS) {
+		return retval;
 	}
 
-	for (int i = 0; i < state->num_components; i++) {
-		if (current_components_backup[i]) {
-			state->current_components[i] = true;
-			ret = try_each(state, try_each_arg);
-			state->current_components[i] = false;
+	retval = suit_seq_exec_state_get(state, &seq_exec_state);
+	if (retval != SUIT_SUCCESS) {
+		return retval;
+	}
 
+	/* If the sequence has finished and the component list was not exhausted, reschedule the sequence. */
+	while ((retval == SUIT_SUCCESS) && (component_idx != SUIT_MAX_NUM_COMPONENTS)) {
+		retval = try_each(state, try_each_arg, validate);
+		/* Sequence finished - execute it for the next component. */
+		if (retval != SUIT_ERR_AGAIN) {
+			int ret = suit_seq_exec_component_idx_next(state, &component_idx);
 			if (ret != SUIT_SUCCESS) {
-				break;
+				retval = ret;
+			} else if (component_idx != SUIT_MAX_NUM_COMPONENTS) {
+				/* Reset the execution state to repeat the sequence. */
+				seq_exec_state->cmd_exec_state = SUIT_SEQ_EXEC_DEFAULT_STATE;
 			}
 		}
 	}
 
-	memcpy(&state->current_components, &current_components_backup, state->num_components);
-
-	return ret;
+	return retval;
 }
-
 
 int suit_directive_run_sequence(struct suit_processor_state *state,
 		struct zcbor_string *command_sequence)
 {
-	return SUIT_ERR_UNSUPPORTED_COMMAND;
+	struct suit_seq_exec_state *seq_exec_state;
+	size_t component_idx;
+
+	/* Implement checks enforced by the CDDL, so the nested non-compliant
+	 * sequence will not slip through.
+	 */
+	if (command_sequence->len < 3) {
+		return SUIT_ERR_DECODING;
+	}
+
+	/* Get the current component index. */
+	int retval = suit_seq_exec_component_idx_get(state, &component_idx);
+	if (retval != SUIT_SUCCESS) {
+		return retval;
+	}
+
+	retval = suit_seq_exec_state_get(state, &seq_exec_state);
+	if (retval != SUIT_SUCCESS) {
+		return retval;
+	}
+
+	/* If the sequence has finished and the component list was not exhausted, reschedule the sequence. */
+	while ((retval == SUIT_SUCCESS) && (component_idx != SUIT_MAX_NUM_COMPONENTS)) {
+		if (seq_exec_state->cmd_exec_state == SUIT_SEQ_EXEC_DEFAULT_STATE) {
+			SUIT_DBG("Push the sequence to run onto the stack\r\n");
+			seq_exec_state->cmd_exec_state = 1;
+			return suit_seq_exec_schedule(state, command_sequence, suit_bool_false);
+		} else if (seq_exec_state->retval == SUIT_FAIL_SOFT_CONDITION) {
+			seq_exec_state->retval = SUIT_SUCCESS;
+		}
+		/* Sequence finished - execute it for the next component. */
+		if (seq_exec_state->retval != SUIT_ERR_AGAIN) {
+			int ret = suit_seq_exec_component_idx_next(state, &component_idx);
+			if (ret != SUIT_SUCCESS) {
+				seq_exec_state->retval = ret;
+			} else if (component_idx != SUIT_MAX_NUM_COMPONENTS) {
+				/* Reset the execution state to repeat the sequence. */
+				seq_exec_state->cmd_exec_state = SUIT_SEQ_EXEC_DEFAULT_STATE;
+			}
+		}
+
+		retval = seq_exec_state->retval;
+	}
+
+	return retval;
 }
 
 
@@ -154,11 +232,31 @@ int suit_directive_override_parameters(struct suit_processor_state *state,
 		struct __suit_directive_override_parameters_map__SUIT_Parameters *params,
 		uint_fast32_t param_count)
 {
-	for (int i = 0; i < state->num_components; i++) {
-		if (state->current_components[i]) {
-			for (int j = 0; j < param_count; j++) {
-				int err = set_param(&state->components[i],
-					&params[j].___suit_directive_override_parameters_map__SUIT_Parameters);
+	for (int j = 0; j < param_count; j++) {
+		struct SUIT_Parameters_ *param = &params[j].___suit_directive_override_parameters_map__SUIT_Parameters;
+
+		if (param->_SUIT_Parameters_choice == _SUIT_Parameters_suit_parameter_soft_failure) {
+			struct suit_seq_exec_state *seq_exec_state;
+
+			/* The soft-failure may be set only within try-each or command sequence.
+			 * Fail if the stack contains a single entry (the manifest command sequence entry point).
+			 */
+			if (state->seq_stack_height < 2) {
+				return SUIT_ERR_UNSUPPORTED_COMMAND;
+			}
+
+			int retval = suit_seq_exec_state_get(state, &seq_exec_state);
+			if (retval != SUIT_SUCCESS) {
+				return retval;
+			}
+
+			seq_exec_state->soft_failure = (param->_SUIT_Parameters_suit_parameter_soft_failure ? suit_bool_true : suit_bool_false);
+			continue;
+		}
+
+		for (int i = 0; i < state->num_components; i++) {
+			if (state->current_components[i]) {
+				int err = set_param(&state->components[i], param);
 				if (err != SUIT_SUCCESS) {
 					return err;
 				}
