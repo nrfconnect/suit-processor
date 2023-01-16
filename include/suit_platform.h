@@ -11,6 +11,23 @@
 #include <stdint.h>
 
 
+#ifndef SUIT_DBG
+#define SUIT_DBG(...)
+#endif
+#ifndef SUIT_DBG_RAW
+#define SUIT_DBG_RAW(...)
+#endif
+#ifndef SUIT_INF
+#define SUIT_INF(...)
+#endif
+#ifndef SUIT_WRN
+#define SUIT_WRN(...)
+#endif
+#ifndef SUIT_ERR
+#define SUIT_ERR(...)
+#endif
+
+
 /** Reset all loaded component properties and handles assigned to them. */
 void suit_plat_reset_components(void);
 

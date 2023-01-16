@@ -18,6 +18,8 @@
 #define SUIT_MAX_NUM_COMPONENTS 4  ///! The maximum number of components referenced in the manifest.
 #define SUIT_MAX_COMMAND_ARGS 3  ///! The maximum number of arguments consumed by a single command.
 #define SUIT_SUIT_SIG_STRUCTURE1_MAX_LENGTH 55  ///! The maximum length of the Sig_structure1 structure. Current value allows to store only 256-bit long digests.
+#define SUIT_MAX_SEQ_DEPTH 5  ///! The maximum number of command sequences that may be encapsulated.
+#define SUIT_SEQ_EXEC_DEFAULT_STATE 0  ///! The default value of the cmd_exec_state.
 
 /** Errors from the suit API
  *
@@ -27,9 +29,9 @@
 #define SUIT_SUCCESS                      0
 #define SUIT_FAIL_CONDITION               1 // Test failed (e.g. Vendor ID/Class ID).
 #define SUIT_ERR_TAMP                     3 // Tampering detected in processing.
-#define SUIT_ERR_ORDER                    4
-#define SUIT_ERR_WAIT                     5
-#define SUIT_ERR_DECODING                 6
+#define SUIT_ERR_ORDER                    4 // API called in an invalid order.
+#define SUIT_ERR_WAIT                     5 // Platform operation should be retried later.
+#define SUIT_ERR_DECODING                 6 // Failed to decode the payload.
 #define SUIT_ERR_AUTHENTICATION           7 // Envelope authentication failed.
 #define SUIT_ERR_MANIFEST_VERIFICATION    8 // Manifest (cryptographic) verification failed.
 #define SUIT_ERR_MANIFEST_VALIDATION      9 // Manifest validation failed (rule broken).
@@ -43,6 +45,9 @@
 #define SUIT_ERR_MISSING_COMPONENT        17 // Missing required component from a Component Set.
 #define SUIT_ERR_CRASH                    18 // Application crashed when executed.
 #define SUIT_ERR_TIMEOUT                  19 // Watchdog timeout occurred.
+#define SUIT_ERR_AGAIN                    100 // The execution has not yet finished. Call the API again.
+#define SUIT_ERR_OVERFLOW                 101 // The execution context is too small to handle the command sequence.
+#define SUIT_FAIL_SOFT_CONDITION          102 // Test failed (e.g. Vendor ID/Class ID) and soft-failure parameter was set to true.
 
 
 #define SUIT_ZCBOR_ERR_OFFSET 128
@@ -119,6 +124,26 @@ static inline void suit_reset_params(struct suit_manifest_params *params)
 	params->component_handle = bak;
 }
 
+/** @brief Structure describing manifest processor execution state.
+ *
+ * @note The cmd_exec_state should be used by the command implementation to
+ *       distinguish between the first an subsequent calls.
+ *       Currently it is used by the run-sequence directive to prevent it
+ *       from scheduling the sequence more than once as well as the try-each
+ *       directive to select the correct command block.
+ */
+struct suit_seq_exec_state {
+	struct zcbor_string cmd_seq_str; ///! Structure describing the currently executed command sequence.
+	size_t n_commands; ///! The number of commands expected inside the currently executed command sequence.
+	size_t current_command; ///! The index of currently executed command within the executed command sequence.
+	int cmd_exec_state; ///! Optional current command execution state.
+	enum suit_bool soft_failure; ///! suit-parameter-soft-failure
+	int retval; ///! Value returned by the nested command sequence execution.
+	const uint8_t * exec_ptr; ///! The pointer within the currently executed command sequence, pointing to the current command in the sequence.
+	size_t current_component_idx; ///! In case of nested command execution - the currently selected component from the component list.
+	bool current_components_backup[SUIT_MAX_NUM_COMPONENTS]; //! List of components, selected before the execution of command sequences.
+};
+
 struct suit_processor_state {
 	enum suit_bool envelope_decoded;
 	suit_manifest_envelope_t envelope;
@@ -129,12 +154,13 @@ struct suit_processor_state {
 	enum suit_bool manifest_authenticated;
 	suit_manifest_t manifest;
 	enum suit_bool manifest_validated;
-	enum suit_manifest_step previous_step;
+	enum suit_manifest_step current_step;
 	enum suit_bool dry_run;
 	size_t num_components;
 	bool current_components[SUIT_MAX_NUM_COMPONENTS];
 	struct suit_manifest_params components[SUIT_MAX_NUM_COMPONENTS];
-	enum suit_bool soft_failure; ///! suit-parameter-soft-failure
+	size_t seq_stack_height;
+	struct suit_seq_exec_state seq_stack[SUIT_MAX_SEQ_DEPTH];
 };
 
 /** https://www.iana.org/assignments/cose/cose.xhtml */

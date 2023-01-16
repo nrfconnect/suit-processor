@@ -12,6 +12,7 @@
 #include <suit_platform.h>
 #include <cose_encode.h>
 #include <cose_decode.h>
+#include <suit_directive.h>
 
 /** Calculate the length of the CBOR byte string header
  */
@@ -42,7 +43,6 @@ void suit_reset_state(struct suit_processor_state *state)
 	state->manifest_decoded = suit_bool_false;
 	state->manifest_validated = suit_bool_false;
 	state->dry_run = suit_bool_true;
-	state->soft_failure = suit_bool_false;
 	suit_plat_reset_components();
 }
 
@@ -372,6 +372,33 @@ static struct zcbor_string *get_command_seq(struct suit_processor_state *state,
 	return NULL;
 }
 
+/** @brief Reset all component's parameter as well as the list of active components.
+ *
+ * @param  state  Manifest processor state to be modified.
+*/
+static int prepare_params(struct suit_processor_state *state)
+{
+	int retval = SUIT_SUCCESS;
+
+	/* Reset SUIT parameters */
+	for (int i = 0; i < state->num_components; i++) {
+		suit_reset_params(&state->components[i]);
+	}
+
+	/* If there is only one component - set it as an active one */
+	if (state->num_components == 1) {
+		struct IndexArg_ index_arg = {
+			._IndexArg_uint = 0,
+			._IndexArg_choice = _IndexArg_uint,
+		};
+		retval = suit_directive_set_current_components(state, &index_arg);
+	} else if (state->num_components == 0) {
+		retval = SUIT_ERR_MANIFEST_VALIDATION;
+	}
+
+	return retval;
+}
+
 
 int suit_validate_manifest(struct suit_processor_state *state)
 {
@@ -441,9 +468,14 @@ int suit_validate_manifest(struct suit_processor_state *state)
 		}
 	}
 
+
 	/* Verify shared command sequence */
 	while (common->_SUIT_Common_suit_shared_sequence_present){
-		int ret = suit_validate_shared_sequence(state, &common->_SUIT_Common_suit_shared_sequence._SUIT_Common_suit_shared_sequence);
+		int ret = prepare_params(state);
+
+		CHECK_RET(ret, break);
+
+		ret = suit_validate_shared_sequence(state, &common->_SUIT_Common_suit_shared_sequence._SUIT_Common_suit_shared_sequence);
 
 		CHECK_RET(ret, break);
 	}
@@ -456,8 +488,12 @@ int suit_validate_manifest(struct suit_processor_state *state)
 	for (enum suit_manifest_step step = SUIT_NO_STEP + 1; step < SUIT_LAST_STEP; step++) {
 		struct zcbor_string *step_seq = get_command_seq(state, step);
 
+		int ret = prepare_params(state);
+		if (ret != SUIT_SUCCESS) {
+			return ret;
+		}
 		while (step_seq != NULL) {
-			int ret = suit_validate_command_sequence(state, step_seq);
+			ret = suit_validate_command_sequence(state, step_seq);
 
 			CHECK_RET(ret, break);
 		}
@@ -476,12 +512,18 @@ int suit_validate_manifest(struct suit_processor_state *state)
 		}
 
 		if (step_seq != NULL) {
+			ret = prepare_params(state);
+			if (ret != SUIT_SUCCESS) {
+				return ret;
+			}
+
 			/* Execute shared command sequence */
 			while (common->_SUIT_Common_suit_shared_sequence_present){
-				ret = suit_run_shared_sequence(state, &common->_SUIT_Common_suit_shared_sequence._SUIT_Common_suit_shared_sequence);
+				ret = suit_run_command_sequence(state, &common->_SUIT_Common_suit_shared_sequence._SUIT_Common_suit_shared_sequence);
 
 				CHECK_RET(ret, break);
 			}
+
 			ret = suit_run_command_sequence(state, step_seq);
 		}
 
@@ -509,12 +551,16 @@ tamp:
 int suit_process_manifest(struct suit_processor_state *state,
 	enum suit_manifest_step step)
 {
-	if ( state->envelope_decoded != suit_bool_true
+	int ret = SUIT_ERR_TAMP;
+
+	if (state->envelope_decoded != suit_bool_true
 		|| state->envelope_validated != suit_bool_true
 		|| state->manifest_decoded != suit_bool_true
 		|| state->manifest_validated != suit_bool_true) {
 		return SUIT_ERR_ORDER;
 	}
+
+	state->current_step = step;
 
 	struct zcbor_string *step_seq = get_command_seq(state, step);
 
@@ -523,15 +569,22 @@ int suit_process_manifest(struct suit_processor_state *state,
 	}
 
 	if (step_seq != NULL) {
+		ret = prepare_params(state);
+		if (ret != SUIT_SUCCESS) {
+			return ret;
+		}
+
 		/* Execute shared command sequence */
 		struct SUIT_Common *common = &state->manifest._SUIT_Manifest_suit_common_cbor;
 		while (common->_SUIT_Common_suit_shared_sequence_present){
-			int ret = suit_run_shared_sequence(state, &common->_SUIT_Common_suit_shared_sequence._SUIT_Common_suit_shared_sequence);
+			ret = suit_run_command_sequence(state, &common->_SUIT_Common_suit_shared_sequence._SUIT_Common_suit_shared_sequence);
 
 			CHECK_RET(ret, break);
 		}
 
-		return suit_run_command_sequence(state, step_seq);
+		ret = suit_run_command_sequence(state, step_seq);
+
+		return ret;
 	}
 
 tamp:
