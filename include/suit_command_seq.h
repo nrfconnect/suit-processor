@@ -21,13 +21,9 @@ int suit_validate_shared_sequence(struct suit_processor_state *state, struct zcb
  */
 int suit_validate_command_sequence(struct suit_processor_state *state, struct zcbor_string *cmd_seq_str);
 
-/** Run all the commands in this sequence.
+/** Run all commands in the sequence.
  */
 int suit_run_command_sequence(struct suit_processor_state *state, struct zcbor_string *cmd_seq_str);
-
-/** Run all the commands in this shared sequence.
- */
-int suit_run_shared_sequence(struct suit_processor_state *state, struct zcbor_string *cmd_seq_str);
 
 
 #endif /* SUIT_COMMAND_SEQ_H__ */

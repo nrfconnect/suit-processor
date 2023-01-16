@@ -145,6 +145,7 @@ target_include_directories(manifest PUBLIC
 add_library(suit)
 target_sources(suit PRIVATE
   src/suit_command_seq.c
+  src/suit_seq_exec.c
   src/suit_condition.c
   src/suit_directive.c
   src/suit.c
