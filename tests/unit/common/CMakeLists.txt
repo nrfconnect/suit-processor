@@ -17,3 +17,15 @@ target_include_directories(complex_arg PUBLIC
   include
   )
 target_link_libraries(complex_arg PRIVATE zephyr_interface)
+
+# Define bootstrap_envelope library
+add_library(bootstrap_envelope)
+target_sources(bootstrap_envelope PRIVATE
+  src/bootstrap_envelope.c
+  src/bootstrap_seq.c
+  )
+target_include_directories(bootstrap_envelope PUBLIC
+  include
+  )
+target_link_libraries(bootstrap_envelope PRIVATE zephyr_interface)
+target_link_libraries(bootstrap_envelope PRIVATE suit)
