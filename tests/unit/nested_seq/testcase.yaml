@@ -1,0 +1,4 @@
+tests:
+  suit-processor.unit.nested_seq:
+    platform_allow: native_posix native_posix_64 mps2_an521
+    tags: suit-processor run-command-sequence
