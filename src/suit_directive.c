@@ -344,8 +344,13 @@ int suit_directive_copy(struct suit_processor_state *state)
 				return SUIT_ERR_UNAVAILABLE_PARAMETER;
 			}
 
-			int ret = plat_copy(state, state->components[i].component_handle,
-						state->components[i].source_component);
+			const size_t src_idx = state->components[i].source_component;
+			if (src_idx >= state->num_components) {
+				return SUIT_ERR_UNSUPPORTED_PARAMETER;
+			}
+
+			const suit_component_t src_handle = state->components[src_idx].component_handle;
+			int ret = plat_copy(state, state->components[i].component_handle, src_handle);
 
 			if (ret != SUIT_SUCCESS) {
 				return ret;
