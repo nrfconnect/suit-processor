@@ -99,7 +99,7 @@ if(ZCBOR_COMMAND_ORDER)
       -c "${CMAKE_CURRENT_LIST_DIR}/cddl/manifest.cddl"
       -d
       -t SUIT_Envelope_Tagged SUIT_Manifest SUIT_Shared_Sequence SUIT_Command_Sequence
-         SUIT_Condition SUIT_Directive SUIT_Shared_Commands
+         SUIT_Condition SUIT_Directive SUIT_Shared_Commands SUIT_Text_Map
       --output-cmake manifest.cmake
       --copy-sources
   )
@@ -110,7 +110,7 @@ else()
       code
       -d
       -t SUIT_Envelope_Tagged SUIT_Manifest SUIT_Shared_Sequence SUIT_Command_Sequence
-         SUIT_Condition SUIT_Directive SUIT_Shared_Commands
+         SUIT_Condition SUIT_Directive SUIT_Shared_Commands SUIT_Text_Map
       --output-cmake manifest.cmake
       --copy-sources
   )
