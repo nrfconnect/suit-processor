@@ -10,7 +10,7 @@
 #include <suit_command_seq.h>
 #include <bootstrap_envelope.h>
 #include <bootstrap_seq.h>
-#include "suit_platform/mock_suit_platform.h"
+#include "suit_platform/cmock_suit_platform.h"
 
 
 typedef int (*seq_validation_api_t)(struct suit_processor_state *state, struct zcbor_string *cmd_seq_str);
@@ -247,7 +247,7 @@ static void seq_validation_nested_test_template(seq_validation_api_t validate, b
 void test_seq_validation_prepare_reset_state(void)
 {
 	/* It is required to call platform reset API in case of SUIT processor state reset. */
-	__wrap_suit_plat_reset_components_Expect();
+	__cmock_suit_plat_reset_components_Expect();
 
 	suit_reset_state(&state);
 }
@@ -479,7 +479,7 @@ void test_seq_validation_shared_unknown_command(void)
 void test_seq_validation_shared_nested_run_sequence(void)
 {
 	for (size_t depth = 0; depth < (SUIT_MAX_SEQ_DEPTH - 1); depth++) {
-		for (size_t i = 0; i < ARRAY_SIZE(shared_support_matrix); i++) {
+		for (size_t i = 0; i < ZCBOR_ARRAY_SIZE(shared_support_matrix); i++) {
 			seq_validation_nested_test_template(
 				suit_validate_shared_sequence,
 				bootsrap_seq_hdr_run_sequence,
@@ -495,7 +495,7 @@ void test_seq_validation_shared_nested_run_sequence(void)
 void test_seq_validation_command_nested_run_sequence(void)
 {
 	for (size_t depth = 0; depth < (SUIT_MAX_SEQ_DEPTH - 1); depth++) {
-		for (size_t i = 0; i < ARRAY_SIZE(command_support_matrix); i++) {
+		for (size_t i = 0; i < ZCBOR_ARRAY_SIZE(command_support_matrix); i++) {
 			seq_validation_nested_test_template(
 				suit_validate_command_sequence,
 				bootsrap_seq_hdr_run_sequence,
@@ -512,7 +512,7 @@ void test_seq_validation_shared_nested_run_sequence_multiple_components(void)
 {
 	for (size_t depth = 1; depth < (SUIT_MAX_SEQ_DEPTH - 1); depth++) {
 		for (size_t n_components = 2; n_components < SUIT_MAX_NUM_COMPONENTS; n_components++) {
-			for (size_t i = 0; i < ARRAY_SIZE(shared_support_matrix); i++) {
+			for (size_t i = 0; i < ZCBOR_ARRAY_SIZE(shared_support_matrix); i++) {
 				seq_validation_nested_test_template(
 					suit_validate_shared_sequence,
 					bootsrap_seq_hdr_run_sequence_on_all_components,
@@ -530,7 +530,7 @@ void test_seq_validation_command_nested_run_sequence_multiple_components(void)
 {
 	for (size_t depth = 1; depth < (SUIT_MAX_SEQ_DEPTH - 1); depth++) {
 		for (size_t n_components = 2; n_components < SUIT_MAX_NUM_COMPONENTS; n_components++) {
-			for (size_t i = 0; i < ARRAY_SIZE(command_support_matrix); i++) {
+			for (size_t i = 0; i < ZCBOR_ARRAY_SIZE(command_support_matrix); i++) {
 				seq_validation_nested_test_template(
 					suit_validate_command_sequence,
 					bootsrap_seq_hdr_run_sequence_on_all_components,
@@ -547,7 +547,7 @@ void test_seq_validation_command_nested_run_sequence_multiple_components(void)
 void test_seq_validation_shared_nested_try_each(void)
 {
 	for (size_t depth = 0; depth < (SUIT_MAX_SEQ_DEPTH - 1); depth++) {
-		for (size_t i = 0; i < ARRAY_SIZE(shared_support_matrix); i++) {
+		for (size_t i = 0; i < ZCBOR_ARRAY_SIZE(shared_support_matrix); i++) {
 			seq_validation_nested_test_template(
 				suit_validate_shared_sequence,
 				bootsrap_seq_hdr_try_each,
@@ -563,7 +563,7 @@ void test_seq_validation_shared_nested_try_each(void)
 void test_seq_validation_command_nested_try_each(void)
 {
 	for (size_t depth = 0; depth < (SUIT_MAX_SEQ_DEPTH - 1); depth++) {
-		for (size_t i = 0; i < ARRAY_SIZE(command_support_matrix); i++) {
+		for (size_t i = 0; i < ZCBOR_ARRAY_SIZE(command_support_matrix); i++) {
 			seq_validation_nested_test_template(
 				suit_validate_command_sequence,
 				bootsrap_seq_hdr_try_each,
@@ -580,7 +580,7 @@ void test_seq_validation_shared_nested_try_each_multiple_components(void)
 {
 	for (size_t depth = 1; depth < (SUIT_MAX_SEQ_DEPTH - 1); depth++) {
 		for (size_t n_components = 2; n_components < SUIT_MAX_NUM_COMPONENTS; n_components++) {
-			for (size_t i = 0; i < ARRAY_SIZE(shared_support_matrix); i++) {
+			for (size_t i = 0; i < ZCBOR_ARRAY_SIZE(shared_support_matrix); i++) {
 				seq_validation_nested_test_template(
 					suit_validate_shared_sequence,
 					bootsrap_seq_hdr_try_each_on_all_components,
@@ -598,7 +598,7 @@ void test_seq_validation_command_nested_try_each_multiple_components(void)
 {
 	for (size_t depth = 1; depth < (SUIT_MAX_SEQ_DEPTH - 1); depth++) {
 		for (size_t n_components = 2; n_components < SUIT_MAX_NUM_COMPONENTS; n_components++) {
-			for (size_t i = 0; i < ARRAY_SIZE(command_support_matrix); i++) {
+			for (size_t i = 0; i < ZCBOR_ARRAY_SIZE(command_support_matrix); i++) {
 				seq_validation_nested_test_template(
 					suit_validate_command_sequence,
 					bootsrap_seq_hdr_try_each_on_all_components,
