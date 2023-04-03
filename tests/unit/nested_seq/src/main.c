@@ -9,7 +9,7 @@
 #include <suit.h>
 #include <bootstrap_envelope.h>
 #include <bootstrap_seq.h>
-#include "suit_platform/mock_suit_platform.h"
+#include "suit_platform/cmock_suit_platform.h"
 
 
 static struct suit_processor_state state;
@@ -234,7 +234,7 @@ static uint8_t nested_component_overrides_limit_cmd[] = {
 void test_nested_seq_prepare_reset_state(void)
 {
 	/* It is required to call platform reset API in case of SUIT processor state reset. */
-	__wrap_suit_plat_reset_components_Expect();
+	__cmock_suit_plat_reset_components_Expect();
 
 	suit_reset_state(&state);
 }
@@ -259,7 +259,7 @@ void test_nested_seq_invoke_successful(void)
 		bootstrap_envelope_sequence(&state, SUIT_INVOKE, &invoke_seq);
 
 		if (depth < SUIT_MAX_SEQ_DEPTH) {
-			__wrap_suit_plat_invoke_ExpectAndReturn(ASSIGNED_COMPONENT_HANDLE, NULL, SUIT_SUCCESS);
+			__cmock_suit_plat_invoke_ExpectAndReturn(ASSIGNED_COMPONENT_HANDLE, NULL, SUIT_SUCCESS);
 			retval = suit_process_manifest(&state, SUIT_INVOKE);
 			TEST_ASSERT_EQUAL(SUIT_SUCCESS, retval);
 		} else {
@@ -293,7 +293,7 @@ void test_nested_seq_invoke_failed(void)
 		bootstrap_envelope_sequence(&state, SUIT_INVOKE, &invoke_seq);
 
 		if (depth < SUIT_MAX_SEQ_DEPTH) {
-			__wrap_suit_plat_invoke_ExpectAndReturn(ASSIGNED_COMPONENT_HANDLE, NULL, SUIT_ERR_UNSUPPORTED_COMPONENT_ID);
+			__cmock_suit_plat_invoke_ExpectAndReturn(ASSIGNED_COMPONENT_HANDLE, NULL, SUIT_ERR_UNSUPPORTED_COMPONENT_ID);
 			retval = suit_process_manifest(&state, SUIT_INVOKE);
 			TEST_ASSERT_EQUAL(SUIT_ERR_UNSUPPORTED_COMPONENT_ID, retval);
 		} else {
@@ -327,7 +327,7 @@ void test_nested_seq_condition_hard_successful(void)
 		bootstrap_envelope_sequence(&state, SUIT_INVOKE, &invoke_seq);
 
 		if (depth < SUIT_MAX_SEQ_DEPTH) {
-			__wrap_suit_plat_check_vid_IgnoreAndReturn(SUIT_SUCCESS);
+			__cmock_suit_plat_check_vid_IgnoreAndReturn(SUIT_SUCCESS);
 			retval = suit_process_manifest(&state, SUIT_INVOKE);
 			TEST_ASSERT_EQUAL(SUIT_SUCCESS, retval);
 		} else {
@@ -361,7 +361,7 @@ void test_nested_seq_condition_hard_failed(void)
 		bootstrap_envelope_sequence(&state, SUIT_INVOKE, &invoke_seq);
 
 		if (depth < SUIT_MAX_SEQ_DEPTH) {
-			__wrap_suit_plat_check_vid_IgnoreAndReturn(SUIT_FAIL_CONDITION);
+			__cmock_suit_plat_check_vid_IgnoreAndReturn(SUIT_FAIL_CONDITION);
 			retval = suit_process_manifest(&state, SUIT_INVOKE);
 			TEST_ASSERT_EQUAL(SUIT_FAIL_CONDITION, retval);
 		} else {
@@ -395,9 +395,9 @@ void test_nested_seq_condition_soft_successful(void)
 		bootstrap_envelope_sequence(&state, SUIT_INVOKE, &invoke_seq);
 
 		if (depth < (SUIT_MAX_SEQ_DEPTH - 1)) {
-			__wrap_suit_plat_check_vid_IgnoreAndReturn(SUIT_SUCCESS);
-			__wrap_suit_plat_invoke_ExpectAndReturn(ASSIGNED_COMPONENT_HANDLE, NULL, SUIT_SUCCESS);
-			__wrap_suit_plat_invoke_ExpectAndReturn(ASSIGNED_COMPONENT_HANDLE, NULL, SUIT_SUCCESS);
+			__cmock_suit_plat_check_vid_IgnoreAndReturn(SUIT_SUCCESS);
+			__cmock_suit_plat_invoke_ExpectAndReturn(ASSIGNED_COMPONENT_HANDLE, NULL, SUIT_SUCCESS);
+			__cmock_suit_plat_invoke_ExpectAndReturn(ASSIGNED_COMPONENT_HANDLE, NULL, SUIT_SUCCESS);
 			retval = suit_process_manifest(&state, SUIT_INVOKE);
 			TEST_ASSERT_EQUAL(SUIT_SUCCESS, retval);
 		} else {
@@ -431,8 +431,8 @@ void test_nested_seq_condition_soft_failed(void)
 		bootstrap_envelope_sequence(&state, SUIT_INVOKE, &invoke_seq);
 
 		if (depth < (SUIT_MAX_SEQ_DEPTH - 1)) {
-			__wrap_suit_plat_check_vid_IgnoreAndReturn(SUIT_FAIL_CONDITION);
-			__wrap_suit_plat_invoke_ExpectAndReturn(ASSIGNED_COMPONENT_HANDLE, NULL, SUIT_SUCCESS);
+			__cmock_suit_plat_check_vid_IgnoreAndReturn(SUIT_FAIL_CONDITION);
+			__cmock_suit_plat_invoke_ExpectAndReturn(ASSIGNED_COMPONENT_HANDLE, NULL, SUIT_SUCCESS);
 			retval = suit_process_manifest(&state, SUIT_INVOKE);
 			TEST_ASSERT_EQUAL(SUIT_SUCCESS, retval);
 		} else {
@@ -466,7 +466,7 @@ void test_nested_seq_condition_soft_aborted(void)
 		bootstrap_envelope_sequence(&state, SUIT_INVOKE, &invoke_seq);
 
 		if (depth < (SUIT_MAX_SEQ_DEPTH - 1)) {
-			__wrap_suit_plat_check_vid_IgnoreAndReturn(SUIT_ERR_UNSUPPORTED_COMPONENT_ID);
+			__cmock_suit_plat_check_vid_IgnoreAndReturn(SUIT_ERR_UNSUPPORTED_COMPONENT_ID);
 			retval = suit_process_manifest(&state, SUIT_INVOKE);
 			TEST_ASSERT_EQUAL(SUIT_ERR_UNSUPPORTED_COMPONENT_ID, retval);
 		} else {
@@ -493,9 +493,9 @@ void test_nested_seq_condition_soft_failed_hard_succeed(void)
 
 	bootstrap_envelope_sequence(&state, SUIT_INVOKE, &invoke_seq);
 
-	__wrap_suit_plat_check_vid_IgnoreAndReturn(SUIT_FAIL_CONDITION);
-	__wrap_suit_plat_check_vid_IgnoreAndReturn(SUIT_SUCCESS);
-	__wrap_suit_plat_invoke_ExpectAndReturn(ASSIGNED_COMPONENT_HANDLE, NULL, SUIT_SUCCESS);
+	__cmock_suit_plat_check_vid_IgnoreAndReturn(SUIT_FAIL_CONDITION);
+	__cmock_suit_plat_check_vid_IgnoreAndReturn(SUIT_SUCCESS);
+	__cmock_suit_plat_invoke_ExpectAndReturn(ASSIGNED_COMPONENT_HANDLE, NULL, SUIT_SUCCESS);
 	retval = suit_process_manifest(&state, SUIT_INVOKE);
 	TEST_ASSERT_EQUAL(SUIT_SUCCESS, retval);
 	TEST_ASSERT_EQUAL(state.seq_stack_height, 0);
@@ -514,8 +514,8 @@ void test_nested_seq_condition_soft_failed_hard_failed(void)
 
 	bootstrap_envelope_sequence(&state, SUIT_INVOKE, &invoke_seq);
 
-	__wrap_suit_plat_check_vid_IgnoreAndReturn(SUIT_FAIL_CONDITION);
-	__wrap_suit_plat_check_vid_IgnoreAndReturn(SUIT_FAIL_CONDITION);
+	__cmock_suit_plat_check_vid_IgnoreAndReturn(SUIT_FAIL_CONDITION);
+	__cmock_suit_plat_check_vid_IgnoreAndReturn(SUIT_FAIL_CONDITION);
 	retval = suit_process_manifest(&state, SUIT_INVOKE);
 	TEST_ASSERT_EQUAL(SUIT_FAIL_CONDITION, retval);
 	TEST_ASSERT_EQUAL(state.seq_stack_height, 0);
@@ -537,16 +537,16 @@ void test_nested_seq_condition_soft_series_mixed_hard_succeed(void)
 		for (size_t seq = 0; seq < 3; seq++) {
 			if (i & (1 << seq)) {
 				/* Fail soft sequence */
-				__wrap_suit_plat_check_vid_IgnoreAndReturn(SUIT_FAIL_CONDITION);
+				__cmock_suit_plat_check_vid_IgnoreAndReturn(SUIT_FAIL_CONDITION);
 			} else {
 				/* Pass soft sequence */
-				__wrap_suit_plat_check_vid_IgnoreAndReturn(SUIT_SUCCESS);
-				__wrap_suit_plat_invoke_ExpectAndReturn(ASSIGNED_COMPONENT_HANDLE, NULL, SUIT_SUCCESS);
+				__cmock_suit_plat_check_vid_IgnoreAndReturn(SUIT_SUCCESS);
+				__cmock_suit_plat_invoke_ExpectAndReturn(ASSIGNED_COMPONENT_HANDLE, NULL, SUIT_SUCCESS);
 			}
 		}
 		/* Pass hard sequence */
-		__wrap_suit_plat_check_vid_IgnoreAndReturn(SUIT_SUCCESS);
-		__wrap_suit_plat_invoke_ExpectAndReturn(ASSIGNED_COMPONENT_HANDLE, NULL, SUIT_SUCCESS);
+		__cmock_suit_plat_check_vid_IgnoreAndReturn(SUIT_SUCCESS);
+		__cmock_suit_plat_invoke_ExpectAndReturn(ASSIGNED_COMPONENT_HANDLE, NULL, SUIT_SUCCESS);
 
 		retval = suit_process_manifest(&state, SUIT_INVOKE);
 		TEST_ASSERT_EQUAL(SUIT_SUCCESS, retval);
@@ -572,15 +572,15 @@ void test_nested_seq_condition_soft_series_mixed_hard_failed(void)
 		for (size_t seq = 0; seq < 3; seq++) {
 			if (i & (1 << seq)) {
 				/* Fail soft sequence */
-				__wrap_suit_plat_check_vid_IgnoreAndReturn(SUIT_FAIL_CONDITION);
+				__cmock_suit_plat_check_vid_IgnoreAndReturn(SUIT_FAIL_CONDITION);
 			} else {
 				/* Pass soft sequence */
-				__wrap_suit_plat_check_vid_IgnoreAndReturn(SUIT_SUCCESS);
-				__wrap_suit_plat_invoke_ExpectAndReturn(ASSIGNED_COMPONENT_HANDLE, NULL, SUIT_SUCCESS);
+				__cmock_suit_plat_check_vid_IgnoreAndReturn(SUIT_SUCCESS);
+				__cmock_suit_plat_invoke_ExpectAndReturn(ASSIGNED_COMPONENT_HANDLE, NULL, SUIT_SUCCESS);
 			}
 		}
 		/* Fail hard sequence */
-		__wrap_suit_plat_check_vid_IgnoreAndReturn(SUIT_FAIL_CONDITION);
+		__cmock_suit_plat_check_vid_IgnoreAndReturn(SUIT_FAIL_CONDITION);
 
 		retval = suit_process_manifest(&state, SUIT_INVOKE);
 		TEST_ASSERT_EQUAL(SUIT_FAIL_CONDITION, retval);
@@ -606,17 +606,17 @@ void test_nested_seq_condition_soft_series_aborted(void)
 		for (size_t seq = 0; seq < 3; seq++) {
 			if (i & (1 << seq)) {
 				/* Abort soft sequence */
-				__wrap_suit_plat_check_vid_IgnoreAndReturn(SUIT_ERR_UNSUPPORTED_COMPONENT_ID);
+				__cmock_suit_plat_check_vid_IgnoreAndReturn(SUIT_ERR_UNSUPPORTED_COMPONENT_ID);
 				break;
 			} else {
 				/* Pass soft sequence */
-				__wrap_suit_plat_check_vid_IgnoreAndReturn(SUIT_SUCCESS);
-				__wrap_suit_plat_invoke_ExpectAndReturn(ASSIGNED_COMPONENT_HANDLE, NULL, SUIT_SUCCESS);
+				__cmock_suit_plat_check_vid_IgnoreAndReturn(SUIT_SUCCESS);
+				__cmock_suit_plat_invoke_ExpectAndReturn(ASSIGNED_COMPONENT_HANDLE, NULL, SUIT_SUCCESS);
 			}
 		}
 		if (i == 0) {
 			/* Abort hard sequence */
-			__wrap_suit_plat_check_vid_IgnoreAndReturn(SUIT_ERR_UNSUPPORTED_COMPONENT_ID);
+			__cmock_suit_plat_check_vid_IgnoreAndReturn(SUIT_ERR_UNSUPPORTED_COMPONENT_ID);
 		}
 
 		retval = suit_process_manifest(&state, SUIT_INVOKE);
@@ -647,18 +647,18 @@ void test_nested_seq_condition_soft_series_mixed_hard_succeed_multiple_component
 				for (comp_seq = 0; comp_seq < 2; comp_seq++) {
 					if ((cond_fail & (1 << seq)) && (component_fail & (1 << comp_seq))) {
 						/* Fail soft sequence */
-						__wrap_suit_plat_check_vid_IgnoreAndReturn(SUIT_FAIL_CONDITION);
+						__cmock_suit_plat_check_vid_IgnoreAndReturn(SUIT_FAIL_CONDITION);
 					} else {
 						/* Pass soft sequence */
-						__wrap_suit_plat_check_vid_IgnoreAndReturn(SUIT_SUCCESS);
-						__wrap_suit_plat_invoke_ExpectAndReturn(ASSIGNED_COMPONENT_HANDLE + comp_seq, NULL, SUIT_SUCCESS);
+						__cmock_suit_plat_check_vid_IgnoreAndReturn(SUIT_SUCCESS);
+						__cmock_suit_plat_invoke_ExpectAndReturn(ASSIGNED_COMPONENT_HANDLE + comp_seq, NULL, SUIT_SUCCESS);
 					}
 				}
 			}
 			for (comp_seq = 0; comp_seq < 2; comp_seq++) {
 				/* Pass hard sequence */
-				__wrap_suit_plat_check_vid_IgnoreAndReturn(SUIT_SUCCESS);
-				__wrap_suit_plat_invoke_ExpectAndReturn(ASSIGNED_COMPONENT_HANDLE + comp_seq, NULL, SUIT_SUCCESS);
+				__cmock_suit_plat_check_vid_IgnoreAndReturn(SUIT_SUCCESS);
+				__cmock_suit_plat_invoke_ExpectAndReturn(ASSIGNED_COMPONENT_HANDLE + comp_seq, NULL, SUIT_SUCCESS);
 			}
 
 			retval = suit_process_manifest(&state, SUIT_INVOKE);
@@ -691,13 +691,13 @@ void test_nested_seq_condition_soft_series_mixed_aborted_multiple_components(voi
 				for (comp_seq = 0; comp_seq < 2; comp_seq++) {
 					if ((cond_fail & (1 << seq)) && (component_fail & (1 << comp_seq))) {
 						/* Fail soft sequence */
-						__wrap_suit_plat_check_vid_IgnoreAndReturn(SUIT_ERR_UNSUPPORTED_COMPONENT_ID);
+						__cmock_suit_plat_check_vid_IgnoreAndReturn(SUIT_ERR_UNSUPPORTED_COMPONENT_ID);
 						group_failed = true;
 						break;
 					} else {
 						/* Pass soft sequence */
-						__wrap_suit_plat_check_vid_IgnoreAndReturn(SUIT_SUCCESS);
-						__wrap_suit_plat_invoke_ExpectAndReturn(ASSIGNED_COMPONENT_HANDLE + comp_seq, NULL, SUIT_SUCCESS);
+						__cmock_suit_plat_check_vid_IgnoreAndReturn(SUIT_SUCCESS);
+						__cmock_suit_plat_invoke_ExpectAndReturn(ASSIGNED_COMPONENT_HANDLE + comp_seq, NULL, SUIT_SUCCESS);
 					}
 				}
 				if (group_failed) {
@@ -706,7 +706,7 @@ void test_nested_seq_condition_soft_series_mixed_aborted_multiple_components(voi
 			}
 			if (!group_failed) {
 				/* Executed only once, for the first component */
-				__wrap_suit_plat_check_vid_IgnoreAndReturn(SUIT_ERR_UNSUPPORTED_COMPONENT_ID);
+				__cmock_suit_plat_check_vid_IgnoreAndReturn(SUIT_ERR_UNSUPPORTED_COMPONENT_ID);
 			}
 
 			retval = suit_process_manifest(&state, SUIT_INVOKE);
@@ -732,15 +732,15 @@ void test_nested_seq_component_overrides_expand(void)
 
 	/* Component index set to 0, and then to true - expect 4 different calls. */
 	for (size_t i = 0; i < 4; i++) {
-		__wrap_suit_plat_invoke_ExpectAndReturn(ASSIGNED_COMPONENT_HANDLE + i, NULL, SUIT_SUCCESS);
+		__cmock_suit_plat_invoke_ExpectAndReturn(ASSIGNED_COMPONENT_HANDLE + i, NULL, SUIT_SUCCESS);
 	}
 
 	/* Component index remains unmodified - expect 1 call. */
-	__wrap_suit_plat_check_vid_ExpectAndReturn(NULL, ASSIGNED_COMPONENT_HANDLE, SUIT_SUCCESS);
-	__wrap_suit_plat_check_vid_IgnoreArg_vid_uuid();
+	__cmock_suit_plat_check_vid_ExpectAndReturn(NULL, ASSIGNED_COMPONENT_HANDLE, SUIT_SUCCESS);
+	__cmock_suit_plat_check_vid_IgnoreArg_vid_uuid();
 
 	/* Outside run-sequence body - expect 1 call. */
-	__wrap_suit_plat_invoke_ExpectAndReturn(ASSIGNED_COMPONENT_HANDLE, NULL, SUIT_SUCCESS);
+	__cmock_suit_plat_invoke_ExpectAndReturn(ASSIGNED_COMPONENT_HANDLE, NULL, SUIT_SUCCESS);
 
 	retval = suit_process_manifest(&state, SUIT_INVOKE);
 	TEST_ASSERT_EQUAL(SUIT_SUCCESS, retval);
@@ -761,18 +761,18 @@ void test_nested_seq_component_overrides_limit(void)
 
 	/* Component index set to true, and then to 0 - expect 4 identical calls. */
 	for (size_t i = 0; i < 4; i++) {
-		__wrap_suit_plat_invoke_ExpectAndReturn(ASSIGNED_COMPONENT_HANDLE, NULL, SUIT_SUCCESS);
+		__cmock_suit_plat_invoke_ExpectAndReturn(ASSIGNED_COMPONENT_HANDLE, NULL, SUIT_SUCCESS);
 	}
 
 	/* Component index remains unmodified - expect 4 different calls. */
 	for (size_t i = 0; i < 4; i++) {
-		__wrap_suit_plat_check_vid_ExpectAndReturn(NULL, ASSIGNED_COMPONENT_HANDLE + i, SUIT_SUCCESS);
-		__wrap_suit_plat_check_vid_IgnoreArg_vid_uuid();
+		__cmock_suit_plat_check_vid_ExpectAndReturn(NULL, ASSIGNED_COMPONENT_HANDLE + i, SUIT_SUCCESS);
+		__cmock_suit_plat_check_vid_IgnoreArg_vid_uuid();
 	}
 
 	/* Outside run-sequence body - expect 4 different calls. */
 	for (size_t i = 0; i < 4; i++) {
-		__wrap_suit_plat_invoke_ExpectAndReturn(ASSIGNED_COMPONENT_HANDLE + i, NULL, SUIT_SUCCESS);
+		__cmock_suit_plat_invoke_ExpectAndReturn(ASSIGNED_COMPONENT_HANDLE + i, NULL, SUIT_SUCCESS);
 	}
 
 	retval = suit_process_manifest(&state, SUIT_INVOKE);

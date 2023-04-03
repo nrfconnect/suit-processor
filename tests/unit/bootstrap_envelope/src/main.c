@@ -7,7 +7,7 @@
 #include <unity.h>
 #include <suit.h>
 #include <bootstrap_envelope.h>
-#include "suit_platform/mock_suit_platform.h"
+#include "suit_platform/cmock_suit_platform.h"
 
 
 static struct suit_processor_state state;
@@ -16,7 +16,7 @@ static struct suit_processor_state state;
 void test_bootstrap_reset_state(void)
 {
 	/* It is required to call platform reset API in case of SUIT processor state reset. */
-	__wrap_suit_plat_reset_components_Expect();
+	__cmock_suit_plat_reset_components_Expect();
 
 	suit_reset_state(&state);
 }
@@ -85,7 +85,7 @@ void test_bootstrap_invoke_single_component(void)
 	bootstrap_envelope_sequence(&state, SUIT_INVOKE, &invoke_seq);
 	bootstrap_envelope_components(&state, 1);
 
-	__wrap_suit_plat_invoke_ExpectAndReturn(ASSIGNED_COMPONENT_HANDLE, NULL, SUIT_SUCCESS);
+	__cmock_suit_plat_invoke_ExpectAndReturn(ASSIGNED_COMPONENT_HANDLE, NULL, SUIT_SUCCESS);
 	int retval = suit_process_manifest(&state, SUIT_INVOKE);
 	TEST_ASSERT_EQUAL(SUIT_SUCCESS, retval);
 }
