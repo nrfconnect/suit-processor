@@ -132,9 +132,6 @@ static uint8_t try_each_component_overrides_cmd[] = {
 
 void test_try_each_prepare_reset_state(void)
 {
-	/* It is required to call platform reset API in case of SUIT processor state reset. */
-	__cmock_suit_plat_reset_components_Expect();
-
 	suit_reset_state(&state);
 }
 
@@ -156,6 +153,7 @@ void test_try_each_first_succeeds(void)
 	bootstrap_envelope_sequence(&state, SUIT_INVOKE, &invoke_seq);
 
 	__cmock_suit_plat_check_vid_IgnoreAndReturn(SUIT_SUCCESS);
+	__cmock_suit_plat_sequence_completed_ExpectAndReturn(SUIT_INVOKE, NULL, NULL, 0, SUIT_SUCCESS);
 	retval = suit_process_manifest(&state, SUIT_INVOKE);
 	TEST_ASSERT_EQUAL(SUIT_SUCCESS, retval);
 	TEST_ASSERT_EQUAL(state.seq_stack_height, 0);
@@ -180,6 +178,7 @@ void test_try_each_second_succeeds(void)
 
 	__cmock_suit_plat_check_vid_IgnoreAndReturn(SUIT_FAIL_CONDITION);
 	__cmock_suit_plat_invoke_ExpectAndReturn(ASSIGNED_COMPONENT_HANDLE, NULL, SUIT_SUCCESS);
+	__cmock_suit_plat_sequence_completed_ExpectAndReturn(SUIT_INVOKE, NULL, NULL, 0, SUIT_SUCCESS);
 	retval = suit_process_manifest(&state, SUIT_INVOKE);
 	TEST_ASSERT_EQUAL(SUIT_SUCCESS, retval);
 	TEST_ASSERT_EQUAL(state.seq_stack_height, 0);
@@ -204,6 +203,7 @@ void test_try_each_default_succeeds(void)
 
 	__cmock_suit_plat_check_vid_IgnoreAndReturn(SUIT_FAIL_CONDITION);
 	__cmock_suit_plat_invoke_ExpectAndReturn(ASSIGNED_COMPONENT_HANDLE, NULL, SUIT_FAIL_CONDITION);
+	__cmock_suit_plat_sequence_completed_ExpectAndReturn(SUIT_INVOKE, NULL, NULL, 0, SUIT_SUCCESS);
 	retval = suit_process_manifest(&state, SUIT_INVOKE);
 	TEST_ASSERT_EQUAL(SUIT_SUCCESS, retval);
 	TEST_ASSERT_EQUAL(state.seq_stack_height, 0);
@@ -300,13 +300,13 @@ void test_try_each_component_overrides(void)
 	/* sequence in 2nd case - override component to all components */
 	for (size_t seq_i = 0; seq_i < 4; seq_i++) {
 		/* sequence in 2nd case - execute 4 times command for each component. */
-		__cmock_suit_plat_check_vid_ExpectAndReturn(NULL, ASSIGNED_COMPONENT_HANDLE + seq_i, SUIT_SUCCESS);
+		__cmock_suit_plat_check_vid_ExpectAndReturn(ASSIGNED_COMPONENT_HANDLE + seq_i, NULL, SUIT_SUCCESS);
 		__cmock_suit_plat_check_vid_IgnoreArg_vid_uuid();
 	}
 	/* 2nd case - fail*/
 	__cmock_suit_plat_invoke_ExpectAndReturn(ASSIGNED_COMPONENT_HANDLE, NULL, SUIT_FAIL_CONDITION);
 	/* 3rd case - succeed, component set by the 2nd case */
-	__cmock_suit_plat_check_vid_ExpectAndReturn(NULL, ASSIGNED_COMPONENT_HANDLE, SUIT_SUCCESS);
+	__cmock_suit_plat_check_vid_ExpectAndReturn(ASSIGNED_COMPONENT_HANDLE, NULL, SUIT_SUCCESS);
 	__cmock_suit_plat_check_vid_IgnoreArg_vid_uuid();
 
 	/* 2nd component, 1st case - succeed */
@@ -315,19 +315,19 @@ void test_try_each_component_overrides(void)
 	/* 3rd component, 1st case - fail */
 	__cmock_suit_plat_invoke_ExpectAndReturn(ASSIGNED_COMPONENT_HANDLE + 2, NULL, SUIT_FAIL_CONDITION);
 	/* 3rd component, 2nd case - fail (executed for all components, but the first hard failure ends the whole sequence)*/
-	__cmock_suit_plat_check_vid_ExpectAndReturn(NULL, ASSIGNED_COMPONENT_HANDLE, SUIT_FAIL_CONDITION);
+	__cmock_suit_plat_check_vid_ExpectAndReturn(ASSIGNED_COMPONENT_HANDLE, NULL, SUIT_FAIL_CONDITION);
 	__cmock_suit_plat_check_vid_IgnoreArg_vid_uuid();
 	/* 3rd component, 3rd case - succeed, component set bythe 2nd case */
-	__cmock_suit_plat_check_vid_ExpectAndReturn(NULL, ASSIGNED_COMPONENT_HANDLE, SUIT_SUCCESS);
+	__cmock_suit_plat_check_vid_ExpectAndReturn(ASSIGNED_COMPONENT_HANDLE, NULL, SUIT_SUCCESS);
 	__cmock_suit_plat_check_vid_IgnoreArg_vid_uuid();
 
 	/* 4th component, 1st case - fail */
 	__cmock_suit_plat_invoke_ExpectAndReturn(ASSIGNED_COMPONENT_HANDLE + 3, NULL, SUIT_FAIL_CONDITION);
 	/* 4th component, 2nd case - fail (executed for all components, but the first hard failure ends the whole sequence)*/
-	__cmock_suit_plat_check_vid_ExpectAndReturn(NULL, ASSIGNED_COMPONENT_HANDLE, SUIT_FAIL_CONDITION);
+	__cmock_suit_plat_check_vid_ExpectAndReturn(ASSIGNED_COMPONENT_HANDLE, NULL, SUIT_FAIL_CONDITION);
 	__cmock_suit_plat_check_vid_IgnoreArg_vid_uuid();
 	/* 4th component, 3rd case - fail, component set bythe 2nd case */
-	__cmock_suit_plat_check_vid_ExpectAndReturn(NULL, ASSIGNED_COMPONENT_HANDLE, SUIT_ERR_UNSUPPORTED_COMPONENT_ID);
+	__cmock_suit_plat_check_vid_ExpectAndReturn(ASSIGNED_COMPONENT_HANDLE, NULL, SUIT_ERR_UNSUPPORTED_COMPONENT_ID);
 	__cmock_suit_plat_check_vid_IgnoreArg_vid_uuid();
 
 	retval = suit_process_manifest(&state, SUIT_INVOKE);

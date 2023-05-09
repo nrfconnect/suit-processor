@@ -10,6 +10,10 @@
 #include "suit_types.h"
 #include <stdint.h>
 
+#ifdef SUIT_PLATFORM_LEGACY_API_SUPPORT
+#include "suit_platform_legacy.h"
+#endif /* SUIT_PLATFORM_LEGACY_API_SUPPORT */
+
 
 #ifndef SUIT_DBG
 #define SUIT_DBG(...)
@@ -27,109 +31,292 @@
 #define SUIT_ERR(...)
 #endif
 
-
-/** Reset all loaded component properties and handles assigned to them. */
-void suit_plat_reset_components(void);
-
-/** Check the provided payload against the provided digest */
+/** @brief Check the provided payload against the provided digest.
+ *
+ * @param[in] alg_id   The digest verification algorithm to use.
+ * @param[in] digest   Expected diest value.
+ * @param[in] payload  The payload to verify.
+ *
+ * @returns SUIT_SUCCESS if the digest matches, error code otherwise.
+ */
 int suit_plat_check_digest(enum suit_cose_alg alg_id,
 		struct zcbor_string *digest,
 		struct zcbor_string *payload);
 
-/** Authenticate the given payload against the given signature.
+/** @brief Authenticate the given manifest against the given signature.
  *
- *  @param[in]  alg_id  The signature verification algorithm to use.
- *  @param[in]  key_id  The key to check the signature with.
- *  @param[in]  signature  The signature to check.
- *  @param[in]  data  The data that is signed by the @p signature.
+ * @param[in] manifest_component_id  The manifest component ID, identifying
+ *                                   the type of manifest in the system.
+ * @param[in] alg_id                 The signature verification algorithm to use.
+ * @param[in] key_id                 The key to check the signature with.
+ * @param[in] signature              The signature to check.
+ * @param[in] data                   The data that is signed by the @p signature.
+ *
+ * @returns SUIT_SUCCESS if the signature is correct, error code otherwise.
  */
-int suit_plat_authenticate(enum suit_cose_alg alg_id, struct zcbor_string *key_id,
+int suit_plat_authenticate_manifest(struct zcbor_string *manifest_component_id,
+		enum suit_cose_alg alg_id, struct zcbor_string *key_id,
 		struct zcbor_string *signature, struct zcbor_string *data);
 
-/** Check that the given component ID exists, is valid, and is authorized.
+/** @brief Check that the provided manifest is allowed to be unsigned.
  *
- *  If so, create and return a component handle for it.
+ * @param[in] manifest_component_id  The manifest component ID, identifying
+ *                                   the type of manifest in the system.
  *
- *  @param[in]  component_id  The CBOR-encoded component identifier.
- *  @param[in]  key_ids  The keys the current manifest was authenticated
- *                       against. This is to check that the manifest is
- *                       authorized to handle the given component ID.
- *  @param[in]  num_key_ids  The number of members in the @p key_ids list.
- *  @param[out] component_handle  A reference for use with other functions in
- *                                this API, instead of always passing the
- *                                @p parts.
+ * @returns SUIT_SUCCESS if the manifest can be processed, error code otherwise.
+ */
+int suit_plat_authorize_unsigned_manifest(struct zcbor_string *manifest_component_id);
+
+#ifndef SUIT_PLATFORM_LEGACY_API_SUPPORT
+/** @brief Check that the given component ID exists, is valid, and is authorized.
+ *         If so, create and return a component handle for it.
+ *
+ * @param[in]  component_id      The CBOR-encoded component identifier.
+ * @param[out] component_handle  A reference for use with other functions in
+ *                               this API, instead of always passing the
+ *                               @p parts.
+ *
+ * @returns SUIT_SUCCESS if the component handle was created, error code otherwise.
  */
 int suit_plat_create_component_handle(struct zcbor_string *component_id,
-		struct zcbor_string *key_ids[SUIT_MAX_NUM_SIGNERS], size_t num_key_ids,
-		suit_component_t *component_handle);
+		suit_component_t *handle);
+#endif /* !SUIT_PLATFORM_LEGACY_API_SUPPORT */
 
-/** Check the provided payload against the provided digest */
-int suit_plat_check_image_match(enum suit_cose_alg alg_id,
-		struct zcbor_string *digest, size_t image_size,
-		suit_component_t image_handle);
+/** @brief Release loaded component properties and handles assigned to them.
+ *
+ * @param[in] component_handle  The platform-specific component handle value.
+ *
+ * @returns SUIT_SUCCESS if the component handle was released, error code otherwise.
+ */
+int suit_plat_release_component_handle(suit_component_t handle);
 
-/** Check whether the given slot is active for the given component. */
-int suit_plat_check_slot(suit_component_t component_handle, unsigned int slot);
+#ifndef SUIT_PLATFORM_LEGACY_API_SUPPORT
+/** @brief Check the provided payload against the provided digest.
+ *
+ * @param[in] handle      A reference to the checked component.
+ * @param[in] alg_id      The digest verification algorithm to use.
+ * @param[in] digest      Expected diest value.
+ * @param[in] image_size  The size of the checked content.
+ *
+ * @returns SUIT_SUCCESS if the image digest matches, error code otherwise.
+ */
+int suit_plat_check_image_match(suit_component_t handle,
+		enum suit_cose_alg alg_id, struct zcbor_string *digest,
+		size_t image_size);
+#endif /* !SUIT_PLATFORM_LEGACY_API_SUPPORT */
 
-/** Check whether the given vendor ID applies to the given component. */
-int suit_plat_check_vid(struct zcbor_string *vid_uuid,
-		suit_component_t component_handle);
+/** @brief Check the provided payload against the component value.
+ *
+ * @param[in] handle   A reference to the checked component.
+ * @param[in] content  A reference to the buffer, describing the content.
+ *
+ * @returns SUIT_SUCCESS if the component contents matches, error code otherwise.
+ */
+int suit_plat_check_content(suit_component_t handle, struct zcbor_string *content);
 
-/** Check whether the given class ID applies to the given component. */
-int suit_plat_check_cid(struct zcbor_string *cid_uuid,
-		suit_component_t component_handle);
+/** @brief Check whether the given slot is active for the given component.
+ *
+ * @note This API is currently not supported.
+ *
+ * @param[in] handle  A reference to the checked component.
+ * @param[in] slot    Expected active slot number.
+ *
+ * @returns SUIT_SUCCESS if the component slot matches, error code otherwise.
+ */
+int suit_plat_check_slot(suit_component_t handle, unsigned int slot);
 
-/** Check whether the given device ID applies to the given component. */
-int suit_plat_check_did(struct zcbor_string *did_uuid,
-		suit_component_t component_handle);
+#ifndef SUIT_PLATFORM_LEGACY_API_SUPPORT
+/** @brief Check whether the given vendor ID applies to the given component.
+ *
+ * @param[in] handle    A reference to the checked component.
+ * @param[in] vid_uuid  A reference to the expected UUID value.
+ *
+ * @returns SUIT_SUCCESS if the vendor UUID matches, error code otherwise.
+ */
+int suit_plat_check_vid(suit_component_t handle, struct zcbor_string *vid_uuid);
 
-/** Check that the provided sequence number is recent enough. */
-int suit_plat_check_sequence_num(unsigned int seq_num);
+/** @brief Check whether the given class ID applies to the given component.
+ *
+ * @param[in] handle    A reference to the checked component.
+ * @param[in] cid_uuid  A reference to the expected UUID value.
+ *
+ * @returns SUIT_SUCCESS if the class UUID matches, error code otherwise.
+ */
+int suit_plat_check_cid(suit_component_t handle, struct zcbor_string *cid_uuid);
 
-/** Update the sequence number against which new manifests will be checked. */
-int suit_plat_commit_sequence_num(unsigned int seq_num);
+/** @brief Check whether the given device ID applies to the given component.
+ *
+ * @param[in] handle    A reference to the checked component.
+ * @param[in] did_uuid  A reference to the expected UUID value.
+ *
+ * @returns SUIT_SUCCESS if the device UUID matches, error code otherwise.
+ */
+int suit_plat_check_did(suit_component_t handle, struct zcbor_string *did_uuid);
+#endif /* !SUIT_PLATFORM_LEGACY_API_SUPPORT */
 
-/** Check that the given fetch operation can be performed. */
-int suit_plat_check_fetch(suit_component_t dst_handle, struct zcbor_string *uri);
+/** @brief Check that the provided sequence number for a given manifest is recent enough.
+ *
+ * @param[in] seq_name               The currently processed SUIT manifest sequence.
+ * @param[in] manifest_component_id  The manifest component ID, identifying
+ *                                   the type of manifest in the system.
+ * @param[in] seq_num                The manifest sequence number value.
+ *
+ * @returns SUIT_SUCCESS if the sequence is allowed to be executed with a given sequence number, error code otherwise.
+ */
+int suit_plat_authorize_sequence_num(enum suit_command_sequence seq_name, struct zcbor_string *manifest_component_id, unsigned int seq_num);
 
-/** Fetch the payload from the given @p uri into @p dst. */
+/** Check that the provided component ID is supported by the given manifest.
+ *
+ * @param[in] manifest_component_id  The manifest component ID, identifying
+ *                                   the type of manifest in the system.
+ * @param[in] component_id           The CBOR-encoded component identifier to verify.
+ *
+ * @returns SUIT_SUCCESS if the component ID is allowed, error code otherwise.
+ */
+int suit_plat_authorize_component_id(struct zcbor_string *manifest_component_id, struct zcbor_string *component_id);
+
+/** @brief Fetch the payload from the given @p uri into @p dst.
+ *
+ * @param[in] dst_handle  A reference to the destination component.
+ * @param[in] uri         A reference to the buffer, containing the URI to be fetched.
+ *
+ * @returns SUIT_SUCCESS if the operation succeeds, error code otherwise.
+ */
 int suit_plat_fetch(suit_component_t dst_handle, struct zcbor_string *uri);
 
-/** Check that the given fetch operation can be performed. */
-int suit_plat_check_fetch_integrated(suit_component_t dst_handle, struct zcbor_string *payload);
-
-/** Fetch the given integrated payload into @p dst. */
+/** @brief Fetch the given integrated payload into @p dst.
+ *
+ * @param[in] dst_handle  A reference to the destination component.
+ * @param[in] payload     A reference to the buffer, describing the fetched content.
+ *
+ * @returns SUIT_SUCCESS if the operation succeeds, error code otherwise.
+ */
 int suit_plat_fetch_integrated(suit_component_t dst_handle, struct zcbor_string *payload);
 
-/** Check that the given copy operation can be performed. */
-int suit_plat_check_copy(suit_component_t dst_handle, suit_component_t src_handle);
-
-/** Copy a payload from @p src_handle to @p dst_handle. */
+/** @brief Copy a payload from @p src_handle to @p dst_handle.
+ *
+ * @param[in] dst_handle  A reference to the destination component.
+ * @param[in] src_handle  A reference to the source component.
+ *
+ * @returns SUIT_SUCCESS if the operation succeeds, error code otherwise.
+ */
 int suit_plat_copy(suit_component_t dst_handle, suit_component_t src_handle);
 
-/** Check that the given swap operation can be performed. */
-int suit_plat_check_swap(suit_component_t dst_handle, suit_component_t src_handle);
-
-/** Swap a payload from @p src_handle to @p dst_handle. */
+/** @brief Swap a payload from @p src_handle to @p dst_handle.
+ *
+ * @param[in] dst_handle  A reference to the destination component.
+ * @param[in] src_handle  A reference to the source component.
+ *
+ * @returns SUIT_SUCCESS if the operation succeeds, error code otherwise.
+ */
 int suit_plat_swap(suit_component_t dst_handle, suit_component_t src_handle);
 
-/** Check that the given invoke operation can be performed. */
-int suit_plat_check_invoke(suit_component_t image_handle, struct zcbor_string *invoke_args);
+/** @brief Write a payload from @p content to @p dst_handle.
+ *
+ * @param[in] dst_handle  A reference to the destination component.
+ * @param[in] content     A reference to the buffer, describing the content.
+ *
+ * @returns SUIT_SUCCESS if the operation succeeds, error code otherwise.
+ */
+int suit_plat_write(suit_component_t dst_handle, struct zcbor_string *content);
 
-/** Invoke the given image. */
+/** @brief Invoke the given image.
+ *
+ * @param[in] image_handle  A reference to the invoked component.
+ * @param[in] invoke_args   A reference to the buffer with platform-specific invoke arguments.
+ *
+ * @returns SUIT_SUCCESS if the operation succeeds, error code otherwise.
+ */
 int suit_plat_invoke(suit_component_t image_handle, struct zcbor_string *invoke_args);
 
-/** File a report on a command result. */
+/** @brief File a report on a command result.
+ *
+ * @note This API is currently not supported.
+ *
+ * @param[in] rep_policy  Reporting policy.
+ * @param[in] report      Reference to the structure with the SUIT report to store.
+ *
+ * @returns SUIT_SUCCESS if the report was recorded, error code otherwise.
+ */
 int suit_plat_report(unsigned int rep_policy, struct suit_report *report);
 
-/** Store an opaque state struct to non-volatile memory.
+/** @brief A callback function, informing about the sequence completion.
  *
- *  The SUIT operation must be able to cope with random resets, both unexpected
- *  resets and resets required by the firmware update procedures.
+ * @param[in] seq_name               The finished SUIT manifest sequence.
+ * @param[in] manifest_component_id  The manifest component ID, identifying
+ *                                   the type of manifest in the system.
+ * @param[in] envelope_str           A reference to the SUIT envelope that was processed.
+ * @param[in] envelope_len           The length of the processed envelope.
+ *
+ * @returns SUIT_SUCCESS if the callback succeeds, error code otherwise.
  */
-int suit_plat_set_state(unsigned int state_id, unsigned char *state, size_t state_len);
+int suit_plat_sequence_completed(enum suit_command_sequence seq_name, struct zcbor_string *manifest_component_id, const uint8_t *envelope_str, size_t envelope_len);
 
-/** Retrieve an opaque state struct from non-volatile memory. */
-int suit_plat_get_state(unsigned int state_id, unsigned char *state, size_t state_len);
+/** @brief Return a pointer to the SUIT envelope, stored inside the component.
+ *
+ * @param[in]  component_handle  A reference to the component, describing the SUIT envelope.
+ * @param[out] envelope_str      A reference to the SUIT envelope, represented by the component.
+ * @param[out] envelope_len      The length of the returned envelope.
+ *
+ * @returns SUIT_SUCCESS if the manifest was returned, error code otherwise.
+ */
+int suit_plat_retrive_manifest(suit_component_t component_handle, uint8_t **envelope_str, size_t *envelope_len);
+
+#ifdef SUIT_PLATFORM_DRY_RUN_SUPPORT
+/** @brief Check that the given fetch operation can be performed.
+ *
+ * @param[in] dst_handle  A reference to the destination component.
+ * @param[in] uri         A reference to the buffer, containing the URI to be fetched.
+ *
+ * @returns SUIT_SUCCESS if the operation succeeds, error code otherwise.
+ */
+int suit_plat_check_fetch(suit_component_t dst_handle, struct zcbor_string *uri);
+
+/** @brief Check that the given fetch of integrated payload can be performed.
+ *
+ * @param[in] dst_handle  A reference to the destination component.
+ * @param[in] payload     A reference to the buffer, describing the fetched content.
+ *
+ * @returns SUIT_SUCCESS if the operation succeeds, error code otherwise.
+ */
+int suit_plat_check_fetch_integrated(suit_component_t dst_handle, struct zcbor_string *payload);
+
+/** @brief Check that the given copy operation can be performed.
+ *
+ * @param[in] dst_handle  A reference to the destination component.
+ * @param[in] src_handle  A reference to the source component.
+ *
+ * @returns SUIT_SUCCESS if the operation succeeds, error code otherwise.
+ */
+int suit_plat_check_copy(suit_component_t dst_handle, suit_component_t src_handle);
+
+/** @brief Check that the given swap operation can be performed.
+ *
+ * @param[in] dst_handle  A reference to the destination component.
+ * @param[in] src_handle  A reference to the source component.
+ *
+ * @returns SUIT_SUCCESS if the operation succeeds, error code otherwise.
+ */
+int suit_plat_check_swap(suit_component_t dst_handle, suit_component_t src_handle);
+
+/** @brief Check that the given invoke operation can be performed.
+ *
+ * @param[in] dst_handle  A reference to the destination component.
+ * @param[in] content     A reference to the buffer, describing the content.
+ *
+ * @returns SUIT_SUCCESS if the operation succeeds, error code otherwise.
+ */
+int suit_plat_check_write(suit_component_t dst_handle, struct zcbor_string *content);
+
+/** @brief Check that the given invoke operation can be performed.
+ *
+ * @param[in] image_handle  A reference to the invoked component.
+ * @param[in] invoke_args   A reference to the buffer with platform-specific invoke arguments.
+ *
+ * @returns SUIT_SUCCESS if the operation succeeds, error code otherwise.
+ */
+int suit_plat_check_invoke(suit_component_t image_handle, struct zcbor_string *invoke_args);
+
+#endif /* SUIT_PLATFORM_DRY_RUN_SUPPORT */
 
 #endif /* SUIT_PLATFORM_H__ */
