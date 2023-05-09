@@ -9,6 +9,16 @@ config SUIT_PROCESSOR
 	help
 	  Library for processing SUIT envelope 
 
+config SUIT_PLATFORM_DRY_RUN_SUPPORT
+	bool "Enable the SUIT platform dry run APIs"
+	default y
+	depends on !UNITY
+
+config SUIT_PLATFORM_LEGACY_API_SUPPORT
+	bool "Enable the support for legacy SUIT platform APIs"
+	default y
+	depends on !UNITY
+
 config APP_LINK_WITH_SUIT_PROCESSOR_INTERFACE
 	bool
 	default y if SUIT_PROCESSOR

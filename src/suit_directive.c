@@ -271,22 +271,30 @@ int suit_directive_override_parameters(struct suit_processor_state *state,
 static int plat_fetch(struct suit_processor_state *state, suit_component_t dst_handle,
 			struct zcbor_string *uri)
 {
+#ifdef SUIT_PLATFORM_DRY_RUN_SUPPORT
 	if (state->dry_run != suit_bool_false) {
 		return suit_plat_check_fetch(dst_handle, uri);
 	} else {
 		return suit_plat_fetch(dst_handle, uri);
 	}
+#else /* SUIT_PLATFORM_DRY_RUN_SUPPORT */
+	return suit_plat_fetch(dst_handle, uri);
+#endif /* SUIT_PLATFORM_DRY_RUN_SUPPORT */
 }
 
 
 static int plat_fetch_integrated(struct suit_processor_state *state, suit_component_t dst_handle,
 			struct zcbor_string *payload)
 {
+#ifdef SUIT_PLATFORM_DRY_RUN_SUPPORT
 	if (state->dry_run != suit_bool_false) {
 		return suit_plat_check_fetch_integrated(dst_handle, payload);
 	} else {
 		return suit_plat_fetch_integrated(dst_handle, payload);
 	}
+#else /* SUIT_PLATFORM_DRY_RUN_SUPPORT */
+	return suit_plat_fetch_integrated(dst_handle, payload);
+#endif /* SUIT_PLATFORM_DRY_RUN_SUPPORT */
 }
 
 
@@ -328,11 +336,15 @@ int suit_directive_fetch(struct suit_processor_state *state)
 static int plat_copy(struct suit_processor_state *state, suit_component_t dst_handle,
 		suit_component_t src_handle)
 {
+#ifdef SUIT_PLATFORM_DRY_RUN_SUPPORT
 	if (state->dry_run != suit_bool_false) {
 		return suit_plat_check_copy(dst_handle, src_handle);
 	} else {
 		return suit_plat_copy(dst_handle, src_handle);
 	}
+#else /* SUIT_PLATFORM_DRY_RUN_SUPPORT */
+	return suit_plat_copy(dst_handle, src_handle);
+#endif /* SUIT_PLATFORM_DRY_RUN_SUPPORT */
 }
 
 
@@ -370,11 +382,15 @@ int suit_directive_swap(struct suit_processor_state *state)
 static int plat_invoke(struct suit_processor_state *state, suit_component_t image_handle,
 		struct zcbor_string *invoke_args)
 {
+#ifdef SUIT_PLATFORM_DRY_RUN_SUPPORT
 	if (state->dry_run != suit_bool_false) {
 		return suit_plat_check_invoke(image_handle, invoke_args);
 	} else {
 		return suit_plat_invoke(image_handle, invoke_args);
 	}
+#else /* SUIT_PLATFORM_DRY_RUN_SUPPORT */
+	return suit_plat_invoke(image_handle, invoke_args);
+#endif /* SUIT_PLATFORM_DRY_RUN_SUPPORT */
 }
 
 

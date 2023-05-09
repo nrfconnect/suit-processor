@@ -81,10 +81,22 @@ enum suit_bool {
 	suit_bool_true = 0x713cf9c6, ///! 111 0001 0011 1100 1111 1001 1100 0110
 };
 
-#define SUIT_NUM_STEPS 5
+#define SUIT_NUM_STEPS 6
+
+enum suit_command_sequence {
+	SUIT_SEQ_PARSE,
+	SUIT_SEQ_DEP_RESOLUTION,
+	SUIT_SEQ_PAYLOAD_FETCH,
+	SUIT_SEQ_INSTALL,
+	SUIT_SEQ_VALIDATE,
+	SUIT_SEQ_LOAD,
+	SUIT_SEQ_INVOKE,
+	SUIT_SEQ_MAX,
+};
 
 enum suit_manifest_step {
 	SUIT_NO_STEP,
+	SUIT_DEP_RESOLUTION,
 	SUIT_PAYLOAD_FETCH,
 	SUIT_INSTALL,
 	SUIT_VALIDATE,
@@ -145,6 +157,7 @@ struct suit_seq_exec_state {
 };
 
 struct suit_processor_state {
+	struct zcbor_string envelope_str;
 	enum suit_bool envelope_decoded;
 	suit_manifest_envelope_t envelope;
 	enum suit_bool envelope_validated;
@@ -155,7 +168,9 @@ struct suit_processor_state {
 	suit_manifest_t manifest;
 	enum suit_bool manifest_validated;
 	enum suit_manifest_step current_step;
+#ifdef SUIT_PLATFORM_DRY_RUN_SUPPORT
 	enum suit_bool dry_run;
+#endif /* SUIT_PLATFORM_DRY_RUN_SUPPORT */
 	size_t num_components;
 	bool current_components[SUIT_MAX_NUM_COMPONENTS];
 	struct suit_manifest_params components[SUIT_MAX_NUM_COMPONENTS];

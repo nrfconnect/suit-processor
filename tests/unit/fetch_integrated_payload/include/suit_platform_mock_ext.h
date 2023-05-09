@@ -72,69 +72,103 @@ void assert_zcbor_string(void *p1, void *p2);
 }
 int __check_digest_callback(enum suit_cose_alg alg_id, struct zcbor_string* digest, struct zcbor_string* payload, int cmock_num_calls);
 
-#define __cmock_suit_plat_authenticate_ExpectComplexArgsAndReturn(alg_id, key_id, signature, data, cmock_retval) { \
-	extern complex_arg_q_t __authenticate_callback_queue; \
-	push_complex_arg(key_id, assert_zcbor_string, __authenticate_callback_queue); \
-	push_complex_arg(signature, assert_zcbor_string, __authenticate_callback_queue); \
-	push_complex_arg(data, assert_zcbor_string, __authenticate_callback_queue); \
-	push_retval_arg(cmock_retval, __authenticate_callback_queue); \
-	__cmock_suit_plat_authenticate_AddCallback(__authenticate_callback); \
-	__cmock_suit_plat_authenticate_ExpectAndReturn(alg_id, key_id, signature, data, cmock_retval); \
-	__cmock_suit_plat_authenticate_IgnoreArg_key_id(); \
-	__cmock_suit_plat_authenticate_IgnoreArg_signature(); \
-	__cmock_suit_plat_authenticate_IgnoreArg_data(); \
+#define __cmock_suit_plat_authenticate_manifest_ExpectComplexArgsAndReturn(manifest_component_id, alg_id, key_id, signature, data, cmock_retval) { \
+	extern complex_arg_q_t __authenticate_manifest_callback_queue; \
+	push_complex_arg(manifest_component_id, assert_zcbor_string, __authenticate_manifest_callback_queue); \
+	push_complex_arg(key_id, assert_zcbor_string, __authenticate_manifest_callback_queue); \
+	push_complex_arg(signature, assert_zcbor_string, __authenticate_manifest_callback_queue); \
+	push_complex_arg(data, assert_zcbor_string, __authenticate_manifest_callback_queue); \
+	push_retval_arg(cmock_retval, __authenticate_manifest_callback_queue); \
+	__cmock_suit_plat_authenticate_manifest_AddCallback(__authenticate_manifest_callback); \
+	__cmock_suit_plat_authenticate_manifest_ExpectAndReturn(manifest_component_id, alg_id, key_id, signature, data, cmock_retval); \
+	__cmock_suit_plat_authenticate_manifest_IgnoreArg_key_id(); \
+	__cmock_suit_plat_authenticate_manifest_IgnoreArg_signature(); \
+	__cmock_suit_plat_authenticate_manifest_IgnoreArg_data(); \
+	__cmock_suit_plat_authenticate_manifest_IgnoreArg_manifest_component_id(); \
 }
-int __authenticate_callback(enum suit_cose_alg alg_id, struct zcbor_string* key_id, struct zcbor_string* signature, struct zcbor_string* data, int cmock_num_calls);
+int __authenticate_manifest_callback(struct zcbor_string* manifest_component_id, enum suit_cose_alg alg_id, struct zcbor_string* key_id, struct zcbor_string* signature, struct zcbor_string* data, int cmock_num_calls);
 
-#define __cmock_suit_plat_create_component_handle_ExpectComplexArgsAndReturn(component_id, key_ids, num_key_ids, component_handle, cmock_retval) { \
+#define __cmock_suit_plat_create_component_handle_ExpectComplexArgsAndReturn(component_id, handle, cmock_retval) { \
 	extern complex_arg_q_t __get_component_handle_callback_queue; \
 	push_complex_arg(component_id, assert_zcbor_string, __get_component_handle_callback_queue); \
 	push_retval_arg(cmock_retval, __get_component_handle_callback_queue); \
 	__cmock_suit_plat_create_component_handle_AddCallback(__get_component_handle_callback); \
-	__cmock_suit_plat_create_component_handle_ExpectAndReturn(component_id, key_ids, num_key_ids, component_handle, cmock_retval); \
+	__cmock_suit_plat_create_component_handle_ExpectAndReturn(component_id, handle, cmock_retval); \
 	__cmock_suit_plat_create_component_handle_IgnoreArg_component_id(); \
 }
-int __get_component_handle_callback(struct zcbor_string* component_id, struct zcbor_string** key_ids, size_t num_key_ids, suit_component_t* component_handle, int cmock_num_calls);
+int __get_component_handle_callback(struct zcbor_string* component_id, suit_component_t* handle, int cmock_num_calls);
 
-#define __cmock_suit_plat_check_image_match_ExpectComplexArgsAndReturn(alg_id, digest, image_size, image_handle, cmock_retval) { \
+#define __cmock_suit_plat_check_image_match_ExpectComplexArgsAndReturn(image_handle, alg_id, digest, image_size, cmock_retval) { \
 	extern complex_arg_q_t __check_image_match_callback_queue; \
 	push_complex_arg(digest, assert_zcbor_string, __check_image_match_callback_queue); \
 	push_retval_arg(cmock_retval, __check_image_match_callback_queue); \
 	__cmock_suit_plat_check_image_match_AddCallback(__check_image_match_callback); \
-	__cmock_suit_plat_check_image_match_ExpectAndReturn(alg_id, digest, image_size, image_handle, cmock_retval); \
+	__cmock_suit_plat_check_image_match_ExpectAndReturn(image_handle, alg_id, digest, image_size, cmock_retval); \
 	__cmock_suit_plat_check_image_match_IgnoreArg_digest(); \
 }
-int __check_image_match_callback(enum suit_cose_alg alg_id, struct zcbor_string* digest, size_t image_size, suit_component_t image_handle, int cmock_num_calls);
+int __check_image_match_callback(suit_component_t image_handle, enum suit_cose_alg alg_id, struct zcbor_string* digest, size_t image_size, int cmock_num_calls);
 
-#define __cmock_suit_plat_check_vid_ExpectComplexArgsAndReturn(vid_uuid, component_handle, cmock_retval) { \
+#define __cmock_suit_plat_check_vid_ExpectComplexArgsAndReturn(component_handle, vid_uuid, cmock_retval) { \
 	extern complex_arg_q_t __check_vid_callback_queue; \
 	push_complex_arg(vid_uuid, assert_zcbor_string, __check_vid_callback_queue); \
 	push_retval_arg(cmock_retval, __check_vid_callback_queue); \
 	__cmock_suit_plat_check_vid_AddCallback(__check_vid_callback); \
-	__cmock_suit_plat_check_vid_ExpectAndReturn(vid_uuid, component_handle, cmock_retval); \
+	__cmock_suit_plat_check_vid_ExpectAndReturn(component_handle, vid_uuid, cmock_retval); \
 	__cmock_suit_plat_check_vid_IgnoreArg_vid_uuid(); \
 }
-int __check_vid_callback(struct zcbor_string* vid_uuid, suit_component_t component_handle, int cmock_num_calls);
+int __check_vid_callback(suit_component_t component_handle, struct zcbor_string* vid_uuid, int cmock_num_calls);
 
-#define __cmock_suit_plat_check_cid_ExpectComplexArgsAndReturn(cid_uuid, component_handle, cmock_retval) { \
+#define __cmock_suit_plat_check_cid_ExpectComplexArgsAndReturn(component_handle, cid_uuid, cmock_retval) { \
 	extern complex_arg_q_t __check_cid_callback_queue; \
 	push_complex_arg(cid_uuid, assert_zcbor_string, __check_cid_callback_queue); \
 	push_retval_arg(cmock_retval, __check_cid_callback_queue); \
 	__cmock_suit_plat_check_cid_AddCallback(__check_cid_callback); \
-	__cmock_suit_plat_check_cid_ExpectAndReturn(cid_uuid, component_handle, cmock_retval); \
+	__cmock_suit_plat_check_cid_ExpectAndReturn(component_handle, cid_uuid, cmock_retval); \
 	__cmock_suit_plat_check_cid_IgnoreArg_cid_uuid(); \
 }
-int __check_cid_callback(struct zcbor_string* cid_uuid, suit_component_t component_handle, int cmock_num_calls);
+int __check_cid_callback(suit_component_t component_handle, struct zcbor_string* cid_uuid, int cmock_num_calls);
 
-#define __cmock_suit_plat_check_did_ExpectComplexArgsAndReturn(did_uuid, component_handle, cmock_retval) { \
+#define __cmock_suit_plat_check_did_ExpectComplexArgsAndReturn(component_handle, did_uuid, cmock_retval) { \
 	extern complex_arg_q_t __check_did_callback_queue; \
 	push_complex_arg(did_uuid, assert_zcbor_string, __check_did_callback_queue); \
 	push_retval_arg(cmock_retval, __check_did_callback_queue); \
 	__cmock_suit_plat_check_did_AddCallback(__check_did_callback); \
-	__cmock_suit_plat_check_did_ExpectAndReturn(did_uuid, component_handle, cmock_retval); \
+	__cmock_suit_plat_check_did_ExpectAndReturn(component_handle, did_uuid, cmock_retval); \
 	__cmock_suit_plat_check_did_IgnoreArg_did_uuid(); \
 }
-int __check_did_callback(struct zcbor_string* did_uuid, suit_component_t component_handle, int cmock_num_calls);
+int __check_did_callback(suit_component_t component_handle, struct zcbor_string* did_uuid, int cmock_num_calls);
+
+#define __cmock_suit_plat_suit_plat_authorize_component_id_ExpectComplexArgsAndReturn(manifest_component_id, component_id, cmock_retval) { \
+	extern complex_arg_q_t __authorize_component_id_callback_queue; \
+	push_complex_arg(manifest_component_id, assert_zcbor_string, __authorize_component_id_callback_queue); \
+	push_complex_arg(component_id, assert_zcbor_string, __authorize_component_id_callback_queue); \
+	push_retval_arg(cmock_retval, __authorize_component_id_callback_queue); \
+	__cmock_suit_plat_authorize_component_id_AddCallback(__authorize_component_id_callback); \
+	__cmock_suit_plat_authorize_component_id_ExpectAndReturn(manifest_component_id, component_id, cmock_retval); \
+	__cmock_suit_plat_authorize_component_id_IgnoreArg_manifest_component_id(); \
+	__cmock_suit_plat_authorize_component_id_IgnoreArg_component_id(); \
+}
+int __authorize_component_id_callback(struct zcbor_string *manifest_component_id, struct zcbor_string *component_id, int cmock_num_calls);
+
+#define __cmock_suit_plat_check_fetch_ExpectComplexArgsAndReturn(dst_handle, uri, cmock_retval) { \
+	extern complex_arg_q_t __check_fetch_callback_queue; \
+	push_complex_arg(uri, assert_zcbor_string, __check_fetch_callback_queue); \
+	push_retval_arg(cmock_retval, __check_fetch_callback_queue); \
+	__cmock_suit_plat_check_fetch_AddCallback(__check_fetch_callback); \
+	__cmock_suit_plat_check_fetch_ExpectAndReturn(dst_handle, uri, cmock_retval); \
+	__cmock_suit_plat_check_fetch_IgnoreArg_uri(); \
+}
+int __check_fetch_callback(suit_component_t dst_handle, struct zcbor_string* uri, int cmock_num_calls);
+
+#define __cmock_suit_plat_fetch_ExpectComplexArgsAndReturn(dst_handle, uri, cmock_retval) { \
+	extern complex_arg_q_t __fetch_callback_queue; \
+	push_complex_arg(uri, assert_zcbor_string, __fetch_callback_queue); \
+	push_retval_arg(cmock_retval, __fetch_callback_queue); \
+	__cmock_suit_plat_fetch_AddCallback(__fetch_callback); \
+	__cmock_suit_plat_fetch_ExpectAndReturn(dst_handle, uri, cmock_retval); \
+	__cmock_suit_plat_fetch_IgnoreArg_uri(); \
+}
+int __fetch_callback(suit_component_t dst_handle, struct zcbor_string* uri, int cmock_num_calls);
 
 #define __cmock_suit_plat_check_fetch_integrated_ExpectComplexArgsAndReturn(dst_handle, payload, cmock_retval) { \
 	extern complex_arg_q_t __check_fetch_integrated_callback_queue; \

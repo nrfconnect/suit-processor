@@ -246,9 +246,6 @@ static void seq_validation_nested_test_template(seq_validation_api_t validate, b
 
 void test_seq_validation_prepare_reset_state(void)
 {
-	/* It is required to call platform reset API in case of SUIT processor state reset. */
-	__cmock_suit_plat_reset_components_Expect();
-
 	suit_reset_state(&state);
 }
 

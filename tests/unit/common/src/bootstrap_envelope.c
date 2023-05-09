@@ -22,7 +22,9 @@ void bootstrap_envelope_empty(struct suit_processor_state *state)
 	state->manifest_decoded = suit_bool_true;
 	state->manifest_validated = suit_bool_true;
 	state->current_step = 0;
+#ifdef SUIT_PLATFORM_DRY_RUN_SUPPORT
 	state->dry_run = suit_bool_false;
+#endif /* SUIT_PLATFORM_DRY_RUN_SUPPORT */
 
 	common->_SUIT_Common_suit_shared_sequence_present = false;
 	severable->_SUIT_Severable_Members_Choice_suit_payload_fetch_present = false;

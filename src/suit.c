@@ -42,8 +42,19 @@ void suit_reset_state(struct suit_processor_state *state)
 	state->manifest_authenticated = suit_bool_false;
 	state->manifest_decoded = suit_bool_false;
 	state->manifest_validated = suit_bool_false;
+#ifdef SUIT_PLATFORM_DRY_RUN_SUPPORT
 	state->dry_run = suit_bool_true;
+#endif /* SUIT_PLATFORM_DRY_RUN_SUPPORT */
+
+#ifdef SUIT_PLATFORM_LEGACY_API_SUPPORT
 	suit_plat_reset_components();
+#else /* SUIT_PLATFORM_LEGACY_API_SUPPORT */
+	for (size_t i = 0; i < SUIT_MAX_NUM_COMPONENTS; i++) {
+		if (state->components[i].component_handle) {
+			(void)suit_plat_release_component_handle(state->components[i].component_handle);
+		}
+	}
+#endif /* SUIT_PLATFORM_LEGACY_API_SUPPORT */
 }
 
 /** Decode the string into a manifest envelope and validate the data structure.
@@ -74,6 +85,8 @@ int suit_decode_envelope(uint8_t *envelope_str, size_t envelope_len,
 
 	if (ret == ZCBOR_SUCCESS) {
 		state->envelope_decoded = suit_bool_true;
+		state->envelope_str.value = envelope_str;
+		state->envelope_str.len = envelope_len;
 		return SUIT_SUCCESS;
 	}
 
@@ -139,6 +152,7 @@ static int cose_authenticate_digest(struct suit_processor_state *state, struct z
 		.len = signed_data_size,
 	};
 
+#ifdef SUIT_PLATFORM_LEGACY_API_SUPPORT
 	/* Authenticate data using platform API */
 	ret = suit_plat_authenticate(
 		/* Value enforced by the input CDDL (cose_sign.cddl, supported_algs //= (ES256: -7)) */
@@ -150,6 +164,20 @@ static int cose_authenticate_digest(struct suit_processor_state *state, struct z
 		&cose_sign1_struct._COSE_Sign1_signature,
 		/* Authenticate Signature1 structure, including both algorithm ID and digest bytes of the manifest */
 		&signed_bstr);
+#else /* SUIT_PLATFORM_LEGACY_API_SUPPORT */
+	/* Authenticate data using platform API */
+	ret = suit_plat_authenticate_manifest(
+		NULL, /* manifest_component_id */
+		/* Value enforced by the input CDDL (cose_sign.cddl, supported_algs //= (ES256: -7)) */
+		suit_cose_es256,
+		(cose_sign1_struct._COSE_Sign1__Headers._Headers_protected_cbor._header_map_key_id_present ?
+			&cose_sign1_struct._COSE_Sign1__Headers._Headers_protected_cbor._header_map_key_id._header_map_key_id:
+			(struct zcbor_string *)NULL),
+		/* Pass signature, specific for the key */
+		&cose_sign1_struct._COSE_Sign1_signature,
+		/* Authenticate Signature1 structure, including both algorithm ID and digest bytes of the manifest */
+		&signed_bstr);
+#endif /* SUIT_PLATFORM_LEGACY_API_SUPPORT */
 
 	/* Store the key IDs that authenticated the digest */
 	if (ret == SUIT_SUCCESS) {
@@ -403,11 +431,14 @@ static int prepare_params(struct suit_processor_state *state)
 int suit_validate_manifest(struct suit_processor_state *state)
 {
 	struct SUIT_Common *common = NULL;
+#ifdef SUIT_PLATFORM_DRY_RUN_SUPPORT
 	unsigned int num_dry_run_steps = 0;
+#endif /* SUIT_PLATFORM_DRY_RUN_SUPPORT */
 
 	if (state->envelope_decoded != suit_bool_true
 		|| state->envelope_validated != suit_bool_true
 		|| state->manifest_decoded != suit_bool_true) {
+		SUIT_ERR("Manifest validation failed: Invalid order\r\n");
 		return SUIT_ERR_ORDER;
 	}
 
@@ -421,10 +452,18 @@ int suit_validate_manifest(struct suit_processor_state *state)
 
 	/* Verify the manifest sequence number */
 	do {
+#ifdef SUIT_PLATFORM_LEGACY_API_SUPPORT
 		int ret = suit_plat_check_sequence_num(state->manifest._SUIT_Manifest_suit_manifest_sequence_number);
+#else /* SUIT_PLATFORM_LEGACY_API_SUPPORT */
+		int ret = suit_plat_authorize_sequence_num(
+			state->current_step,
+			NULL, /* manifest_component_id */
+			state->manifest._SUIT_Manifest_suit_manifest_sequence_number);
+#endif /* SUIT_PLATFORM_LEGACY_API_SUPPORT */
 
 		CHECK_RET(ret, break);
 	} while (0);
+	SUIT_DBG("Manifest sequence number authorized\r\n");
 
 	/* If the text field inside the envelope is present and the text field is severed from the manifest, verify the digest */
 	while (state->envelope._SUIT_Envelope__SUIT_Severable_Manifest_Members._SUIT_Severable_Manifest_Members_suit_text_present
@@ -442,30 +481,50 @@ int suit_validate_manifest(struct suit_processor_state *state)
 		/* Text appears in envelope but not in manifest, so it is not signed */
 		return SUIT_ERR_MANIFEST_VALIDATION;
 	}
+	SUIT_DBG("Manifest severable elements verified against digests\r\n");
 
 	/* Verify common sequence */
 	common = &state->manifest._SUIT_Manifest_suit_common_cbor;
 
 	/* Verify list of components */
 	if (common->_SUIT_Common_suit_components_present){
+		struct zcbor_string component_id;
+
 		/* Verify the length of the list */
 		if (common->_SUIT_Common_suit_components._SUIT_Common_suit_components._SUIT_Components__SUIT_Component_Identifier_count > SUIT_MAX_NUM_COMPONENTS) {
 			return SUIT_ERR_MANIFEST_VALIDATION;
 		}
 
-		/* Assign component handles */
-		struct zcbor_string component_id;
+#ifndef SUIT_PLATFORM_LEGACY_API_SUPPORT
+		/* Authorize component IDs */
 		for (int i = 0; i < common->_SUIT_Common_suit_components._SUIT_Common_suit_components._SUIT_Components__SUIT_Component_Identifier_count; i++) {
 			/* Zip list of strings into a single ZCBOR string */
 			get_component_id_str(&component_id,
 				&common->_SUIT_Common_suit_components._SUIT_Common_suit_components._SUIT_Components__SUIT_Component_Identifier[i]);
+			int ret = suit_plat_authorize_component_id(NULL /* manifest_component_id */, &component_id);
+
+			CHECK_RET(ret, continue);
+		}
+		SUIT_DBG("Manifest component handles authorized\r\n");
+#endif /* SUIT_PLATFORM_LEGACY_API_SUPPORT */
+
+		/* Assign component handles */
+		for (int i = 0; i < common->_SUIT_Common_suit_components._SUIT_Common_suit_components._SUIT_Components__SUIT_Component_Identifier_count; i++) {
+			/* Zip list of strings into a single ZCBOR string */
+			get_component_id_str(&component_id,
+				&common->_SUIT_Common_suit_components._SUIT_Common_suit_components._SUIT_Components__SUIT_Component_Identifier[i]);
+#ifdef SUIT_PLATFORM_LEGACY_API_SUPPORT
 			int ret = suit_plat_create_component_handle(&component_id, state->key_ids, state->num_key_ids, &state->components[i].component_handle);
+#else /* SUIT_PLATFORM_LEGACY_API_SUPPORT */
+			int ret = suit_plat_create_component_handle(&component_id, &state->components[i].component_handle);
+#endif /* SUIT_PLATFORM_LEGACY_API_SUPPORT */
 
 			/* Increase the number of valid component indexes / handles */
 			state->num_components++;
 
 			CHECK_RET(ret, continue);
 		}
+		SUIT_DBG("Manifest component handles created\r\n");
 	}
 
 
@@ -479,6 +538,7 @@ int suit_validate_manifest(struct suit_processor_state *state)
 
 		CHECK_RET(ret, break);
 	}
+	SUIT_DBG("Manifest shared sequence validated\r\n");
 
 	if (common != &state->manifest._SUIT_Manifest_suit_common_cbor) {
 		goto tamp;
@@ -497,8 +557,10 @@ int suit_validate_manifest(struct suit_processor_state *state)
 
 			CHECK_RET(ret, break);
 		}
+		SUIT_DBG("Manifest sequence %d validated\r\n", step);
 	}
 
+#ifdef SUIT_PLATFORM_DRY_RUN_SUPPORT
 	/* Execute dry run over all manifest members */
 	state->dry_run = suit_bool_true;
 
@@ -525,9 +587,11 @@ int suit_validate_manifest(struct suit_processor_state *state)
 			}
 
 			ret = suit_run_command_sequence(state, step_seq);
+			SUIT_DBG("Manifest sequence %d dru-run completed\r\n", step);
 		}
 
 		if (ret != SUIT_SUCCESS) {
+			SUIT_ERR("Manifest sequence %d dry-run failed\r\n", step);
 			return ret;
 		} else if (ret == SUIT_SUCCESS) {
 			num_dry_run_steps++;
@@ -535,12 +599,19 @@ int suit_validate_manifest(struct suit_processor_state *state)
 	}
 
 	if (num_dry_run_steps != SUIT_NUM_STEPS) {
+		SUIT_DBG("Manifest validation failed\r\n");
 		goto tamp;
 	} else if (num_dry_run_steps == SUIT_NUM_STEPS) {
+		SUIT_DBG("Manifest validation finished\r\n");
 		state->manifest_validated = suit_bool_true;
 		state->dry_run = suit_bool_false;
 		return SUIT_SUCCESS;
 	}
+#else /* SUIT_PLATFORM_DRY_RUN_SUPPORT */
+	SUIT_DBG("Manifest validation finished\r\n");
+	state->manifest_validated = suit_bool_true;
+	return SUIT_SUCCESS;
+#endif /* SUIT_PLATFORM_DRY_RUN_SUPPORT */
 
 tamp:
 	state->manifest_validated = suit_bool_false;
@@ -583,6 +654,15 @@ int suit_process_manifest(struct suit_processor_state *state,
 		}
 
 		ret = suit_run_command_sequence(state, step_seq);
+
+#ifndef SUIT_PLATFORM_LEGACY_API_SUPPORT
+		if (ret == SUIT_SUCCESS) {
+			ret = suit_plat_sequence_completed(state->current_step,
+				NULL  /* manifest_component_id */,
+				state->envelope_str.value,
+				state->envelope_str.len);
+		}
+#endif /* SUIT_PLATFORM_LEGACY_API_SUPPORT */
 
 		return ret;
 	}
