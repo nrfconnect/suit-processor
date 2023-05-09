@@ -15,9 +15,6 @@ static struct suit_processor_state state;
 
 void test_bootstrap_reset_state(void)
 {
-	/* It is required to call platform reset API in case of SUIT processor state reset. */
-	__cmock_suit_plat_reset_components_Expect();
-
 	suit_reset_state(&state);
 }
 
@@ -86,6 +83,8 @@ void test_bootstrap_invoke_single_component(void)
 	bootstrap_envelope_components(&state, 1);
 
 	__cmock_suit_plat_invoke_ExpectAndReturn(ASSIGNED_COMPONENT_HANDLE, NULL, SUIT_SUCCESS);
+	__cmock_suit_plat_sequence_completed_ExpectAndReturn(SUIT_INVOKE, NULL, NULL, 0, SUIT_SUCCESS);
+
 	int retval = suit_process_manifest(&state, SUIT_INVOKE);
 	TEST_ASSERT_EQUAL(SUIT_SUCCESS, retval);
 }

@@ -34,3 +34,6 @@ target_link_libraries(cose PRIVATE zephyr_interface)
 
 # Link app with the main SUIT library
 target_link_libraries(app PRIVATE suit)
+
+zephyr_compile_definitions_ifdef(CONFIG_SUIT_PLATFORM_LEGACY_API_SUPPORT SUIT_PLATFORM_LEGACY_API_SUPPORT)
+zephyr_compile_definitions_ifdef(CONFIG_SUIT_PLATFORM_DRY_RUN_SUPPORT SUIT_PLATFORM_DRY_RUN_SUPPORT)
