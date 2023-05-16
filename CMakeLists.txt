@@ -12,59 +12,19 @@ else()
   set(ZCBOR_COMMAND ${PYTHON_EXECUTABLE} ${ZEPHYR_ZCBOR_MODULE_DIR}/zcbor/zcbor.py)
 endif()
 
-# Check ZCBOR version due to possibility of usage with two not compatible releases 0.5.x and 0.6.x.
-# Support for 0.5.x release will be removed when https://projecttools.nordicsemi.no/jira/browse/KRKNWK-15753 closed.
-# Version checking logic:
-#  - get the first line of the command output and store in the ZCBOR_VERSION variable
-#  - check result of the last child process to handle 0.6.0 release with missing 'version' command
-#  - convert semantic version to numeric value (i.e. 1.2.3 -> 123)
-#  - store numeric value in the ZCBOR_VERSION variable
-#  - set ZCBOR_COMMAND_ORDER based on ZCBOR_VERSION value
-execute_process(
-  COMMAND ${ZCBOR_COMMAND}
-  --version
-  OUTPUT_VARIABLE ZCBOR_VERSION
-  RESULT_VARIABLE ZCBOR_VERSION_RES
-  ERROR_QUIET
-)
-if(NOT ZCBOR_VERSION_RES EQUAL 0)
-  # Workaround for missing version command in 0.6.0
-  set(ZCBOR_VERSION "zcbor 0.6.0")
-endif()
-separate_arguments(ZCBOR_VERSION)
-list(GET ZCBOR_VERSION 1 ZCBOR_VERSION)
-string(REPLACE "." "" ZCBOR_VERSION ${ZCBOR_VERSION})
-message(STATUS "ZCBOR_VERSION: ${ZCBOR_VERSION}")
-if(ZCBOR_VERSION GREATER "051")
-  set(ZCBOR_COMMAND_ORDER 1)
-else()
-  set(ZCBOR_COMMAND_ORDER 0)
-endif()
-
 set(ZCBOR_DIR "${CMAKE_CURRENT_BINARY_DIR}")
 
 # Generate and add COSE parser code
-if(ZCBOR_COMMAND_ORDER)
-  set(ZCBOR_COMMAND_COSE
-    ${ZCBOR_COMMAND}
-      code
-      -c "${CMAKE_CURRENT_LIST_DIR}/cddl/cose_sign.cddl"
-      -d -e
-      -t COSE_Sign1_Tagged Sig_structure1
-      --output-cmake cose.cmake
-      --copy-sources
-  )
-else()
-  set(ZCBOR_COMMAND_COSE
-    ${ZCBOR_COMMAND}
-      -c "${CMAKE_CURRENT_LIST_DIR}/cddl/cose_sign.cddl"
-      code
-      -d -e
-      -t COSE_Sign1_Tagged Sig_structure1
-      --output-cmake cose.cmake
-      --copy-sources
-  )
-endif()
+set(ZCBOR_COMMAND_COSE
+  ${ZCBOR_COMMAND}
+    code
+    -c "${CMAKE_CURRENT_LIST_DIR}/cddl/cose_sign.cddl"
+    -d -e
+    -t COSE_Sign1_Tagged Sig_structure1
+    --output-cmake cose.cmake
+    --copy-sources
+)
+
 if(NOT EXISTS "${ZCBOR_DIR}/cose.cmake")
 execute_process(
   COMMAND ${ZCBOR_COMMAND_COSE}
@@ -92,29 +52,16 @@ target_include_directories(cose PUBLIC
     )
 
 # Generate and add SUIT envelope parser code
-if(ZCBOR_COMMAND_ORDER)
-  set(ZCBOR_COMMAND_MANIFEST
-    ${ZCBOR_COMMAND}
-      code
-      -c "${CMAKE_CURRENT_LIST_DIR}/cddl/manifest.cddl"
-      -d
-      -t SUIT_Envelope_Tagged SUIT_Manifest SUIT_Shared_Sequence SUIT_Command_Sequence
-         SUIT_Condition SUIT_Directive SUIT_Shared_Commands SUIT_Text_Map
-      --output-cmake manifest.cmake
-      --copy-sources
-  )
-else()
-  set(ZCBOR_COMMAND_MANIFEST
-    ${ZCBOR_COMMAND}
-      -c "${CMAKE_CURRENT_LIST_DIR}/cddl/manifest.cddl"
-      code
-      -d
-      -t SUIT_Envelope_Tagged SUIT_Manifest SUIT_Shared_Sequence SUIT_Command_Sequence
-         SUIT_Condition SUIT_Directive SUIT_Shared_Commands SUIT_Text_Map
-      --output-cmake manifest.cmake
-      --copy-sources
-  )
-endif()
+set(ZCBOR_COMMAND_MANIFEST
+  ${ZCBOR_COMMAND}
+    code
+    -c "${CMAKE_CURRENT_LIST_DIR}/cddl/manifest.cddl"
+    -d
+    -t SUIT_Envelope_Tagged SUIT_Manifest SUIT_Shared_Sequence SUIT_Command_Sequence
+       SUIT_Condition SUIT_Directive SUIT_Shared_Commands SUIT_Text_Map
+    --output-cmake manifest.cmake
+    --copy-sources
+)
 if(NOT EXISTS "${ZCBOR_DIR}/manifest.cmake")
 execute_process(
   COMMAND ${ZCBOR_COMMAND_MANIFEST}
