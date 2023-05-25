@@ -1,3 +1,9 @@
+/*
+ * Copyright (c) 2023 Nordic Semiconductor ASA
+ *
+ * SPDX-License-Identifier: LicenseRef-Nordic-5-Clause
+ */
+
 #include <bootstrap_envelope.h>
 
 void bootstrap_envelope_empty(struct suit_processor_state *state)
