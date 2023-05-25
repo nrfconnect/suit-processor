@@ -1,3 +1,9 @@
+/*
+ * Copyright (c) 2023 Nordic Semiconductor ASA
+ *
+ * SPDX-License-Identifier: LicenseRef-Nordic-5-Clause
+ */
+
 #include <bootstrap_seq.h>
 
 size_t bootsrap_seq_hdr_run_sequence(uint8_t * cmd_buf, size_t buf_size, size_t content_size)
