@@ -11,6 +11,33 @@
 #include "manifest_types.h"
 
 
+enum suit_decoder_step {
+	INVALID,
+	INITIALIZED,
+	ENVELOPE_DECODED,
+	MANIFEST_DIGEST_VERIFIED,
+	MANIFEST_DECODED,
+	MANIFEST_AUTHENTICATED,
+	MANIFEST_AUTHORIZED,
+	SEQUENCES_DECODED,
+	COMPONENTS_CREATED,
+	LAST_STEP,
+};
+
+struct suit_decoder_state {
+	struct suit_manifest_state *decoded_manifest;
+	enum suit_decoder_step step;
+
+	struct zcbor_string manifest_digest_bytes;
+	struct zcbor_string authentication_bstr[2];
+	uint_fast32_t authentication_bstr_count;
+
+	union {
+		suit_manifest_envelope_t envelope;
+		suit_manifest_t manifest;
+	};
+};
+
 enum suit_seq_status {
 	UNAVAILABLE,
 	SEVERED,
