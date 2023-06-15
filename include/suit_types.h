@@ -19,7 +19,7 @@
 #define SUIT_MAX_NUM_COMPONENT_PARAMS (SUIT_MAX_NUM_COMPONENTS * SUIT_MAX_MANIFEST_DEPTH) ///! The maximum number of active components during processing dependency manifests.
 #define SUIT_MAX_NUM_INTEGRATED_PAYLOADS 5  ///! The maximum number of integrated payloads in a single manifest.
 #define SUIT_MAX_COMMAND_ARGS 3  ///! The maximum number of arguments consumed by a single command.
-#define SUIT_SUIT_SIG_STRUCTURE1_MAX_LENGTH 55  ///! The maximum length of the Sig_structure1 structure. Current value allows to store only 256-bit long digests.
+#define SUIT_SUIT_SIG_STRUCTURE1_MAX_LENGTH 61  ///! The maximum length of the Sig_structure1 structure. Current value allows to store only 256-bit long digests with key id.
 #define SUIT_MAX_SEQ_DEPTH 5  ///! The maximum number of command sequences that may be encapsulated.
 #define SUIT_SEQ_EXEC_DEFAULT_STATE 0  ///! The default value of the cmd_exec_state.
 #define SUIT_MAX_MANIFEST_DEPTH 3 ///! The maximum nesting level of hierarchical manifests.
