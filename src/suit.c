@@ -97,8 +97,16 @@ tamp:
 }
 
 
-static int cose_verify_digest(struct zcbor_string * digest_btsr, struct zcbor_string * data_bstr)
+static int cose_verify_digest(struct zcbor_string *digest_bstr, struct zcbor_string *data_bstr)
 {
+	struct SUIT_Digest digest;
+	size_t bytes_processed;
+
+	int ret = cbor_decode_SUIT_Digest(digest_bstr->value, digest_bstr->len, &digest, &bytes_processed);
+	if ((ret != 0) || (bytes_processed != digest_bstr->len)) {
+		return SUIT_ERR_DECODING;
+	}
+
 	/* Include CBOR header (type, length) in digest calculation */
 	size_t offset = header_len(data_bstr->len);
 	struct zcbor_string data_bytes = {
@@ -109,7 +117,7 @@ static int cose_verify_digest(struct zcbor_string * digest_btsr, struct zcbor_st
 	return suit_plat_check_digest(
 		/* Value enforced by the input CDDL (manifest.cddl, suit-cose-hash-algs /= cose-alg-sha-256) */
 		suit_cose_sha256,
-		digest_btsr,
+		&digest._SUIT_Digest_suit_digest_bytes,
 		&data_bytes);
 }
 
@@ -270,7 +278,7 @@ int suit_validate_envelope(struct suit_processor_state *state)
 	if (num_ok && (num_ok == auth->_SUIT_Authentication_bstr_count)) {
 		/* Check the manifest digest against authenticated value */
 		int ret = cose_verify_digest(
-			&auth->_SUIT_Authentication_SUIT_Digest_bstr_cbor._SUIT_Digest_suit_digest_bytes,
+			&auth->_SUIT_Authentication_SUIT_Digest_bstr,
 			&state->envelope._SUIT_Envelope_suit_manifest);
 
 		if (ret != SUIT_SUCCESS) {

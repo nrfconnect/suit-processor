@@ -58,7 +58,7 @@ set(ZCBOR_COMMAND_MANIFEST
     -c "${CMAKE_CURRENT_LIST_DIR}/cddl/manifest.cddl"
     -d
     -t SUIT_Envelope_Tagged SUIT_Manifest SUIT_Shared_Sequence SUIT_Command_Sequence
-       SUIT_Condition SUIT_Directive SUIT_Shared_Commands SUIT_Text_Map
+       SUIT_Condition SUIT_Directive SUIT_Shared_Commands SUIT_Text_Map SUIT_Digest
     --output-cmake manifest.cmake
     --copy-sources
 )
