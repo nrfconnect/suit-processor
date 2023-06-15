@@ -69,7 +69,7 @@ SUIT_Manifest = {
   ? suit-reference-uri          => tstr,
   SUIT_Unseverable_Members,
   SUIT_Severable_Members_Choice,
-;  * $$SUIT_Manifest_Extensions,
+  0*1 $$SUIT_Manifest_Extensions,
 }
 
 SUIT_Unseverable_Members = (
@@ -82,14 +82,14 @@ SUIT_Unseverable_Members = (
 SUIT_Severable_Members_Choice = (
   ? suit-payload-fetch => bstr .cbor SUIT_Command_Sequence,
   ? suit-install => bstr .cbor SUIT_Command_Sequence,
-  ? suit-text => SUIT_Digest ; / bstr .cbor SUIT_Text_Map,
-;  * $$severable-manifest-members-choice-extensions
+  ? suit-text => SUIT_Digest, ; / bstr .cbor SUIT_Text_Map,
+  0*1 $$severable-manifest-members-choice-extensions
 )
 
 SUIT_Common = {
   ? suit-components             => SUIT_Components,
   ? suit-shared-sequence        => bstr .cbor SUIT_Shared_Sequence,
-;  * $$SUIT_Common-extensions,
+  0*1 $$SUIT_Common-extensions,
 }
 
 SUIT_Components           = [ 1*4 SUIT_Component_Identifier ]

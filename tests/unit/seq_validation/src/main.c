@@ -17,9 +17,9 @@ typedef int (*seq_validation_api_t)(struct suit_processor_state *state, struct z
 
 struct cmd_support_matrix {
 	int exp_retval;
-	uint8_t * test_cmd;
+	uint8_t *test_cmd;
 	size_t test_cmd_size;
-	const uint8_t * cmd_name;
+	const uint8_t *cmd_name;
 };
 
 
@@ -50,9 +50,14 @@ static uint8_t condition_check_content_cmd[] = {
 		0x06, /* uint(suit-condition-check-content) */
 		0x00, /* uint(SUIT_Rep_Policy::None) */
 };
+static uint8_t condition_dependency_integrity_cmd[] = {
+	0x82, /* list (2 elements - 1 command) */
+		0x07, /* uint(suit-condition-dependency-integrity) */
+		0x00, /* uint(SUIT_Rep_Policy::None) */
+};
 static uint8_t condition_is_dependency_cmd[] = {
 	0x82, /* list (2 elements - 1 command) */
-		0x07, /* uint(suit-condition-is_dependency) */
+		0x08, /* uint(suit-condition-is_dependency) */
 		0x00, /* uint(SUIT_Rep_Policy::None) */
 };
 static uint8_t condition_abort_cmd[] = {
@@ -66,6 +71,11 @@ static uint8_t condition_device_identifier_cmd[] = {
 		0x00, /* uint(SUIT_Rep_Policy::None) */
 };
 
+static uint8_t directive_process_dependency_cmd[] = {
+	0x82, /* list (2 elements - 1 command) */
+		0x0b, /* uint(suit-directive-process-dependency) */
+		0xf5, /* true */
+};
 static uint8_t directive_set_component_index_cmd[] = {
 	0x82, /* list (2 elements - 1 command) */
 		0x0c, /* uint(suit-directive-set-component-index) */
@@ -155,14 +165,16 @@ struct cmd_support_matrix shared_support_matrix[] = {
 	{SUIT_SUCCESS, condition_image_match_cmd, sizeof(condition_image_match_cmd), "condition_image_match"},
 	{SUIT_SUCCESS, condition_component_slot_cmd, sizeof(condition_component_slot_cmd), "condition_component_slot"},
 	{SUIT_ERR_DECODING, condition_check_content_cmd, sizeof(condition_check_content_cmd), "condition_check_content"},
-	{SUIT_ERR_DECODING, condition_is_dependency_cmd, sizeof(condition_is_dependency_cmd), "condition_is_dependency"},
+	{SUIT_ERR_MANIFEST_VALIDATION, condition_dependency_integrity_cmd, sizeof(condition_dependency_integrity_cmd), "condition_dependency_integrity"},
+	{SUIT_ERR_MANIFEST_VALIDATION, condition_is_dependency_cmd, sizeof(condition_is_dependency_cmd), "condition_is_dependency"},
 	{SUIT_SUCCESS, condition_abort_cmd, sizeof(condition_abort_cmd), "condition_abort"},
 	{SUIT_SUCCESS, condition_device_identifier_cmd, sizeof(condition_device_identifier_cmd), "condition_device_identifier"},
+	{SUIT_ERR_DECODING, directive_process_dependency_cmd, sizeof(directive_process_dependency_cmd), "directive_process_dependency"},
 	{SUIT_SUCCESS, directive_set_component_index_cmd, sizeof(directive_set_component_index_cmd), "directive_set_component_index"},
 	{ZCBOR_ERR_TO_SUIT_ERR(ZCBOR_ERR_NO_PAYLOAD), directive_try_each_empty_sequences_cmd, sizeof(directive_try_each_empty_sequences_cmd), "directive_try_each without payload"},
 	{SUIT_SUCCESS, directive_try_each_cmd, sizeof(directive_try_each_cmd), "directive_try_each"},
 	{SUIT_ERR_DECODING, directive_write_cmd, sizeof(directive_write_cmd), "directive_write"},
-	{SUIT_ERR_DECODING, directive_set_parameters_cmd, sizeof(directive_set_parameters_cmd), "directive_set_parameters"},
+	{SUIT_ERR_MANIFEST_VALIDATION, directive_set_parameters_cmd, sizeof(directive_set_parameters_cmd), "directive_set_parameters"},
 	{SUIT_SUCCESS, directive_override_parameters_cmd, sizeof(directive_override_parameters_cmd), "directive_override_parameters"},
 	{SUIT_ERR_MANIFEST_VALIDATION, directive_fetch_cmd, sizeof(directive_fetch_cmd), "directive_fetch"},
 	{SUIT_ERR_MANIFEST_VALIDATION, directive_copy_cmd, sizeof(directive_copy_cmd), "directive_copy"},
@@ -179,14 +191,16 @@ struct cmd_support_matrix command_support_matrix[] = {
 	{SUIT_SUCCESS, condition_image_match_cmd, sizeof(condition_image_match_cmd), "condition_image_match"},
 	{SUIT_SUCCESS, condition_component_slot_cmd, sizeof(condition_component_slot_cmd), "condition_component_slot"},
 	{SUIT_ERR_DECODING, condition_check_content_cmd, sizeof(condition_check_content_cmd), "condition_check_content"},
-	{SUIT_ERR_DECODING, condition_is_dependency_cmd, sizeof(condition_is_dependency_cmd), "condition_is_dependency"},
+	{SUIT_ERR_MANIFEST_VALIDATION, condition_dependency_integrity_cmd, sizeof(condition_is_dependency_cmd), "condition_dependency_integrity"},
+	{SUIT_ERR_MANIFEST_VALIDATION, condition_is_dependency_cmd, sizeof(condition_is_dependency_cmd), "condition_is_dependency"},
 	{SUIT_SUCCESS, condition_abort_cmd, sizeof(condition_abort_cmd), "condition_abort"},
 	{SUIT_SUCCESS, condition_device_identifier_cmd, sizeof(condition_device_identifier_cmd), "condition_device_identifier"},
+	{SUIT_ERR_DECODING, directive_process_dependency_cmd, sizeof(directive_process_dependency_cmd), "directive_process_dependency"},
 	{SUIT_SUCCESS, directive_set_component_index_cmd, sizeof(directive_set_component_index_cmd), "directive_set_component_index"},
 	{ZCBOR_ERR_TO_SUIT_ERR(ZCBOR_ERR_NO_PAYLOAD), directive_try_each_empty_sequences_cmd, sizeof(directive_try_each_empty_sequences_cmd), "directive_try_each without payload"},
 	{SUIT_SUCCESS, directive_try_each_cmd, sizeof(directive_try_each_cmd), "directive_try_each"},
 	{SUIT_ERR_DECODING, directive_write_cmd, sizeof(directive_write_cmd), "directive_write"},
-	{SUIT_ERR_DECODING, directive_set_parameters_cmd, sizeof(directive_set_parameters_cmd), "directive_set_parameters"},
+	{SUIT_ERR_MANIFEST_VALIDATION, directive_set_parameters_cmd, sizeof(directive_set_parameters_cmd), "directive_set_parameters"},
 	{SUIT_SUCCESS, directive_override_parameters_cmd, sizeof(directive_override_parameters_cmd), "directive_override_parameters"},
 	{SUIT_SUCCESS, directive_fetch_cmd, sizeof(directive_fetch_cmd), "directive_fetch"},
 	{SUIT_SUCCESS, directive_copy_cmd, sizeof(directive_copy_cmd), "directive_copy"},
@@ -222,6 +236,7 @@ static void seq_validation_nested_test_template(seq_validation_api_t validate, b
 	seq.len = content_size;//ptr - nested_cmd;
 
 	int retval = validate(&state, &seq);
+
 	snprintf(assert_msg, sizeof(assert_msg),
 		"Assetion failed at %s with %d nesting headers and %d components",
 		support_matrix->cmd_name,
@@ -231,7 +246,7 @@ static void seq_validation_nested_test_template(seq_validation_api_t validate, b
 		support_matrix->exp_retval,
 		retval,
 		assert_msg);
-        TEST_ASSERT_EQUAL(state.seq_stack_height, 0);
+	TEST_ASSERT_EQUAL(state.seq_stack_height, 0);
 }
 
 
@@ -263,6 +278,7 @@ void test_seq_validation_shared_bstr_as_command_list(void)
 	bootstrap_envelope_components(&state, 1);
 
 	int retval = suit_validate_shared_sequence(&state, &seq);
+
 	TEST_ASSERT_EQUAL(ZCBOR_ERR_TO_SUIT_ERR(ZCBOR_ERR_WRONG_TYPE), retval);
 }
 
@@ -283,6 +299,7 @@ void test_seq_validation_shared_infinite_length_command_list(void)
 	bootstrap_envelope_components(&state, 1);
 
 	int retval = suit_validate_shared_sequence(&state, &seq);
+
 	TEST_ASSERT_EQUAL(SUIT_ERR_DECODING, retval);
 }
 
@@ -304,6 +321,7 @@ void test_seq_validation_shared_odd_number_of_commands(void)
 	bootstrap_envelope_components(&state, 1);
 
 	int retval = suit_validate_shared_sequence(&state, &seq);
+
 	TEST_ASSERT_EQUAL(SUIT_ERR_DECODING, retval);
 }
 
@@ -325,6 +343,7 @@ void test_seq_validation_shared_payload_longer_than_expected(void)
 	bootstrap_envelope_components(&state, 1);
 
 	int retval = suit_validate_shared_sequence(&state, &seq);
+
 	TEST_ASSERT_EQUAL(SUIT_ERR_DECODING, retval);
 }
 
@@ -344,6 +363,7 @@ void test_seq_validation_shared_no_components(void)
 	bootstrap_envelope_components(&state, 0);
 
 	int retval = suit_validate_shared_sequence(&state, &seq);
+
 	TEST_ASSERT_EQUAL(SUIT_ERR_MANIFEST_VALIDATION, retval);
 }
 
@@ -363,6 +383,7 @@ void test_seq_validation_command_no_components(void)
 	bootstrap_envelope_components(&state, 0);
 
 	int retval = suit_validate_command_sequence(&state, &seq);
+
 	TEST_ASSERT_EQUAL(SUIT_ERR_MANIFEST_VALIDATION, retval);
 }
 
@@ -382,6 +403,7 @@ void test_seq_validation_shared_set_invalid_index(void)
 	bootstrap_envelope_components(&state, 1);
 
 	int retval = suit_validate_shared_sequence(&state, &seq);
+
 	TEST_ASSERT_EQUAL(SUIT_ERR_MANIFEST_VALIDATION, retval);
 }
 
@@ -401,6 +423,7 @@ void test_seq_validation_command_set_invalid_index(void)
 	bootstrap_envelope_components(&state, 1);
 
 	int retval = suit_validate_command_sequence(&state, &seq);
+
 	TEST_ASSERT_EQUAL(SUIT_ERR_MANIFEST_VALIDATION, retval);
 }
 
@@ -420,6 +443,7 @@ void test_seq_validation_shared_condition_without_set_index(void)
 	bootstrap_envelope_components(&state, 2);
 
 	int retval = suit_validate_shared_sequence(&state, &seq);
+
 	TEST_ASSERT_EQUAL(SUIT_ERR_MANIFEST_VALIDATION, retval);
 }
 
@@ -441,6 +465,7 @@ void test_seq_validation_shared_directive_without_set_index(void)
 	bootstrap_envelope_components(&state, 2);
 
 	int retval = suit_validate_shared_sequence(&state, &seq);
+
 	TEST_ASSERT_EQUAL(SUIT_ERR_MANIFEST_VALIDATION, retval);
 }
 
@@ -459,6 +484,7 @@ void test_seq_validation_shared_unknown_command(void)
 	bootstrap_envelope_components(&state, 1);
 
 	int retval = suit_validate_shared_sequence(&state, &seq);
+
 	TEST_ASSERT_EQUAL(SUIT_ERR_DECODING, retval);
 }
 
