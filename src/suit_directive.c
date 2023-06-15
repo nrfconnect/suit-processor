@@ -149,7 +149,7 @@ static int suit_directive_override_parameter(struct SUIT_Parameters_ *param, str
 		dst->cid_set = true;
 		break;
 	case _SUIT_Parameters_suit_parameter_image_digest:
-		memcpy(&dst->image_digest, &param->_SUIT_Parameters_suit_parameter_image_digest_cbor._SUIT_Digest_suit_digest_bytes, sizeof(dst->image_digest));
+		memcpy(&dst->image_digest, &param->_SUIT_Parameters_suit_parameter_image_digest, sizeof(dst->image_digest));
 		dst->image_digest_set = true;
 		break;
 	case _SUIT_Parameters_suit_parameter_image_size:

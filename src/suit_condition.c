@@ -6,6 +6,7 @@
 
 #include <suit_types.h>
 #include <suit_platform.h>
+#include <manifest_decode.h>
 
 
 int suit_condition_vendor_identifier(struct suit_processor_state *state,
@@ -80,9 +81,20 @@ int suit_condition_device_identifier(struct suit_processor_state *state,
 int suit_condition_image_match(struct suit_processor_state *state,
 		struct suit_manifest_params *component_params)
 {
+	struct SUIT_Digest digest;
+	size_t bytes_processed;
+
 	if (!component_params->image_digest_set
 		|| !component_params->image_size_set) {
 		return SUIT_ERR_UNAVAILABLE_PARAMETER;
+	}
+
+	int ret = cbor_decode_SUIT_Digest(
+		component_params->image_digest.value,
+		component_params->image_digest.len,
+		&digest, &bytes_processed);
+	if ((ret != 0) || (bytes_processed != component_params->image_digest.len)) {
+		return SUIT_ERR_DECODING;
 	}
 
 #ifdef SUIT_PLATFORM_DRY_RUN_SUPPORT
@@ -93,13 +105,13 @@ int suit_condition_image_match(struct suit_processor_state *state,
 
 #ifdef SUIT_PLATFORM_LEGACY_API_SUPPORT
 	return suit_plat_check_image_match(suit_cose_sha256,
-			&component_params->image_digest,
+			&digest._SUIT_Digest_suit_digest_bytes,
 			component_params->image_size,
 			component_params->component_handle);
 #else /* SUIT_PLATFORM_LEGACY_API_SUPPORT */
 	return suit_plat_check_image_match(component_params->component_handle,
 			suit_cose_sha256,
-			&component_params->image_digest,
+			&digest._SUIT_Digest_suit_digest_bytes,
 			component_params->image_size);
 #endif /* SUIT_PLATFORM_LEGACY_API_SUPPORT */
 }
