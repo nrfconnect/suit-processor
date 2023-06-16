@@ -14,6 +14,11 @@
 
 static struct suit_processor_state state;
 
+static struct zcbor_string exp_manifest_id = {
+	.value = NULL,
+	.len = 0,
+};
+
 static uint8_t invoke_cmd[] = {
 	0x82, /* list (2 elements - 1 command) */
 	0x17, /* uint(suit-directive-invoke) */
@@ -254,10 +259,11 @@ void test_nested_seq_invoke_successful(void)
 		invoke_seq.len = content_size;
 		bootstrap_envelope_reset_step(&state);
 		bootstrap_envelope_sequence(&state, SUIT_INVOKE, &invoke_seq);
+		__cmock_suit_plat_authorize_sequence_num_ExpectAndReturn(SUIT_INVOKE, &exp_manifest_id, 0, SUIT_SUCCESS);
 
 		if (depth < SUIT_MAX_SEQ_DEPTH) {
 			__cmock_suit_plat_invoke_ExpectAndReturn(ASSIGNED_COMPONENT_HANDLE, NULL, SUIT_SUCCESS);
-			__cmock_suit_plat_sequence_completed_ExpectAndReturn(SUIT_INVOKE, NULL, NULL, 0, SUIT_SUCCESS);
+			__cmock_suit_plat_sequence_completed_ExpectAndReturn(SUIT_INVOKE, &exp_manifest_id, NULL, 0, SUIT_SUCCESS);
 			retval = suit_process_manifest(&state, SUIT_INVOKE);
 			TEST_ASSERT_EQUAL(SUIT_SUCCESS, retval);
 		} else {
@@ -289,6 +295,7 @@ void test_nested_seq_invoke_failed(void)
 		invoke_seq.len = content_size;
 		bootstrap_envelope_reset_step(&state);
 		bootstrap_envelope_sequence(&state, SUIT_INVOKE, &invoke_seq);
+		__cmock_suit_plat_authorize_sequence_num_ExpectAndReturn(SUIT_INVOKE, &exp_manifest_id, 0, SUIT_SUCCESS);
 
 		if (depth < SUIT_MAX_SEQ_DEPTH) {
 			__cmock_suit_plat_invoke_ExpectAndReturn(ASSIGNED_COMPONENT_HANDLE, NULL, SUIT_ERR_UNSUPPORTED_COMPONENT_ID);
@@ -323,10 +330,11 @@ void test_nested_seq_condition_hard_successful(void)
 		invoke_seq.len = content_size;
 		bootstrap_envelope_reset_step(&state);
 		bootstrap_envelope_sequence(&state, SUIT_INVOKE, &invoke_seq);
+		__cmock_suit_plat_authorize_sequence_num_ExpectAndReturn(SUIT_INVOKE, &exp_manifest_id, 0, SUIT_SUCCESS);
 
 		if (depth < SUIT_MAX_SEQ_DEPTH) {
 			__cmock_suit_plat_check_vid_IgnoreAndReturn(SUIT_SUCCESS);
-			__cmock_suit_plat_sequence_completed_ExpectAndReturn(SUIT_INVOKE, NULL, NULL, 0, SUIT_SUCCESS);
+			__cmock_suit_plat_sequence_completed_ExpectAndReturn(SUIT_INVOKE, &exp_manifest_id, NULL, 0, SUIT_SUCCESS);
 			retval = suit_process_manifest(&state, SUIT_INVOKE);
 			TEST_ASSERT_EQUAL(SUIT_SUCCESS, retval);
 		} else {
@@ -358,6 +366,7 @@ void test_nested_seq_condition_hard_failed(void)
 		invoke_seq.len = content_size;
 		bootstrap_envelope_reset_step(&state);
 		bootstrap_envelope_sequence(&state, SUIT_INVOKE, &invoke_seq);
+		__cmock_suit_plat_authorize_sequence_num_ExpectAndReturn(SUIT_INVOKE, &exp_manifest_id, 0, SUIT_SUCCESS);
 
 		if (depth < SUIT_MAX_SEQ_DEPTH) {
 			__cmock_suit_plat_check_vid_IgnoreAndReturn(SUIT_FAIL_CONDITION);
@@ -392,12 +401,13 @@ void test_nested_seq_condition_soft_successful(void)
 		invoke_seq.len = content_size;
 		bootstrap_envelope_reset_step(&state);
 		bootstrap_envelope_sequence(&state, SUIT_INVOKE, &invoke_seq);
+		__cmock_suit_plat_authorize_sequence_num_ExpectAndReturn(SUIT_INVOKE, &exp_manifest_id, 0, SUIT_SUCCESS);
 
 		if (depth < (SUIT_MAX_SEQ_DEPTH - 1)) {
 			__cmock_suit_plat_check_vid_IgnoreAndReturn(SUIT_SUCCESS);
 			__cmock_suit_plat_invoke_ExpectAndReturn(ASSIGNED_COMPONENT_HANDLE, NULL, SUIT_SUCCESS);
 			__cmock_suit_plat_invoke_ExpectAndReturn(ASSIGNED_COMPONENT_HANDLE, NULL, SUIT_SUCCESS);
-			__cmock_suit_plat_sequence_completed_ExpectAndReturn(SUIT_INVOKE, NULL, NULL, 0, SUIT_SUCCESS);
+			__cmock_suit_plat_sequence_completed_ExpectAndReturn(SUIT_INVOKE, &exp_manifest_id, NULL, 0, SUIT_SUCCESS);
 			retval = suit_process_manifest(&state, SUIT_INVOKE);
 			TEST_ASSERT_EQUAL(SUIT_SUCCESS, retval);
 		} else {
@@ -429,11 +439,12 @@ void test_nested_seq_condition_soft_failed(void)
 		invoke_seq.len = content_size;
 		bootstrap_envelope_reset_step(&state);
 		bootstrap_envelope_sequence(&state, SUIT_INVOKE, &invoke_seq);
+		__cmock_suit_plat_authorize_sequence_num_ExpectAndReturn(SUIT_INVOKE, &exp_manifest_id, 0, SUIT_SUCCESS);
 
 		if (depth < (SUIT_MAX_SEQ_DEPTH - 1)) {
 			__cmock_suit_plat_check_vid_IgnoreAndReturn(SUIT_FAIL_CONDITION);
 			__cmock_suit_plat_invoke_ExpectAndReturn(ASSIGNED_COMPONENT_HANDLE, NULL, SUIT_SUCCESS);
-			__cmock_suit_plat_sequence_completed_ExpectAndReturn(SUIT_INVOKE, NULL, NULL, 0, SUIT_SUCCESS);
+			__cmock_suit_plat_sequence_completed_ExpectAndReturn(SUIT_INVOKE, &exp_manifest_id, NULL, 0, SUIT_SUCCESS);
 			retval = suit_process_manifest(&state, SUIT_INVOKE);
 			TEST_ASSERT_EQUAL(SUIT_SUCCESS, retval);
 		} else {
@@ -465,6 +476,7 @@ void test_nested_seq_condition_soft_aborted(void)
 		invoke_seq.len = content_size;
 		bootstrap_envelope_reset_step(&state);
 		bootstrap_envelope_sequence(&state, SUIT_INVOKE, &invoke_seq);
+		__cmock_suit_plat_authorize_sequence_num_ExpectAndReturn(SUIT_INVOKE, &exp_manifest_id, 0, SUIT_SUCCESS);
 
 		if (depth < (SUIT_MAX_SEQ_DEPTH - 1)) {
 			__cmock_suit_plat_check_vid_IgnoreAndReturn(SUIT_ERR_UNSUPPORTED_COMPONENT_ID);
@@ -494,10 +506,11 @@ void test_nested_seq_condition_soft_failed_hard_succeed(void)
 
 	bootstrap_envelope_sequence(&state, SUIT_INVOKE, &invoke_seq);
 
+	__cmock_suit_plat_authorize_sequence_num_ExpectAndReturn(SUIT_INVOKE, &exp_manifest_id, 0, SUIT_SUCCESS);
 	__cmock_suit_plat_check_vid_IgnoreAndReturn(SUIT_FAIL_CONDITION);
 	__cmock_suit_plat_check_vid_IgnoreAndReturn(SUIT_SUCCESS);
 	__cmock_suit_plat_invoke_ExpectAndReturn(ASSIGNED_COMPONENT_HANDLE, NULL, SUIT_SUCCESS);
-	__cmock_suit_plat_sequence_completed_ExpectAndReturn(SUIT_INVOKE, NULL, NULL, 0, SUIT_SUCCESS);
+	__cmock_suit_plat_sequence_completed_ExpectAndReturn(SUIT_INVOKE, &exp_manifest_id, NULL, 0, SUIT_SUCCESS);
 	retval = suit_process_manifest(&state, SUIT_INVOKE);
 	TEST_ASSERT_EQUAL(SUIT_SUCCESS, retval);
 	TEST_ASSERT_EQUAL(state.seq_stack_height, 0);
@@ -516,6 +529,7 @@ void test_nested_seq_condition_soft_failed_hard_failed(void)
 
 	bootstrap_envelope_sequence(&state, SUIT_INVOKE, &invoke_seq);
 
+	__cmock_suit_plat_authorize_sequence_num_ExpectAndReturn(SUIT_INVOKE, &exp_manifest_id, 0, SUIT_SUCCESS);
 	__cmock_suit_plat_check_vid_IgnoreAndReturn(SUIT_FAIL_CONDITION);
 	__cmock_suit_plat_check_vid_IgnoreAndReturn(SUIT_FAIL_CONDITION);
 	retval = suit_process_manifest(&state, SUIT_INVOKE);
@@ -535,6 +549,7 @@ void test_nested_seq_condition_soft_series_mixed_hard_succeed(void)
 		bootstrap_envelope_empty(&state);
 		bootstrap_envelope_components(&state, 1);
 		bootstrap_envelope_sequence(&state, SUIT_INVOKE, &invoke_seq);
+		__cmock_suit_plat_authorize_sequence_num_ExpectAndReturn(SUIT_INVOKE, &exp_manifest_id, 0, SUIT_SUCCESS);
 
 		for (size_t seq = 0; seq < 3; seq++) {
 			if (i & (1 << seq)) {
@@ -549,7 +564,7 @@ void test_nested_seq_condition_soft_series_mixed_hard_succeed(void)
 		/* Pass hard sequence */
 		__cmock_suit_plat_check_vid_IgnoreAndReturn(SUIT_SUCCESS);
 		__cmock_suit_plat_invoke_ExpectAndReturn(ASSIGNED_COMPONENT_HANDLE, NULL, SUIT_SUCCESS);
-		__cmock_suit_plat_sequence_completed_ExpectAndReturn(SUIT_INVOKE, NULL, NULL, 0, SUIT_SUCCESS);
+		__cmock_suit_plat_sequence_completed_ExpectAndReturn(SUIT_INVOKE, &exp_manifest_id, NULL, 0, SUIT_SUCCESS);
 
 		retval = suit_process_manifest(&state, SUIT_INVOKE);
 		TEST_ASSERT_EQUAL(SUIT_SUCCESS, retval);
@@ -571,6 +586,7 @@ void test_nested_seq_condition_soft_series_mixed_hard_failed(void)
 		bootstrap_envelope_empty(&state);
 		bootstrap_envelope_components(&state, 1);
 		bootstrap_envelope_sequence(&state, SUIT_INVOKE, &invoke_seq);
+		__cmock_suit_plat_authorize_sequence_num_ExpectAndReturn(SUIT_INVOKE, &exp_manifest_id, 0, SUIT_SUCCESS);
 
 		for (size_t seq = 0; seq < 3; seq++) {
 			if (i & (1 << seq)) {
@@ -605,6 +621,7 @@ void test_nested_seq_condition_soft_series_aborted(void)
 		bootstrap_envelope_empty(&state);
 		bootstrap_envelope_components(&state, 1);
 		bootstrap_envelope_sequence(&state, SUIT_INVOKE, &invoke_seq);
+		__cmock_suit_plat_authorize_sequence_num_ExpectAndReturn(SUIT_INVOKE, &exp_manifest_id, 0, SUIT_SUCCESS);
 
 		for (size_t seq = 0; seq < 3; seq++) {
 			if (i & (1 << seq)) {
@@ -645,6 +662,7 @@ void test_nested_seq_condition_soft_series_mixed_hard_succeed_multiple_component
 			bootstrap_envelope_empty(&state);
 			bootstrap_envelope_components(&state, 2);
 			bootstrap_envelope_sequence(&state, SUIT_INVOKE, &invoke_seq);
+			__cmock_suit_plat_authorize_sequence_num_ExpectAndReturn(SUIT_INVOKE, &exp_manifest_id, 0, SUIT_SUCCESS);
 
 			for (seq = 0; seq < 3; seq++) {
 				for (comp_seq = 0; comp_seq < 2; comp_seq++) {
@@ -664,7 +682,7 @@ void test_nested_seq_condition_soft_series_mixed_hard_succeed_multiple_component
 				__cmock_suit_plat_invoke_ExpectAndReturn(ASSIGNED_COMPONENT_HANDLE + comp_seq, NULL, SUIT_SUCCESS);
 			}
 
-			__cmock_suit_plat_sequence_completed_ExpectAndReturn(SUIT_INVOKE, NULL, NULL, 0, SUIT_SUCCESS);
+			__cmock_suit_plat_sequence_completed_ExpectAndReturn(SUIT_INVOKE, &exp_manifest_id, NULL, 0, SUIT_SUCCESS);
 			retval = suit_process_manifest(&state, SUIT_INVOKE);
 			TEST_ASSERT_EQUAL(SUIT_SUCCESS, retval);
 			TEST_ASSERT_EQUAL(state.seq_stack_height, 0);
@@ -689,6 +707,7 @@ void test_nested_seq_condition_soft_series_mixed_aborted_multiple_components(voi
 			bootstrap_envelope_empty(&state);
 			bootstrap_envelope_components(&state, 2);
 			bootstrap_envelope_sequence(&state, SUIT_INVOKE, &invoke_seq);
+			__cmock_suit_plat_authorize_sequence_num_ExpectAndReturn(SUIT_INVOKE, &exp_manifest_id, 0, SUIT_SUCCESS);
 
 			bool group_failed = false;
 			for (seq = 0; seq < 3; seq++) {
@@ -733,6 +752,7 @@ void test_nested_seq_component_overrides_expand(void)
 	bootstrap_envelope_empty(&state);
 	bootstrap_envelope_components(&state, SUIT_MAX_NUM_COMPONENTS);
 	bootstrap_envelope_sequence(&state, SUIT_INVOKE, &invoke_seq);
+	__cmock_suit_plat_authorize_sequence_num_ExpectAndReturn(SUIT_INVOKE, &exp_manifest_id, 0, SUIT_SUCCESS);
 
 	/* Component index set to 0, and then to true - expect 4 different calls. */
 	for (size_t i = 0; i < SUIT_MAX_NUM_COMPONENTS; i++) {
@@ -745,7 +765,7 @@ void test_nested_seq_component_overrides_expand(void)
 
 	/* Outside run-sequence body - expect 1 call. */
 	__cmock_suit_plat_invoke_ExpectAndReturn(ASSIGNED_COMPONENT_HANDLE, NULL, SUIT_SUCCESS);
-	__cmock_suit_plat_sequence_completed_ExpectAndReturn(SUIT_INVOKE, NULL, NULL, 0, SUIT_SUCCESS);
+	__cmock_suit_plat_sequence_completed_ExpectAndReturn(SUIT_INVOKE, &exp_manifest_id, NULL, 0, SUIT_SUCCESS);
 
 	retval = suit_process_manifest(&state, SUIT_INVOKE);
 	TEST_ASSERT_EQUAL(SUIT_SUCCESS, retval);
@@ -763,6 +783,7 @@ void test_nested_seq_component_overrides_limit(void)
 	bootstrap_envelope_empty(&state);
 	bootstrap_envelope_components(&state, SUIT_MAX_NUM_COMPONENTS);
 	bootstrap_envelope_sequence(&state, SUIT_INVOKE, &invoke_seq);
+	__cmock_suit_plat_authorize_sequence_num_ExpectAndReturn(SUIT_INVOKE, &exp_manifest_id, 0, SUIT_SUCCESS);
 
 	/* Component index set to true, and then to 0 - expect 4 identical calls. */
 	for (size_t i = 0; i < SUIT_MAX_NUM_COMPONENTS; i++) {
@@ -780,7 +801,7 @@ void test_nested_seq_component_overrides_limit(void)
 		__cmock_suit_plat_invoke_ExpectAndReturn(ASSIGNED_COMPONENT_HANDLE + i, NULL, SUIT_SUCCESS);
 	}
 
-	__cmock_suit_plat_sequence_completed_ExpectAndReturn(SUIT_INVOKE, NULL, NULL, 0, SUIT_SUCCESS);
+	__cmock_suit_plat_sequence_completed_ExpectAndReturn(SUIT_INVOKE, &exp_manifest_id, NULL, 0, SUIT_SUCCESS);
 	retval = suit_process_manifest(&state, SUIT_INVOKE);
 	TEST_ASSERT_EQUAL(SUIT_SUCCESS, retval);
 	TEST_ASSERT_EQUAL(state.seq_stack_height, 0);

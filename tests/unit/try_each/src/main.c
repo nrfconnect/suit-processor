@@ -14,6 +14,11 @@
 
 static struct suit_processor_state state;
 
+static struct zcbor_string exp_manifest_id = {
+	.value = NULL,
+	.len = 0,
+};
+
 static uint8_t try_each_cmd[] = {
 	0x84, /* list (4 elements - 2 commands) */
 	0x14, /* uint(suit-directive-override-parameters) */
@@ -152,8 +157,9 @@ void test_try_each_first_succeeds(void)
 	invoke_seq.len = content_size;
 	bootstrap_envelope_sequence(&state, SUIT_INVOKE, &invoke_seq);
 
+	__cmock_suit_plat_authorize_sequence_num_ExpectAndReturn(SUIT_INVOKE, &exp_manifest_id, 0, SUIT_SUCCESS);
 	__cmock_suit_plat_check_vid_IgnoreAndReturn(SUIT_SUCCESS);
-	__cmock_suit_plat_sequence_completed_ExpectAndReturn(SUIT_INVOKE, NULL, NULL, 0, SUIT_SUCCESS);
+	__cmock_suit_plat_sequence_completed_ExpectAndReturn(SUIT_INVOKE, &exp_manifest_id, NULL, 0, SUIT_SUCCESS);
 	retval = suit_process_manifest(&state, SUIT_INVOKE);
 	TEST_ASSERT_EQUAL(SUIT_SUCCESS, retval);
 	TEST_ASSERT_EQUAL(state.seq_stack_height, 0);
@@ -176,9 +182,10 @@ void test_try_each_second_succeeds(void)
 	invoke_seq.len = content_size;
 	bootstrap_envelope_sequence(&state, SUIT_INVOKE, &invoke_seq);
 
+	__cmock_suit_plat_authorize_sequence_num_ExpectAndReturn(SUIT_INVOKE, &exp_manifest_id, 0, SUIT_SUCCESS);
 	__cmock_suit_plat_check_vid_IgnoreAndReturn(SUIT_FAIL_CONDITION);
 	__cmock_suit_plat_invoke_ExpectAndReturn(ASSIGNED_COMPONENT_HANDLE, NULL, SUIT_SUCCESS);
-	__cmock_suit_plat_sequence_completed_ExpectAndReturn(SUIT_INVOKE, NULL, NULL, 0, SUIT_SUCCESS);
+	__cmock_suit_plat_sequence_completed_ExpectAndReturn(SUIT_INVOKE, &exp_manifest_id, NULL, 0, SUIT_SUCCESS);
 	retval = suit_process_manifest(&state, SUIT_INVOKE);
 	TEST_ASSERT_EQUAL(SUIT_SUCCESS, retval);
 	TEST_ASSERT_EQUAL(state.seq_stack_height, 0);
@@ -201,9 +208,10 @@ void test_try_each_default_succeeds(void)
 	invoke_seq.len = content_size;
 	bootstrap_envelope_sequence(&state, SUIT_INVOKE, &invoke_seq);
 
+	__cmock_suit_plat_authorize_sequence_num_ExpectAndReturn(SUIT_INVOKE, &exp_manifest_id, 0, SUIT_SUCCESS);
 	__cmock_suit_plat_check_vid_IgnoreAndReturn(SUIT_FAIL_CONDITION);
 	__cmock_suit_plat_invoke_ExpectAndReturn(ASSIGNED_COMPONENT_HANDLE, NULL, SUIT_FAIL_CONDITION);
-	__cmock_suit_plat_sequence_completed_ExpectAndReturn(SUIT_INVOKE, NULL, NULL, 0, SUIT_SUCCESS);
+	__cmock_suit_plat_sequence_completed_ExpectAndReturn(SUIT_INVOKE, &exp_manifest_id, NULL, 0, SUIT_SUCCESS);
 	retval = suit_process_manifest(&state, SUIT_INVOKE);
 	TEST_ASSERT_EQUAL(SUIT_SUCCESS, retval);
 	TEST_ASSERT_EQUAL(state.seq_stack_height, 0);
@@ -226,6 +234,7 @@ void test_try_each_second_aborts(void)
 	invoke_seq.len = content_size;
 	bootstrap_envelope_sequence(&state, SUIT_INVOKE, &invoke_seq);
 
+	__cmock_suit_plat_authorize_sequence_num_ExpectAndReturn(SUIT_INVOKE, &exp_manifest_id, 0, SUIT_SUCCESS);
 	__cmock_suit_plat_check_vid_IgnoreAndReturn(SUIT_FAIL_CONDITION);
 	__cmock_suit_plat_invoke_ExpectAndReturn(ASSIGNED_COMPONENT_HANDLE, NULL, SUIT_ERR_UNSUPPORTED_COMPONENT_ID);
 	retval = suit_process_manifest(&state, SUIT_INVOKE);
@@ -250,6 +259,8 @@ void test_try_each_out_of_cases(void)
 	invoke_seq.len = content_size;
 	bootstrap_envelope_sequence(&state, SUIT_INVOKE, &invoke_seq);
 
+	__cmock_suit_plat_authorize_sequence_num_ExpectAndReturn(SUIT_INVOKE, &exp_manifest_id, 0, SUIT_SUCCESS);
+
 	retval = suit_process_manifest(&state, SUIT_INVOKE);
 	TEST_ASSERT_EQUAL(SUIT_ERR_CRASH, retval);
 	TEST_ASSERT_EQUAL(state.seq_stack_height, 0);
@@ -272,6 +283,8 @@ void test_try_each_nested_invalid(void)
 	invoke_seq.len = content_size;
 	bootstrap_envelope_sequence(&state, SUIT_INVOKE, &invoke_seq);
 
+	__cmock_suit_plat_authorize_sequence_num_ExpectAndReturn(SUIT_INVOKE, &exp_manifest_id, 0, SUIT_SUCCESS);
+
 	retval = suit_process_manifest(&state, SUIT_INVOKE);
 	TEST_ASSERT_EQUAL(SUIT_ERR_DECODING, retval);
 	TEST_ASSERT_EQUAL(state.seq_stack_height, 0);
@@ -293,6 +306,8 @@ void test_try_each_component_overrides(void)
 	invoke_seq.value = cmd_buf;
 	invoke_seq.len = content_size;
 	bootstrap_envelope_sequence(&state, SUIT_INVOKE, &invoke_seq);
+
+	__cmock_suit_plat_authorize_sequence_num_ExpectAndReturn(SUIT_INVOKE, &exp_manifest_id, 0, SUIT_SUCCESS);
 
 	/* 1st case - fail */
 	__cmock_suit_plat_invoke_ExpectAndReturn(ASSIGNED_COMPONENT_HANDLE, NULL, SUIT_FAIL_CONDITION);
