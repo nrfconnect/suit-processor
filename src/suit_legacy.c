@@ -4,7 +4,6 @@
  * SPDX-License-Identifier: LicenseRef-Nordic-5-Clause
  */
 
-
 #include <manifest_decode.h>
 #include <suit.h>
 #include <suit_types.h>
@@ -76,6 +75,7 @@ static int suit_processor_process_manifest(struct suit_processor_state *state, e
 	}
 
 	struct zcbor_string *step_seq = suit_manifest_get_command_seq(manifest_state, step);
+
 	if (step_seq == NULL) {
 		SUIT_ERR("Failed to execute sequence %d: sequence not found\r\n", step);
 		return SUIT_ERR_UNAVAILABLE_COMMAND_SEQ;
@@ -109,14 +109,14 @@ static int suit_processor_process_manifest(struct suit_processor_state *state, e
 					manifest_state->envelope_str.len);
 			}
 		}
-#endif /* SUIT_PLATFORM_LEGACY_API_SUPPORT */
+#endif /* !SUIT_PLATFORM_LEGACY_API_SUPPORT */
 	}
 
 	return ret;
 }
 
 
-/** Reset the iternal state of the SUIT manifest processor.
+/** Reset the internal state of the SUIT manifest processor.
  */
 void suit_reset_state(struct suit_processor_state *state)
 {
@@ -322,6 +322,7 @@ int suit_process_manifest(struct suit_processor_state *state, enum suit_manifest
 	}
 
 	struct zcbor_string *step_seq = suit_manifest_get_command_seq(manifest_state, step);
+
 	if (step_seq == NULL) {
 		SUIT_ERR("Failed to execute sequence %d: sequence not found\r\n", step);
 		return SUIT_ERR_UNAVAILABLE_COMMAND_SEQ;

@@ -99,7 +99,7 @@ target_sources(suit PRIVATE
   src/suit_seq_exec.c
   src/suit_condition.c
   src/suit_directive.c
-  src/suit.c
+  src/suit_legacy.c
   )
 target_include_directories(suit PUBLIC
   include
