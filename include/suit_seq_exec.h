@@ -11,58 +11,34 @@
 #include <manifest_types.h>
 
 
-/** @brief Type of the command to be handled. */
-enum command_type {
-	SUIT_COMMAND_INVALID,
-	SUIT_COMMAND_CONDITION,
-	SUIT_COMMAND_DIRECTIVE,
-};
-
-/** @brief Single SUIT command structure. */
-typedef struct {
-	enum command_type type;
-	union {
-		struct SUIT_Condition_ condition;
-		struct SUIT_Directive_ directive;
-	};
-} suit_command_t;
-
-/** @brief Single command handler function prototype.
- *
- * @param[in] state    The SUIT processor state.
- * @param[in] command  The pointer to the command structure to execute.
- */
-typedef int (*seq_exec_processor_t)(struct suit_processor_state *state, suit_command_t *command);
-
-
 /** @brief Schedule the command sequence for execution.
  *
  * @note This function only schedules the execution and returns the SUIT_ERR_AGAIN aftrewards.
  *       The command execution is done from the suit_run_command_sequence(..) calls.
  *
  * @param[in]  state             The SUIT processor state to modify.
+ * @param[in]  manifest          Reference to the manifest structure, for which the sequence will be executed.
  * @param[in]  command_sequence  Command sequence to be scheduled.
  * @param[in]  soft_failure      The initial value of the suit-parameter-soft-failure for the sequence.
+ * @param[in]  cmd_processor     Processor to execute commands in the sequence.
  *
  * @retval SUIT_ERR_AGAIN     If the command has been successfully scheduled.
  * @retval SUIT_ERR_OVERFLOW  If the command execution stack was too small to schedule the new sequence.
  */
-int suit_seq_exec_schedule(struct suit_processor_state *state, struct zcbor_string *command_sequence, enum suit_bool soft_failure);
+int suit_seq_exec_schedule(struct suit_processor_state *state, struct suit_manifest_state *manifest, struct zcbor_string *command_sequence, enum suit_bool soft_failure, seq_exec_processor_t cmd_processor);
 
 /** @brief Execute the scheduled command sequence.
  *
  * @note This function only executes the sequence as long as it does not require execution of nested sequence.
  *       In such case, the API returns SUIT_ERR_AGAIN and should be called again to continue the execution.
  *
- * @param[in]  state             The SUIT processor state to modify.
- * @param[in]  command_sequence  Command sequence to be scheduled.
- * @param[in]  soft_failure      The initial value of the suit-parameter-soft-failure for the sequence.
+ * @param[in]  state  The SUIT processor state to modify.
  *
  * @retval SUIT_SUCCESS       If the command has finished.
  * @retval SUIT_ERR_AGAIN     If the command has not completed.
  * @retval SUIT_ERR_OVERFLOW  If the command execution stack was too small to execute the sequence.
  */
-int suit_seq_exec_step(struct suit_processor_state *state, seq_exec_processor_t cmd_processor);
+int suit_seq_exec_step(struct suit_processor_state *state);
 
 /** @brief Get the current command sequence execution state.
  *
@@ -92,12 +68,12 @@ int suit_seq_exec_finalize(struct suit_processor_state *state, int retval);
  * @note If the API is called for the first time on an execution context, it will create a backup
  *       of the list of currently selected components and select the first component index afterwards.
  *
- * @param[in]   state          The SUIT processor state to be used.
- * @param[out]  component_idx  Pointer to the variable, that will be set with the current component index value.
+ * @param[in]   seq_exec_state  The SUIT processor execution state to be used.
+ * @param[out]  component_idx   Pointer to the variable, that will be set with the current component index value.
  *
  * @returns SUIT_SUCCESS if the current component was successfully returned, error code otherwise.
  */
-int suit_seq_exec_component_idx_get(struct suit_processor_state *state, size_t *component_idx);
+int suit_seq_exec_component_idx_get(struct suit_seq_exec_state *seq_exec_state, size_t *component_idx);
 
 /** @brief Switch to the next component index, on which the sequence will be executed.
  *
@@ -106,56 +82,56 @@ int suit_seq_exec_component_idx_get(struct suit_processor_state *state, size_t *
  * @note If the list of selected components is exhausted, the component_idx will be set to SUIT_MAX_NUM_COMPONENTS
  *       and this API will automatically restore the list of selected components from the backup.
  *
- * @param[in]   state          The SUIT processor state to be used.
- * @param[out]  component_idx  Pointer to the variable, that will be set with the current component index value.
+ * @param[in]   seq_exec_state  The SUIT processor execution state to be used.
+ * @param[out]  component_idx   Pointer to the variable, that will be set with the current component index value.
  *
  * @returns SUIT_SUCCESS if the current component was successfully returned, error code otherwise.
  */
-int suit_seq_exec_component_idx_next(struct suit_processor_state *state, size_t *component_idx);
+int suit_seq_exec_component_idx_next(struct suit_seq_exec_state *seq_exec_state, size_t *component_idx);
 
 /** @brief Add a component specified by an index to the list of selected components.
  *
- * @param[in]  state  The SUIT processor state to be used.
- * @param[in]  index  The component index of the current manifest.
+ * @param[in]  seq_exec_state  The SUIT processor execution state to be used.
+ * @param[in]  index           The component index of the current manifest.
  *
  * @returns SUIT_SUCCESS if the component was selected, error code otherwise.
  */
-int suit_exec_select_component_idx(struct suit_processor_state *state, size_t index);
+int suit_exec_select_component_idx(struct suit_seq_exec_state *seq_exec_state, size_t index);
 
 /** @brief Add all components from the current manifest to the list of selected components.
  *
- * @param[in]  state  The SUIT processor state to be used.
+ * @param[in]  seq_exec_state  The SUIT processor execution state to be used.
  *
  * @returns SUIT_SUCCESS if components were selected, error code otherwise.
  */
-int suit_exec_select_all_components(struct suit_processor_state *state);
+int suit_exec_select_all_components(struct suit_seq_exec_state *seq_exec_state);
 
 /** @brief Remove all components from the current manifest from the list of selected components.
  *
- * @param[in]  state  The SUIT processor state to be used.
+ * @param[in]  seq_exec_state  The SUIT processor execution state to be used.
  *
  * @returns SUIT_SUCCESS if components were removed, error code otherwise.
  */
-int suit_exec_deselect_all_components(struct suit_processor_state *state);
+int suit_exec_deselect_all_components(struct suit_seq_exec_state *seq_exec_state);
 
 /** @brief Resolve the component index of the current manifest to the component handle.
  *
- * @param[in]   state          The SUIT processor state to be used.
- * @param[in]   component_idx  The component index of the current manifest.
- * @param[out]  handle         Pointer to the variable, that will be set with the resolved component handle.
+ * @param[in]   seq_exec_state  The SUIT processor execution state to be used.
+ * @param[in]   component_idx   The component index of the current manifest.
+ * @param[out]  handle          Pointer to the variable, that will be set with the resolved component handle.
  *
  * @returns SUIT_SUCCESS if the component handle was found and returned, error code otherwise.
  */
-int suit_exec_component_handle_from_idx(struct suit_processor_state *state, size_t component_idx, suit_component_t *handle);
+int suit_exec_component_handle_from_idx(struct suit_seq_exec_state *seq_exec_state, size_t component_idx, suit_component_t *handle);
 
 /** @brief Look for URI in the list of integrated payload of the current manifest.
  *
- * @param[in]   state    The SUIT processor state to be used.
- * @param[in]   uri      URI to look for.
- * @param[out]  payload  Pointer to the variable, that will be set with the reference and size of the integrated payload.
+ * @param[in]   seq_exec_state  The SUIT processor execution state to be used.
+ * @param[in]   uri             URI to look for.
+ * @param[out]  payload         Pointer to the variable, that will be set with the reference and size of the integrated payload.
  *
  * @returns SUIT_SUCCESS if the integrated payload was found and returned, error code otherwise.
  */
-int suit_exec_find_integrated_payload(struct suit_processor_state *state, struct zcbor_string *uri, struct zcbor_string *payload);
+int suit_exec_find_integrated_payload(struct suit_seq_exec_state *seq_exec_state, struct zcbor_string *uri, struct zcbor_string *payload);
 
 #endif /* SUIT_SEQ_EXEC_H__ */

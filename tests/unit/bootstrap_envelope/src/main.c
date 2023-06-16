@@ -12,6 +12,11 @@
 
 static struct suit_processor_state state;
 
+static struct zcbor_string exp_manifest_id = {
+	.value = NULL,
+	.len = 0,
+};
+
 
 void test_bootstrap_reset_state(void)
 {
@@ -42,6 +47,8 @@ void test_bootstrap_empty_sequence(void)
 	 */
 	bootstrap_envelope_components(&state, 1);
 
+	__cmock_suit_plat_authorize_sequence_num_ExpectAndReturn(SUIT_VALIDATE, &exp_manifest_id, 0, SUIT_SUCCESS);
+
 	int retval = suit_process_manifest(&state, SUIT_VALIDATE);
 	TEST_ASSERT_EQUAL(ZCBOR_ERR_TO_SUIT_ERR(ZCBOR_ERR_NO_PAYLOAD), retval);
 }
@@ -61,6 +68,8 @@ void test_bootstrap_invoke_no_components(void)
 	bootstrap_envelope_empty(&state);
 	bootstrap_envelope_sequence(&state, SUIT_INVOKE, &invoke_seq);
 	bootstrap_envelope_components(&state, 0);
+
+	__cmock_suit_plat_authorize_sequence_num_ExpectAndReturn(SUIT_INVOKE, &exp_manifest_id, 0, SUIT_SUCCESS);
 
 	int retval = suit_process_manifest(&state, SUIT_INVOKE);
 	TEST_ASSERT_EQUAL(SUIT_ERR_MANIFEST_VALIDATION, retval);
@@ -82,8 +91,9 @@ void test_bootstrap_invoke_single_component(void)
 	bootstrap_envelope_sequence(&state, SUIT_INVOKE, &invoke_seq);
 	bootstrap_envelope_components(&state, 1);
 
+	__cmock_suit_plat_authorize_sequence_num_ExpectAndReturn(SUIT_INVOKE, &exp_manifest_id, 0, SUIT_SUCCESS);
 	__cmock_suit_plat_invoke_ExpectAndReturn(ASSIGNED_COMPONENT_HANDLE, NULL, SUIT_SUCCESS);
-	__cmock_suit_plat_sequence_completed_ExpectAndReturn(SUIT_INVOKE, NULL, NULL, 0, SUIT_SUCCESS);
+	__cmock_suit_plat_sequence_completed_ExpectAndReturn(SUIT_INVOKE, &exp_manifest_id, NULL, 0, SUIT_SUCCESS);
 
 	int retval = suit_process_manifest(&state, SUIT_INVOKE);
 	TEST_ASSERT_EQUAL(SUIT_SUCCESS, retval);

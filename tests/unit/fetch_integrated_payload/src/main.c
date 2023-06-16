@@ -156,6 +156,10 @@ struct zcbor_string exp_text_payload = {
 	.len = 137,
 };
 
+static struct zcbor_string exp_manifest_id = {
+	.value = NULL,
+	.len = 0,
+};
 static uint8_t manifest_digest[] = {
 	0x83, 0xda, 0xb4, 0xc8, 0x99, 0x8d, 0x42, 0xbe,
 	0xf9, 0x9d, 0x36, 0x83, 0xb1, 0x88, 0x20, 0x34,
@@ -218,7 +222,7 @@ void test_suit_validate_envelope(void)
 	 * - Verify the manifest signature
 	 * - Verify that the manifest digest matches with the manifest contents
 	 */
-	__cmock_suit_plat_authenticate_manifest_ExpectComplexArgsAndReturn(NULL, suit_cose_es256, NULL, &exp_signature, &exp_data, SUIT_SUCCESS);
+	__cmock_suit_plat_authenticate_manifest_ExpectComplexArgsAndReturn(&exp_manifest_id, suit_cose_es256, NULL, &exp_signature, &exp_data, SUIT_SUCCESS);
 	__cmock_suit_plat_check_digest_ExpectComplexArgsAndReturn(suit_cose_sha256, &exp_manifest_digest, &exp_manifest_payload, SUIT_SUCCESS);
 
 	err = suit_validate_envelope(&state);
@@ -255,8 +259,7 @@ void test_suit_validate_manifest(void)
 	 *   - Check FETCH (integrated) command from the install step
 	 *   - Check INVOKE command from the invoke step
 	 */
-	__cmock_suit_plat_authorize_sequence_num_ExpectAndReturn(SUIT_NO_STEP, NULL, 1, SUIT_SUCCESS);
-	__cmock_suit_plat_suit_plat_authorize_component_id_ExpectComplexArgsAndReturn(NULL, &exp_component_id, SUIT_SUCCESS);
+	__cmock_suit_plat_suit_plat_authorize_component_id_ExpectComplexArgsAndReturn(&exp_manifest_id, &exp_component_id, SUIT_SUCCESS);
 	__cmock_suit_plat_create_component_handle_ExpectComplexArgsAndReturn(&exp_component_id, NULL, SUIT_SUCCESS);
 	__cmock_suit_plat_create_component_handle_IgnoreArg_handle();
 	__cmock_suit_plat_create_component_handle_ReturnThruPtr_handle(&component_handle);
@@ -295,11 +298,12 @@ void test_suit_process_step_install(void)
 	 * - copy the integrated payload into executable slot through FETCH (integrated) command
 	 * - verify the image digest in the executable slot
 	 */
+	__cmock_suit_plat_authorize_sequence_num_ExpectAndReturn(SUIT_INSTALL, &exp_manifest_id, 1, SUIT_SUCCESS);
 	__cmock_suit_plat_check_vid_ExpectComplexArgsAndReturn(ASSIGNED_COMPONENT_HANDLE, &exp_vid_uuid, SUIT_SUCCESS);
 	__cmock_suit_plat_check_cid_ExpectComplexArgsAndReturn(ASSIGNED_COMPONENT_HANDLE, &exp_cid_uuid, SUIT_SUCCESS);
 	__cmock_suit_plat_fetch_integrated_ExpectComplexArgsAndReturn(ASSIGNED_COMPONENT_HANDLE, &exp_image_payload, SUIT_SUCCESS);
 	__cmock_suit_plat_check_image_match_ExpectComplexArgsAndReturn(ASSIGNED_COMPONENT_HANDLE, suit_cose_sha256, &exp_image_digest, 256, SUIT_SUCCESS);
-	__cmock_suit_plat_sequence_completed_ExpectAndReturn(SUIT_INSTALL, NULL, manifest_buf, manifest_len, SUIT_SUCCESS);
+	__cmock_suit_plat_sequence_completed_ExpectAndReturn(SUIT_INSTALL, &exp_manifest_id, manifest_buf, manifest_len, SUIT_SUCCESS);
 
 	int err = suit_process_manifest(&state, SUIT_INSTALL);
 	TEST_ASSERT_EQUAL(SUIT_SUCCESS, err);
@@ -311,10 +315,11 @@ void test_suit_process_step_validate(void)
 	 * - execute the shared sequence (VID and CID checks)
 	 * - verify the image digest in the executable slot.
 	 */
+	__cmock_suit_plat_authorize_sequence_num_ExpectAndReturn(SUIT_VALIDATE, &exp_manifest_id, 1, SUIT_SUCCESS);
 	__cmock_suit_plat_check_vid_ExpectComplexArgsAndReturn(ASSIGNED_COMPONENT_HANDLE, &exp_vid_uuid, SUIT_SUCCESS);
 	__cmock_suit_plat_check_cid_ExpectComplexArgsAndReturn(ASSIGNED_COMPONENT_HANDLE, &exp_cid_uuid, SUIT_SUCCESS);
 	__cmock_suit_plat_check_image_match_ExpectComplexArgsAndReturn(ASSIGNED_COMPONENT_HANDLE, suit_cose_sha256, &exp_image_digest, 256, SUIT_SUCCESS);
-	__cmock_suit_plat_sequence_completed_ExpectAndReturn(SUIT_VALIDATE, NULL, manifest_buf, manifest_len, SUIT_SUCCESS);
+	__cmock_suit_plat_sequence_completed_ExpectAndReturn(SUIT_VALIDATE, &exp_manifest_id, manifest_buf, manifest_len, SUIT_SUCCESS);
 
 	int err = suit_process_manifest(&state, SUIT_VALIDATE);
 	TEST_ASSERT_EQUAL(SUIT_SUCCESS, err);
@@ -334,10 +339,11 @@ void test_suit_process_step_invoke(void)
 	 * - execute the INVOKE command.
 	 * The image validity is expected to be checked in the SUIT_VALIDATE step.
 	 */
+	__cmock_suit_plat_authorize_sequence_num_ExpectAndReturn(SUIT_INVOKE, &exp_manifest_id, 1, SUIT_SUCCESS);
 	__cmock_suit_plat_check_vid_ExpectComplexArgsAndReturn(ASSIGNED_COMPONENT_HANDLE, &exp_vid_uuid, SUIT_SUCCESS);
 	__cmock_suit_plat_check_cid_ExpectComplexArgsAndReturn(ASSIGNED_COMPONENT_HANDLE, &exp_cid_uuid, SUIT_SUCCESS);
 	__cmock_suit_plat_invoke_ExpectAndReturn(ASSIGNED_COMPONENT_HANDLE, NULL, SUIT_SUCCESS);
-	__cmock_suit_plat_sequence_completed_ExpectAndReturn(SUIT_INVOKE, NULL, manifest_buf, manifest_len, SUIT_SUCCESS);
+	__cmock_suit_plat_sequence_completed_ExpectAndReturn(SUIT_INVOKE, &exp_manifest_id, manifest_buf, manifest_len, SUIT_SUCCESS);
 
 	int err = suit_process_manifest(&state, SUIT_INVOKE);
 	TEST_ASSERT_EQUAL(SUIT_SUCCESS, err);
