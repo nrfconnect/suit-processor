@@ -7,7 +7,7 @@
 #ifndef SUIT_CONDITION_H__
 #define SUIT_CONDITION_H__
 
-#include "suit_types.h"
+#include "suit_processor.h"
 
 
 /** Check a vendor ID based on the configured parameters. */

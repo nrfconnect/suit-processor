@@ -7,7 +7,7 @@
 #ifndef SUIT_SEQ_EXEC_H__
 #define SUIT_SEQ_EXEC_H__
 
-#include "suit_types.h"
+#include "suit_processor.h"
 #include <manifest_types.h>
 
 

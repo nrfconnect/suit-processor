@@ -172,6 +172,11 @@ struct zcbor_string exp_manifest_payload = {
 };
 
 
+void test_suit_reset_state(void)
+{
+	suit_reset_state(&state);
+}
+
 void test_suit_decode_envelope(void)
 {
 	/* The envelope decoding is fully handled by the ZCBOR code and does not call platform APIs */

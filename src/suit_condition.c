@@ -4,7 +4,7 @@
  * SPDX-License-Identifier: LicenseRef-Nordic-5-Clause
  */
 
-#include <suit_types.h>
+#include <suit_condition.h>
 #include <suit_platform.h>
 #include <manifest_decode.h>
 

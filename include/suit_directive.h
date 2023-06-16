@@ -7,7 +7,7 @@
 #ifndef SUIT_DIRECTIVE_H__
 #define SUIT_DIRECTIVE_H__
 
-#include "suit_types.h"
+#include "suit_processor.h"
 #include <stdint.h>
 
 
