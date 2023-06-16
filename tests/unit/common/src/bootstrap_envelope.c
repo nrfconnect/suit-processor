@@ -21,7 +21,7 @@ void bootstrap_envelope_empty(struct suit_processor_state *state)
 	state->envelope_validated = suit_bool_true;
 	state->manifest_decoded = suit_bool_true;
 	state->manifest_validated = suit_bool_true;
-	state->current_step = 0;
+	state->current_seq = SUIT_SEQ_INVALID;
 #ifdef SUIT_PLATFORM_DRY_RUN_SUPPORT
 	state->dry_run = suit_bool_false;
 #endif /* SUIT_PLATFORM_DRY_RUN_SUPPORT */
@@ -43,7 +43,7 @@ void bootstrap_envelope_reset_step(struct suit_processor_state *state)
 		return;
 	}
 
-	state->current_step = 0;
+	state->current_seq = SUIT_SEQ_INVALID;
 }
 
 void bootstrap_envelope_sequence(struct suit_processor_state *state, enum suit_manifest_step step, struct zcbor_string *seq)
