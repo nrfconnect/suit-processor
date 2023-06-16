@@ -7,7 +7,7 @@
 #ifndef SUIT_COMMAND_SEQ_H__
 #define SUIT_COMMAND_SEQ_H__
 
-#include "suit_types.h"
+#include "suit_processor.h"
 
 
 /** Validate that all commands are among the commands allowed for the shared

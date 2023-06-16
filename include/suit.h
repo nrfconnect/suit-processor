@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Nordic Semiconductor ASA
+ * Copyright (c) 2023 Nordic Semiconductor ASA
  *
  * SPDX-License-Identifier: LicenseRef-Nordic-5-Clause
  */
@@ -7,36 +7,45 @@
 #ifndef SUIT_H__
 #define SUIT_H__
 
-#include "suit_types.h"
 #include <stdint.h>
+#include <suit_types.h>
+#include <suit_legacy.h>
 
-/** Reset the iternal state of the SUIT manifest processor.
+
+/** @brief Initialize SUIT processor module
+ *
+ * @details This API initializes internal states of all SUIT core modules.
+ *
+ * @returns SUIT_SUCCESS if the operation succeeds, error code otherwise.
  */
-void suit_reset_state(struct suit_processor_state *state);
+int suit_processor_init(void);
 
-/** Decode the string into a manifest envelope and validate the data structure.
+/** @brief Process a sequence of the SUIT manifest.
+ *
+ * @details This API will decode, authenticate and validate the input manifest data structure.
+ *
+ * @param[in]  envelope_str  Reference to the input envelope to be parsed.
+ * @param[in]  envelope_len  Length of the input envelope.
+ * @param[in]  seq_name      Name of the sequence to process.
+ *
+ * @returns SUIT_SUCCESS if the operation succeeds, error code otherwise.
  */
-int suit_decode_envelope(uint8_t *manifest_str, size_t manifest_len,
-	struct suit_processor_state *state);
+int suit_process_sequence(uint8_t *envelope_str, size_t envelope_len, enum suit_command_sequence seq_name);
 
-/** Validate higher level rules, such as those outlined in the SUIT information
- *  model and manifest specification. Then check the signature of the manifest.
+/** Extract metadata from the given envelope.
+ *
+ * @details This API will decode and (optionally) authenticate the input manifest data structure.
+ *
+ * @note The output structures will be set to point to the correct places within the input envelope.
+ *
+ * @param[in]   envelope_str           Reference to the input envelope to be parsed.
+ * @param[in]   envelope_len           Length of the input envelope.
+ * @param[in]   authenticate           Boolean flag, indicating if the input manifest should be authenticated.
+ * @param[out]  manifest_component_id  Pointer to the structure in which the manifest component ID value will be stored.
+ * @param[out]  digest                 Pointer to the structure in which the manifest digest value will be stored.
+ * @param[out]  seq_num                Pointer to the structure in which the manifest sequence number will be stored.
+ * @returns SUIT_SUCCESS if the operation succeeds, error code otherwise.
  */
-int suit_validate_envelope(struct suit_processor_state *state);
-
-/** Decode the string into a manifest envelope and validate the data structure.
- */
-int suit_decode_manifest(struct suit_processor_state *state);
-
-/** Validate higher level rules, such as those outlined in the SUIT information
- *  model and manifest specification.
- */
-int suit_validate_manifest(struct suit_processor_state *state);
-
-/** Do the specified step in the manifest.
- */
-int suit_process_manifest(struct suit_processor_state *state,
-	enum suit_manifest_step step);
-
+int suit_processor_get_manifest_metadata(uint8_t *envelope_str, size_t envelope_len, bool authenticate, struct zcbor_string *manifest_component_id, struct zcbor_string *digest, unsigned int *seq_num);
 
 #endif /* SUIT_H__ */

@@ -6,6 +6,7 @@
 
 
 #include <manifest_decode.h>
+#include <suit.h>
 #include <suit_types.h>
 #include <suit_platform.h>
 #include <suit_command_seq.h>
@@ -42,6 +43,7 @@ void suit_reset_state(struct suit_processor_state *state)
 	state->manifest_authenticated = suit_bool_false;
 	state->manifest_decoded = suit_bool_false;
 	state->manifest_validated = suit_bool_false;
+	state->current_seq = SUIT_NO_STEP;
 #ifdef SUIT_PLATFORM_DRY_RUN_SUPPORT
 	state->dry_run = suit_bool_true;
 #endif /* SUIT_PLATFORM_DRY_RUN_SUPPORT */
@@ -453,7 +455,7 @@ int suit_validate_manifest(struct suit_processor_state *state)
 		int ret = suit_plat_check_sequence_num(state->manifest._SUIT_Manifest_suit_manifest_sequence_number);
 #else /* SUIT_PLATFORM_LEGACY_API_SUPPORT */
 		int ret = suit_plat_authorize_sequence_num(
-			state->current_step,
+			state->current_seq,
 			NULL, /* manifest_component_id */
 			state->manifest._SUIT_Manifest_suit_manifest_sequence_number);
 #endif /* SUIT_PLATFORM_LEGACY_API_SUPPORT */
@@ -628,7 +630,7 @@ int suit_process_manifest(struct suit_processor_state *state,
 		return SUIT_ERR_ORDER;
 	}
 
-	state->current_step = step;
+	state->current_seq = step;
 
 	struct zcbor_string *step_seq = get_command_seq(state, step);
 
@@ -654,7 +656,7 @@ int suit_process_manifest(struct suit_processor_state *state,
 
 #ifndef SUIT_PLATFORM_LEGACY_API_SUPPORT
 		if (ret == SUIT_SUCCESS) {
-			ret = suit_plat_sequence_completed(state->current_step,
+			ret = suit_plat_sequence_completed(state->current_seq,
 				NULL  /* manifest_component_id */,
 				state->envelope_str.value,
 				state->envelope_str.len);
