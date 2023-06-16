@@ -24,7 +24,7 @@ enum suit_manifest_step {
 };
 
 
-/** Reset the iternal state of the SUIT manifest processor.
+/** Reset the internal state of the SUIT manifest processor.
  */
 void suit_reset_state(struct suit_processor_state *state);
 
