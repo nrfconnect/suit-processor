@@ -13,7 +13,7 @@
 #define SUIT_NUM_STEPS 6
 
 enum suit_manifest_step {
-	SUIT_NO_STEP = SUIT_SEQ_SHARED,
+	SUIT_NO_STEP = SUIT_SEQ_INVALID,
 	SUIT_DEP_RESOLUTION = SUIT_SEQ_DEP_RESOLUTION,
 	SUIT_PAYLOAD_FETCH = SUIT_SEQ_PAYLOAD_FETCH,
 	SUIT_INSTALL = SUIT_SEQ_INSTALL,
@@ -23,12 +23,6 @@ enum suit_manifest_step {
 	SUIT_LAST_STEP = SUIT_SEQ_MAX,
 };
 
-static inline void suit_reset_params(struct suit_manifest_params *params)
-{
-	suit_component_t bak = params->component_handle;
-	memset(params, 0, sizeof(*params));
-	params->component_handle = bak;
-}
 
 /** Reset the iternal state of the SUIT manifest processor.
  */

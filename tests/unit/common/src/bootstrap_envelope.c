@@ -8,30 +8,31 @@
 
 void bootstrap_envelope_empty(struct suit_processor_state *state)
 {
-	struct SUIT_Common *common = &state->manifest._SUIT_Manifest_suit_common_cbor;
-	struct SUIT_Severable_Members_Choice_ *severable = &state->manifest._SUIT_Manifest__SUIT_Severable_Members_Choice;
-	struct SUIT_Unseverable_Members_ *unseverable = &state->manifest._SUIT_Manifest__SUIT_Unseverable_Members;
+	struct suit_manifest_state *manifest_state = &state->manifest_stack[0];
 
 	if (state == NULL) {
 		return;
 	}
 
+	state->manifest_stack_height = 0;
+	memset(&state->manifest_stack[0], 0, sizeof(state->manifest_stack[0]));
+
 	/* Pretend that the envelope has been both decoded and validated. */
-	state->envelope_decoded = suit_bool_true;
-	state->envelope_validated = suit_bool_true;
-	state->manifest_decoded = suit_bool_true;
-	state->manifest_validated = suit_bool_true;
+	state->manifest_stack_height = 1;
 	state->current_seq = SUIT_SEQ_INVALID;
+
 #ifdef SUIT_PLATFORM_DRY_RUN_SUPPORT
 	state->dry_run = suit_bool_false;
 #endif /* SUIT_PLATFORM_DRY_RUN_SUPPORT */
 
-	common->_SUIT_Common_suit_shared_sequence_present = false;
-	severable->_SUIT_Severable_Members_Choice_suit_payload_fetch_present = false;
-	severable->_SUIT_Severable_Members_Choice_suit_install_present = false;
-	unseverable->_SUIT_Unseverable_Members_suit_validate_present = false;
-	unseverable->_SUIT_Unseverable_Members_suit_load_present = false;
-	unseverable->_SUIT_Unseverable_Members_suit_invoke_present = false;
+	manifest_state->shared_sequence_status = UNAVAILABLE;
+	manifest_state->dependency_resolution_seq_status = UNAVAILABLE;
+	manifest_state->payload_fetch_seq_status = UNAVAILABLE;
+	manifest_state->install_seq_status = UNAVAILABLE;
+	manifest_state->validate_seq_status = UNAVAILABLE;
+	manifest_state->load_seq_status = UNAVAILABLE;
+	manifest_state->invoke_seq_status = UNAVAILABLE;
+	manifest_state->text_status = UNAVAILABLE;
 
 	/* Clear execution stack. */
 	state->seq_stack_height = 0;
@@ -46,46 +47,40 @@ void bootstrap_envelope_reset_step(struct suit_processor_state *state)
 	state->current_seq = SUIT_SEQ_INVALID;
 }
 
-void bootstrap_envelope_sequence(struct suit_processor_state *state, enum suit_manifest_step step, struct zcbor_string *seq)
+void bootstrap_envelope_sequence(struct suit_processor_state *state, enum suit_command_sequence seq_name, struct zcbor_string *seq)
 {
-	struct SUIT_Common *common = &state->manifest._SUIT_Manifest_suit_common_cbor;
-	struct SUIT_Severable_Members_Choice_ *severable = &state->manifest._SUIT_Manifest__SUIT_Severable_Members_Choice;
-	struct SUIT_Unseverable_Members_ *unseverable = &state->manifest._SUIT_Manifest__SUIT_Unseverable_Members;
+	struct suit_manifest_state *manifest;
 
-	if (state == NULL) {
+	if ((state == NULL) || (state->manifest_stack_height != 1)) {
 		return;
 	}
 
-	switch (step) {
-		case SUIT_NO_STEP:
-			common->_SUIT_Common_suit_shared_sequence_present = true;
-			common->_SUIT_Common_suit_shared_sequence._SUIT_Common_suit_shared_sequence.value = seq->value;
-			common->_SUIT_Common_suit_shared_sequence._SUIT_Common_suit_shared_sequence.len = seq->len;
+	manifest = &state->manifest_stack[0];
+
+	switch (seq_name) {
+		case SUIT_SEQ_SHARED:
+			manifest->shared_sequence = *seq;
+			manifest->shared_sequence_status = AUTHENTICATED;
 			break;
-		case SUIT_PAYLOAD_FETCH:
-			severable->_SUIT_Severable_Members_Choice_suit_payload_fetch_present = true;
-			severable->_SUIT_Severable_Members_Choice_suit_payload_fetch._SUIT_Severable_Members_Choice_suit_payload_fetch.value = seq->value;
-			severable->_SUIT_Severable_Members_Choice_suit_payload_fetch._SUIT_Severable_Members_Choice_suit_payload_fetch.len = seq->len;
+		case SUIT_SEQ_PAYLOAD_FETCH:
+			manifest->payload_fetch_seq = *seq;
+			manifest->payload_fetch_seq_status = AUTHENTICATED;
 			break;
-		case SUIT_INSTALL:
-			severable->_SUIT_Severable_Members_Choice_suit_install_present = true;
-	       		severable->_SUIT_Severable_Members_Choice_suit_install._SUIT_Severable_Members_Choice_suit_install.value = seq->value;
-			severable->_SUIT_Severable_Members_Choice_suit_install._SUIT_Severable_Members_Choice_suit_install.len = seq->len;
+		case SUIT_SEQ_INSTALL:
+			manifest->install_seq = *seq;
+			manifest->install_seq_status = AUTHENTICATED;
 			break;
-		case SUIT_VALIDATE:
-			unseverable->_SUIT_Unseverable_Members_suit_validate_present = true;
-	       		unseverable->_SUIT_Unseverable_Members_suit_validate._SUIT_Unseverable_Members_suit_validate.value = seq->value;
-			unseverable->_SUIT_Unseverable_Members_suit_validate._SUIT_Unseverable_Members_suit_validate.len = seq->len;
+		case SUIT_SEQ_VALIDATE:
+			manifest->validate_seq = *seq;
+			manifest->validate_seq_status = AUTHENTICATED;
 			break;
-		case SUIT_LOAD:
-			unseverable->_SUIT_Unseverable_Members_suit_load_present = true;
-	       		unseverable->_SUIT_Unseverable_Members_suit_load._SUIT_Unseverable_Members_suit_load.value = seq->value;
-			unseverable->_SUIT_Unseverable_Members_suit_load._SUIT_Unseverable_Members_suit_load.len = seq->len;
+		case SUIT_SEQ_LOAD:
+			manifest->load_seq = *seq;
+			manifest->load_seq_status = AUTHENTICATED;
 			break;
-		case SUIT_INVOKE:
-			unseverable->_SUIT_Unseverable_Members_suit_invoke_present = true;
-	       		unseverable->_SUIT_Unseverable_Members_suit_invoke._SUIT_Unseverable_Members_suit_invoke.value = seq->value;
-			unseverable->_SUIT_Unseverable_Members_suit_invoke._SUIT_Unseverable_Members_suit_invoke.len = seq->len;
+		case SUIT_SEQ_INVOKE:
+			manifest->invoke_seq = *seq;
+			manifest->invoke_seq_status = AUTHENTICATED;
 			break;
 		default:
 			break;
@@ -94,13 +89,18 @@ void bootstrap_envelope_sequence(struct suit_processor_state *state, enum suit_m
 
 void bootstrap_envelope_components(struct suit_processor_state *state, size_t num_components)
 {
-	state->num_components = num_components;
+	struct suit_manifest_state *manifest;
 
-	if (state == NULL) {
+	if ((state == NULL) || (state->manifest_stack_height != 1)) {
 		return;
 	}
 
+	manifest = &state->manifest_stack[0];
+	manifest->components_count = num_components;
+
 	for (size_t i = 0; i < num_components; i++) {
 		state->components[i].component_handle = ASSIGNED_COMPONENT_HANDLE + i;
+		state->components[i].ref_count = 1;
+		manifest->component_map[i] = i;
 	}
 }

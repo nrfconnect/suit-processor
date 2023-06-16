@@ -32,7 +32,7 @@ void bootstrap_envelope_reset_step(struct suit_processor_state *state);
  *                If set to the SUIT_NO_STEP, the shared command sequence is configured.
  * @param  seq    Structure describing command sequence encoded as ZCBOR byte string.
  */
-void bootstrap_envelope_sequence(struct suit_processor_state *state, enum suit_manifest_step step, struct zcbor_string *seq);
+void bootstrap_envelope_sequence(struct suit_processor_state *state, enum suit_command_sequence seq, struct zcbor_string *seq_name);
 
 /** @brief Preconfigure components inside the SUIT processor state.
  *

@@ -10,6 +10,31 @@
 #include <suit_types.h>
 #include "manifest_types.h"
 
+/* Forward declaration of the SUIT processor state, used inside the command processor callback. */
+struct suit_processor_state;
+
+/** @brief Type of the command to be handled. */
+enum command_type {
+	SUIT_COMMAND_INVALID,
+	SUIT_COMMAND_CONDITION,
+	SUIT_COMMAND_DIRECTIVE,
+};
+
+/** @brief Single SUIT command structure. */
+typedef struct {
+	enum command_type type;
+	union {
+		struct SUIT_Condition_ condition;
+		struct SUIT_Directive_ directive;
+	};
+} suit_command_t;
+
+/** @brief Single command handler function prototype.
+ *
+ * @param[in] state    The SUIT processor state.
+ * @param[in] command  The pointer to the command structure to execute.
+ */
+typedef int (*seq_exec_processor_t)(struct suit_processor_state *state, suit_command_t *command);
 
 enum suit_bool {
 	suit_bool_false = 0x2a17644c, ///! 10 1010 0001 0111 0110 0100 0100 1100
@@ -156,6 +181,8 @@ struct suit_seq_exec_state {
 	int cmd_exec_state; ///! Optional current command execution state.
 	enum suit_bool soft_failure; ///! suit-parameter-soft-failure
 	int retval; ///! Value returned by the nested command sequence execution.
+	seq_exec_processor_t cmd_processor; ///! The command processor to use to process the sequence.
+	struct suit_manifest_state *manifest; ///! The reference to the current manifest structure.
 	const uint8_t *exec_ptr; ///! The pointer within the currently executed command sequence, pointing to the current command in the sequence.
 	size_t current_component_idx; ///! In case of nested command execution - the currently selected component from the component list.
 	bool current_components[SUIT_MAX_NUM_COMPONENTS];
@@ -163,23 +190,18 @@ struct suit_seq_exec_state {
 };
 
 struct suit_processor_state {
-	struct zcbor_string envelope_str;
-	enum suit_bool envelope_decoded;
-	suit_manifest_envelope_t envelope;
-	enum suit_bool envelope_validated;
-	struct zcbor_string *key_ids[SUIT_MAX_NUM_SIGNERS];
-	size_t num_key_ids;
-	enum suit_bool manifest_decoded;
-	enum suit_bool manifest_authenticated;
-	suit_manifest_t manifest;
-	enum suit_bool manifest_validated;
+	struct suit_parser_state parser_state;
 	enum suit_command_sequence current_seq;
 
 #ifdef SUIT_PLATFORM_DRY_RUN_SUPPORT
 	enum suit_bool dry_run;
 #endif /* SUIT_PLATFORM_DRY_RUN_SUPPORT */
-	size_t num_components;
-	struct suit_manifest_params components[SUIT_MAX_NUM_COMPONENTS];
+
+	struct suit_manifest_params components[SUIT_MAX_NUM_COMPONENT_PARAMS];
+
+	size_t manifest_stack_height;
+	struct suit_manifest_state manifest_stack[SUIT_MAX_MANIFEST_DEPTH];
+
 	size_t seq_stack_height;
 	struct suit_seq_exec_state seq_stack[SUIT_MAX_SEQ_DEPTH];
 };

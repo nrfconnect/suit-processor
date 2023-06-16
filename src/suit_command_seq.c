@@ -9,11 +9,13 @@
 #include <zcbor_common.h>
 #include <manifest_types.h>
 #include <manifest_decode.h>
+#include <suit_platform.h>
 #include <suit_types.h>
 #include <suit_condition.h>
 #include <suit_directive.h>
 #include <suit_platform.h>
 #include <suit_seq_exec.h>
+#include <suit_manifest.h>
 
 
 static int suit_validate_single_command(struct suit_processor_state *state, suit_command_t *command, bool is_shared_sequence)
@@ -48,13 +50,13 @@ static int suit_validate_single_command(struct suit_processor_state *state, suit
 		return retval;
 	}
 
-	/* Get the current component index. */
-	retval = suit_seq_exec_component_idx_get(state, &component_idx);
+	retval = suit_seq_exec_state_get(state, &seq_exec_state);
 	if (retval != SUIT_SUCCESS) {
 		return retval;
 	}
 
-	retval = suit_seq_exec_state_get(state, &seq_exec_state);
+	/* Get the current component index. */
+	retval = suit_seq_exec_component_idx_get(seq_exec_state, &component_idx);
 	if (retval != SUIT_SUCCESS) {
 		return retval;
 	}
@@ -113,7 +115,7 @@ static int suit_validate_single_command(struct suit_processor_state *state, suit
 
 		/* Sequence finished - execute it for the next component. */
 		if (retval != SUIT_ERR_AGAIN) {
-			int ret = suit_seq_exec_component_idx_next(state, &component_idx);
+			int ret = suit_seq_exec_component_idx_next(seq_exec_state, &component_idx);
 			if (ret != SUIT_SUCCESS) {
 				retval = ret;
 			} else if (component_idx != SUIT_MAX_NUM_COMPONENTS) {
@@ -142,6 +144,7 @@ static inline int suit_validate_single_common_command(struct suit_processor_stat
 static int suit_run_single_command(struct suit_processor_state *state, suit_command_t *command)
 {
 	struct suit_seq_exec_state *seq_exec_state;
+	struct suit_manifest_params *params;
 	size_t component_idx;
 	int retval = SUIT_ERR_DECODING;
 
@@ -168,38 +171,47 @@ static int suit_run_single_command(struct suit_processor_state *state, suit_comm
 		return retval;
 	}
 
-	/* Get the current component index. */
-	retval = suit_seq_exec_component_idx_get(state, &component_idx);
+	retval = suit_seq_exec_state_get(state, &seq_exec_state);
 	if (retval != SUIT_SUCCESS) {
 		return retval;
 	}
 
-	retval = suit_seq_exec_state_get(state, &seq_exec_state);
+	/* Get the current component index. */
+	retval = suit_seq_exec_component_idx_get(seq_exec_state, &component_idx);
 	if (retval != SUIT_SUCCESS) {
 		return retval;
 	}
 
 	/* If the command has finished and the component list was not exhausted, reschedule the command. */
 	while ((retval == SUIT_SUCCESS) && (component_idx != SUIT_MAX_NUM_COMPONENTS)) {
+		retval = suit_manifest_get_component_params(seq_exec_state->manifest, component_idx, &params);
+		if (retval != SUIT_SUCCESS) {
+			return retval;
+		}
+
 		if (command->type == SUIT_COMMAND_CONDITION) {
+			SUIT_DBG("Execute condition %d for component idx: %d (manifest: %p, handle: %p)\r\n",
+				command->condition._SUIT_Condition_choice, component_idx,
+				seq_exec_state->manifest, params->component_handle);
+
 			switch (command->condition._SUIT_Condition_choice) {
 			case _SUIT_Condition___suit_condition_vendor_identifier:
-				retval = suit_condition_vendor_identifier(state, &state->components[component_idx]);
+				retval = suit_condition_vendor_identifier(state, params);
 				break;
 			case _SUIT_Condition___suit_condition_class_identifier:
-				retval = suit_condition_class_identifier(state, &state->components[component_idx]);
+				retval = suit_condition_class_identifier(state, params);
 				break;
 			case _SUIT_Condition___suit_condition_device_identifier:
-				retval = suit_condition_device_identifier(state, &state->components[component_idx]);
+				retval = suit_condition_device_identifier(state, params);
 				break;
 			case _SUIT_Condition___suit_condition_image_match:
-				retval = suit_condition_image_match(state, &state->components[component_idx]);
+				retval = suit_condition_image_match(state, params);
 				break;
 			case _SUIT_Condition___suit_condition_component_slot:
-				retval = suit_condition_component_slot(state, &state->components[component_idx]);
+				retval = suit_condition_component_slot(state, params);
 				break;
 			case _SUIT_Condition___suit_condition_abort:
-				retval = suit_condition_abort(state, &state->components[component_idx]);
+				retval = suit_condition_abort(state, params);
 				break;
 			default:
 				retval = SUIT_ERR_DECODING;
@@ -208,6 +220,10 @@ static int suit_run_single_command(struct suit_processor_state *state, suit_comm
 		}
 
 		else if (command->type == SUIT_COMMAND_DIRECTIVE) {
+			SUIT_DBG("Execute directive %d for component idx: %d (manifest: %p, handle: %p)\r\n",
+				command->directive._SUIT_Directive_choice, component_idx,
+				seq_exec_state->manifest, params->component_handle);
+
 			switch (command->directive._SUIT_Directive_choice) {
 			case _SUIT_Directive___suit_directive_run_sequence:
 				retval = suit_directive_run_sequence(state,
@@ -217,13 +233,13 @@ static int suit_run_single_command(struct suit_processor_state *state, suit_comm
 				retval = suit_directive_try_each(state, &command->directive._SUIT_Directive___suit_directive_try_each__SUIT_Directive_Try_Each_Argument, false);
 				break;
 			case _SUIT_Directive___suit_directive_copy:
-				retval = suit_directive_copy(state, &state->components[component_idx]);
+				retval = suit_directive_copy(state, params);
 				break;
 			case _SUIT_Directive___suit_directive_invoke:
-				retval = suit_directive_invoke(state, &state->components[component_idx]);
+				retval = suit_directive_invoke(state, params);
 				break;
 			case _SUIT_Directive___suit_directive_fetch:
-				retval = suit_directive_fetch(state, &state->components[component_idx]);
+				retval = suit_directive_fetch(state, params);
 				break;
 			default:
 				retval = SUIT_ERR_DECODING;
@@ -235,7 +251,7 @@ static int suit_run_single_command(struct suit_processor_state *state, suit_comm
 
 		/* Command finished - execute it for the next component. */
 		if (retval != SUIT_ERR_AGAIN) {
-			int ret = suit_seq_exec_component_idx_next(state, &component_idx);
+			int ret = suit_seq_exec_component_idx_next(seq_exec_state, &component_idx);
 			if (ret != SUIT_SUCCESS) {
 				retval = ret;
 			} else if (component_idx != SUIT_MAX_NUM_COMPONENTS) {
@@ -250,13 +266,13 @@ static int suit_run_single_command(struct suit_processor_state *state, suit_comm
 	return retval;
 }
 
-
 int suit_validate_shared_sequence(struct suit_processor_state *state, struct zcbor_string *cmd_seq_str)
 {
-	int retval = suit_seq_exec_schedule(state, cmd_seq_str, suit_bool_false);
+	struct suit_manifest_state *manifest = &state->manifest_stack[state->manifest_stack_height - 1];
+	int retval = suit_seq_exec_schedule(state, manifest, cmd_seq_str, suit_bool_false, suit_validate_single_shared_command);
 
 	while (retval == SUIT_ERR_AGAIN) {
-		retval = suit_seq_exec_step(state, suit_validate_single_shared_command);
+		retval = suit_seq_exec_step(state);
 		if (retval != SUIT_ERR_AGAIN) {
 			/* Drop a single element and pass the returned value through the execution stack.
 			 * If the last element on the stack is dropped, this API will return the error code
@@ -272,10 +288,11 @@ int suit_validate_shared_sequence(struct suit_processor_state *state, struct zcb
 
 int suit_validate_command_sequence(struct suit_processor_state *state, struct zcbor_string *cmd_seq_str)
 {
-	int retval = suit_seq_exec_schedule(state, cmd_seq_str, suit_bool_false);
+	struct suit_manifest_state *manifest = &state->manifest_stack[state->manifest_stack_height - 1];
+	int retval = suit_seq_exec_schedule(state, manifest, cmd_seq_str, suit_bool_false, suit_validate_single_common_command);
 
 	while (retval == SUIT_ERR_AGAIN) {
-		retval = suit_seq_exec_step(state, suit_validate_single_common_command);
+		retval = suit_seq_exec_step(state);
 		if (retval != SUIT_ERR_AGAIN) {
 			/* Drop a single element and pass the returned value through the execution stack.
 			 * If the last element on the stack is dropped, this API will return the error code
@@ -291,10 +308,11 @@ int suit_validate_command_sequence(struct suit_processor_state *state, struct zc
 
 int suit_run_command_sequence(struct suit_processor_state *state, struct zcbor_string *cmd_seq_str)
 {
-	int retval = suit_seq_exec_schedule(state, cmd_seq_str, suit_bool_false);
+	struct suit_manifest_state *manifest = &state->manifest_stack[state->manifest_stack_height - 1];
+	int retval = suit_seq_exec_schedule(state, manifest, cmd_seq_str, suit_bool_false, suit_run_single_command);
 
 	while (retval == SUIT_ERR_AGAIN) {
-		retval = suit_seq_exec_step(state, suit_run_single_command);
+		retval = suit_seq_exec_step(state);
 		if (retval != SUIT_ERR_AGAIN) {
 			/* Drop a single element and pass the returned value through the execution stack.
 			 * If the last element on the stack is dropped, this API will return the error code
