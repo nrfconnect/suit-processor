@@ -1,0 +1,4 @@
+tests:
+  suit-processor.unit.decoder:
+    platform_allow: native_posix native_posix_64 mps2_an521
+    tags: suit-processor suit-decoder
