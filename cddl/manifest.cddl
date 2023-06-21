@@ -35,7 +35,7 @@ SUIT_Envelope = {
 
 SUIT_Authentication = [
   bstr .cbor SUIT_Digest,
-  1*2 bstr ; .cbor SUIT_Authentication_Block
+  0*2 bstr ; .cbor SUIT_Authentication_Block
 ]
 
 SUIT_Digest = [
