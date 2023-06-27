@@ -15,11 +15,14 @@
 
 #define SUIT_MAX_NUM_SIGNERS 2  ///! The maximum number of signers.
 #define SUIT_MAX_NUM_COMPONENT_ID_PARTS 5  ///! The maximum number of bytestrings in a component ID.
-#define SUIT_MAX_NUM_COMPONENTS 4  ///! The maximum number of components referenced in the manifest.
+#define SUIT_MAX_NUM_COMPONENTS 6  ///! The maximum number of components referenced in the manifest.
+#define SUIT_MAX_NUM_COMPONENT_PARAMS (SUIT_MAX_NUM_COMPONENTS * SUIT_MAX_MANIFEST_DEPTH) ///! The maximum number of active components during processing dependency manifests.
+#define SUIT_MAX_NUM_INTEGRATED_PAYLOADS 5  ///! The maximum number of integrated payloads in a single manifest.
 #define SUIT_MAX_COMMAND_ARGS 3  ///! The maximum number of arguments consumed by a single command.
 #define SUIT_SUIT_SIG_STRUCTURE1_MAX_LENGTH 55  ///! The maximum length of the Sig_structure1 structure. Current value allows to store only 256-bit long digests.
 #define SUIT_MAX_SEQ_DEPTH 5  ///! The maximum number of command sequences that may be encapsulated.
 #define SUIT_SEQ_EXEC_DEFAULT_STATE 0  ///! The default value of the cmd_exec_state.
+#define SUIT_MAX_MANIFEST_DEPTH 3 ///! The maximum nesting level of hierarchical manifests.
 
 /** Errors from the suit API
  *
@@ -84,7 +87,9 @@ enum suit_bool {
 #define SUIT_NUM_STEPS 6
 
 enum suit_command_sequence {
+	SUIT_SEQ_INVALID,
 	SUIT_SEQ_PARSE,
+	SUIT_SEQ_SHARED,
 	SUIT_SEQ_DEP_RESOLUTION,
 	SUIT_SEQ_PAYLOAD_FETCH,
 	SUIT_SEQ_INSTALL,
@@ -107,10 +112,12 @@ enum suit_manifest_step {
 
 struct suit_manifest_params {
 	suit_component_t component_handle;
+	struct zcbor_string component_id;
+	uint_fast32_t ref_count;
 
 	struct zcbor_string vid;
 	struct zcbor_string cid;
-	struct SUIT_Digest image_digest;
+	struct zcbor_string image_digest;
 	size_t image_size;
 	unsigned int component_slot;
 	struct zcbor_string uri;
@@ -127,11 +134,15 @@ struct suit_manifest_params {
 	bool source_component_set;
 	bool invoke_args_set;
 	bool did_set;
+
+	enum suit_bool is_dependency;
+	bool integrity_checked;
 };
 
 static inline void suit_reset_params(struct suit_manifest_params *params)
 {
 	suit_component_t bak = params->component_handle;
+
 	memset(params, 0, sizeof(*params));
 	params->component_handle = bak;
 }
@@ -151,7 +162,7 @@ struct suit_seq_exec_state {
 	int cmd_exec_state; ///! Optional current command execution state.
 	enum suit_bool soft_failure; ///! suit-parameter-soft-failure
 	int retval; ///! Value returned by the nested command sequence execution.
-	const uint8_t * exec_ptr; ///! The pointer within the currently executed command sequence, pointing to the current command in the sequence.
+	const uint8_t *exec_ptr; ///! The pointer within the currently executed command sequence, pointing to the current command in the sequence.
 	size_t current_component_idx; ///! In case of nested command execution - the currently selected component from the component list.
 	bool current_components_backup[SUIT_MAX_NUM_COMPONENTS]; //! List of components, selected before the execution of command sequences.
 };
@@ -185,7 +196,7 @@ enum suit_cose_alg {
 };
 
 struct suit_arg {
-	union{struct zcbor_string *bstr; unsigned int uint;} arg;
+	union{struct zcbor_string *bstr; unsigned int uint; } arg;
 	enum{bstr, uint} arg_type;
 };
 

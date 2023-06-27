@@ -93,13 +93,13 @@ int suit_condition_image_match(struct suit_processor_state *state,
 
 #ifdef SUIT_PLATFORM_LEGACY_API_SUPPORT
 	return suit_plat_check_image_match(suit_cose_sha256,
-			&component_params->image_digest._SUIT_Digest_suit_digest_bytes,
+			&component_params->image_digest,
 			component_params->image_size,
 			component_params->component_handle);
 #else /* SUIT_PLATFORM_LEGACY_API_SUPPORT */
 	return suit_plat_check_image_match(component_params->component_handle,
 			suit_cose_sha256,
-			&component_params->image_digest._SUIT_Digest_suit_digest_bytes,
+			&component_params->image_digest,
 			component_params->image_size);
 #endif /* SUIT_PLATFORM_LEGACY_API_SUPPORT */
 }
