@@ -91,6 +91,7 @@ target_include_directories(manifest PUBLIC
 # Define SUIT library
 add_library(suit)
 target_sources(suit PRIVATE
+  src/suit_manifest.c
   src/suit_command_seq.c
   src/suit_seq_exec.c
   src/suit_condition.c
