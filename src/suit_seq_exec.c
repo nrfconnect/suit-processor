@@ -63,21 +63,86 @@ static int recover_components(struct suit_processor_state *state)
 	return retval;
 }
 
+static int init_selected_components(struct suit_processor_state *state)
+{
+	int retval = suit_exec_deselect_all_components(state);
+
+	/* If there is only one component - set it as an active one */
+	if ((retval == SUIT_SUCCESS) &&
+	    (state->num_components == 1)) {
+		retval = suit_exec_select_component_idx(state, 0);
+	} else if (state->num_components == 0) {
+		retval = SUIT_ERR_MANIFEST_VALIDATION;
+	}
+
+	return retval;
+}
+
+
+int suit_exec_select_component_idx(struct suit_processor_state *state, size_t index)
+{
+	if (state == NULL) {
+		return SUIT_ERR_CRASH;
+	}
+
+	if (state->num_components > index) {
+		state->current_components[index] = true;
+		return SUIT_SUCCESS;
+	}
+
+	return SUIT_ERR_MISSING_COMPONENT;
+}
+
+int suit_exec_select_all_components(struct suit_processor_state *state)
+{
+	if (state == NULL) {
+		return SUIT_ERR_CRASH;
+	}
+
+	for (size_t index = 0; index < state->num_components; index++) {
+		state->current_components[index] = true;
+	}
+
+	return SUIT_SUCCESS;
+}
+
+int suit_exec_deselect_all_components(struct suit_processor_state *state)
+{
+	if (state == NULL) {
+		return SUIT_ERR_CRASH;
+	}
+
+	for (size_t index = 0; index < state->num_components; index++) {
+		state->current_components[index] = false;
+	}
+
+	return SUIT_SUCCESS;
+}
 
 int suit_seq_exec_schedule(struct suit_processor_state *state, struct zcbor_string *command_sequence, enum suit_bool soft_failure)
 {
 	if (state->seq_stack_height < SUIT_MAX_SEQ_DEPTH) {
 		SUIT_DBG("Push sequence: %p\r\n", command_sequence->value);
+		struct suit_seq_exec_state *seq_exec_state = &state->seq_stack[state->seq_stack_height];
 
-		state->seq_stack[state->seq_stack_height].cmd_seq_str.value = command_sequence->value;
-		state->seq_stack[state->seq_stack_height].cmd_seq_str.len = command_sequence->len;
-		state->seq_stack[state->seq_stack_height].cmd_exec_state = SUIT_SEQ_EXEC_DEFAULT_STATE;
-		state->seq_stack[state->seq_stack_height].exec_ptr = command_sequence->value;
-		state->seq_stack[state->seq_stack_height].retval = SUIT_SUCCESS;
-		state->seq_stack[state->seq_stack_height].soft_failure = soft_failure;
-		state->seq_stack[state->seq_stack_height].current_component_idx = SUIT_MAX_NUM_COMPONENTS;
-		state->seq_stack[state->seq_stack_height].n_commands = 0;
-		state->seq_stack[state->seq_stack_height].current_command = 0;
+		seq_exec_state->cmd_seq_str.value = command_sequence->value;
+		seq_exec_state->cmd_seq_str.len = command_sequence->len;
+		seq_exec_state->cmd_exec_state = SUIT_SEQ_EXEC_DEFAULT_STATE;
+		seq_exec_state->exec_ptr = command_sequence->value;
+		seq_exec_state->retval = SUIT_SUCCESS;
+		seq_exec_state->soft_failure = soft_failure;
+		seq_exec_state->current_component_idx = SUIT_MAX_NUM_COMPONENTS;
+		seq_exec_state->n_commands = 0;
+		seq_exec_state->current_command = 0;
+
+		if (state->seq_stack_height == 0) {
+			int ret = init_selected_components(state);
+			if (ret != SUIT_SUCCESS) {
+				SUIT_ERR("Unable to prepare components. Error: %d\r\n", ret);
+				return ret;
+			}
+		}
+
 		state->seq_stack_height += 1;
 
 		return SUIT_ERR_AGAIN;
@@ -354,4 +419,40 @@ int suit_seq_exec_component_idx_next(struct suit_processor_state *state, size_t 
 	}
 
 	return SUIT_SUCCESS;
+}
+
+int suit_exec_component_handle_from_idx(struct suit_processor_state *state, size_t component_idx, suit_component_t *handle)
+{
+	struct suit_seq_exec_state *seq_exec_state;
+
+	int ret = suit_seq_exec_state_get(state, &seq_exec_state);
+	if (ret != SUIT_SUCCESS) {
+		return ret;
+	}
+
+	if (component_idx >= state->num_components) {
+		return SUIT_ERR_UNSUPPORTED_PARAMETER;
+	}
+
+	if (ret == SUIT_SUCCESS) {
+		*handle = state->components[component_idx].component_handle;
+	}
+
+	return ret;
+}
+
+int suit_exec_find_integrated_payload(struct suit_processor_state *state, struct zcbor_string *uri, struct zcbor_string *payload)
+{
+	for (int j = 0; j < state->envelope._SUIT_Envelope__SUIT_Integrated_Payload_count; j++) {
+		if (suit_compare_zcbor_strings(&state->envelope._SUIT_Envelope__SUIT_Integrated_Payload[j]._SUIT_Envelope__SUIT_Integrated_Payload._SUIT_Integrated_Payload_suit_integrated_payload_key_key, uri)) {
+			*payload = state->envelope._SUIT_Envelope__SUIT_Integrated_Payload[j]._SUIT_Envelope__SUIT_Integrated_Payload._SUIT_Integrated_Payload_suit_integrated_payload_key;
+
+			return SUIT_SUCCESS;
+		}
+	}
+
+	payload->len = 0;
+	payload->value = NULL;
+
+	return SUIT_ERR_UNAVAILABLE_PAYLOAD;
 }

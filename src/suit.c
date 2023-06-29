@@ -413,17 +413,6 @@ static int prepare_params(struct suit_processor_state *state)
 		suit_reset_params(&state->components[i]);
 	}
 
-	/* If there is only one component - set it as an active one */
-	if (state->num_components == 1) {
-		struct IndexArg_ index_arg = {
-			._IndexArg_uint = 0,
-			._IndexArg_choice = _IndexArg_uint,
-		};
-		retval = suit_directive_set_current_components(state, &index_arg);
-	} else if (state->num_components == 0) {
-		retval = SUIT_ERR_MANIFEST_VALIDATION;
-	}
-
 	return retval;
 }
 
