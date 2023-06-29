@@ -85,12 +85,6 @@ int suit_seq_exec_state_get(struct suit_processor_state *state, struct suit_seq_
  */
 int suit_seq_exec_finalize(struct suit_processor_state *state, int retval);
 
-/** @brief Reset the list of active components and select the current one.
- *
- * @param[in]  state   The SUIT processor state to be modified.
- */
-void suit_seq_exec_component_reset(struct suit_processor_state *state);
-
 /** @brief Get the current component index, on which the sequence will be executed.
  *
  * @note This API is used to implement the loop, which executes nested command sequence on
@@ -118,5 +112,50 @@ int suit_seq_exec_component_idx_get(struct suit_processor_state *state, size_t *
  * @returns SUIT_SUCCESS if the current component was successfully returned, error code otherwise.
  */
 int suit_seq_exec_component_idx_next(struct suit_processor_state *state, size_t *component_idx);
+
+/** @brief Add a component specified by an index to the list of selected components.
+ *
+ * @param[in]  state  The SUIT processor state to be used.
+ * @param[in]  index  The component index of the current manifest.
+ *
+ * @returns SUIT_SUCCESS if the component was selected, error code otherwise.
+ */
+int suit_exec_select_component_idx(struct suit_processor_state *state, size_t index);
+
+/** @brief Add all components from the current manifest to the list of selected components.
+ *
+ * @param[in]  state  The SUIT processor state to be used.
+ *
+ * @returns SUIT_SUCCESS if components were selected, error code otherwise.
+ */
+int suit_exec_select_all_components(struct suit_processor_state *state);
+
+/** @brief Remove all components from the current manifest from the list of selected components.
+ *
+ * @param[in]  state  The SUIT processor state to be used.
+ *
+ * @returns SUIT_SUCCESS if components were removed, error code otherwise.
+ */
+int suit_exec_deselect_all_components(struct suit_processor_state *state);
+
+/** @brief Resolve the component index of the current manifest to the component handle.
+ *
+ * @param[in]   state          The SUIT processor state to be used.
+ * @param[in]   component_idx  The component index of the current manifest.
+ * @param[out]  handle         Pointer to the variable, that will be set with the resolved component handle.
+ *
+ * @returns SUIT_SUCCESS if the component handle was found and returned, error code otherwise.
+ */
+int suit_exec_component_handle_from_idx(struct suit_processor_state *state, size_t component_idx, suit_component_t *handle);
+
+/** @brief Look for URI in the list of integrated payload of the current manifest.
+ *
+ * @param[in]   state    The SUIT processor state to be used.
+ * @param[in]   uri      URI to look for.
+ * @param[out]  payload  Pointer to the variable, that will be set with the reference and size of the integrated payload.
+ *
+ * @returns SUIT_SUCCESS if the integrated payload was found and returned, error code otherwise.
+ */
+int suit_exec_find_integrated_payload(struct suit_processor_state *state, struct zcbor_string *uri, struct zcbor_string *payload);
 
 #endif /* SUIT_SEQ_EXEC_H__ */
