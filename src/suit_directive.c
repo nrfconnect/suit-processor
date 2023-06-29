@@ -12,45 +12,55 @@
 
 int suit_directive_set_current_components(struct suit_processor_state *state, struct IndexArg_ *index_arg)
 {
+	if ((state == NULL) || (index_arg == NULL)) {
+		SUIT_ERR("Unable to set current components: invalid argument\r\n");
+		return SUIT_ERR_DECODING;
+	}
+
 	/* Disable all components. */
-	for (int i = 0; i < state->num_components; i++) {
-		state->current_components[i] = false;
+	int retval = suit_exec_deselect_all_components(state);
+	if (retval != SUIT_SUCCESS) {
+		SUIT_ERR("Unable to set current components: failed to deselect all components (%d)\r\n", retval);
+		return retval;
 	}
 
 	/* Single component. */
 	if (index_arg->_IndexArg_choice == _IndexArg_uint) {
-		if (index_arg->_IndexArg_uint >= state->num_components) {
-			/* Invalid index. */
-			return SUIT_ERR_DECODING;
-		} else {
-			state->current_components[index_arg->_IndexArg_uint] = true;
-		}
+		return suit_exec_select_component_idx(state, index_arg->_IndexArg_uint);
 	/* Multiple components. */
 	} else if (index_arg->_IndexArg_choice == _IndexArg__uint) {
 		for (int i = 0; i < index_arg->_IndexArg__uint_uint_count; i++) {
-			if (index_arg->_IndexArg__uint_uint[i] >= state->num_components) {
-				/* Invalid index. */
-				return SUIT_ERR_DECODING;
+			retval = suit_exec_select_component_idx(state, index_arg->_IndexArg__uint_uint[i]);
+			if (retval != SUIT_SUCCESS) {
+				SUIT_ERR("Unable to set current components: failed to select group of components (%d)\r\n", retval);
+				return retval;
 			}
-		}
-		/* All indices have been validated, enable the components. */
-		for (int i = 0; i < index_arg->_IndexArg__uint_uint_count; i++) {
-			state->current_components[index_arg->_IndexArg__uint_uint[i]] = true;
 		}
 	/* All components (if true). The false value is not allowed by CDDL. */
 	} else if (index_arg->_IndexArg_choice == _IndexArg_bool) {
 		/* Enable all components. */
-		for (int i = 0; i < state->num_components; i++) {
-			state->current_components[i] = true;
-		}
+		return suit_exec_select_all_components(state);
 	}
-	return SUIT_SUCCESS;
+
+	return retval;
 }
 
-static int try_each(struct suit_processor_state *state, struct SUIT_Directive_Try_Each_Argument *try_each_arg, bool validate)
+int suit_directive_try_each(struct suit_processor_state *state, struct SUIT_Directive_Try_Each_Argument *try_each_arg, bool validate)
 {
 	struct suit_seq_exec_state *seq_exec_state;
 	struct zcbor_string *command_sequence = NULL;
+
+	if ((state == NULL) || (try_each_arg == NULL)) {
+		SUIT_ERR("Unable to execute try-each directive: invalid argument\r\n");
+		return SUIT_ERR_DECODING;
+	}
+
+	/* Implement checks enforced by the CDDL, so the nested non-compliant
+	 * sequence will not slip through.
+	 */
+	if (try_each_arg->_SUIT_Directive_Try_Each_Argument_SUIT_Command_Sequence_bstr_count < 2) {
+		return SUIT_ERR_DECODING;
+	}
 
 	int retval = suit_seq_exec_state_get(state, &seq_exec_state);
 	if (retval != SUIT_SUCCESS) {
@@ -94,52 +104,14 @@ static int try_each(struct suit_processor_state *state, struct SUIT_Directive_Tr
 }
 
 
-int suit_directive_try_each(struct suit_processor_state *state, struct SUIT_Directive_Try_Each_Argument *try_each_arg, bool validate)
+int suit_directive_run_sequence(struct suit_processor_state *state, struct zcbor_string *command_sequence)
 {
 	struct suit_seq_exec_state *seq_exec_state;
-	size_t component_idx;
 
-	/* Implement checks enforced by the CDDL, so the nested non-compliant
-	 * sequence will not slip through.
-	 */
-	if (try_each_arg->_SUIT_Directive_Try_Each_Argument_SUIT_Command_Sequence_bstr_count < 2) {
+	if ((state == NULL) || (command_sequence == NULL)) {
+		SUIT_ERR("Unable to execute run-sequence directive: invalid argument\r\n");
 		return SUIT_ERR_DECODING;
 	}
-
-	/* Get the current component index. */
-	int retval = suit_seq_exec_component_idx_get(state, &component_idx);
-	if (retval != SUIT_SUCCESS) {
-		return retval;
-	}
-
-	retval = suit_seq_exec_state_get(state, &seq_exec_state);
-	if (retval != SUIT_SUCCESS) {
-		return retval;
-	}
-
-	/* If the sequence has finished and the component list was not exhausted, reschedule the sequence. */
-	while ((retval == SUIT_SUCCESS) && (component_idx != SUIT_MAX_NUM_COMPONENTS)) {
-		retval = try_each(state, try_each_arg, validate);
-		/* Sequence finished - execute it for the next component. */
-		if (retval != SUIT_ERR_AGAIN) {
-			int ret = suit_seq_exec_component_idx_next(state, &component_idx);
-			if (ret != SUIT_SUCCESS) {
-				retval = ret;
-			} else if (component_idx != SUIT_MAX_NUM_COMPONENTS) {
-				/* Reset the execution state to repeat the sequence. */
-				seq_exec_state->cmd_exec_state = SUIT_SEQ_EXEC_DEFAULT_STATE;
-			}
-		}
-	}
-
-	return retval;
-}
-
-int suit_directive_run_sequence(struct suit_processor_state *state,
-		struct zcbor_string *command_sequence)
-{
-	struct suit_seq_exec_state *seq_exec_state;
-	size_t component_idx;
 
 	/* Implement checks enforced by the CDDL, so the nested non-compliant
 	 * sequence will not slip through.
@@ -148,45 +120,24 @@ int suit_directive_run_sequence(struct suit_processor_state *state,
 		return SUIT_ERR_DECODING;
 	}
 
-	/* Get the current component index. */
-	int retval = suit_seq_exec_component_idx_get(state, &component_idx);
+	int retval = suit_seq_exec_state_get(state, &seq_exec_state);
 	if (retval != SUIT_SUCCESS) {
 		return retval;
 	}
 
-	retval = suit_seq_exec_state_get(state, &seq_exec_state);
-	if (retval != SUIT_SUCCESS) {
-		return retval;
+	if (seq_exec_state->cmd_exec_state == SUIT_SEQ_EXEC_DEFAULT_STATE) {
+		SUIT_DBG("Push the sequence to run onto the stack\r\n");
+		seq_exec_state->cmd_exec_state = 1;
+		return suit_seq_exec_schedule(state, command_sequence, suit_bool_false);
+	} else if (seq_exec_state->retval == SUIT_FAIL_SOFT_CONDITION) {
+		seq_exec_state->retval = SUIT_SUCCESS;
 	}
 
-	/* If the sequence has finished and the component list was not exhausted, reschedule the sequence. */
-	while ((retval == SUIT_SUCCESS) && (component_idx != SUIT_MAX_NUM_COMPONENTS)) {
-		if (seq_exec_state->cmd_exec_state == SUIT_SEQ_EXEC_DEFAULT_STATE) {
-			SUIT_DBG("Push the sequence to run onto the stack\r\n");
-			seq_exec_state->cmd_exec_state = 1;
-			return suit_seq_exec_schedule(state, command_sequence, suit_bool_false);
-		} else if (seq_exec_state->retval == SUIT_FAIL_SOFT_CONDITION) {
-			seq_exec_state->retval = SUIT_SUCCESS;
-		}
-		/* Sequence finished - execute it for the next component. */
-		if (seq_exec_state->retval != SUIT_ERR_AGAIN) {
-			int ret = suit_seq_exec_component_idx_next(state, &component_idx);
-			if (ret != SUIT_SUCCESS) {
-				seq_exec_state->retval = ret;
-			} else if (component_idx != SUIT_MAX_NUM_COMPONENTS) {
-				/* Reset the execution state to repeat the sequence. */
-				seq_exec_state->cmd_exec_state = SUIT_SEQ_EXEC_DEFAULT_STATE;
-			}
-		}
-
-		retval = seq_exec_state->retval;
-	}
-
-	return retval;
+	return seq_exec_state->retval;
 }
 
 
-static int set_param(struct suit_manifest_params *dst, struct SUIT_Parameters_ * param)
+static int suit_directive_override_parameter(struct SUIT_Parameters_ *param, struct suit_manifest_params *dst)
 {
 	switch (param->_SUIT_Parameters_choice) {
 	case _SUIT_Parameters_suit_parameter_vendor_identifier:
@@ -232,12 +183,23 @@ int suit_directive_override_parameters(struct suit_processor_state *state,
 		struct __suit_directive_override_parameters_map__SUIT_Parameters *params,
 		uint_fast32_t param_count)
 {
+	struct suit_seq_exec_state *seq_exec_state;
+	size_t component_idx;
+
+	if ((state == NULL) || (params == NULL)) {
+		SUIT_ERR("Unable to execute override-parameters directive: invalid argument\r\n");
+		return SUIT_ERR_DECODING;
+	}
+
+	int retval = suit_seq_exec_state_get(state, &seq_exec_state);
+	if (retval != SUIT_SUCCESS) {
+		return retval;
+	}
+
 	for (int j = 0; j < param_count; j++) {
 		struct SUIT_Parameters_ *param = &params[j].___suit_directive_override_parameters_map__SUIT_Parameters;
 
 		if (param->_SUIT_Parameters_choice == _SUIT_Parameters_suit_parameter_soft_failure) {
-			struct suit_seq_exec_state *seq_exec_state;
-
 			/* The soft-failure may be set only within try-each or command sequence.
 			 * Fail if the stack contains a single entry (the manifest command sequence entry point).
 			 */
@@ -245,97 +207,105 @@ int suit_directive_override_parameters(struct suit_processor_state *state,
 				return SUIT_ERR_UNSUPPORTED_COMMAND;
 			}
 
-			int retval = suit_seq_exec_state_get(state, &seq_exec_state);
-			if (retval != SUIT_SUCCESS) {
-				return retval;
-			}
-
 			seq_exec_state->soft_failure = (param->_SUIT_Parameters_suit_parameter_soft_failure ? suit_bool_true : suit_bool_false);
 			continue;
 		}
 
-		for (int i = 0; i < state->num_components; i++) {
-			if (state->current_components[i]) {
-				int err = set_param(&state->components[i], param);
-				if (err != SUIT_SUCCESS) {
-					return err;
+		/* Get the current component index. */
+		retval = suit_seq_exec_component_idx_get(state, &component_idx);
+		if (retval != SUIT_SUCCESS) {
+			break;
+		}
+
+		/* If the command has finished and the component list was not exhausted, reschedule the command. */
+		while ((retval == SUIT_SUCCESS) && (component_idx != SUIT_MAX_NUM_COMPONENTS)) {
+			retval = suit_directive_override_parameter(param, &state->components[component_idx]);
+			/* Command finished - execute it for the next component. */
+			if (retval != SUIT_ERR_AGAIN) {
+				int ret = suit_seq_exec_component_idx_next(state, &component_idx);
+				if (ret != SUIT_SUCCESS) {
+					retval = ret;
+				} else if (component_idx != SUIT_MAX_NUM_COMPONENTS) {
+					/* Reset the execution state to repeat the sequence. */
+					seq_exec_state->cmd_exec_state = SUIT_SEQ_EXEC_DEFAULT_STATE;
 				}
 			}
 		}
-	}
 
-	return SUIT_SUCCESS;
-}
-
-
-static int plat_fetch(struct suit_processor_state *state, suit_component_t dst_handle,
-			struct zcbor_string *uri)
-{
-#ifdef SUIT_PLATFORM_DRY_RUN_SUPPORT
-	if (state->dry_run != suit_bool_false) {
-		return suit_plat_check_fetch(dst_handle, uri);
-	} else {
-		return suit_plat_fetch(dst_handle, uri);
-	}
-#else /* SUIT_PLATFORM_DRY_RUN_SUPPORT */
-	return suit_plat_fetch(dst_handle, uri);
-#endif /* SUIT_PLATFORM_DRY_RUN_SUPPORT */
-}
-
-
-static int plat_fetch_integrated(struct suit_processor_state *state, suit_component_t dst_handle,
-			struct zcbor_string *payload)
-{
-#ifdef SUIT_PLATFORM_DRY_RUN_SUPPORT
-	if (state->dry_run != suit_bool_false) {
-		return suit_plat_check_fetch_integrated(dst_handle, payload);
-	} else {
-		return suit_plat_fetch_integrated(dst_handle, payload);
-	}
-#else /* SUIT_PLATFORM_DRY_RUN_SUPPORT */
-	return suit_plat_fetch_integrated(dst_handle, payload);
-#endif /* SUIT_PLATFORM_DRY_RUN_SUPPORT */
-}
-
-
-int suit_directive_fetch(struct suit_processor_state *state)
-{
-
-	for (int i = 0; i < state->num_components; i++) {
-		if (state->current_components[i]) {
-			if (!state->components[i].uri_set) {
-				return SUIT_ERR_UNAVAILABLE_PAYLOAD;
-			}
-
-			bool integrated = false;
-			int ret;
-
-			for (int j = 0; j < state->envelope._SUIT_Envelope__SUIT_Integrated_Payload_count; j++) {
-				if (suit_compare_zcbor_strings(&state->envelope._SUIT_Envelope__SUIT_Integrated_Payload[j]._SUIT_Envelope__SUIT_Integrated_Payload._SUIT_Integrated_Payload_suit_integrated_payload_key_key, &state->components[i].uri)) {
-					ret = plat_fetch_integrated(state,
-						state->components[i].component_handle,
-						&state->envelope._SUIT_Envelope__SUIT_Integrated_Payload[j]._SUIT_Envelope__SUIT_Integrated_Payload._SUIT_Integrated_Payload_suit_integrated_payload_key);
-					integrated = true;
-				}
-			}
-
-			if (!integrated) {
-				ret = plat_fetch(state, state->components[i].component_handle, &state->components[i].uri);
-			}
-
-			if (ret != SUIT_SUCCESS) {
-				return ret;
-			}
+		if (retval != SUIT_SUCCESS) {
+			break;
 		}
 	}
 
-	return SUIT_SUCCESS;
+	return retval;
 }
 
 
-static int plat_copy(struct suit_processor_state *state, suit_component_t dst_handle,
-		suit_component_t src_handle)
+int suit_directive_fetch(struct suit_processor_state *state, struct suit_manifest_params *component_params)
 {
+	bool integrated = false;
+	struct zcbor_string integrated_payload;
+	int ret;
+
+	if ((state == NULL) || (component_params == NULL)) {
+		SUIT_ERR("Unable to execute fetch directive: invalid argument\r\n");
+		return SUIT_ERR_DECODING;
+	}
+
+	if (!component_params->uri_set) {
+		return SUIT_ERR_UNAVAILABLE_PAYLOAD;
+	}
+
+	ret = suit_exec_find_integrated_payload(state, &component_params->uri, &integrated_payload);
+	if (ret == SUIT_SUCCESS) {
+		integrated = true;
+	}
+
+	if (!integrated) {
+#ifdef SUIT_PLATFORM_DRY_RUN_SUPPORT
+		if (state->dry_run != suit_bool_false) {
+			ret = suit_plat_check_fetch(component_params->component_handle, &component_params->uri);
+		} else {
+			ret = suit_plat_fetch(component_params->component_handle, &component_params->uri);
+		}
+#else /* SUIT_PLATFORM_DRY_RUN_SUPPORT */
+		ret = suit_plat_fetch(component_params->component_handle, &component_params->uri);
+#endif /* SUIT_PLATFORM_DRY_RUN_SUPPORT */
+	} else {
+#ifdef SUIT_PLATFORM_DRY_RUN_SUPPORT
+		if (state->dry_run != suit_bool_false) {
+			ret = suit_plat_check_fetch_integrated(component_params->component_handle, &integrated_payload);
+		} else {
+			ret = suit_plat_fetch_integrated(component_params->component_handle, &integrated_payload);
+		}
+#else /* SUIT_PLATFORM_DRY_RUN_SUPPORT */
+		ret = suit_plat_fetch_integrated(component_params->component_handle, &integrated_payload);
+#endif /* SUIT_PLATFORM_DRY_RUN_SUPPORT */
+	}
+
+	return ret;
+}
+
+
+int suit_directive_copy(struct suit_processor_state *state, struct suit_manifest_params *component_params)
+{
+	suit_component_t dst_handle = component_params->component_handle;
+	suit_component_t src_handle;
+
+	if ((state == NULL) || (component_params == NULL)) {
+		SUIT_ERR("Unable to execute copy directive: invalid argument\r\n");
+		return SUIT_ERR_DECODING;
+	}
+
+	if (!component_params->source_component_set) {
+		return SUIT_ERR_UNAVAILABLE_PARAMETER;
+	}
+
+	int ret = suit_exec_component_handle_from_idx(state, component_params->source_component, &src_handle);
+	if (ret != SUIT_SUCCESS) {
+		return ret;
+	}
+
 #ifdef SUIT_PLATFORM_DRY_RUN_SUPPORT
 	if (state->dry_run != suit_bool_false) {
 		return suit_plat_check_copy(dst_handle, src_handle);
@@ -348,40 +318,31 @@ static int plat_copy(struct suit_processor_state *state, suit_component_t dst_ha
 }
 
 
-int suit_directive_copy(struct suit_processor_state *state)
+int suit_directive_swap(struct suit_processor_state *state, struct suit_manifest_params *component_params)
 {
-	for (int i = 0; i < state->num_components; i++) {
-		if (state->current_components[i]) {
-			if (!state->components[i].source_component_set) {
-				return SUIT_ERR_UNAVAILABLE_PARAMETER;
-			}
-
-			const size_t src_idx = state->components[i].source_component;
-			if (src_idx >= state->num_components) {
-				return SUIT_ERR_UNSUPPORTED_PARAMETER;
-			}
-
-			const suit_component_t src_handle = state->components[src_idx].component_handle;
-			int ret = plat_copy(state, state->components[i].component_handle, src_handle);
-
-			if (ret != SUIT_SUCCESS) {
-				return ret;
-			}
-		}
+	if ((state == NULL) || (component_params == NULL)) {
+		SUIT_ERR("Unable to execute swap directive: invalid argument\r\n");
+		return SUIT_ERR_DECODING;
 	}
 
-	return SUIT_SUCCESS;
-}
-
-int suit_directive_swap(struct suit_processor_state *state)
-{
 	return SUIT_ERR_UNSUPPORTED_COMMAND;
 }
 
 
-static int plat_invoke(struct suit_processor_state *state, suit_component_t image_handle,
-		struct zcbor_string *invoke_args)
+int suit_directive_invoke(struct suit_processor_state *state, struct suit_manifest_params *component_params)
 {
+	suit_component_t image_handle = component_params->component_handle;
+	struct zcbor_string *invoke_args = NULL;
+
+	if ((state == NULL) || (component_params == NULL)) {
+		SUIT_ERR("Unable to execute invoke directive: invalid argument\r\n");
+		return SUIT_ERR_DECODING;
+	}
+
+	if (component_params->invoke_args_set) {
+		invoke_args = &component_params->invoke_args;
+	}
+
 #ifdef SUIT_PLATFORM_DRY_RUN_SUPPORT
 	if (state->dry_run != suit_bool_false) {
 		return suit_plat_check_invoke(image_handle, invoke_args);
@@ -391,26 +352,4 @@ static int plat_invoke(struct suit_processor_state *state, suit_component_t imag
 #else /* SUIT_PLATFORM_DRY_RUN_SUPPORT */
 	return suit_plat_invoke(image_handle, invoke_args);
 #endif /* SUIT_PLATFORM_DRY_RUN_SUPPORT */
-}
-
-
-int suit_directive_invoke(struct suit_processor_state *state)
-{
-	for (int i = 0; i < state->num_components; i++) {
-		if (state->current_components[i]) {
-			struct zcbor_string *invoke_args = NULL;
-
-			if (state->components[i].invoke_args_set) {
-				invoke_args = &state->components[i].invoke_args;
-			}
-
-			int ret = plat_invoke(state, state->components[i].component_handle, invoke_args);
-
-			if (ret != SUIT_SUCCESS) {
-				return ret;
-			}
-		}
-	}
-
-	return SUIT_SUCCESS;
 }
