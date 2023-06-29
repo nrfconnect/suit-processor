@@ -33,20 +33,8 @@ void bootstrap_envelope_empty(struct suit_processor_state *state)
 	unseverable->_SUIT_Unseverable_Members_suit_load_present = false;
 	unseverable->_SUIT_Unseverable_Members_suit_invoke_present = false;
 
-	/* Disable all components. */
-	for (int i = 0; i < SUIT_MAX_NUM_COMPONENTS; i++) {
-		state->current_components[i] = false;
-	}
-
 	/* Clear execution stack. */
 	state->seq_stack_height = 0;
-}
-
-void bootstrap_envelope_select_component(struct suit_processor_state *state, size_t component_idx)
-{
-	if (component_idx < state->num_components) {
-		state->current_components[component_idx] = true;
-	}
 }
 
 void bootstrap_envelope_reset_step(struct suit_processor_state *state)

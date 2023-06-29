@@ -207,9 +207,6 @@ static void seq_validation_nested_test_template(seq_validation_api_t validate, b
 
 	bootstrap_envelope_empty(&state);
 	bootstrap_envelope_components(&state, n_components);
-	if (n_components == 1) {
-		bootstrap_envelope_select_component(&state, 0);
-	}
 
 	/* Append command to test */
 	memcpy(nested_cmd, support_matrix->test_cmd, support_matrix->test_cmd_size);
@@ -264,7 +261,6 @@ void test_seq_validation_shared_bstr_as_command_list(void)
 
 	bootstrap_envelope_empty(&state);
 	bootstrap_envelope_components(&state, 1);
-	bootstrap_envelope_select_component(&state, 0);
 
 	int retval = suit_validate_shared_sequence(&state, &seq);
 	TEST_ASSERT_EQUAL(ZCBOR_ERR_TO_SUIT_ERR(ZCBOR_ERR_WRONG_TYPE), retval);
@@ -285,7 +281,6 @@ void test_seq_validation_shared_infinite_length_command_list(void)
 
 	bootstrap_envelope_empty(&state);
 	bootstrap_envelope_components(&state, 1);
-	bootstrap_envelope_select_component(&state, 0);
 
 	int retval = suit_validate_shared_sequence(&state, &seq);
 	TEST_ASSERT_EQUAL(SUIT_ERR_DECODING, retval);
@@ -307,7 +302,6 @@ void test_seq_validation_shared_odd_number_of_commands(void)
 
 	bootstrap_envelope_empty(&state);
 	bootstrap_envelope_components(&state, 1);
-	bootstrap_envelope_select_component(&state, 0);
 
 	int retval = suit_validate_shared_sequence(&state, &seq);
 	TEST_ASSERT_EQUAL(SUIT_ERR_DECODING, retval);
@@ -329,7 +323,6 @@ void test_seq_validation_shared_payload_longer_than_expected(void)
 
 	bootstrap_envelope_empty(&state);
 	bootstrap_envelope_components(&state, 1);
-	bootstrap_envelope_select_component(&state, 0);
 
 	int retval = suit_validate_shared_sequence(&state, &seq);
 	TEST_ASSERT_EQUAL(SUIT_ERR_DECODING, retval);
@@ -387,7 +380,6 @@ void test_seq_validation_shared_set_invalid_index(void)
 
 	bootstrap_envelope_empty(&state);
 	bootstrap_envelope_components(&state, 1);
-	bootstrap_envelope_select_component(&state, 0);
 
 	int retval = suit_validate_shared_sequence(&state, &seq);
 	TEST_ASSERT_EQUAL(SUIT_ERR_MANIFEST_VALIDATION, retval);
@@ -407,7 +399,6 @@ void test_seq_validation_command_set_invalid_index(void)
 
 	bootstrap_envelope_empty(&state);
 	bootstrap_envelope_components(&state, 1);
-	bootstrap_envelope_select_component(&state, 0);
 
 	int retval = suit_validate_command_sequence(&state, &seq);
 	TEST_ASSERT_EQUAL(SUIT_ERR_MANIFEST_VALIDATION, retval);
@@ -466,7 +457,6 @@ void test_seq_validation_shared_unknown_command(void)
 
 	bootstrap_envelope_empty(&state);
 	bootstrap_envelope_components(&state, 1);
-	bootstrap_envelope_select_component(&state, 0);
 
 	int retval = suit_validate_shared_sequence(&state, &seq);
 	TEST_ASSERT_EQUAL(SUIT_ERR_DECODING, retval);
