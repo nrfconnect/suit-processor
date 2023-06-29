@@ -17,13 +17,6 @@
  */
 void bootstrap_envelope_empty(struct suit_processor_state *state);
 
-/** @brief Mark component as selected one.
- *
- * @param  state          Manifest processor state to be modified.
- * @param  component_idx  Selected component index.
- */
-void bootstrap_envelope_select_component(struct suit_processor_state *state, size_t component_idx);
-
 /** @brief Reset the manifest internal step counter.
  *
  * @note Use this API to execute arbitrary command sequence.
