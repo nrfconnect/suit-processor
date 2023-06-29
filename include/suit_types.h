@@ -164,6 +164,7 @@ struct suit_seq_exec_state {
 	int retval; ///! Value returned by the nested command sequence execution.
 	const uint8_t *exec_ptr; ///! The pointer within the currently executed command sequence, pointing to the current command in the sequence.
 	size_t current_component_idx; ///! In case of nested command execution - the currently selected component from the component list.
+	bool current_components[SUIT_MAX_NUM_COMPONENTS];
 	bool current_components_backup[SUIT_MAX_NUM_COMPONENTS]; //! List of components, selected before the execution of command sequences.
 };
 
@@ -183,7 +184,6 @@ struct suit_processor_state {
 	enum suit_bool dry_run;
 #endif /* SUIT_PLATFORM_DRY_RUN_SUPPORT */
 	size_t num_components;
-	bool current_components[SUIT_MAX_NUM_COMPONENTS];
 	struct suit_manifest_params components[SUIT_MAX_NUM_COMPONENTS];
 	size_t seq_stack_height;
 	struct suit_seq_exec_state seq_stack[SUIT_MAX_SEQ_DEPTH];

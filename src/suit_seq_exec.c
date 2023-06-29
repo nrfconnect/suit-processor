@@ -26,15 +26,13 @@ static int backup_and_reset_components(struct suit_processor_state *state)
 	SUIT_DBG("%p: Backup and reset component list\r\n",
 		seq_exec_state->cmd_seq_str.value);
 	memcpy(&seq_exec_state->current_components_backup,
-		&state->current_components,
+		&seq_exec_state->current_components,
 		SUIT_MAX_NUM_COMPONENTS * sizeof(bool));
 	if (state->num_components > SUIT_MAX_NUM_COMPONENTS) {
 		return SUIT_ERR_DECODING;
 	}
-	for (int i = 0; i < state->num_components; i++) {
-		state->current_components[i] = false;
-	}
-	return retval;
+
+	return suit_exec_deselect_all_components(state);
 }
 
 static int recover_components(struct suit_processor_state *state)
@@ -47,7 +45,7 @@ static int recover_components(struct suit_processor_state *state)
 	}
 
 	/* Recover the list of selected components from backup. */
-	memcpy(&state->current_components,
+	memcpy(&seq_exec_state->current_components,
 		&seq_exec_state->current_components_backup,
 		SUIT_MAX_NUM_COMPONENTS * sizeof(bool));
 
@@ -55,7 +53,7 @@ static int recover_components(struct suit_processor_state *state)
 		seq_exec_state->cmd_seq_str.value);
 	SUIT_DBG("%p: Selected components: ", seq_exec_state->cmd_seq_str.value);
 	for (size_t i = 0; i < SUIT_MAX_NUM_COMPONENTS; i++) {
-		if (state->current_components[i]) {
+		if (seq_exec_state->current_components[i]) {
 			SUIT_DBG_RAW("%d ", i);
 		}
 	}
@@ -81,12 +79,19 @@ static int init_selected_components(struct suit_processor_state *state)
 
 int suit_exec_select_component_idx(struct suit_processor_state *state, size_t index)
 {
+	struct suit_seq_exec_state *seq_exec_state;
+
 	if (state == NULL) {
 		return SUIT_ERR_CRASH;
 	}
 
+	int retval = suit_seq_exec_state_get(state, &seq_exec_state);
+	if (retval != SUIT_SUCCESS) {
+		return retval;
+	}
+
 	if (state->num_components > index) {
-		state->current_components[index] = true;
+		seq_exec_state->current_components[index] = true;
 		return SUIT_SUCCESS;
 	}
 
@@ -95,12 +100,19 @@ int suit_exec_select_component_idx(struct suit_processor_state *state, size_t in
 
 int suit_exec_select_all_components(struct suit_processor_state *state)
 {
+	struct suit_seq_exec_state *seq_exec_state;
+
 	if (state == NULL) {
 		return SUIT_ERR_CRASH;
 	}
 
+	int retval = suit_seq_exec_state_get(state, &seq_exec_state);
+	if (retval != SUIT_SUCCESS) {
+		return retval;
+	}
+
 	for (size_t index = 0; index < state->num_components; index++) {
-		state->current_components[index] = true;
+		seq_exec_state->current_components[index] = true;
 	}
 
 	return SUIT_SUCCESS;
@@ -108,12 +120,19 @@ int suit_exec_select_all_components(struct suit_processor_state *state)
 
 int suit_exec_deselect_all_components(struct suit_processor_state *state)
 {
+	struct suit_seq_exec_state *seq_exec_state;
+
 	if (state == NULL) {
 		return SUIT_ERR_CRASH;
 	}
 
+	int retval = suit_seq_exec_state_get(state, &seq_exec_state);
+	if (retval != SUIT_SUCCESS) {
+		return retval;
+	}
+
 	for (size_t index = 0; index < state->num_components; index++) {
-		state->current_components[index] = false;
+		seq_exec_state->current_components[index] = false;
 	}
 
 	return SUIT_SUCCESS;
@@ -134,16 +153,19 @@ int suit_seq_exec_schedule(struct suit_processor_state *state, struct zcbor_stri
 		seq_exec_state->current_component_idx = SUIT_MAX_NUM_COMPONENTS;
 		seq_exec_state->n_commands = 0;
 		seq_exec_state->current_command = 0;
+		state->seq_stack_height += 1;
 
-		if (state->seq_stack_height == 0) {
+		if (state->seq_stack_height > 1) {
+			memcpy(&seq_exec_state->current_components,
+				&state->seq_stack[state->seq_stack_height - 2].current_components,
+				SUIT_MAX_NUM_COMPONENTS * sizeof(bool));
+		} else {
 			int ret = init_selected_components(state);
 			if (ret != SUIT_SUCCESS) {
 				SUIT_ERR("Unable to prepare components. Error: %d\r\n", ret);
 				return ret;
 			}
 		}
-
-		state->seq_stack_height += 1;
 
 		return SUIT_ERR_AGAIN;
 	}
@@ -295,6 +317,10 @@ int suit_seq_exec_state_get(struct suit_processor_state *state, struct suit_seq_
 
 int suit_seq_exec_finalize(struct suit_processor_state *state, int retval)
 {
+	if (state == NULL) {
+		return SUIT_ERR_CRASH;
+	}
+
 	if (state->seq_stack_height > 0) {
 		SUIT_DBG("Finalize sequence: %p\r\n", state->seq_stack[state->seq_stack_height - 1].cmd_seq_str.value);
 		if ((state->seq_stack[state->seq_stack_height - 1].soft_failure == suit_bool_true) &&
@@ -303,6 +329,10 @@ int suit_seq_exec_finalize(struct suit_processor_state *state, int retval)
 		}
 
 		state->seq_stack_height -= 1;
+
+		memcpy(&state->seq_stack[state->seq_stack_height - 1].current_components,
+			&state->seq_stack[state->seq_stack_height].current_components,
+			SUIT_MAX_NUM_COMPONENTS * sizeof(bool));
 
 		/* If there is a command sequence to handle the error code - pass it to the caller stack frame. */
 		if (state->seq_stack_height > 0) {
@@ -332,9 +362,9 @@ void suit_seq_exec_component_reset(struct suit_processor_state *state)
 
 	for (int i = 0; i < state->num_components; i++) {
 		if (i == seq_exec_state->current_component_idx) {
-			state->current_components[i] = true;
+			seq_exec_state->current_components[i] = true;
 		} else {
-			state->current_components[i] = false;
+			seq_exec_state->current_components[i] = false;
 		}
 	}
 }
@@ -390,7 +420,7 @@ int suit_seq_exec_component_idx_next(struct suit_processor_state *state, size_t 
 		SUIT_DBG("%p: Unselect component %d\r\n",
 			seq_exec_state->cmd_seq_str.value,
 			seq_exec_state->current_component_idx);
-		state->current_components[seq_exec_state->current_component_idx] = false;
+		seq_exec_state->current_components[seq_exec_state->current_component_idx] = false;
 	}
 
 	for (size_t i = 0; i < SUIT_MAX_NUM_COMPONENTS; i++) {
@@ -408,7 +438,7 @@ int suit_seq_exec_component_idx_next(struct suit_processor_state *state, size_t 
 		SUIT_DBG("%p: Select component %d\r\n",
 			seq_exec_state->cmd_seq_str.value,
 			*component_idx);
-		state->current_components[*component_idx] = true;
+		seq_exec_state->current_components[*component_idx] = true;
 	} else {
 		/* If executed for the last time - restore components from the backup. */
 		retval = recover_components(state);
