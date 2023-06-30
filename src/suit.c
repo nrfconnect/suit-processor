@@ -9,11 +9,11 @@
 #include <suit.h>
 #include <suit_types.h>
 #include <suit_platform.h>
-#include <suit_command_seq.h>
+#include <suit_schedule_seq.h>
 #include <cose_encode.h>
 #include <cose_decode.h>
 #include <suit_directive.h>
-#include <suit_parser.h>
+#include <suit_decoder.h>
 #include <suit_manifest.h>
 
 
@@ -83,15 +83,18 @@ static int suit_processor_process_manifest(struct suit_processor_state *state, e
 
 	if (step_seq != NULL) {
 		/* Execute shared command sequence */
-		struct zcbor_string *shared_seq = suit_manifest_get_command_seq(manifest_state, SUIT_SEQ_SHARED);
-		if (shared_seq != NULL) {
-			ret = suit_run_command_sequence(state, shared_seq);
-			SUIT_DBG("Shared sequence executed. Status: %d\r\n", ret);
+		ret = suit_schedule_execution(state, manifest_state, SUIT_SEQ_SHARED);
+		if (ret == SUIT_ERR_UNAVAILABLE_COMMAND_SEQ) {
+			ret = SUIT_SUCCESS;
+		} else if (ret == SUIT_ERR_AGAIN) {
+			ret = suit_process_scheduled(state);
 		}
 
 		if (ret == SUIT_SUCCESS) {
-			ret = suit_run_command_sequence(state, step_seq);
-			SUIT_DBG("Command sequence %d executed. Status: %d\r\n", step, ret);
+			ret = suit_schedule_execution(state, manifest_state, state->current_seq);
+		}
+		if (ret == SUIT_ERR_AGAIN) {
+			ret = suit_process_scheduled(state);
 		}
 
 #ifndef SUIT_PLATFORM_LEGACY_API_SUPPORT
@@ -158,11 +161,11 @@ int suit_decode_envelope(uint8_t *envelope_str, size_t envelope_len,
 	}
 
 	if (ret == SUIT_SUCCESS) {
-		ret = suit_parser_init(&state->parser_state, &state->manifest_stack[0]);
+		ret = suit_decoder_init(&state->decoder_state, &state->manifest_stack[0]);
 	}
 
 	if (ret == SUIT_SUCCESS) {
-		ret = suit_parser_decode_envelope(&state->parser_state, envelope_str, envelope_len);
+		ret = suit_decoder_decode_envelope(&state->decoder_state, envelope_str, envelope_len);
 	}
 
 	return ret;
@@ -175,14 +178,14 @@ int suit_validate_envelope(struct suit_processor_state *state)
 		return SUIT_ERR_TAMP;
 	}
 
-	int ret = suit_parser_check_manifest_digest(&state->parser_state);
+	int ret = suit_decoder_check_manifest_digest(&state->decoder_state);
 
 	if (ret == SUIT_SUCCESS) {
-		ret = suit_parser_decode_manifest(&state->parser_state);
+		ret = suit_decoder_decode_manifest(&state->decoder_state);
 	}
 
 	if (ret == SUIT_SUCCESS) {
-		ret = suit_parser_authenticate_manifest(&state->parser_state);
+		ret = suit_decoder_authenticate_manifest(&state->decoder_state);
 	}
 
 	return ret;
@@ -195,7 +198,7 @@ int suit_decode_manifest(struct suit_processor_state *state)
 		return SUIT_ERR_TAMP;
 	}
 
-	if (state->parser_state.step != MANIFEST_AUTHENTICATED) {
+	if (state->decoder_state.step != MANIFEST_AUTHENTICATED) {
 		return SUIT_ERR_ORDER;
 	}
 
@@ -238,18 +241,22 @@ static int suit_dry_run_manifest(struct suit_processor_state *state)
 
 int suit_validate_manifest(struct suit_processor_state *state)
 {
+	struct suit_manifest_state *manifest_state;
+
 	if ((state == NULL) || (state->manifest_stack_height != 0)) {
 		return SUIT_ERR_TAMP;
 	}
 
-	int ret = suit_parser_authorize_manifest(&state->parser_state);
+	manifest_state = &state->manifest_stack[0];
+
+	int ret = suit_decoder_authorize_manifest(&state->decoder_state);
 
 	if (ret == SUIT_SUCCESS) {
-		ret = suit_parser_decode_sequences(&state->parser_state);
+		ret = suit_decoder_decode_sequences(&state->decoder_state);
 	}
 
 	if (ret == SUIT_SUCCESS) {
-		ret = suit_parser_create_components(&state->parser_state);
+		ret = suit_decoder_create_components(&state->decoder_state);
 	}
 
 	if (ret == SUIT_SUCCESS) {
@@ -258,32 +265,30 @@ int suit_validate_manifest(struct suit_processor_state *state)
 
 	/* Verify shared command sequence */
 	if (ret == SUIT_SUCCESS) {
-		struct suit_manifest_state *manifest_state = &state->manifest_stack[0];
-		struct zcbor_string *cmd_seq_str = suit_manifest_get_command_seq(manifest_state, SUIT_SEQ_SHARED);
-
-		if (cmd_seq_str != NULL) {
+		ret = suit_schedule_validation(state, manifest_state, SUIT_SEQ_SHARED);
+		if (ret == SUIT_ERR_UNAVAILABLE_COMMAND_SEQ) {
+			ret = SUIT_SUCCESS;
+		} else if (ret == SUIT_ERR_AGAIN) {
 			ret = prepare_params(state);
 			if (ret == SUIT_SUCCESS) {
-				ret = suit_validate_shared_sequence(state, cmd_seq_str);
+				ret = suit_process_scheduled(state);
+				SUIT_DBG("Manifest shared sequence validated (%d)\r\n", ret);
 			}
-
-			SUIT_DBG("Manifest shared sequence validated (%d)\r\n", ret);
 		}
 	}
 
 	/* Verify regular command sequences */
 	if (ret == SUIT_SUCCESS) {
 		for (enum suit_command_sequence seq = SUIT_SEQ_DEP_RESOLUTION; seq < SUIT_SEQ_MAX; seq++) {
-			struct suit_manifest_state *manifest_state = &state->manifest_stack[0];
-			struct zcbor_string *cmd_seq_str = suit_manifest_get_command_seq(manifest_state, seq);
-
-			if (cmd_seq_str != NULL) {
+			ret = suit_schedule_validation(state, manifest_state, seq);
+			if (ret == SUIT_ERR_UNAVAILABLE_COMMAND_SEQ) {
+				ret = SUIT_SUCCESS;
+			} else if (ret == SUIT_ERR_AGAIN) {
 				ret = prepare_params(state);
 				if (ret == SUIT_SUCCESS) {
-					ret = suit_validate_command_sequence(state, cmd_seq_str);
+					ret = suit_process_scheduled(state);
+					SUIT_DBG("Manifest sequence %d validated (%d)\r\n", seq, ret);
 				}
-
-				SUIT_DBG("Manifest sequence %d validated (%d)\r\n", seq, ret);
 			}
 
 			if (ret != SUIT_SUCCESS) {
@@ -299,7 +304,6 @@ int suit_validate_manifest(struct suit_processor_state *state)
 #endif /* SUIT_PLATFORM_DRY_RUN_SUPPORT */
 
 	if ((ret != SUIT_SUCCESS) && (state->manifest_stack_height > 0)) {
-		struct suit_manifest_state *manifest_state = &state->manifest_stack[0];
 		(void)suit_manifest_release(manifest_state);
 		state->manifest_stack_height--;
 	}

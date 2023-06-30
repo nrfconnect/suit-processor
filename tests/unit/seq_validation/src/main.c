@@ -7,7 +7,7 @@
 #include <unity.h>
 #include <stdint.h>
 #include <suit.h>
-#include <suit_command_seq.h>
+#include <suit_schedule_seq.h>
 #include <bootstrap_envelope.h>
 #include <bootstrap_seq.h>
 #include "suit_platform/cmock_suit_platform.h"
@@ -249,6 +249,36 @@ static void seq_validation_nested_test_template(seq_validation_api_t validate, b
 	TEST_ASSERT_EQUAL(state.seq_stack_height, 0);
 }
 
+static int validate_command_sequence(struct suit_processor_state *state, struct zcbor_string *cmd_seq_str)
+{
+	enum suit_command_sequence seq = SUIT_SEQ_PAYLOAD_FETCH;
+	struct suit_manifest_state *manifest_state = &state->manifest_stack[0];
+
+	bootstrap_envelope_sequence(state, seq, cmd_seq_str);
+
+	int ret = suit_schedule_validation(state, manifest_state, seq);
+	if (ret == SUIT_ERR_AGAIN) {
+		ret = suit_process_scheduled(state);
+	}
+
+	return ret;
+}
+
+static int validate_shared_sequence(struct suit_processor_state *state, struct zcbor_string *cmd_seq_str)
+{
+	enum suit_command_sequence seq = SUIT_SEQ_SHARED;
+	struct suit_manifest_state *manifest_state = &state->manifest_stack[0];
+
+	bootstrap_envelope_sequence(state, seq, cmd_seq_str);
+
+	int ret = suit_schedule_validation(state, manifest_state, seq);
+	if (ret == SUIT_ERR_AGAIN) {
+		ret = suit_process_scheduled(state);
+	}
+
+	return ret;
+}
+
 
 /* Generic note about the test sequences:
  *
@@ -277,7 +307,7 @@ void test_seq_validation_shared_bstr_as_command_list(void)
 	bootstrap_envelope_empty(&state);
 	bootstrap_envelope_components(&state, 1);
 
-	int retval = suit_validate_shared_sequence(&state, &seq);
+	int retval = validate_shared_sequence(&state, &seq);
 
 	TEST_ASSERT_EQUAL(ZCBOR_ERR_TO_SUIT_ERR(ZCBOR_ERR_WRONG_TYPE), retval);
 }
@@ -298,7 +328,7 @@ void test_seq_validation_shared_infinite_length_command_list(void)
 	bootstrap_envelope_empty(&state);
 	bootstrap_envelope_components(&state, 1);
 
-	int retval = suit_validate_shared_sequence(&state, &seq);
+	int retval = validate_shared_sequence(&state, &seq);
 
 	TEST_ASSERT_EQUAL(SUIT_ERR_DECODING, retval);
 }
@@ -320,7 +350,7 @@ void test_seq_validation_shared_odd_number_of_commands(void)
 	bootstrap_envelope_empty(&state);
 	bootstrap_envelope_components(&state, 1);
 
-	int retval = suit_validate_shared_sequence(&state, &seq);
+	int retval = validate_shared_sequence(&state, &seq);
 
 	TEST_ASSERT_EQUAL(SUIT_ERR_DECODING, retval);
 }
@@ -342,7 +372,7 @@ void test_seq_validation_shared_payload_longer_than_expected(void)
 	bootstrap_envelope_empty(&state);
 	bootstrap_envelope_components(&state, 1);
 
-	int retval = suit_validate_shared_sequence(&state, &seq);
+	int retval = validate_shared_sequence(&state, &seq);
 
 	TEST_ASSERT_EQUAL(SUIT_ERR_DECODING, retval);
 }
@@ -362,7 +392,7 @@ void test_seq_validation_shared_no_components(void)
 	bootstrap_envelope_empty(&state);
 	bootstrap_envelope_components(&state, 0);
 
-	int retval = suit_validate_shared_sequence(&state, &seq);
+	int retval = validate_shared_sequence(&state, &seq);
 
 	TEST_ASSERT_EQUAL(SUIT_ERR_MANIFEST_VALIDATION, retval);
 }
@@ -382,7 +412,7 @@ void test_seq_validation_command_no_components(void)
 	bootstrap_envelope_empty(&state);
 	bootstrap_envelope_components(&state, 0);
 
-	int retval = suit_validate_command_sequence(&state, &seq);
+	int retval = validate_command_sequence(&state, &seq);
 
 	TEST_ASSERT_EQUAL(SUIT_ERR_MANIFEST_VALIDATION, retval);
 }
@@ -402,7 +432,7 @@ void test_seq_validation_shared_set_invalid_index(void)
 	bootstrap_envelope_empty(&state);
 	bootstrap_envelope_components(&state, 1);
 
-	int retval = suit_validate_shared_sequence(&state, &seq);
+	int retval = validate_shared_sequence(&state, &seq);
 
 	TEST_ASSERT_EQUAL(SUIT_ERR_MANIFEST_VALIDATION, retval);
 }
@@ -422,7 +452,7 @@ void test_seq_validation_command_set_invalid_index(void)
 	bootstrap_envelope_empty(&state);
 	bootstrap_envelope_components(&state, 1);
 
-	int retval = suit_validate_command_sequence(&state, &seq);
+	int retval = validate_command_sequence(&state, &seq);
 
 	TEST_ASSERT_EQUAL(SUIT_ERR_MANIFEST_VALIDATION, retval);
 }
@@ -442,7 +472,7 @@ void test_seq_validation_shared_condition_without_set_index(void)
 	bootstrap_envelope_empty(&state);
 	bootstrap_envelope_components(&state, 2);
 
-	int retval = suit_validate_shared_sequence(&state, &seq);
+	int retval = validate_shared_sequence(&state, &seq);
 
 	TEST_ASSERT_EQUAL(SUIT_ERR_MANIFEST_VALIDATION, retval);
 }
@@ -464,7 +494,7 @@ void test_seq_validation_shared_directive_without_set_index(void)
 	bootstrap_envelope_empty(&state);
 	bootstrap_envelope_components(&state, 2);
 
-	int retval = suit_validate_shared_sequence(&state, &seq);
+	int retval = validate_shared_sequence(&state, &seq);
 
 	TEST_ASSERT_EQUAL(SUIT_ERR_MANIFEST_VALIDATION, retval);
 }
@@ -483,7 +513,7 @@ void test_seq_validation_shared_unknown_command(void)
 	bootstrap_envelope_empty(&state);
 	bootstrap_envelope_components(&state, 1);
 
-	int retval = suit_validate_shared_sequence(&state, &seq);
+	int retval = validate_shared_sequence(&state, &seq);
 
 	TEST_ASSERT_EQUAL(SUIT_ERR_DECODING, retval);
 }
@@ -494,7 +524,7 @@ void test_seq_validation_shared_nested_run_sequence(void)
 	for (size_t depth = 0; depth < (SUIT_MAX_SEQ_DEPTH - 1); depth++) {
 		for (size_t i = 0; i < ZCBOR_ARRAY_SIZE(shared_support_matrix); i++) {
 			seq_validation_nested_test_template(
-				suit_validate_shared_sequence,
+				validate_shared_sequence,
 				bootsrap_seq_hdr_run_sequence,
 				&shared_support_matrix[i],
 				1,
@@ -510,7 +540,7 @@ void test_seq_validation_command_nested_run_sequence(void)
 	for (size_t depth = 0; depth < (SUIT_MAX_SEQ_DEPTH - 1); depth++) {
 		for (size_t i = 0; i < ZCBOR_ARRAY_SIZE(command_support_matrix); i++) {
 			seq_validation_nested_test_template(
-				suit_validate_command_sequence,
+				validate_command_sequence,
 				bootsrap_seq_hdr_run_sequence,
 				&command_support_matrix[i],
 				1,
@@ -527,7 +557,7 @@ void test_seq_validation_shared_nested_run_sequence_multiple_components(void)
 		for (size_t n_components = 2; n_components < SUIT_MAX_NUM_COMPONENTS; n_components++) {
 			for (size_t i = 0; i < ZCBOR_ARRAY_SIZE(shared_support_matrix); i++) {
 				seq_validation_nested_test_template(
-					suit_validate_shared_sequence,
+					validate_shared_sequence,
 					bootsrap_seq_hdr_run_sequence_on_all_components,
 					&shared_support_matrix[i],
 					n_components,
@@ -545,7 +575,7 @@ void test_seq_validation_command_nested_run_sequence_multiple_components(void)
 		for (size_t n_components = 2; n_components < SUIT_MAX_NUM_COMPONENTS; n_components++) {
 			for (size_t i = 0; i < ZCBOR_ARRAY_SIZE(command_support_matrix); i++) {
 				seq_validation_nested_test_template(
-					suit_validate_command_sequence,
+					validate_command_sequence,
 					bootsrap_seq_hdr_run_sequence_on_all_components,
 					&command_support_matrix[i],
 					n_components,
@@ -562,7 +592,7 @@ void test_seq_validation_shared_nested_try_each(void)
 	for (size_t depth = 0; depth < (SUIT_MAX_SEQ_DEPTH - 1); depth++) {
 		for (size_t i = 0; i < ZCBOR_ARRAY_SIZE(shared_support_matrix); i++) {
 			seq_validation_nested_test_template(
-				suit_validate_shared_sequence,
+				validate_shared_sequence,
 				bootsrap_seq_hdr_try_each,
 				&shared_support_matrix[i],
 				1,
@@ -578,7 +608,7 @@ void test_seq_validation_command_nested_try_each(void)
 	for (size_t depth = 0; depth < (SUIT_MAX_SEQ_DEPTH - 1); depth++) {
 		for (size_t i = 0; i < ZCBOR_ARRAY_SIZE(command_support_matrix); i++) {
 			seq_validation_nested_test_template(
-				suit_validate_command_sequence,
+				validate_command_sequence,
 				bootsrap_seq_hdr_try_each,
 				&command_support_matrix[i],
 				1,
@@ -595,7 +625,7 @@ void test_seq_validation_shared_nested_try_each_multiple_components(void)
 		for (size_t n_components = 2; n_components < SUIT_MAX_NUM_COMPONENTS; n_components++) {
 			for (size_t i = 0; i < ZCBOR_ARRAY_SIZE(shared_support_matrix); i++) {
 				seq_validation_nested_test_template(
-					suit_validate_shared_sequence,
+					validate_shared_sequence,
 					bootsrap_seq_hdr_try_each_on_all_components,
 					&shared_support_matrix[i],
 					n_components,
@@ -613,7 +643,7 @@ void test_seq_validation_command_nested_try_each_multiple_components(void)
 		for (size_t n_components = 2; n_components < SUIT_MAX_NUM_COMPONENTS; n_components++) {
 			for (size_t i = 0; i < ZCBOR_ARRAY_SIZE(command_support_matrix); i++) {
 				seq_validation_nested_test_template(
-					suit_validate_command_sequence,
+					validate_command_sequence,
 					bootsrap_seq_hdr_try_each_on_all_components,
 					&command_support_matrix[i],
 					n_components,
