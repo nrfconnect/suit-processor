@@ -171,7 +171,6 @@ int suit_seq_exec_schedule(struct suit_processor_state *state, struct suit_manif
 		seq_exec_state->cmd_processor = cmd_processor;
 		state->seq_stack_height += 1;
 
-
 		if ((state->seq_stack_height > 1) &&
 		    (state->seq_stack[state->seq_stack_height - 2].manifest == manifest)) {
 			memcpy(&seq_exec_state->current_components,
@@ -187,6 +186,8 @@ int suit_seq_exec_schedule(struct suit_processor_state *state, struct suit_manif
 
 		return SUIT_ERR_AGAIN;
 	}
+
+	SUIT_ERR("Unable to schedule sequece execution: execution stack overflow\r\n");
 
 	return SUIT_ERR_OVERFLOW;
 }
