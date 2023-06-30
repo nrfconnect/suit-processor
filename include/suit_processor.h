@@ -190,7 +190,7 @@ struct suit_seq_exec_state {
 };
 
 struct suit_processor_state {
-	struct suit_parser_state parser_state;
+	struct suit_decoder_state decoder_state;
 	enum suit_command_sequence current_seq;
 
 #ifdef SUIT_PLATFORM_DRY_RUN_SUPPORT

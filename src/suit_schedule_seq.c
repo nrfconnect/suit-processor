@@ -140,7 +140,6 @@ static inline int suit_validate_single_common_command(struct suit_processor_stat
 	return suit_validate_single_command(state, command, false);
 }
 
-
 static int suit_run_single_command(struct suit_processor_state *state, suit_command_t *command)
 {
 	struct suit_seq_exec_state *seq_exec_state;
@@ -266,50 +265,49 @@ static int suit_run_single_command(struct suit_processor_state *state, suit_comm
 	return retval;
 }
 
-int suit_validate_shared_sequence(struct suit_processor_state *state, struct zcbor_string *cmd_seq_str)
-{
-	struct suit_manifest_state *manifest = &state->manifest_stack[state->manifest_stack_height - 1];
-	int retval = suit_seq_exec_schedule(state, manifest, cmd_seq_str, suit_bool_false, suit_validate_single_shared_command);
 
-	while (retval == SUIT_ERR_AGAIN) {
-		retval = suit_seq_exec_step(state);
-		if (retval != SUIT_ERR_AGAIN) {
-			/* Drop a single element and pass the returned value through the execution stack.
-			 * If the last element on the stack is dropped, this API will return the error code
-			 * passed as an argument.
-			 * If there are still elements on the stack, this API will return SUIT_ERR_AGAIN.
-			 */
-			retval = suit_seq_exec_finalize(state, retval);
-		}
+int suit_schedule_execution(struct suit_processor_state *state, struct suit_manifest_state *manifest, enum suit_command_sequence seq_name)
+{
+	struct zcbor_string *cmd_seq_str;
+
+	if (manifest == NULL) {
+		return SUIT_ERR_CRASH;
 	}
 
-	return retval;
-}
-
-int suit_validate_command_sequence(struct suit_processor_state *state, struct zcbor_string *cmd_seq_str)
-{
-	struct suit_manifest_state *manifest = &state->manifest_stack[state->manifest_stack_height - 1];
-	int retval = suit_seq_exec_schedule(state, manifest, cmd_seq_str, suit_bool_false, suit_validate_single_common_command);
-
-	while (retval == SUIT_ERR_AGAIN) {
-		retval = suit_seq_exec_step(state);
-		if (retval != SUIT_ERR_AGAIN) {
-			/* Drop a single element and pass the returned value through the execution stack.
-			 * If the last element on the stack is dropped, this API will return the error code
-			 * passed as an argument.
-			 * If there are still elements on the stack, this API will return SUIT_ERR_AGAIN.
-			 */
-			retval = suit_seq_exec_finalize(state, retval);
-		}
+	cmd_seq_str = suit_manifest_get_command_seq(manifest, seq_name);
+	if (cmd_seq_str == NULL) {
+		return SUIT_ERR_UNAVAILABLE_COMMAND_SEQ;
 	}
 
-	return retval;
+	SUIT_DBG("Command sequence (%d) scheduled for execution\r\n", seq_name);
+	return suit_seq_exec_schedule(state, manifest, cmd_seq_str, suit_bool_false, suit_run_single_command);
 }
 
-int suit_run_command_sequence(struct suit_processor_state *state, struct zcbor_string *cmd_seq_str)
+int suit_schedule_validation(struct suit_processor_state *state, struct suit_manifest_state *manifest, enum suit_command_sequence seq_name)
 {
-	struct suit_manifest_state *manifest = &state->manifest_stack[state->manifest_stack_height - 1];
-	int retval = suit_seq_exec_schedule(state, manifest, cmd_seq_str, suit_bool_false, suit_run_single_command);
+	struct zcbor_string *cmd_seq_str;
+
+	if (manifest == NULL) {
+		return SUIT_ERR_ORDER;
+	}
+
+	cmd_seq_str = suit_manifest_get_command_seq(manifest, seq_name);
+	if (cmd_seq_str == NULL) {
+		return SUIT_ERR_UNAVAILABLE_COMMAND_SEQ;
+	}
+
+	if (seq_name == SUIT_SEQ_SHARED) {
+		SUIT_DBG("Shared sequence scheduled for validation\r\n");
+		return suit_seq_exec_schedule(state, manifest, cmd_seq_str, suit_bool_false, suit_validate_single_shared_command);
+	} else {
+		SUIT_DBG("Command sequence (%d) scheduled for validation\r\n", seq_name);
+		return suit_seq_exec_schedule(state, manifest, cmd_seq_str, suit_bool_false, suit_validate_single_common_command);
+	}
+}
+
+int suit_process_scheduled(struct suit_processor_state *state)
+{
+	int retval = SUIT_ERR_AGAIN;
 
 	while (retval == SUIT_ERR_AGAIN) {
 		retval = suit_seq_exec_step(state);

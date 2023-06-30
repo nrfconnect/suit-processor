@@ -13,8 +13,8 @@
 
 /** @brief Schedule the command sequence for execution.
  *
- * @note This function only schedules the execution and returns the SUIT_ERR_AGAIN aftrewards.
- *       The command execution is done from the suit_run_command_sequence(..) calls.
+ * @note This function only schedules the execution and returns the SUIT_ERR_AGAIN afterwards.
+ *       The command execution is done from the suit_seq_exec_step(..) calls.
  *
  * @param[in]  state             The SUIT processor state to modify.
  * @param[in]  manifest          Reference to the manifest structure, for which the sequence will be executed.
