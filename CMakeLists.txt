@@ -100,6 +100,7 @@ target_sources(suit PRIVATE
   src/suit_condition.c
   src/suit_directive.c
   src/suit_legacy.c
+  src/suit.c
   )
 target_include_directories(suit PUBLIC
   include
