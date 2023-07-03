@@ -13,6 +13,7 @@ int suit_condition_vendor_identifier(struct suit_processor_state *state,
 		struct suit_manifest_params *component_params)
 {
 	if (!component_params->vid_set) {
+		SUIT_ERR("Failed to check vendor ID: value not set (handle: %p)\r\n", (void *)component_params->component_handle);
 		return SUIT_ERR_UNAVAILABLE_PARAMETER;
 	}
 
@@ -36,6 +37,7 @@ int suit_condition_class_identifier(struct suit_processor_state *state,
 		struct suit_manifest_params *component_params)
 {
 	if (!component_params->cid_set) {
+		SUIT_ERR("Failed to check class ID: value not set (handle: %p)\r\n", (void *)component_params->component_handle);
 		return SUIT_ERR_UNAVAILABLE_PARAMETER;
 	}
 
@@ -59,6 +61,7 @@ int suit_condition_device_identifier(struct suit_processor_state *state,
 		struct suit_manifest_params *component_params)
 {
 	if (!component_params->did_set) {
+		SUIT_ERR("Failed to check device ID: value not set (handle: %p)\r\n", (void *)component_params->component_handle);
 		return SUIT_ERR_UNAVAILABLE_PARAMETER;
 	}
 
@@ -86,6 +89,7 @@ int suit_condition_image_match(struct suit_processor_state *state,
 
 	if (!component_params->image_digest_set
 		|| !component_params->image_size_set) {
+		SUIT_ERR("Failed to check image digest: size or digest not set (handle: %p)\r\n", (void *)component_params->component_handle);
 		return SUIT_ERR_UNAVAILABLE_PARAMETER;
 	}
 
@@ -121,6 +125,7 @@ int suit_condition_component_slot(struct suit_processor_state *state,
 		struct suit_manifest_params *component_params)
 {
 	if (!component_params->component_slot_set) {
+		SUIT_ERR("Failed to check slot: value not set (handle: %p)\r\n", (void *)component_params->component_handle);
 		return SUIT_ERR_UNAVAILABLE_PARAMETER;
 	}
 

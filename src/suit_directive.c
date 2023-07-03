@@ -34,10 +34,12 @@ int suit_directive_set_current_components(struct suit_processor_state *state, st
 
 	/* Single component. */
 	if (index_arg->_IndexArg_choice == _IndexArg_uint) {
+		SUIT_DBG("Select single component: %d (manifest: %p)\r\n", index_arg->_IndexArg_uint, seq_exec_state->manifest);
 		return suit_exec_select_component_idx(seq_exec_state, index_arg->_IndexArg_uint);
 	/* Multiple components. */
 	} else if (index_arg->_IndexArg_choice == _IndexArg__uint) {
 		for (int i = 0; i < index_arg->_IndexArg__uint_uint_count; i++) {
+			SUIT_DBG("Select component: %d (manifest: %p)\r\n", index_arg->_IndexArg__uint_uint[i], seq_exec_state->manifest);
 			retval = suit_exec_select_component_idx(seq_exec_state, index_arg->_IndexArg__uint_uint[i]);
 			if (retval != SUIT_SUCCESS) {
 				SUIT_ERR("Unable to set current components: failed to select group of components (%d)\r\n", retval);
@@ -47,6 +49,7 @@ int suit_directive_set_current_components(struct suit_processor_state *state, st
 	/* All components (if true). The false value is not allowed by CDDL. */
 	} else if (index_arg->_IndexArg_choice == _IndexArg_bool) {
 		/* Enable all components. */
+		SUIT_DBG("Select all components (manifest: %p)\r\n", seq_exec_state->manifest);
 		return suit_exec_select_all_components(seq_exec_state);
 	}
 
@@ -149,34 +152,42 @@ static int suit_directive_override_parameter(struct SUIT_Parameters_ *param, str
 {
 	switch (param->_SUIT_Parameters_choice) {
 	case _SUIT_Parameters_suit_parameter_vendor_identifier:
+		SUIT_DBG("Override VID (handle: %p)\r\n", dst->component_handle);
 		memcpy(&dst->vid, &param->_SUIT_Parameters_suit_parameter_vendor_identifier, sizeof(dst->vid));
 		dst->vid_set = true;
 		break;
 	case _SUIT_Parameters_suit_parameter_class_identifier:
+		SUIT_DBG("Override CID (handle: %p)\r\n", dst->component_handle);
 		memcpy(&dst->cid, &param->_SUIT_Parameters_suit_parameter_class_identifier, sizeof(dst->cid));
 		dst->cid_set = true;
 		break;
 	case _SUIT_Parameters_suit_parameter_image_digest:
+		SUIT_DBG("Override digest (handle: %p)\r\n", dst->component_handle);
 		memcpy(&dst->image_digest, &param->_SUIT_Parameters_suit_parameter_image_digest, sizeof(dst->image_digest));
 		dst->image_digest_set = true;
 		break;
 	case _SUIT_Parameters_suit_parameter_image_size:
+		SUIT_DBG("Override image size (handle: %p)\r\n", dst->component_handle);
 		dst->image_size = param->_SUIT_Parameters_suit_parameter_image_size;
 		dst->image_size_set = true;
 		break;
 	case _SUIT_Parameters_suit_parameter_component_slot:
+		SUIT_DBG("Override slot (handle: %p)\r\n", dst->component_handle);
 		dst->component_slot = param->_SUIT_Parameters_suit_parameter_component_slot;
 		dst->component_slot_set = true;
 		break;
 	case _SUIT_Parameters_suit_parameter_uri:
+		SUIT_DBG("Override URI (handle: %p)\r\n", dst->component_handle);
 		memcpy(&dst->uri, &param->_SUIT_Parameters_suit_parameter_uri, sizeof(dst->uri));
 		dst->uri_set = true;
 		break;
 	case _SUIT_Parameters_suit_parameter_source_component:
+		SUIT_DBG("Override source component (handle: %p)\r\n", dst->component_handle);
 		dst->source_component = param->_SUIT_Parameters_suit_parameter_source_component;
 		dst->source_component_set = true;
 		break;
 	case _SUIT_Parameters_suit_parameter_device_identifier:
+		SUIT_DBG("Override DID (handle: %p)\r\n", dst->component_handle);
 		memcpy(&dst->did, &param->_SUIT_Parameters_suit_parameter_device_identifier, sizeof(dst->did));
 		dst->did_set = true;
 		break;
