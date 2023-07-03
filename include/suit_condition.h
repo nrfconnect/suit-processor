@@ -34,5 +34,14 @@ int suit_condition_component_slot(struct suit_processor_state *state,
 int suit_condition_abort(struct suit_processor_state *state,
 		struct suit_manifest_params *component_params);
 
+#ifndef SUIT_PLATFORM_LEGACY_API_SUPPORT
+/** Check a manifest component integrity and signature. */
+int suit_condition_dependency_integrity(struct suit_processor_state *state,
+		struct suit_manifest_params *component_params);
+
+/** Check if component is a dependency manifest component. */
+int suit_condition_is_dependency(struct suit_processor_state *state,
+		struct suit_manifest_params *component_params);
+#endif /* !SUIT_PLATFORM_LEGACY_API_SUPPORT */
 
 #endif /* SUIT_CONDITION_H__ */

@@ -74,6 +74,13 @@ static int suit_validate_single_command(struct suit_processor_state *state, suit
 				SUIT_DBG("Found valid condition: %d\r\n", command->condition._SUIT_Condition_choice);
 				retval = SUIT_SUCCESS;
 				break;
+#ifndef SUIT_PLATFORM_LEGACY_API_SUPPORT
+			case _SUIT_Condition___suit_condition_dependency_integrity:
+			case _SUIT_Condition___suit_condition_is_dependency:
+				SUIT_DBG("Found valid dependency condition: %d\r\n", command->condition._SUIT_Condition_choice);
+				retval = SUIT_SUCCESS;
+				break;
+#endif /* !SUIT_PLATFORM_LEGACY_API_SUPPORT */
 			default:
 				SUIT_ERR("Found invalid condition: %d\r\n", command->condition._SUIT_Condition_choice);
 				retval = SUIT_ERR_MANIFEST_VALIDATION;
@@ -95,6 +102,18 @@ static int suit_validate_single_command(struct suit_processor_state *state, suit
 				retval = suit_directive_run_sequence(state,
 					&command->directive._SUIT_Directive___suit_directive_run_sequence_SUIT_Command_Sequence_bstr);
 				break;
+#ifndef SUIT_PLATFORM_LEGACY_API_SUPPORT
+			case _SUIT_Directive___suit_directive_process_dependency:
+			case _SUIT_Directive___suit_directive_set_parameters:
+				if (!is_shared_sequence) {
+					SUIT_DBG("Found valid dependency directive: %d\r\n", command->directive._SUIT_Directive_choice);
+					retval = SUIT_SUCCESS;
+				} else {
+					SUIT_ERR("Found invalid dependency directive: %d\r\n", command->directive._SUIT_Directive_choice);
+					retval = SUIT_ERR_MANIFEST_VALIDATION;
+				}
+				break;
+#endif /* !SUIT_PLATFORM_LEGACY_API_SUPPORT */
 			case _SUIT_Directive___suit_directive_fetch:
 			case _SUIT_Directive___suit_directive_copy:
 			case _SUIT_Directive___suit_directive_invoke:
@@ -212,6 +231,14 @@ static int suit_run_single_command(struct suit_processor_state *state, suit_comm
 			case _SUIT_Condition___suit_condition_abort:
 				retval = suit_condition_abort(state, params);
 				break;
+#ifndef SUIT_PLATFORM_LEGACY_API_SUPPORT
+			case _SUIT_Condition___suit_condition_dependency_integrity:
+				retval = suit_condition_dependency_integrity(state, params);
+				break;
+			case _SUIT_Condition___suit_condition_is_dependency:
+				retval = suit_condition_is_dependency(state, params);
+				break;
+#endif /* !SUIT_PLATFORM_LEGACY_API_SUPPORT */
 			default:
 				retval = SUIT_ERR_DECODING;
 				break;
@@ -231,6 +258,17 @@ static int suit_run_single_command(struct suit_processor_state *state, suit_comm
 			case _SUIT_Directive___suit_directive_try_each:
 				retval = suit_directive_try_each(state, &command->directive._SUIT_Directive___suit_directive_try_each__SUIT_Directive_Try_Each_Argument, false);
 				break;
+#ifndef SUIT_PLATFORM_LEGACY_API_SUPPORT
+			case _SUIT_Directive___suit_directive_process_dependency:
+				retval = suit_directive_process_dependency(state, params);
+				break;
+			case _SUIT_Directive___suit_directive_set_parameters:
+				retval = suit_directive_set_parameters(state,
+					command->directive.___suit_directive_set_parameters_map__SUIT_Parameters,
+					command->directive.___suit_directive_set_parameters_map__SUIT_Parameters_count,
+					params);
+				break;
+#endif /* !SUIT_PLATFORM_LEGACY_API_SUPPORT */
 			case _SUIT_Directive___suit_directive_copy:
 				retval = suit_directive_copy(state, params);
 				break;
