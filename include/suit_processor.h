@@ -206,4 +206,27 @@ struct suit_processor_state {
 	struct suit_seq_exec_state seq_stack[SUIT_MAX_SEQ_DEPTH];
 };
 
+
+/** @brief Poplate the manifest stack by loading a new envelope.
+ *
+ * @details This API will:
+ *           - Reset the decoder state.
+ *           - Parse the input CBOR envelope.
+ *           - Check integrity of the manifest.
+ *           - Parse the CBOR manifest from the input envelope.
+ *           - Verify the signature of the manifest digest.
+ *           - Authorize the manifest class ID as well as the list of components.
+ *           - Decode the command sequences.
+ *           - Authorize the manifest sequence number.
+ *           - Populate component handles using platform API.
+ *           - Commit the manifest stack by increasing the height variable.
+ *
+ * @param[in]  state         The SUIT processor state to be modified.
+ * @param[in]  envelope_str  Reference to the input envelope to be loaded.
+ * @param[in]  envelope_len  Length of the input envelope.
+ *
+ * @returns SUIT_SUCCESS if the operation succeeds, error code otherwise.
+ */
+int suit_processor_load_envelope(struct suit_processor_state *state, uint8_t *envelope_str, size_t envelope_len);
+
 #endif /* SUIT_PROCESSOR_H__ */

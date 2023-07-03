@@ -7,6 +7,9 @@
 #include <suit_condition.h>
 #include <suit_platform.h>
 #include <manifest_decode.h>
+#include <suit_seq_exec.h>
+#include <suit_schedule_seq.h>
+#include <suit_manifest.h>
 
 
 int suit_condition_vendor_identifier(struct suit_processor_state *state,
@@ -145,4 +148,97 @@ int suit_condition_abort(struct suit_processor_state *state,
 	return SUIT_FAIL_CONDITION;
 }
 
+#ifndef SUIT_PLATFORM_LEGACY_API_SUPPORT
+int suit_condition_dependency_integrity(struct suit_processor_state *state,
+		struct suit_manifest_params *component_params)
+{
+	uint8_t *envelope_str;
+	size_t envelope_len;
+	struct suit_seq_exec_state *seq_exec_state;
+	struct suit_manifest_state *manifest_state;
 
+	if (component_params->is_dependency == suit_bool_false) {
+		SUIT_ERR("Unsupported component id (not a dependency manifest)\r\n");
+		return SUIT_FAIL_CONDITION;
+	} else if (component_params->is_dependency != suit_bool_true) {
+		SUIT_ERR("Unsupported component id (invalid dependency flag value)\r\n");
+		return SUIT_ERR_TAMP;
+	}
+
+#ifdef SUIT_PLATFORM_DRY_RUN_SUPPORT
+	if (state->dry_run != suit_bool_false) {
+		return SUIT_SUCCESS;
+	}
+#endif /* SUIT_PLATFORM_DRY_RUN_SUPPORT */
+
+	int retval = suit_seq_exec_state_get(state, &seq_exec_state);
+	if (retval != SUIT_SUCCESS) {
+		return retval;
+	}
+
+	SUIT_DBG("Current manifest dependency seq state: %d\r\n", seq_exec_state->cmd_exec_state);
+	manifest_state = &state->manifest_stack[state->manifest_stack_height - 1];
+
+	if (seq_exec_state->cmd_exec_state == SUIT_SEQ_EXEC_DEFAULT_STATE) {
+		/** Return a pointer to the manifest contents, stored inside the component. */
+		retval = suit_plat_retrive_manifest(component_params->component_handle, &envelope_str, &envelope_len);
+
+		if (retval == SUIT_SUCCESS) {
+			retval = suit_processor_load_envelope(state, envelope_str, envelope_len);
+		}
+
+		if (retval == SUIT_SUCCESS) {
+			SUIT_DBG("Validate sequences\r\n");
+			seq_exec_state->cmd_exec_state = SUIT_SEQ_SHARED;
+			seq_exec_state->retval = SUIT_SUCCESS;
+			retval = SUIT_ERR_AGAIN;
+		} else {
+			seq_exec_state->retval = retval;
+		}
+
+	} else if ((seq_exec_state->cmd_exec_state >= SUIT_SEQ_SHARED) && (seq_exec_state->cmd_exec_state < SUIT_SEQ_MAX)) {
+		if (seq_exec_state->retval != SUIT_SUCCESS) {
+			retval = seq_exec_state->retval;
+		} else {
+			seq_exec_state->retval = suit_schedule_validation(state, manifest_state, seq_exec_state->cmd_exec_state);
+			if (seq_exec_state->retval == SUIT_ERR_UNAVAILABLE_COMMAND_SEQ) {
+				seq_exec_state->retval = SUIT_SUCCESS;
+			}
+			retval = SUIT_ERR_AGAIN;
+		}
+
+		seq_exec_state->cmd_exec_state++;
+
+	} else {
+		if (seq_exec_state->retval == SUIT_SUCCESS) {
+			component_params->integrity_checked = true;
+		}
+
+		retval = seq_exec_state->retval;
+	}
+
+	if ((retval != SUIT_ERR_AGAIN) && (seq_exec_state->cmd_exec_state != SUIT_SEQ_EXEC_DEFAULT_STATE)) {
+		SUIT_DBG("Release manifest\r\n");
+		/* Remove the checked manifest from the stack */
+		int ret = suit_manifest_release(manifest_state);
+		state->manifest_stack_height--;
+		if (retval == SUIT_SUCCESS) {
+			seq_exec_state->retval = ret;
+		}
+	}
+
+	return retval;
+}
+
+int suit_condition_is_dependency(struct suit_processor_state *state,
+		struct suit_manifest_params *component_params)
+{
+	if (component_params->is_dependency == suit_bool_true) {
+		return SUIT_SUCCESS;
+	} else if (component_params->is_dependency == suit_bool_false) {
+		return SUIT_FAIL_CONDITION;
+	}
+
+	return SUIT_ERR_TAMP;
+}
+#endif /* !SUIT_PLATFORM_LEGACY_API_SUPPORT */

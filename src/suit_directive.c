@@ -9,6 +9,7 @@
 #include <suit_directive.h>
 #include <suit_manifest.h>
 #include <suit_seq_exec.h>
+#include <suit_schedule_seq.h>
 
 
 int suit_directive_set_current_components(struct suit_processor_state *state, struct IndexArg_ *index_arg)
@@ -265,6 +266,177 @@ int suit_directive_override_parameters(struct suit_processor_state *state,
 	return retval;
 }
 
+#ifndef SUIT_PLATFORM_LEGACY_API_SUPPORT
+static int suit_directive_set_parameter(struct SUIT_Parameters_ *param, struct suit_manifest_params *dst)
+{
+	bool parameter_set = false;
+
+	switch (param->_SUIT_Parameters_choice) {
+	case _SUIT_Parameters_suit_parameter_vendor_identifier:
+		parameter_set = dst->vid_set;
+		break;
+	case _SUIT_Parameters_suit_parameter_class_identifier:
+		parameter_set = dst->cid_set;
+		break;
+	case _SUIT_Parameters_suit_parameter_image_digest:
+		parameter_set = dst->image_digest_set;
+		break;
+	case _SUIT_Parameters_suit_parameter_image_size:
+		parameter_set = dst->image_size_set;
+		break;
+	case _SUIT_Parameters_suit_parameter_component_slot:
+		parameter_set = dst->component_slot_set;
+		break;
+	case _SUIT_Parameters_suit_parameter_uri:
+		parameter_set = dst->uri_set;
+		break;
+	case _SUIT_Parameters_suit_parameter_source_component:
+		parameter_set = dst->source_component_set;
+		break;
+	case _SUIT_Parameters_suit_parameter_device_identifier:
+		parameter_set = dst->did_set;
+		break;
+	default:
+		return SUIT_ERR_UNSUPPORTED_PARAMETER;
+	}
+
+	if (parameter_set == false) {
+		return suit_directive_override_parameter(param, dst);
+	}
+
+	return SUIT_SUCCESS;
+}
+
+int suit_directive_set_parameters(struct suit_processor_state *state,
+		struct __suit_directive_set_parameters_map__SUIT_Parameters *params,
+		uint_fast32_t param_count,
+		struct suit_manifest_params *component_params)
+{
+	int retval = SUIT_ERR_DECODING;
+
+	if ((state == NULL) || (params == NULL) || (component_params == NULL)) {
+		SUIT_ERR("Unable to execute set-parameters directive: invalid argument\r\n");
+		return SUIT_ERR_DECODING;
+	}
+
+	for (int j = 0; j < param_count; j++) {
+		struct SUIT_Parameters_ *param = &params[j].___suit_directive_set_parameters_map__SUIT_Parameters;
+		SUIT_DBG("Set parameter %d (handle: %p)\r\n", param->_SUIT_Parameters_choice, component_params->component_handle);
+
+		retval = suit_directive_set_parameter(param, component_params);
+		if (retval == SUIT_ERR_AGAIN) {
+			/* Setting parameters must not use execution stack to take place. */
+			retval = SUIT_ERR_TAMP;
+		}
+
+		if (retval != SUIT_SUCCESS) {
+			break;
+		}
+	}
+
+	return retval;
+}
+
+int suit_directive_process_dependency(struct suit_processor_state *state, struct suit_manifest_params *component_params)
+{
+	uint8_t *envelope_str;
+	size_t envelope_len;
+	struct suit_seq_exec_state *seq_exec_state;
+	struct suit_manifest_state *manifest_state;
+
+	if (component_params->is_dependency == suit_bool_false) {
+		SUIT_ERR("Unsupported component id (not a dependency manifest)\r\n");
+		return SUIT_ERR_UNSUPPORTED_COMPONENT_ID;
+	} else if (component_params->is_dependency != suit_bool_true) {
+		SUIT_ERR("Unsupported component id (invalid dependency flag value)\r\n");
+		return SUIT_ERR_TAMP;
+	} else if (component_params->integrity_checked != true) {
+#ifdef SUIT_PLATFORM_DRY_RUN_SUPPORT
+		if (state->dry_run != suit_bool_false) {
+			return SUIT_SUCCESS;
+		}
+#endif /* SUIT_PLATFORM_DRY_RUN_SUPPORT */
+
+		SUIT_ERR("Manifest component integrity not checked\r\n");
+		return SUIT_ERR_ORDER;
+	}
+
+	int retval = suit_seq_exec_state_get(state, &seq_exec_state);
+	if (retval != SUIT_SUCCESS) {
+		return retval;
+	}
+
+	SUIT_DBG("Current manifest dependency seq state: %d\r\n", seq_exec_state->cmd_exec_state);
+	manifest_state = &state->manifest_stack[state->manifest_stack_height - 1];
+
+	if (seq_exec_state->retval != SUIT_SUCCESS) {
+		retval = seq_exec_state->retval;
+	} else if (seq_exec_state->cmd_exec_state == SUIT_SEQ_EXEC_DEFAULT_STATE) {
+		/** Return a pointer to the manifest contents, stored inside the component. */
+		retval = suit_plat_retrive_manifest(component_params->component_handle, &envelope_str, &envelope_len);
+
+		if (retval == SUIT_SUCCESS) {
+			retval = suit_processor_load_envelope(state, envelope_str, envelope_len);
+		}
+
+		if (retval == SUIT_SUCCESS) {
+			SUIT_DBG("Validate sequences\r\n");
+			seq_exec_state->cmd_exec_state = SUIT_SEQ_SHARED;
+			seq_exec_state->retval = SUIT_SUCCESS;
+			retval = SUIT_ERR_AGAIN;
+		} else {
+			seq_exec_state->retval = retval;
+		}
+
+	} else if ((seq_exec_state->cmd_exec_state >= SUIT_SEQ_SHARED) && (seq_exec_state->cmd_exec_state < SUIT_SEQ_MAX)) {
+		seq_exec_state->retval = suit_schedule_validation(state, manifest_state, seq_exec_state->cmd_exec_state);
+		if (seq_exec_state->retval == SUIT_ERR_UNAVAILABLE_COMMAND_SEQ) {
+			seq_exec_state->retval = SUIT_SUCCESS;
+		}
+
+		retval = SUIT_ERR_AGAIN;
+		seq_exec_state->cmd_exec_state++;
+
+	} else if (seq_exec_state->cmd_exec_state == SUIT_SEQ_MAX) {
+		seq_exec_state->retval = suit_schedule_execution(state, manifest_state, SUIT_SEQ_SHARED);
+		SUIT_DBG("Shared sequence scheduled\r\n");
+
+		retval = SUIT_ERR_AGAIN;
+		seq_exec_state->cmd_exec_state++;
+
+	} else if (seq_exec_state->cmd_exec_state == SUIT_SEQ_MAX + 1) {
+		seq_exec_state->retval = suit_schedule_execution(state, manifest_state, state->current_seq);
+		if (seq_exec_state->retval == SUIT_ERR_UNAVAILABLE_COMMAND_SEQ) {
+			SUIT_DBG("Command sequence unavailable\r\n");
+			seq_exec_state->retval = SUIT_SUCCESS;
+		} else {
+			SUIT_DBG("Command sequence scheduled\r\n");
+		}
+
+		retval = SUIT_ERR_AGAIN;
+		seq_exec_state->cmd_exec_state++;
+
+	} else if (seq_exec_state->cmd_exec_state == SUIT_SEQ_MAX + 2) {
+		if (seq_exec_state->retval != SUIT_ERR_AGAIN) {
+			SUIT_DBG("Command sequence %d executed. Status: %d\r\n", state->current_seq, seq_exec_state->retval);
+		}
+
+		retval = seq_exec_state->retval;
+	}
+
+	if ((retval != SUIT_ERR_AGAIN) && (seq_exec_state->cmd_exec_state != SUIT_SEQ_EXEC_DEFAULT_STATE)) {
+		SUIT_DBG("Release manifest\r\n");
+		/* Remove the checked manifest from the stack */
+		int ret = suit_manifest_release(manifest_state);
+		state->manifest_stack_height--;
+		if (retval == SUIT_SUCCESS) {
+			seq_exec_state->retval = ret;
+		}
+	}
+
+	return retval;
+}
+#endif /* !SUIT_PLATFORM_LEGACY_API_SUPPORT */
 
 int suit_directive_fetch(struct suit_processor_state *state, struct suit_manifest_params *component_params)
 {
