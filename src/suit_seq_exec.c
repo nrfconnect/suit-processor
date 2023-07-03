@@ -21,8 +21,6 @@ static int backup_and_reset_components(struct suit_seq_exec_state *seq_exec_stat
 		return SUIT_ERR_ORDER;
 	}
 
-	SUIT_DBG("%p: Backup and reset component list\r\n",
-		seq_exec_state->cmd_seq_str.value);
 	memcpy(&seq_exec_state->current_components_backup,
 		&seq_exec_state->current_components,
 		SUIT_MAX_NUM_COMPONENTS * sizeof(bool));
@@ -44,8 +42,6 @@ static int recover_components(struct suit_seq_exec_state *seq_exec_state)
 		&seq_exec_state->current_components_backup,
 		SUIT_MAX_NUM_COMPONENTS * sizeof(bool));
 
-	SUIT_DBG("%p: Recover component list\r\n",
-		seq_exec_state->cmd_seq_str.value);
 	SUIT_DBG("%p: Selected components: ", seq_exec_state->cmd_seq_str.value);
 	for (size_t i = 0; i < SUIT_MAX_NUM_COMPONENTS; i++) {
 		if (seq_exec_state->current_components[i]) {
@@ -85,10 +81,6 @@ static void suit_seq_exec_component_reset(struct suit_seq_exec_state *seq_exec_s
 	if (seq_exec_state == NULL) {
 		return;
 	}
-
-	SUIT_DBG("%p: Reset component list and select %d\r\n",
-		seq_exec_state->cmd_seq_str.value,
-		seq_exec_state->current_component_idx);
 
 	for (int i = 0; i < seq_exec_state->manifest->components_count; i++) {
 		if (i == seq_exec_state->current_component_idx) {
@@ -291,9 +283,6 @@ int suit_seq_exec_step(struct suit_processor_state *state)
 			return SUIT_ERR_DECODING;
 		}
 
-		SUIT_DBG("%d: Execute single command processor (ptr: %p)\r\n",
-			seq_exec_state->current_command,
-			seq_exec_state->exec_ptr);
 		int retval = seq_exec_state->cmd_processor(state, &command);
 		if (retval == SUIT_SUCCESS) {
 			seq_exec_state->exec_ptr = d_state->payload;
@@ -400,9 +389,6 @@ int suit_seq_exec_component_idx_next(struct suit_seq_exec_state *seq_exec_state,
 	} else {
 		suit_seq_exec_component_reset(seq_exec_state);
 
-		SUIT_DBG("%p: Unselect component %d\r\n",
-			seq_exec_state->cmd_seq_str.value,
-			seq_exec_state->current_component_idx);
 		seq_exec_state->current_components[seq_exec_state->current_component_idx] = false;
 	}
 

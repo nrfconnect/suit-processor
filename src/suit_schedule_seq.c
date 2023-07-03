@@ -165,7 +165,7 @@ static int suit_run_single_command(struct suit_processor_state *state, suit_comm
 			break;
 		}
 
-		SUIT_DBG("Single command executed (status: %d)\r\n", retval);
+		SUIT_ERR("Single command (%d) executed (status: %d)\r\n", command->directive._SUIT_Directive_choice, retval);
 
 		return retval;
 	}
@@ -260,7 +260,7 @@ static int suit_run_single_command(struct suit_processor_state *state, suit_comm
 		}
 	}
 
-	SUIT_DBG("Single command executed (status: %d)\r\n", retval);
+	SUIT_ERR("Single command (%d) executed (status: %d)\r\n", command->directive._SUIT_Directive_choice, retval);
 
 	return retval;
 }
