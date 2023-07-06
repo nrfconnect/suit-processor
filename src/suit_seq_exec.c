@@ -330,13 +330,13 @@ int suit_seq_exec_finalize(struct suit_processor_state *state, int retval)
 
 		state->seq_stack_height -= 1;
 
-		memcpy(&state->seq_stack[state->seq_stack_height - 1].current_components,
-			&state->seq_stack[state->seq_stack_height].current_components,
-			SUIT_MAX_NUM_COMPONENTS * sizeof(bool));
-
 		/* If there is a command sequence to handle the error code - pass it to the caller stack frame. */
 		if (state->seq_stack_height > 0) {
 			state->seq_stack[state->seq_stack_height - 1].retval = retval;
+
+			memcpy(&state->seq_stack[state->seq_stack_height - 1].current_components,
+				&state->seq_stack[state->seq_stack_height].current_components,
+				SUIT_MAX_NUM_COMPONENTS * sizeof(bool));
 
 			return SUIT_ERR_AGAIN;
 		}
