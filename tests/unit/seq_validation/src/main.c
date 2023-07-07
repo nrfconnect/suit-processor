@@ -6,7 +6,7 @@
 
 #include <unity.h>
 #include <stdint.h>
-#include <suit.h>
+#include <suit_manifest.h>
 #include <suit_schedule_seq.h>
 #include <bootstrap_envelope.h>
 #include <bootstrap_seq.h>
@@ -286,9 +286,17 @@ static int validate_shared_sequence(struct suit_processor_state *state, struct z
  * For all cases that use sequences without this command - use special value of component number (1) to skip this check.
  */
 
-void test_seq_validation_prepare_reset_state(void)
+void setUp(void)
 {
-	suit_reset_state(&state);
+	memset(&state, 0, sizeof(state));
+
+	int err = suit_manifest_params_init(state.components, ZCBOR_ARRAY_SIZE(state.components));
+	if (err == SUIT_ERR_ORDER) {
+		/* Allow to call init even if the manifest module is already initialized. */
+		err = SUIT_SUCCESS;
+	}
+
+	TEST_ASSERT_EQUAL_MESSAGE(SUIT_SUCCESS, err, "Unable to initialize SUIT processor");
 }
 
 
@@ -656,13 +664,15 @@ void test_seq_validation_command_nested_try_each_multiple_components(void)
 }
 
 
-/* It is required to be added to each test. That is because unity is using
- * different main signature (returns int) and zephyr expects main which does
- * not return value.
+/* It is required to be added to each test. That is because unity's
+ * main may return nonzero, while zephyr's main currently must
+ * return 0 in all cases (other values are reserved).
  */
 extern int unity_main(void);
 
-void main(void)
+int main(void)
 {
 	(void)unity_main();
+
+	return 0;
 }

@@ -12,106 +12,61 @@
 
 #define ASSIGNED_COMPONENT_HANDLE 0x1E054000
 
-static uint8_t manifest_buf[] = {
-	0xD8, 0x6B, 0xA4, 0x02, 0x58, 0x73, 0x82, 0x58,
-	0x24, 0x82, 0x2F, 0x58, 0x20, 0xAD, 0xD7, 0xDD,
-	0x3E, 0x37, 0x4D, 0x38, 0xF3, 0x8A, 0x7E, 0x4F,
-	0xF2, 0x60, 0x12, 0x42, 0xAA, 0x2D, 0xF2, 0x46,
-	0x3B, 0x8F, 0xEC, 0xA3, 0x60, 0xEA, 0x37, 0x5F,
-	0x50, 0xEA, 0xB3, 0xBF, 0x7D, 0x58, 0x4A, 0xD2,
-	0x84, 0x43, 0xA1, 0x01, 0x26, 0xA0, 0xF6, 0x58,
-	0x40, 0x0A, 0xC7, 0x7A, 0x88, 0xA2, 0x9E, 0x45,
-	0x5D, 0x6A, 0x9D, 0x6E, 0xC9, 0x04, 0x77, 0x24,
-	0x8B, 0x8E, 0x5E, 0x2F, 0xFE, 0x9C, 0xF0, 0x22,
-	0x4F, 0xB7, 0x7A, 0x3C, 0x36, 0xA0, 0xF0, 0x79,
-	0xBB, 0x2B, 0x78, 0xB2, 0xEA, 0xEB, 0x20, 0x00,
-	0x2B, 0x19, 0x3B, 0xE9, 0xA1, 0x3E, 0xFB, 0x83,
-	0xF6, 0xA8, 0x7A, 0x03, 0x74, 0x2D, 0xF1, 0x08,
-	0x4E, 0x5B, 0xD0, 0x4D, 0x45, 0xF9, 0x97, 0x39,
-	0xC0, 0x03, 0x58, 0xAE, 0xA7, 0x01, 0x01, 0x02,
-	0x01, 0x03, 0x58, 0x64, 0xA2, 0x02, 0x81, 0x82,
-	0x41, 0x58, 0x44, 0x1E, 0x05, 0x40, 0x00, 0x04,
-	0x58, 0x56, 0x86, 0x14, 0xA4, 0x01, 0x50, 0x76,
-	0x17, 0xDA, 0xA5, 0x71, 0xFD, 0x5A, 0x85, 0x8F,
-	0x94, 0xE2, 0x8D, 0x73, 0x5C, 0xE9, 0xF4, 0x02,
-	0x50, 0xD6, 0x22, 0xBA, 0xFD, 0x43, 0x37, 0x51,
-	0x85, 0x90, 0xBC, 0x63, 0x68, 0xCD, 0xA7, 0xFB,
-	0xCA, 0x03, 0x58, 0x24, 0x82, 0x2F, 0x58, 0x20,
-	0x5F, 0xC3, 0x54, 0xBF, 0x8E, 0x8C, 0x50, 0xFB,
-	0x4F, 0xBC, 0x2C, 0xFA, 0xEB, 0x04, 0x53, 0x41,
-	0xC9, 0x80, 0x6D, 0xEA, 0xBD, 0xCB, 0x41, 0x54,
-	0xFB, 0x79, 0xCC, 0xA4, 0xF0, 0xC9, 0x8C, 0x12,
-	0x0E, 0x19, 0x01, 0x00, 0x01, 0x0F, 0x02, 0x0F,
-	0x07, 0x43, 0x82, 0x03, 0x0F, 0x09, 0x43, 0x82,
-	0x17, 0x02, 0x11, 0x51, 0x86, 0x14, 0xA1, 0x15,
-	0x68, 0x23, 0x61, 0x70, 0x70, 0x2E, 0x62, 0x69,
-	0x6E, 0x15, 0x02, 0x03, 0x0F, 0x17, 0x82, 0x2F,
-	0x58, 0x20, 0x4E, 0xDC, 0x09, 0xC1, 0x4D, 0x19,
-	0xF1, 0x56, 0x0C, 0x9A, 0xCE, 0x62, 0x64, 0xA5,
-	0x3D, 0x86, 0xF8, 0x90, 0x73, 0x70, 0x49, 0x94,
-	0x63, 0x48, 0x77, 0x00, 0x7F, 0x1E, 0x04, 0x27,
-	0x2E, 0xE5, 0x17, 0x58, 0x8A, 0xA1, 0x82, 0x41,
-	0x58, 0x44, 0x1E, 0x05, 0x40, 0x00, 0xA6, 0x01,
-	0x78, 0x18, 0x4E, 0x6F, 0x72, 0x64, 0x69, 0x63,
-	0x20, 0x53, 0x65, 0x6D, 0x69, 0x63, 0x6F, 0x6E,
-	0x64, 0x75, 0x63, 0x74, 0x6F, 0x72, 0x20, 0x41,
-	0x53, 0x41, 0x02, 0x6E, 0x6E, 0x52, 0x46, 0x35,
-	0x34, 0x32, 0x30, 0x5F, 0x63, 0x70, 0x75, 0x61,
-	0x70, 0x70, 0x03, 0x6E, 0x6E, 0x6F, 0x72, 0x64,
-	0x69, 0x63, 0x73, 0x65, 0x6D, 0x69, 0x2E, 0x63,
-	0x6F, 0x6D, 0x04, 0x78, 0x1D, 0x54, 0x68, 0x65,
-	0x20, 0x6E, 0x52, 0x46, 0x35, 0x33, 0x38, 0x34,
-	0x30, 0x20, 0x61, 0x70, 0x70, 0x6C, 0x69, 0x63,
-	0x61, 0x74, 0x69, 0x6F, 0x6E, 0x20, 0x63, 0x6F,
-	0x72, 0x65, 0x05, 0x78, 0x1A, 0x53, 0x61, 0x6D,
-	0x70, 0x6C, 0x65, 0x20, 0x61, 0x70, 0x70, 0x6C,
-	0x69, 0x63, 0x61, 0x74, 0x69, 0x6F, 0x6E, 0x20,
-	0x63, 0x6F, 0x72, 0x65, 0x20, 0x46, 0x57, 0x06,
-	0x66, 0x76, 0x31, 0x2E, 0x30, 0x2E, 0x30, 0x68,
-	0x23, 0x61, 0x70, 0x70, 0x2E, 0x62, 0x69, 0x6E,
-	0x59, 0x01, 0x00, 0xC7, 0x9C, 0xAB, 0x9D, 0xE8,
-	0x33, 0x7F, 0x30, 0x14, 0xEB, 0xAC, 0x02, 0xAF,
-	0x26, 0x01, 0x5E, 0x80, 0x6D, 0x88, 0xA1, 0xDB,
-	0x11, 0xA7, 0x31, 0xDF, 0xA6, 0xEC, 0xCB, 0x9B,
-	0x48, 0x0D, 0xC8, 0x34, 0x40, 0x6D, 0x30, 0x86,
-	0x7D, 0xE8, 0x1B, 0xEC, 0x3C, 0xF5, 0x40, 0xD0,
-	0x48, 0x18, 0x82, 0x11, 0x9D, 0x7C, 0x3F, 0x6C,
-	0xE5, 0x8F, 0xF1, 0xD3, 0x5D, 0xE1, 0x51, 0xF7,
-	0x6A, 0x0F, 0xAF, 0x0B, 0xBD, 0x4C, 0x5F, 0xA5,
-	0x34, 0x1A, 0x66, 0xDB, 0x22, 0xEC, 0x63, 0xED,
-	0x4B, 0xAB, 0xC7, 0xC8, 0xF7, 0x59, 0xD8, 0xD6,
-	0x9E, 0xEC, 0x71, 0x1B, 0x24, 0x20, 0xB9, 0xAE,
-	0xE1, 0x3B, 0xFC, 0xAE, 0xB8, 0x77, 0xAC, 0xA4,
-	0x57, 0x34, 0x97, 0x84, 0x4F, 0x58, 0xD5, 0x68,
-	0x08, 0x6F, 0xE3, 0x9C, 0x7E, 0x1B, 0xD7, 0x38,
-	0x22, 0x98, 0x48, 0xF8, 0x7A, 0x67, 0xB2, 0xD9,
-	0xAC, 0xC5, 0x34, 0xC1, 0x27, 0x82, 0x8E, 0x42,
-	0x79, 0x84, 0x21, 0x37, 0x4C, 0x41, 0x4A, 0x0F,
-	0xE2, 0x7F, 0xA0, 0x6A, 0x19, 0x13, 0x3D, 0x52,
-	0x22, 0x7F, 0xD6, 0x2F, 0x71, 0x12, 0x76, 0xAB,
-	0x25, 0x9C, 0xFC, 0x67, 0x08, 0x03, 0x7C, 0xDB,
-	0x18, 0xE6, 0x45, 0xF8, 0x99, 0xC2, 0x9E, 0x2C,
-	0xE3, 0x9B, 0x25, 0xA9, 0x7B, 0x09, 0xFF, 0x00,
-	0x57, 0x26, 0x08, 0x0A, 0x11, 0x42, 0xCF, 0x82,
-	0xA2, 0x6B, 0x2A, 0x99, 0xF9, 0x71, 0x9D, 0x14,
-	0x19, 0x5C, 0x5C, 0x78, 0x31, 0x60, 0x42, 0x4A,
-	0x18, 0x1F, 0xEC, 0x78, 0x6A, 0x9A, 0x7C, 0x4F,
-	0xCF, 0xE8, 0x5A, 0x29, 0x65, 0xCD, 0x01, 0x3B,
-	0x6D, 0x53, 0xBB, 0xC6, 0xDB, 0xDA, 0xD5, 0x8F,
-	0xF7, 0xF4, 0xD9, 0xB9, 0x0A, 0x03, 0x4B, 0xFF,
-	0x33, 0xAB, 0x3B, 0xC5, 0xAF, 0xD0, 0xB8, 0x2C,
-	0x0F, 0x6A, 0xA9, 0x11, 0xB0, 0xE8, 0x57, 0x8C,
-	0x92, 0x53, 0x81
-};
-static const size_t manifest_len = sizeof(manifest_buf);
-static struct suit_processor_state state;
 
+extern uint8_t manifest_buf[];
+extern const size_t manifest_len;
+
+
+static struct zcbor_string signature = {
+	.value = &(manifest_buf[57]),
+	.len = 64,
+};
+static uint8_t signature1_cbor[] = {
+	0x84, // Sig_structure1: array(4)
+		0x6A, // context: text(10)
+			'S', 'i', 'g', 'n', 'a', 't', 'u', 'r', 'e', '1',
+		0x43, // body_protected: bytes(3)
+			0xA1, // header_map: map(1)
+				0x01, // alg_id: 1
+					0x26, // ES256: -7
+		0x40, // external_aad: bytes(0)
+		0x58, // payload: bytes(36)
+			0x24, 0x82, 0x2F, 0x58, 0x20,
+			0xAD, 0xD7, 0xDD, 0x3E, 0x37, 0x4D, 0x38, 0xF3,
+			0x8A, 0x7E, 0x4F, 0xF2, 0x60, 0x12, 0x42, 0xAA,
+			0x2D, 0xF2, 0x46, 0x3B, 0x8F, 0xEC, 0xA3, 0x60,
+			0xEA, 0x37, 0x5F, 0x50, 0xEA, 0xB3, 0xBF, 0x7D,
+};
+static struct zcbor_string exp_signature = {
+	.value = signature1_cbor,
+	.len = sizeof(signature1_cbor),
+};
+
+static uint8_t manifest_digest[] = {
+	0xAD, 0xD7, 0xDD, 0x3E, 0x37, 0x4D, 0x38, 0xF3,
+	0x8A, 0x7E, 0x4F, 0xF2, 0x60, 0x12, 0x42, 0xAA,
+	0x2D, 0xF2, 0x46, 0x3B, 0x8F, 0xEC, 0xA3, 0x60,
+	0xEA, 0x37, 0x5F, 0x50, 0xEA, 0xB3, 0xBF, 0x7D,
+};
+static struct zcbor_string exp_manifest_digest = {
+	.value = manifest_digest,
+	.len = sizeof(manifest_digest),
+};
+static struct zcbor_string exp_manifest_payload = {
+	.value = &(manifest_buf[122]),
+	.len = 176,
+};
+
+static struct zcbor_string exp_manifest_id = {
+	.value = NULL,
+	.len = 0,
+};
 
 static uint8_t vid_uuid[] = {
 	0x76, 0x17, 0xDA, 0xA5, 0x71, 0xFD, 0x5A, 0x85, /* RFC4122_UUID(nordicsemi.com) */
 	0x8F, 0x94, 0xE2, 0x8D, 0x73, 0x5C, 0xE9, 0xF4,
 };
-struct zcbor_string exp_vid_uuid = {
+static struct zcbor_string exp_vid_uuid = {
 	.value = vid_uuid,
 	.len = sizeof(vid_uuid),
 };
@@ -120,7 +75,7 @@ static uint8_t cid_uuid[] = {
 	0xD6, 0x22, 0xBA, 0xFD, 0x43, 0x37, 0x51, 0x85,
 	0x90, 0xBC, 0x63, 0x68, 0xCD, 0xA7, 0xFB, 0xCA,
 };
-struct zcbor_string exp_cid_uuid = {
+static struct zcbor_string exp_cid_uuid = {
 	.value = cid_uuid,
 	.len = sizeof(cid_uuid),
 };
@@ -131,11 +86,11 @@ static uint8_t image_digest[] = {
 	0xC9, 0x80, 0x6D, 0xEA, 0xBD, 0xCB, 0x41, 0x54,
 	0xFB, 0x79, 0xCC, 0xA4, 0xF0, 0xC9, 0x8C, 0x12,
 };
-struct zcbor_string exp_image_digest = {
+static struct zcbor_string exp_image_digest = {
 	.value = image_digest,
 	.len = sizeof(image_digest),
 };
-struct zcbor_string exp_image_payload = {
+static struct zcbor_string exp_image_payload = {
 	.value = &manifest_buf[451],
 	.len = 256,
 };
@@ -146,223 +101,229 @@ static uint8_t text_digest[] = {
 	0xF8, 0x90, 0x73, 0x70, 0x49, 0x94, 0x63, 0x48,
 	0x77, 0x00, 0x7F, 0x1E, 0x04, 0x27, 0x2E, 0xE5,
 };
-struct zcbor_string exp_text_digest = {
+static struct zcbor_string exp_text_digest = {
 	.value = text_digest,
 	.len = sizeof(text_digest),
 };
-struct zcbor_string exp_text_payload = {
+static struct zcbor_string exp_text_payload = {
 	.value = &(manifest_buf[301]),
 	.len = 138,
 };
 
-static struct zcbor_string exp_manifest_id = {
-	.value = NULL,
-	.len = 0,
-};
-static uint8_t manifest_digest[] = {
-	0xAD, 0xD7, 0xDD, 0x3E, 0x37, 0x4D, 0x38, 0xF3,
-	0x8A, 0x7E, 0x4F, 0xF2, 0x60, 0x12, 0x42, 0xAA,
-	0x2D, 0xF2, 0x46, 0x3B, 0x8F, 0xEC, 0xA3, 0x60,
-	0xEA, 0x37, 0x5F, 0x50, 0xEA, 0xB3, 0xBF, 0x7D,
-};
-struct zcbor_string exp_manifest_digest = {
-	.value = manifest_digest,
-	.len = sizeof(manifest_digest),
-};
-struct zcbor_string exp_manifest_payload = {
-	.value = &(manifest_buf[122]),
-	.len = 176,
-};
 
 
-void test_suit_reset_state(void)
+static void assert_envelope_authorization(void)
 {
-	suit_reset_state(&state);
-}
-
-void test_suit_decode_envelope(void)
-{
-	/* The envelope decoding is fully handled by the ZCBOR code and does not call platform APIs */
-	int err = suit_decode_envelope(manifest_buf, manifest_len, &state);
-	TEST_ASSERT_EQUAL(SUIT_SUCCESS, err);
-}
-
-void test_suit_validate_envelope(void)
-{
-	int err = 0;
-
-	struct zcbor_string exp_signature = {
-		.value = &(manifest_buf[57]),
-		.len = 64,
-	};
-	uint8_t signature1_cbor[] = {
-		0x84, // Sig_structure1: array(4)
-			0x6A, // context: text(10)
-				'S', 'i', 'g', 'n', 'a', 't', 'u', 'r', 'e', '1',
-			0x43, // body_protected: bytes(3)
-				0xA1, // header_map: map(1)
-					0x01, // alg_id: 1
-						0x26, // ES256: -7
-			0x40, // external_aad: bytes(0)
-			0x58, // payload: bytes(36)
-				0x24, 0x82, 0x2F, 0x58, 0x20,
-				0xAD, 0xD7, 0xDD, 0x3E, 0x37, 0x4D, 0x38, 0xF3,
-				0x8A, 0x7E, 0x4F, 0xF2, 0x60, 0x12, 0x42, 0xAA,
-				0x2D, 0xF2, 0x46, 0x3B, 0x8F, 0xEC, 0xA3, 0x60,
-				0xEA, 0x37, 0x5F, 0x50, 0xEA, 0xB3, 0xBF, 0x7D,
-	};
-	struct zcbor_string exp_data = {
-		.value = signature1_cbor,
-		.len = sizeof(signature1_cbor),
-	};
-	TEST_ASSERT_EQUAL_MEMORY_MESSAGE(&(signature1_cbor[23]), manifest_digest, sizeof(manifest_digest), "Please fix the test: manifest digest inside signature structure is incorrect");
-
-	/* The envelope validation should:
-	 * - Verify the manifest signature
+	/* The envelope authorization should:
 	 * - Verify that the manifest digest matches with the manifest contents
+	 * - Verify the manifest signature
+	 * - Verify the severable fields digest
 	 */
-	__cmock_suit_plat_authenticate_manifest_ExpectComplexArgsAndReturn(&exp_manifest_id, suit_cose_es256, NULL, &exp_signature, &exp_data, SUIT_SUCCESS);
 	__cmock_suit_plat_check_digest_ExpectComplexArgsAndReturn(suit_cose_sha256, &exp_manifest_digest, &exp_manifest_payload, SUIT_SUCCESS);
-
-	err = suit_validate_envelope(&state);
-	TEST_ASSERT_EQUAL(SUIT_SUCCESS, err);
+	__cmock_suit_plat_authenticate_manifest_ExpectComplexArgsAndReturn(&exp_manifest_id, suit_cose_es256, NULL, &signature, &exp_signature, SUIT_SUCCESS);
+	__cmock_suit_plat_check_digest_ExpectComplexArgsAndReturn(suit_cose_sha256, &exp_text_digest, &exp_text_payload, SUIT_SUCCESS);
 }
 
-void test_suit_decode_manifest(void)
+static void assert_component_creation(void)
 {
-	/* The manifest decoding is fully handled by the ZCBOR code and does not call platform APIs */
-	int err = suit_decode_manifest(&state);
-	TEST_ASSERT_EQUAL(SUIT_SUCCESS, err);
-}
-
-void test_suit_validate_manifest(void)
-{
-	suit_component_t component_handle = ASSIGNED_COMPONENT_HANDLE;
-	uint8_t app_id[] = {
+	static suit_component_t component_handle = ASSIGNED_COMPONENT_HANDLE;
+	static uint8_t app_id[] = {
 		0x82, // SUIT_Component_Identifier: array(2)
 			0x41, // bstr: bytes(1)
 				'X',
 			0x44, // bstr: bytes(4)
 				0x1E, 0x05, 0x40, 0x00,
 	};
-	struct zcbor_string exp_component_id = {
+	static struct zcbor_string exp_component_id = {
 		.value = app_id,
 		.len = sizeof(app_id),
 	};
 
-	/* The manifest validation should:
-	 * - Verify the manifest sequence number
-	 * - Obtain a platform-specific component handle for each component described by the manifest
-	 * - Verify digest of the severed text field
-	 * - Execute dry-run commands for each command sequence present in the manifest
-	 *   - Check FETCH (integrated) command from the install step
-	 *   - Check INVOKE command from the invoke step
-	 */
 	__cmock_suit_plat_suit_plat_authorize_component_id_ExpectComplexArgsAndReturn(&exp_manifest_id, &exp_component_id, SUIT_SUCCESS);
 	__cmock_suit_plat_create_component_handle_ExpectComplexArgsAndReturn(&exp_component_id, NULL, SUIT_SUCCESS);
 	__cmock_suit_plat_create_component_handle_IgnoreArg_handle();
 	__cmock_suit_plat_create_component_handle_ReturnThruPtr_handle(&component_handle);
 
-	__cmock_suit_plat_check_digest_ExpectComplexArgsAndReturn(suit_cose_sha256, &exp_text_digest, &exp_text_payload, SUIT_SUCCESS);
+	/* clean-up */
+	__cmock_suit_plat_release_component_handle_ExpectAndReturn(component_handle, SUIT_SUCCESS);
+}
+
 #ifdef SUIT_PLATFORM_DRY_RUN_SUPPORT
+static void assert_dry_run_execution(void)
+{
 	__cmock_suit_plat_check_fetch_integrated_ExpectComplexArgsAndReturn(ASSIGNED_COMPONENT_HANDLE, &exp_image_payload, SUIT_SUCCESS);
 	__cmock_suit_plat_check_invoke_ExpectAndReturn(ASSIGNED_COMPONENT_HANDLE, NULL, SUIT_SUCCESS);
+}
 #endif /* SUIT_PLATFORM_DRY_RUN_SUPPORT */
 
-	int err = suit_validate_manifest(&state);
+
+void setUp(void)
+{
+	int ret = suit_processor_init();
+	TEST_ASSERT_EQUAL_MESSAGE(SUIT_SUCCESS, ret, "Unable to initialize SUIT processor");
+
+	TEST_ASSERT_EQUAL_MEMORY_MESSAGE(&(signature1_cbor[23]), manifest_digest, sizeof(manifest_digest), "Please fix the test: manifest digest inside signature structure is incorrect");
+}
+
+void test_suit_decode_envelope(void)
+{
+	struct zcbor_string manifest_component_id;
+	struct zcbor_string digest;
+	unsigned int seq_num;
+
+	__cmock_suit_plat_check_digest_ExpectComplexArgsAndReturn(suit_cose_sha256, &exp_manifest_digest, &exp_manifest_payload, SUIT_SUCCESS);
+
+	/* The envelope decoding is fully handled by the ZCBOR code and does not call platform APIs */
+	int ret = suit_processor_get_manifest_metadata(
+		manifest_buf, manifest_len, false,
+		&manifest_component_id, &digest, &seq_num);
+
+	TEST_ASSERT_EQUAL_MESSAGE(SUIT_SUCCESS, ret, "Unable to decode input manifest");
+	TEST_ASSERT_EQUAL_MESSAGE(0, seq_num, "Unexpected sequence number value");
+	assert_zcbor_string(&exp_manifest_id, &manifest_component_id);
+	assert_zcbor_string(&exp_manifest_digest, &digest);
+}
+
+void test_suit_process_seq_invald(void)
+{
+	/* SUIT_SEQ_INVALID is not a valid step - it serves as a boundary value of the enum. */
+	int err = suit_process_sequence(manifest_buf, manifest_len, SUIT_SEQ_INVALID);
+	TEST_ASSERT_EQUAL(SUIT_ERR_UNAVAILABLE_COMMAND_SEQ, err);
+}
+
+void test_suit_process_seq_parse(void)
+{
+	assert_envelope_authorization();
+	assert_component_creation();
+#ifdef SUIT_PLATFORM_DRY_RUN_SUPPORT
+	assert_dry_run_execution();
+#endif /* SUIT_PLATFORM_DRY_RUN_SUPPORT */
+
+	__cmock_suit_plat_authorize_sequence_num_ExpectAndReturn(SUIT_SEQ_PARSE, &exp_manifest_id, 1, SUIT_SUCCESS);
+
+	int err = suit_process_sequence(manifest_buf, manifest_len, SUIT_SEQ_PARSE);
 	TEST_ASSERT_EQUAL(SUIT_SUCCESS, err);
 }
 
-void test_suit_process_step_no_step(void)
+void test_suit_process_seq_payload_fetch(void)
 {
-	/* SUIT_NO_STEP is not a valid step - it serves as a boundary value of the enum. */
-	int err = suit_process_manifest(&state, SUIT_NO_STEP);
-	TEST_ASSERT_EQUAL(SUIT_ERR_UNAVAILABLE_COMMAND_SEQ, err);
-}
-
-void test_suit_process_step_payload_fetch(void)
-{
-	/* SUIT_PAYLOAD_FETCH command sequence is not present in the sample manifest.
+	/* SUIT_SEQ_PAYLOAD_FETCH command sequence is not present in the sample manifest.
 	 * The internal payload is fetched to the executable slot by executing FETCH command
 	 * from the INSTALL step.
 	 */
-	int err = suit_process_manifest(&state, SUIT_PAYLOAD_FETCH);
+	assert_envelope_authorization();
+	assert_component_creation();
+#ifdef SUIT_PLATFORM_DRY_RUN_SUPPORT
+	assert_dry_run_execution();
+#endif /* SUIT_PLATFORM_DRY_RUN_SUPPORT */
+
+	__cmock_suit_plat_authorize_sequence_num_ExpectAndReturn(SUIT_SEQ_PAYLOAD_FETCH, &exp_manifest_id, 1, SUIT_SUCCESS);
+
+	int err = suit_process_sequence(manifest_buf, manifest_len, SUIT_SEQ_PAYLOAD_FETCH);
 	TEST_ASSERT_EQUAL(SUIT_ERR_UNAVAILABLE_COMMAND_SEQ, err);
 }
 
-void test_suit_process_step_install(void)
+void test_suit_process_seq_install(void)
 {
-	/* SUIT_INSTALL should:
+	/* SUIT_SEQ_INSTALL should:
 	 * - execute the shared sequence (VID and CID checks),
 	 * - copy the integrated payload into executable slot through FETCH (integrated) command
 	 * - verify the image digest in the executable slot
 	 */
-	__cmock_suit_plat_authorize_sequence_num_ExpectAndReturn(SUIT_INSTALL, &exp_manifest_id, 1, SUIT_SUCCESS);
+	assert_envelope_authorization();
+	assert_component_creation();
+#ifdef SUIT_PLATFORM_DRY_RUN_SUPPORT
+	assert_dry_run_execution();
+#endif /* SUIT_PLATFORM_DRY_RUN_SUPPORT */
+
+	__cmock_suit_plat_authorize_sequence_num_ExpectAndReturn(SUIT_SEQ_INSTALL, &exp_manifest_id, 1, SUIT_SUCCESS);
 	__cmock_suit_plat_check_vid_ExpectComplexArgsAndReturn(ASSIGNED_COMPONENT_HANDLE, &exp_vid_uuid, SUIT_SUCCESS);
 	__cmock_suit_plat_check_cid_ExpectComplexArgsAndReturn(ASSIGNED_COMPONENT_HANDLE, &exp_cid_uuid, SUIT_SUCCESS);
 	__cmock_suit_plat_fetch_integrated_ExpectComplexArgsAndReturn(ASSIGNED_COMPONENT_HANDLE, &exp_image_payload, SUIT_SUCCESS);
 	__cmock_suit_plat_check_image_match_ExpectComplexArgsAndReturn(ASSIGNED_COMPONENT_HANDLE, suit_cose_sha256, &exp_image_digest, 256, SUIT_SUCCESS);
-	__cmock_suit_plat_sequence_completed_ExpectAndReturn(SUIT_INSTALL, &exp_manifest_id, manifest_buf, manifest_len, SUIT_SUCCESS);
+	__cmock_suit_plat_sequence_completed_ExpectAndReturn(SUIT_SEQ_INSTALL, &exp_manifest_id, manifest_buf, manifest_len, SUIT_SUCCESS);
 
-	int err = suit_process_manifest(&state, SUIT_INSTALL);
+	int err = suit_process_sequence(manifest_buf, manifest_len, SUIT_SEQ_INSTALL);
 	TEST_ASSERT_EQUAL(SUIT_SUCCESS, err);
 }
 
-void test_suit_process_step_validate(void)
+void test_suit_process_seq_validate(void)
 {
-	/* SUIT_VALIDATE should:
+	/* SUIT_SEQ_VALIDATE should:
 	 * - execute the shared sequence (VID and CID checks)
 	 * - verify the image digest in the executable slot.
 	 */
-	__cmock_suit_plat_authorize_sequence_num_ExpectAndReturn(SUIT_VALIDATE, &exp_manifest_id, 1, SUIT_SUCCESS);
+	assert_envelope_authorization();
+	assert_component_creation();
+#ifdef SUIT_PLATFORM_DRY_RUN_SUPPORT
+	assert_dry_run_execution();
+#endif /* SUIT_PLATFORM_DRY_RUN_SUPPORT */
+
+	__cmock_suit_plat_authorize_sequence_num_ExpectAndReturn(SUIT_SEQ_VALIDATE, &exp_manifest_id, 1, SUIT_SUCCESS);
 	__cmock_suit_plat_check_vid_ExpectComplexArgsAndReturn(ASSIGNED_COMPONENT_HANDLE, &exp_vid_uuid, SUIT_SUCCESS);
 	__cmock_suit_plat_check_cid_ExpectComplexArgsAndReturn(ASSIGNED_COMPONENT_HANDLE, &exp_cid_uuid, SUIT_SUCCESS);
 	__cmock_suit_plat_check_image_match_ExpectComplexArgsAndReturn(ASSIGNED_COMPONENT_HANDLE, suit_cose_sha256, &exp_image_digest, 256, SUIT_SUCCESS);
-	__cmock_suit_plat_sequence_completed_ExpectAndReturn(SUIT_VALIDATE, &exp_manifest_id, manifest_buf, manifest_len, SUIT_SUCCESS);
+	__cmock_suit_plat_sequence_completed_ExpectAndReturn(SUIT_SEQ_VALIDATE, &exp_manifest_id, manifest_buf, manifest_len, SUIT_SUCCESS);
 
-	int err = suit_process_manifest(&state, SUIT_VALIDATE);
+	int err = suit_process_sequence(manifest_buf, manifest_len, SUIT_SEQ_VALIDATE);
 	TEST_ASSERT_EQUAL(SUIT_SUCCESS, err);
 }
 
-void test_suit_process_step_load(void)
+void test_suit_process_seq_load(void)
 {
-	/* SUIT_LOAD command sequence is not present in the sample manifest. */
-	int err = suit_process_manifest(&state, SUIT_LOAD);
+	/* SUIT_SEQ_LOAD command sequence is not present in the sample manifest. */
+	assert_envelope_authorization();
+	assert_component_creation();
+#ifdef SUIT_PLATFORM_DRY_RUN_SUPPORT
+	assert_dry_run_execution();
+#endif /* SUIT_PLATFORM_DRY_RUN_SUPPORT */
+
+	__cmock_suit_plat_authorize_sequence_num_ExpectAndReturn(SUIT_SEQ_LOAD, &exp_manifest_id, 1, SUIT_SUCCESS);
+
+	int err = suit_process_sequence(manifest_buf, manifest_len, SUIT_SEQ_LOAD);
 	TEST_ASSERT_EQUAL(SUIT_ERR_UNAVAILABLE_COMMAND_SEQ, err);
 }
 
-void test_suit_process_step_invoke(void)
+void test_suit_process_seq_invoke(void)
 {
-	/* SUIT_INVOKE should:
+	/* SUIT_SEQ_INVOKE should:
 	 * - execute the shared sequence (VID and CID checks)
 	 * - execute the INVOKE command.
 	 * The image validity is expected to be checked in the SUIT_VALIDATE step.
 	 */
-	__cmock_suit_plat_authorize_sequence_num_ExpectAndReturn(SUIT_INVOKE, &exp_manifest_id, 1, SUIT_SUCCESS);
+	assert_envelope_authorization();
+	assert_component_creation();
+#ifdef SUIT_PLATFORM_DRY_RUN_SUPPORT
+	assert_dry_run_execution();
+#endif /* SUIT_PLATFORM_DRY_RUN_SUPPORT */
+
+	__cmock_suit_plat_authorize_sequence_num_ExpectAndReturn(SUIT_SEQ_INVOKE, &exp_manifest_id, 1, SUIT_SUCCESS);
 	__cmock_suit_plat_check_vid_ExpectComplexArgsAndReturn(ASSIGNED_COMPONENT_HANDLE, &exp_vid_uuid, SUIT_SUCCESS);
 	__cmock_suit_plat_check_cid_ExpectComplexArgsAndReturn(ASSIGNED_COMPONENT_HANDLE, &exp_cid_uuid, SUIT_SUCCESS);
 	__cmock_suit_plat_invoke_ExpectAndReturn(ASSIGNED_COMPONENT_HANDLE, NULL, SUIT_SUCCESS);
-	__cmock_suit_plat_sequence_completed_ExpectAndReturn(SUIT_INVOKE, &exp_manifest_id, manifest_buf, manifest_len, SUIT_SUCCESS);
+	__cmock_suit_plat_sequence_completed_ExpectAndReturn(SUIT_SEQ_INVOKE, &exp_manifest_id, manifest_buf, manifest_len, SUIT_SUCCESS);
 
-	int err = suit_process_manifest(&state, SUIT_INVOKE);
+	int err = suit_process_sequence(manifest_buf, manifest_len, SUIT_SEQ_INVOKE);
 	TEST_ASSERT_EQUAL(SUIT_SUCCESS, err);
 }
 
-void test_suit_process_step_last_step(void)
+void test_suit_process_seq_max(void)
 {
-	/* SUIT_LAST_STEP is not a valid step - it serves as a boundary value of the enum. */
-	int err = suit_process_manifest(&state, SUIT_LAST_STEP);
+	/* SUIT_SEQ_MAX is not a valid step - it serves as a boundary value of the enum. */
+	int err = suit_process_sequence(manifest_buf, manifest_len, SUIT_SEQ_MAX);
 	TEST_ASSERT_EQUAL(SUIT_ERR_UNAVAILABLE_COMMAND_SEQ, err);
 }
 
 
-/* It is required to be added to each test. That is because unity is using
- * different main signature (returns int) and zephyr expects main which does
- * not return value.
+/* It is required to be added to each test. That is because unity's
+ * main may return nonzero, while zephyr's main currently must
+ * return 0 in all cases (other values are reserved).
  */
 extern int unity_main(void);
 
-void main(void)
+int main(void)
 {
 	(void)unity_main();
+
+	return 0;
 }
