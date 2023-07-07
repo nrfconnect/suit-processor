@@ -6,18 +6,14 @@
 
 #include <unity.h>
 #include <stdint.h>
-#include <suit.h>
+#include <suit_manifest.h>
+#include <suit_schedule_seq.h>
 #include <bootstrap_envelope.h>
 #include <bootstrap_seq.h>
 #include "suit_platform/cmock_suit_platform.h"
 
 
 static struct suit_processor_state state;
-
-static struct zcbor_string exp_manifest_id = {
-	.value = NULL,
-	.len = 0,
-};
 
 static uint8_t try_each_cmd[] = {
 	0x84, /* list (4 elements - 2 commands) */
@@ -135,9 +131,37 @@ static uint8_t try_each_component_overrides_cmd[] = {
 };
 
 
-void test_try_each_prepare_reset_state(void)
+static int process_sequence(struct suit_processor_state *state, struct zcbor_string *seq)
 {
-	suit_reset_state(&state);
+	/* The bootstrap_envelope_* APIs create a single manifest on the stack. */
+	struct suit_manifest_state *manifest = &state->manifest_stack[0];
+
+	/* This test verifies generic execution, so any non-shared sequence could be used. */
+	bootstrap_envelope_sequence(state, SUIT_SEQ_INVOKE, seq);
+
+	int ret = suit_schedule_execution(state, manifest, SUIT_SEQ_INVOKE);
+	if (ret == SUIT_ERR_AGAIN) {
+		ret = suit_process_scheduled(state);
+	}
+
+	return ret;
+}
+
+
+void setUp(void)
+{
+	memset(&state, 0, sizeof(state));
+
+	int err = suit_manifest_params_init(state.components, ZCBOR_ARRAY_SIZE(state.components));
+	if (err == SUIT_ERR_ORDER) {
+		/* Allow to call init even if the manifest module is already initialized. */
+		err = SUIT_SUCCESS;
+	}
+
+	TEST_ASSERT_EQUAL_MESSAGE(SUIT_SUCCESS, err, "Unable to initialize SUIT processor");
+
+	bootstrap_envelope_empty(&state);
+	bootstrap_envelope_components(&state, 1);
 }
 
 void test_try_each_first_succeeds(void)
@@ -147,20 +171,14 @@ void test_try_each_first_succeeds(void)
 	uint8_t cmd_buf[256];
 	size_t content_size = 0;
 
-	bootstrap_envelope_empty(&state);
-	bootstrap_envelope_components(&state, 1);
-
 	memcpy(cmd_buf, try_each_cmd, sizeof(try_each_cmd));
 	content_size = sizeof(try_each_cmd);
 
 	invoke_seq.value = cmd_buf;
 	invoke_seq.len = content_size;
-	bootstrap_envelope_sequence(&state, SUIT_INVOKE, &invoke_seq);
 
-	__cmock_suit_plat_authorize_sequence_num_ExpectAndReturn(SUIT_INVOKE, &exp_manifest_id, 0, SUIT_SUCCESS);
 	__cmock_suit_plat_check_vid_IgnoreAndReturn(SUIT_SUCCESS);
-	__cmock_suit_plat_sequence_completed_ExpectAndReturn(SUIT_INVOKE, &exp_manifest_id, NULL, 0, SUIT_SUCCESS);
-	retval = suit_process_manifest(&state, SUIT_INVOKE);
+	retval = process_sequence(&state, &invoke_seq);
 	TEST_ASSERT_EQUAL(SUIT_SUCCESS, retval);
 	TEST_ASSERT_EQUAL(state.seq_stack_height, 0);
 }
@@ -172,21 +190,15 @@ void test_try_each_second_succeeds(void)
 	uint8_t cmd_buf[256];
 	size_t content_size = 0;
 
-	bootstrap_envelope_empty(&state);
-	bootstrap_envelope_components(&state, 1);
-
 	memcpy(cmd_buf, try_each_cmd, sizeof(try_each_cmd));
 	content_size = sizeof(try_each_cmd);
 
 	invoke_seq.value = cmd_buf;
 	invoke_seq.len = content_size;
-	bootstrap_envelope_sequence(&state, SUIT_INVOKE, &invoke_seq);
 
-	__cmock_suit_plat_authorize_sequence_num_ExpectAndReturn(SUIT_INVOKE, &exp_manifest_id, 0, SUIT_SUCCESS);
 	__cmock_suit_plat_check_vid_IgnoreAndReturn(SUIT_FAIL_CONDITION);
 	__cmock_suit_plat_invoke_ExpectAndReturn(ASSIGNED_COMPONENT_HANDLE, NULL, SUIT_SUCCESS);
-	__cmock_suit_plat_sequence_completed_ExpectAndReturn(SUIT_INVOKE, &exp_manifest_id, NULL, 0, SUIT_SUCCESS);
-	retval = suit_process_manifest(&state, SUIT_INVOKE);
+	retval = process_sequence(&state, &invoke_seq);
 	TEST_ASSERT_EQUAL(SUIT_SUCCESS, retval);
 	TEST_ASSERT_EQUAL(state.seq_stack_height, 0);
 }
@@ -198,21 +210,15 @@ void test_try_each_default_succeeds(void)
 	uint8_t cmd_buf[256];
 	size_t content_size = 0;
 
-	bootstrap_envelope_empty(&state);
-	bootstrap_envelope_components(&state, 1);
-
 	memcpy(cmd_buf, try_each_cmd, sizeof(try_each_cmd));
 	content_size = sizeof(try_each_cmd);
 
 	invoke_seq.value = cmd_buf;
 	invoke_seq.len = content_size;
-	bootstrap_envelope_sequence(&state, SUIT_INVOKE, &invoke_seq);
 
-	__cmock_suit_plat_authorize_sequence_num_ExpectAndReturn(SUIT_INVOKE, &exp_manifest_id, 0, SUIT_SUCCESS);
 	__cmock_suit_plat_check_vid_IgnoreAndReturn(SUIT_FAIL_CONDITION);
 	__cmock_suit_plat_invoke_ExpectAndReturn(ASSIGNED_COMPONENT_HANDLE, NULL, SUIT_FAIL_CONDITION);
-	__cmock_suit_plat_sequence_completed_ExpectAndReturn(SUIT_INVOKE, &exp_manifest_id, NULL, 0, SUIT_SUCCESS);
-	retval = suit_process_manifest(&state, SUIT_INVOKE);
+	retval = process_sequence(&state, &invoke_seq);
 	TEST_ASSERT_EQUAL(SUIT_SUCCESS, retval);
 	TEST_ASSERT_EQUAL(state.seq_stack_height, 0);
 }
@@ -224,20 +230,15 @@ void test_try_each_second_aborts(void)
 	uint8_t cmd_buf[256];
 	size_t content_size = 0;
 
-	bootstrap_envelope_empty(&state);
-	bootstrap_envelope_components(&state, 1);
-
 	memcpy(cmd_buf, try_each_cmd, sizeof(try_each_cmd));
 	content_size = sizeof(try_each_cmd);
 
 	invoke_seq.value = cmd_buf;
 	invoke_seq.len = content_size;
-	bootstrap_envelope_sequence(&state, SUIT_INVOKE, &invoke_seq);
 
-	__cmock_suit_plat_authorize_sequence_num_ExpectAndReturn(SUIT_INVOKE, &exp_manifest_id, 0, SUIT_SUCCESS);
 	__cmock_suit_plat_check_vid_IgnoreAndReturn(SUIT_FAIL_CONDITION);
 	__cmock_suit_plat_invoke_ExpectAndReturn(ASSIGNED_COMPONENT_HANDLE, NULL, SUIT_ERR_UNSUPPORTED_COMPONENT_ID);
-	retval = suit_process_manifest(&state, SUIT_INVOKE);
+	retval = process_sequence(&state, &invoke_seq);
 	TEST_ASSERT_EQUAL(SUIT_ERR_UNSUPPORTED_COMPONENT_ID, retval);
 	TEST_ASSERT_EQUAL(state.seq_stack_height, 0);
 }
@@ -249,19 +250,13 @@ void test_try_each_out_of_cases(void)
 	uint8_t cmd_buf[256];
 	size_t content_size = 0;
 
-	bootstrap_envelope_empty(&state);
-	bootstrap_envelope_components(&state, 1);
-
 	memcpy(cmd_buf, try_each_silent_abort_cmd, sizeof(try_each_silent_abort_cmd));
 	content_size = sizeof(try_each_silent_abort_cmd);
 
 	invoke_seq.value = cmd_buf;
 	invoke_seq.len = content_size;
-	bootstrap_envelope_sequence(&state, SUIT_INVOKE, &invoke_seq);
 
-	__cmock_suit_plat_authorize_sequence_num_ExpectAndReturn(SUIT_INVOKE, &exp_manifest_id, 0, SUIT_SUCCESS);
-
-	retval = suit_process_manifest(&state, SUIT_INVOKE);
+	retval = process_sequence(&state, &invoke_seq);
 	TEST_ASSERT_EQUAL(SUIT_ERR_CRASH, retval);
 	TEST_ASSERT_EQUAL(state.seq_stack_height, 0);
 }
@@ -273,19 +268,13 @@ void test_try_each_nested_invalid(void)
 	uint8_t cmd_buf[256];
 	size_t content_size = 0;
 
-	bootstrap_envelope_empty(&state);
-	bootstrap_envelope_components(&state, 1);
-
 	memcpy(cmd_buf, try_each_nested_invalid_cmd, sizeof(try_each_nested_invalid_cmd));
 	content_size = sizeof(try_each_nested_invalid_cmd);
 
 	invoke_seq.value = cmd_buf;
 	invoke_seq.len = content_size;
-	bootstrap_envelope_sequence(&state, SUIT_INVOKE, &invoke_seq);
 
-	__cmock_suit_plat_authorize_sequence_num_ExpectAndReturn(SUIT_INVOKE, &exp_manifest_id, 0, SUIT_SUCCESS);
-
-	retval = suit_process_manifest(&state, SUIT_INVOKE);
+	retval = process_sequence(&state, &invoke_seq);
 	TEST_ASSERT_EQUAL(SUIT_ERR_DECODING, retval);
 	TEST_ASSERT_EQUAL(state.seq_stack_height, 0);
 }
@@ -297,7 +286,6 @@ void test_try_each_component_overrides(void)
 	uint8_t cmd_buf[256];
 	size_t content_size = 0;
 
-	bootstrap_envelope_empty(&state);
 	bootstrap_envelope_components(&state, 4);
 
 	memcpy(cmd_buf, try_each_component_overrides_cmd, sizeof(try_each_component_overrides_cmd));
@@ -305,9 +293,6 @@ void test_try_each_component_overrides(void)
 
 	invoke_seq.value = cmd_buf;
 	invoke_seq.len = content_size;
-	bootstrap_envelope_sequence(&state, SUIT_INVOKE, &invoke_seq);
-
-	__cmock_suit_plat_authorize_sequence_num_ExpectAndReturn(SUIT_INVOKE, &exp_manifest_id, 0, SUIT_SUCCESS);
 
 	/* 1st case - fail */
 	__cmock_suit_plat_invoke_ExpectAndReturn(ASSIGNED_COMPONENT_HANDLE, NULL, SUIT_FAIL_CONDITION);
@@ -345,19 +330,21 @@ void test_try_each_component_overrides(void)
 	__cmock_suit_plat_check_vid_ExpectAndReturn(ASSIGNED_COMPONENT_HANDLE, NULL, SUIT_ERR_UNSUPPORTED_COMPONENT_ID);
 	__cmock_suit_plat_check_vid_IgnoreArg_vid_uuid();
 
-	retval = suit_process_manifest(&state, SUIT_INVOKE);
+	retval = process_sequence(&state, &invoke_seq);
 	TEST_ASSERT_EQUAL(SUIT_ERR_UNSUPPORTED_COMPONENT_ID, retval);
 	TEST_ASSERT_EQUAL(state.seq_stack_height, 0);
 }
 
 
-/* It is required to be added to each test. That is because unity is using
- * different main signature (returns int) and zephyr expects main which does
- * not return value.
+/* It is required to be added to each test. That is because unity's
+ * main may return nonzero, while zephyr's main currently must
+ * return 0 in all cases (other values are reserved).
  */
 extern int unity_main(void);
 
-void main(void)
+int main(void)
 {
 	(void)unity_main();
+
+	return 0;
 }
