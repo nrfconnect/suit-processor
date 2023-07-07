@@ -207,7 +207,7 @@ struct suit_processor_state {
 };
 
 
-/** @brief Poplate the manifest stack by loading a new envelope.
+/** @brief Populate the manifest stack by loading a new envelope.
  *
  * @details This API will:
  *           - Reset the decoder state.
