@@ -15,7 +15,7 @@
 
 #define SUIT_MAX_NUM_SIGNERS 2  ///! The maximum number of signers.
 #define SUIT_MAX_NUM_COMPONENT_ID_PARTS 5  ///! The maximum number of bytestrings in a component ID.
-#define SUIT_MAX_NUM_COMPONENTS 6  ///! The maximum number of components referenced in the manifest.
+#define SUIT_MAX_NUM_COMPONENTS 4  ///! The maximum number of components referenced in the manifest.
 #define SUIT_MAX_NUM_COMPONENT_PARAMS (SUIT_MAX_NUM_COMPONENTS * SUIT_MAX_MANIFEST_DEPTH) ///! The maximum number of active components during processing dependency manifests.
 #define SUIT_MAX_NUM_INTEGRATED_PAYLOADS 5  ///! The maximum number of integrated payloads in a single manifest.
 #define SUIT_MAX_COMMAND_ARGS 3  ///! The maximum number of arguments consumed by a single command.
