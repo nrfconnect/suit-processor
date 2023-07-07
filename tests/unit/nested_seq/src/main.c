@@ -731,11 +731,11 @@ void test_nested_seq_component_overrides_expand(void)
 	invoke_seq.len = sizeof(nested_component_overrides_expand_cmd);
 
 	bootstrap_envelope_empty(&state);
-	bootstrap_envelope_components(&state, 4);
+	bootstrap_envelope_components(&state, SUIT_MAX_NUM_COMPONENTS);
 	bootstrap_envelope_sequence(&state, SUIT_INVOKE, &invoke_seq);
 
 	/* Component index set to 0, and then to true - expect 4 different calls. */
-	for (size_t i = 0; i < 4; i++) {
+	for (size_t i = 0; i < SUIT_MAX_NUM_COMPONENTS; i++) {
 		__cmock_suit_plat_invoke_ExpectAndReturn(ASSIGNED_COMPONENT_HANDLE + i, NULL, SUIT_SUCCESS);
 	}
 
@@ -761,22 +761,22 @@ void test_nested_seq_component_overrides_limit(void)
 	invoke_seq.len = sizeof(nested_component_overrides_limit_cmd);
 
 	bootstrap_envelope_empty(&state);
-	bootstrap_envelope_components(&state, 4);
+	bootstrap_envelope_components(&state, SUIT_MAX_NUM_COMPONENTS);
 	bootstrap_envelope_sequence(&state, SUIT_INVOKE, &invoke_seq);
 
 	/* Component index set to true, and then to 0 - expect 4 identical calls. */
-	for (size_t i = 0; i < 4; i++) {
+	for (size_t i = 0; i < SUIT_MAX_NUM_COMPONENTS; i++) {
 		__cmock_suit_plat_invoke_ExpectAndReturn(ASSIGNED_COMPONENT_HANDLE, NULL, SUIT_SUCCESS);
 	}
 
 	/* Component index remains unmodified - expect 4 different calls. */
-	for (size_t i = 0; i < 4; i++) {
+	for (size_t i = 0; i < SUIT_MAX_NUM_COMPONENTS; i++) {
 		__cmock_suit_plat_check_vid_ExpectAndReturn(ASSIGNED_COMPONENT_HANDLE + i, NULL, SUIT_SUCCESS);
 		__cmock_suit_plat_check_vid_IgnoreArg_vid_uuid();
 	}
 
 	/* Outside run-sequence body - expect 4 different calls. */
-	for (size_t i = 0; i < 4; i++) {
+	for (size_t i = 0; i < SUIT_MAX_NUM_COMPONENTS; i++) {
 		__cmock_suit_plat_invoke_ExpectAndReturn(ASSIGNED_COMPONENT_HANDLE + i, NULL, SUIT_SUCCESS);
 	}
 
