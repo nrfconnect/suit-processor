@@ -42,8 +42,8 @@ int suit_seq_exec_step(struct suit_processor_state *state);
 
 /** @brief Get the current command sequence execution state.
  *
- * @param[in]   state
- * @param[out]  seq_exec_state
+ * @param[in]   state           The SUIT processor state to be used.
+ * @param[out]  seq_exec_state  Pointer to the reference that will be set to the current command sequence.
  *
  * @retval  SUIT_SUCCESS    If the state was successfully passed through the pointer.
  * @retval  SUIT_ERR_CRASH  If the pointer is invalid or there was no state to be returned (empty stack).
