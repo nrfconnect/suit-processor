@@ -158,19 +158,6 @@ static int cose_sign1_authenticate_digest(struct zcbor_string *manifest_componen
 		.len = signed_data_size,
 	};
 
-#ifdef SUIT_PLATFORM_LEGACY_API_SUPPORT
-	/* Authenticate data using platform API */
-	ret = suit_plat_authenticate(
-		/* Value enforced by the input CDDL (cose_sign.cddl, supported_algs //= (ES256: -7)) */
-		suit_cose_es256,
-		(cose_sign1_struct._COSE_Sign1__Headers._Headers_protected_cbor._header_map_key_id_present ?
-			&cose_sign1_struct._COSE_Sign1__Headers._Headers_protected_cbor._header_map_key_id._header_map_key_id :
-			(struct zcbor_string *)NULL),
-		/* Pass signature, specific for the key */
-		&cose_sign1_struct._COSE_Sign1_signature,
-		/* Authenticate Signature1 structure, including both algorithm ID and digest bytes of the manifest */
-		&signed_bstr);
-#else /* SUIT_PLATFORM_LEGACY_API_SUPPORT */
 	/* Authenticate data using platform API */
 	ret = suit_plat_authenticate_manifest(
 		manifest_component_id,
@@ -183,7 +170,6 @@ static int cose_sign1_authenticate_digest(struct zcbor_string *manifest_componen
 		&cose_sign1_struct._COSE_Sign1_signature,
 		/* Authenticate Signature1 structure, including both algorithm ID and digest bytes of the manifest */
 		&signed_bstr);
-#endif /* SUIT_PLATFORM_LEGACY_API_SUPPORT */
 
 	return ret;
 }
@@ -503,11 +489,7 @@ int suit_decoder_authenticate_manifest(struct suit_decoder_state *state)
 	}
 
 	if (state->authentication_bstr_count == 0) {
-#ifdef SUIT_PLATFORM_LEGACY_API_SUPPORT
-		ret = SUIT_ERR_AUTHENTICATION;
-#else /* SUIT_PLATFORM_LEGACY_API_SUPPORT */
 		ret = suit_plat_authorize_unsigned_manifest(&state->decoded_manifest->manifest_component_id);
-#endif /* SUIT_PLATFORM_LEGACY_API_SUPPORT */
 	} else {
 		volatile enum suit_bool results[SUIT_MAX_NUM_SIGNERS * 2]; /* Use every other entry as canary */
 		volatile int num_ok = 0;
@@ -605,11 +587,9 @@ int suit_decoder_authorize_manifest(struct suit_decoder_state *state)
 			ret = get_component_id_str(&component_id,
 				&common->_SUIT_Common_suit_components._SUIT_Common_suit_components._SUIT_Components__SUIT_Component_Identifier[i]);
 
-#ifndef SUIT_PLATFORM_LEGACY_API_SUPPORT
 			if (ret == SUIT_SUCCESS) {
 				ret = suit_plat_authorize_component_id(&state->decoded_manifest->manifest_component_id, &component_id);
 			}
-#endif /* !SUIT_PLATFORM_LEGACY_API_SUPPORT */
 
 			if (ret == SUIT_SUCCESS) {
 				continue;
