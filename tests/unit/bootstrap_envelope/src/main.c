@@ -6,6 +6,7 @@
 
 #include <unity.h>
 #include <suit_manifest.h>
+#include <suit_processor.h>
 #include <suit_schedule_seq.h>
 #include <bootstrap_envelope.h>
 #include "suit_platform/cmock_suit_platform.h"
@@ -45,7 +46,7 @@ void test_bootstrap_empty_envelope(void)
 	bootstrap_envelope_empty(&state);
 	bootstrap_envelope_components(&state, 0);
 
-	int retval = process_sequence(&state, SUIT_VALIDATE);
+	int retval = process_sequence(&state, SUIT_SEQ_VALIDATE);
 	TEST_ASSERT_EQUAL(SUIT_ERR_UNAVAILABLE_COMMAND_SEQ, retval);
 }
 
@@ -57,14 +58,14 @@ void test_bootstrap_empty_sequence(void)
 	};
 
 	bootstrap_envelope_empty(&state);
-	bootstrap_envelope_sequence(&state, SUIT_VALIDATE, &empty_seq);
+	bootstrap_envelope_sequence(&state, SUIT_SEQ_VALIDATE, &empty_seq);
 	/* If a manifest contains more than one component, it is required to start
 	 * each sequence with set-component-index.
 	 * Use special value (1) to skip this check.
 	 */
 	bootstrap_envelope_components(&state, 1);
 
-	int retval = process_sequence(&state, SUIT_VALIDATE);
+	int retval = process_sequence(&state, SUIT_SEQ_VALIDATE);
 	TEST_ASSERT_EQUAL(ZCBOR_ERR_TO_SUIT_ERR(ZCBOR_ERR_NO_PAYLOAD), retval);
 }
 
@@ -81,10 +82,10 @@ void test_bootstrap_invoke_no_components(void)
 	};
 
 	bootstrap_envelope_empty(&state);
-	bootstrap_envelope_sequence(&state, SUIT_INVOKE, &invoke_seq);
+	bootstrap_envelope_sequence(&state, SUIT_SEQ_INVOKE, &invoke_seq);
 	bootstrap_envelope_components(&state, 0);
 
-	int retval = process_sequence(&state, SUIT_INVOKE);
+	int retval = process_sequence(&state, SUIT_SEQ_INVOKE);
 	TEST_ASSERT_EQUAL(SUIT_ERR_MANIFEST_VALIDATION, retval);
 }
 
@@ -101,12 +102,12 @@ void test_bootstrap_invoke_single_component(void)
 	};
 
 	bootstrap_envelope_empty(&state);
-	bootstrap_envelope_sequence(&state, SUIT_INVOKE, &invoke_seq);
+	bootstrap_envelope_sequence(&state, SUIT_SEQ_INVOKE, &invoke_seq);
 	bootstrap_envelope_components(&state, 1);
 
 	__cmock_suit_plat_invoke_ExpectAndReturn(ASSIGNED_COMPONENT_HANDLE, NULL, SUIT_SUCCESS);
 
-	int retval = process_sequence(&state, SUIT_INVOKE);
+	int retval = process_sequence(&state, SUIT_SEQ_INVOKE);
 	TEST_ASSERT_EQUAL(SUIT_SUCCESS, retval);
 }
 

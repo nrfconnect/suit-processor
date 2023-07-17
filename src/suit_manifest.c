@@ -34,11 +34,7 @@ static int assign_component_index(struct zcbor_string *component_id, size_t *ass
 			components[i].component_id = *component_id;
 			*assigned_index = i;
 
-#ifdef SUIT_PLATFORM_LEGACY_API_SUPPORT
-			ret = suit_plat_create_component_handle(component_id, NULL, 0, &components[i].component_handle);
-#else /* SUIT_PLATFORM_LEGACY_API_SUPPORT */
 			ret = suit_plat_create_component_handle(component_id, &components[i].component_handle);
-#endif /* SUIT_PLATFORM_LEGACY_API_SUPPORT */
 
 			if (ret == SUIT_SUCCESS) {
 				components[*assigned_index].ref_count++;
@@ -60,10 +56,8 @@ static int release_component_index(size_t assigned_index)
 	}
 
 	if (components[assigned_index].ref_count == 1) {
-#ifndef SUIT_PLATFORM_LEGACY_API_SUPPORT
 		ret = suit_plat_release_component_handle(components[assigned_index].component_handle);
 		if (ret == SUIT_SUCCESS)
-#endif /* !SUIT_PLATFORM_LEGACY_API_SUPPORT */
 		{
 			components[assigned_index].is_dependency = 0;
 		}
@@ -208,9 +202,6 @@ int suit_manifest_release(struct suit_manifest_state *manifest)
 		}
 	}
 
-#ifdef SUIT_PLATFORM_LEGACY_API_SUPPORT
-	suit_plat_reset_components();
-#endif /* SUIT_PLATFORM_LEGACY_API_SUPPORT */
 
 	memset(manifest, 0, sizeof(*manifest));
 

@@ -266,7 +266,6 @@ int suit_directive_override_parameters(struct suit_processor_state *state,
 	return retval;
 }
 
-#ifndef SUIT_PLATFORM_LEGACY_API_SUPPORT
 static int suit_directive_set_parameter(struct SUIT_Parameters_ *param, struct suit_manifest_params *dst)
 {
 	bool parameter_set = false;
@@ -436,7 +435,6 @@ int suit_directive_process_dependency(struct suit_processor_state *state, struct
 
 	return retval;
 }
-#endif /* !SUIT_PLATFORM_LEGACY_API_SUPPORT */
 
 int suit_directive_fetch(struct suit_processor_state *state, struct suit_manifest_params *component_params)
 {

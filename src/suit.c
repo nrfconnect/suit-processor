@@ -146,7 +146,6 @@ int suit_processor_load_envelope(struct suit_processor_state *state, uint8_t *en
 		retval = suit_decoder_decode_sequences(&state->decoder_state);
 	}
 
-#ifndef SUIT_PLATFORM_LEGACY_API_SUPPORT
 	if (retval == SUIT_SUCCESS) {
 		SUIT_DBG("Authorize sequence number: %d for sequence: %d\r\n", manifest_state->sequence_number, state->current_seq);
 		/** Check that the provided sequence number for a given manifest is recent enough. */
@@ -155,7 +154,6 @@ int suit_processor_load_envelope(struct suit_processor_state *state, uint8_t *en
 			&manifest_state->manifest_component_id,
 			manifest_state->sequence_number);
 	}
-#endif /* !SUIT_PLATFORM_LEGACY_API_SUPPORT */
 
 	if (retval == SUIT_SUCCESS) {
 		SUIT_DBG("Create component handles\r\n");
@@ -255,14 +253,12 @@ int suit_process_sequence(uint8_t *envelope_str, size_t envelope_len, enum suit_
 			}
 		}
 
-#ifndef SUIT_PLATFORM_LEGACY_API_SUPPORT
 		if (ret == SUIT_SUCCESS) {
 			ret = suit_plat_sequence_completed(state->current_seq,
 				&manifest_state->manifest_component_id,
 				manifest_state->envelope_str.value,
 				manifest_state->envelope_str.len);
 		}
-#endif /* !SUIT_PLATFORM_LEGACY_API_SUPPORT */
 	}
 
 	if (manifest_state != NULL) {
