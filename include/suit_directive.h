@@ -43,7 +43,6 @@ int suit_directive_swap(struct suit_processor_state *state, struct suit_manifest
 /** Invoke/boot a component based on the configured parameters. */
 int suit_directive_invoke(struct suit_processor_state *state, struct suit_manifest_params *component_params);
 
-#ifndef SUIT_PLATFORM_LEGACY_API_SUPPORT
 /** Set the value of the parameters in @p param into the parameter list of the current component if its value is not set. */
 int suit_directive_set_parameters(struct suit_processor_state *state,
 		struct __suit_directive_set_parameters_map__SUIT_Parameters *params,
@@ -52,6 +51,5 @@ int suit_directive_set_parameters(struct suit_processor_state *state,
 
 /** Process the current sequence of the dependency manifest. */
 int suit_directive_process_dependency(struct suit_processor_state *state, struct suit_manifest_params *component_params);
-#endif /* !SUIT_PLATFORM_LEGACY_API_SUPPORT */
 
 #endif /* SUIT_DIRECTIVE_H__ */

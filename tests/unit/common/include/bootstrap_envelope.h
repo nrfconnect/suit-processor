@@ -8,6 +8,7 @@
 #define BOOTSTRAP_ENVELOPE_H__
 
 #include <suit.h>
+#include <suit_processor.h>
 
 #define ASSIGNED_COMPONENT_HANDLE 0x1E054000
 

@@ -10,10 +10,6 @@
 #include "suit_types.h"
 #include <stdint.h>
 
-#ifdef SUIT_PLATFORM_LEGACY_API_SUPPORT
-#include "suit_platform_legacy.h"
-#endif /* SUIT_PLATFORM_LEGACY_API_SUPPORT */
-
 
 #ifndef SUIT_DBG
 #define SUIT_DBG(...)
@@ -67,7 +63,6 @@ int suit_plat_authenticate_manifest(struct zcbor_string *manifest_component_id,
  */
 int suit_plat_authorize_unsigned_manifest(struct zcbor_string *manifest_component_id);
 
-#ifndef SUIT_PLATFORM_LEGACY_API_SUPPORT
 /** @brief Check that the given component ID exists, is valid, and is authorized.
  *         If so, create and return a component handle for it.
  *
@@ -80,7 +75,6 @@ int suit_plat_authorize_unsigned_manifest(struct zcbor_string *manifest_componen
  */
 int suit_plat_create_component_handle(struct zcbor_string *component_id,
 		suit_component_t *handle);
-#endif /* !SUIT_PLATFORM_LEGACY_API_SUPPORT */
 
 /** @brief Release loaded component properties and handles assigned to them.
  *
@@ -90,7 +84,6 @@ int suit_plat_create_component_handle(struct zcbor_string *component_id,
  */
 int suit_plat_release_component_handle(suit_component_t handle);
 
-#ifndef SUIT_PLATFORM_LEGACY_API_SUPPORT
 /** @brief Check the provided payload against the provided digest.
  *
  * @param[in] handle      A reference to the checked component.
@@ -103,7 +96,6 @@ int suit_plat_release_component_handle(suit_component_t handle);
 int suit_plat_check_image_match(suit_component_t handle,
 		enum suit_cose_alg alg_id, struct zcbor_string *digest,
 		size_t image_size);
-#endif /* !SUIT_PLATFORM_LEGACY_API_SUPPORT */
 
 /** @brief Check the provided payload against the component value.
  *
@@ -125,7 +117,6 @@ int suit_plat_check_content(suit_component_t handle, struct zcbor_string *conten
  */
 int suit_plat_check_slot(suit_component_t handle, unsigned int slot);
 
-#ifndef SUIT_PLATFORM_LEGACY_API_SUPPORT
 /** @brief Check whether the given vendor ID applies to the given component.
  *
  * @param[in] handle    A reference to the checked component.
@@ -152,7 +143,6 @@ int suit_plat_check_cid(suit_component_t handle, struct zcbor_string *cid_uuid);
  * @returns SUIT_SUCCESS if the device UUID matches, error code otherwise.
  */
 int suit_plat_check_did(suit_component_t handle, struct zcbor_string *did_uuid);
-#endif /* !SUIT_PLATFORM_LEGACY_API_SUPPORT */
 
 /** @brief Check that the provided sequence number for a given manifest is recent enough.
  *
