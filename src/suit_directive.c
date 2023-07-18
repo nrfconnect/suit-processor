@@ -86,7 +86,7 @@ int suit_directive_try_each(struct suit_processor_state *state, struct SUIT_Dire
 			seq_exec_state->retval = SUIT_SUCCESS;
 		} else if ((validate) && (seq_exec_state->retval == SUIT_SUCCESS) &&
 			   (seq_exec_state->cmd_exec_state < try_each_arg->_SUIT_Directive_Try_Each_Argument_SUIT_Command_Sequence_bstr_count)) {
-			SUIT_DBG("Try sequence validated.\r\n", seq_exec_state->retval);
+			SUIT_DBG("Try sequence validated.\r\n");
 			/* In case of validation - go to the next sequence if the current one succeeds. */
 		} else {
 			SUIT_DBG("Try sequence finished. Status: %d.\r\n", seq_exec_state->retval);
@@ -153,42 +153,42 @@ static int suit_directive_override_parameter(struct SUIT_Parameters_ *param, str
 {
 	switch (param->_SUIT_Parameters_choice) {
 	case _SUIT_Parameters_suit_parameter_vendor_identifier:
-		SUIT_DBG("Override VID (handle: %p)\r\n", dst->component_handle);
+		SUIT_DBG("Override VID (handle: 0x%lx)\r\n", dst->component_handle);
 		memcpy(&dst->vid, &param->_SUIT_Parameters_suit_parameter_vendor_identifier, sizeof(dst->vid));
 		dst->vid_set = true;
 		break;
 	case _SUIT_Parameters_suit_parameter_class_identifier:
-		SUIT_DBG("Override CID (handle: %p)\r\n", dst->component_handle);
+		SUIT_DBG("Override CID (handle: 0x%lx)\r\n", dst->component_handle);
 		memcpy(&dst->cid, &param->_SUIT_Parameters_suit_parameter_class_identifier, sizeof(dst->cid));
 		dst->cid_set = true;
 		break;
 	case _SUIT_Parameters_suit_parameter_image_digest:
-		SUIT_DBG("Override digest (handle: %p)\r\n", dst->component_handle);
+		SUIT_DBG("Override digest (handle: 0x%lx)\r\n", dst->component_handle);
 		memcpy(&dst->image_digest, &param->_SUIT_Parameters_suit_parameter_image_digest, sizeof(dst->image_digest));
 		dst->image_digest_set = true;
 		break;
 	case _SUIT_Parameters_suit_parameter_image_size:
-		SUIT_DBG("Override image size (handle: %p)\r\n", dst->component_handle);
+		SUIT_DBG("Override image size (handle: 0x%lx)\r\n", dst->component_handle);
 		dst->image_size = param->_SUIT_Parameters_suit_parameter_image_size;
 		dst->image_size_set = true;
 		break;
 	case _SUIT_Parameters_suit_parameter_component_slot:
-		SUIT_DBG("Override slot (handle: %p)\r\n", dst->component_handle);
+		SUIT_DBG("Override slot (handle: 0x%lx)\r\n", dst->component_handle);
 		dst->component_slot = param->_SUIT_Parameters_suit_parameter_component_slot;
 		dst->component_slot_set = true;
 		break;
 	case _SUIT_Parameters_suit_parameter_uri:
-		SUIT_DBG("Override URI (handle: %p)\r\n", dst->component_handle);
+		SUIT_DBG("Override URI (handle: 0x%lx)\r\n", dst->component_handle);
 		memcpy(&dst->uri, &param->_SUIT_Parameters_suit_parameter_uri, sizeof(dst->uri));
 		dst->uri_set = true;
 		break;
 	case _SUIT_Parameters_suit_parameter_source_component:
-		SUIT_DBG("Override source component (handle: %p)\r\n", dst->component_handle);
+		SUIT_DBG("Override source component (handle: 0x%lx)\r\n", dst->component_handle);
 		dst->source_component = param->_SUIT_Parameters_suit_parameter_source_component;
 		dst->source_component_set = true;
 		break;
 	case _SUIT_Parameters_suit_parameter_device_identifier:
-		SUIT_DBG("Override DID (handle: %p)\r\n", dst->component_handle);
+		SUIT_DBG("Override DID (handle: 0x%lx)\r\n", dst->component_handle);
 		memcpy(&dst->did, &param->_SUIT_Parameters_suit_parameter_device_identifier, sizeof(dst->did));
 		dst->did_set = true;
 		break;
@@ -321,7 +321,7 @@ int suit_directive_set_parameters(struct suit_processor_state *state,
 
 	for (int j = 0; j < param_count; j++) {
 		struct SUIT_Parameters_ *param = &params[j].___suit_directive_set_parameters_map__SUIT_Parameters;
-		SUIT_DBG("Set parameter %d (handle: %p)\r\n", param->_SUIT_Parameters_choice, component_params->component_handle);
+		SUIT_DBG("Set parameter %d (handle: 0x%lx)\r\n", param->_SUIT_Parameters_choice, component_params->component_handle);
 
 		retval = suit_directive_set_parameter(param, component_params);
 		if (retval == SUIT_ERR_AGAIN) {
