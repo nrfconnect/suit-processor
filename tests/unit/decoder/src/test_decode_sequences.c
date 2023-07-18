@@ -510,9 +510,9 @@ void test_decode_sequences_text_invalid_state(void)
 
 	int ret = suit_decoder_decode_sequences(&state);
 
-	TEST_ASSERT_EQUAL_MESSAGE(SUIT_ERR_MANIFEST_VALIDATION, ret, "The manifest text field decoding did not fail");
-	TEST_ASSERT_EQUAL_MESSAGE(INVALID, state.step, "Invalid state transition after failed text field status check");
-	TEST_ASSERT_EQUAL_MESSAGE(NULL, state.decoded_manifest, "Manifest structure not freed after text field status check failure");
+	TEST_ASSERT_EQUAL_MESSAGE(SUIT_SUCCESS, ret, "The manifest severed text field decoding failed");
+	TEST_ASSERT_EQUAL_MESSAGE(SEQUENCES_DECODED, state.step, "Invalid state transition after manifest sequence decoding");
+	TEST_ASSERT_EQUAL_MESSAGE(UNAVAILABLE, manifest.text_status, "The text field status is still valid, but the payload is not present");
 }
 
 void test_decode_sequences_text_without_digest(void)
