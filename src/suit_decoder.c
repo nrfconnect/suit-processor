@@ -745,8 +745,12 @@ int suit_decoder_decode_sequences(struct suit_decoder_state *state)
 				ret = SUIT_ERR_MANIFEST_VALIDATION;
 			}
 		} else {
+			/* The text digest is present inside the manifest, but it cannot be verified,
+			 * because the text payload has been severed.
+			 * This is a valid case, ie once minified envelope is transferred into the
+			 * SUIT storage partition.
+			 */
 			state->decoded_manifest->text_status = UNAVAILABLE;
-			ret = SUIT_ERR_MANIFEST_VALIDATION;
 		}
 	} else {
 		if (state->decoded_manifest->text_status != UNAVAILABLE) {
@@ -755,7 +759,7 @@ int suit_decoder_decode_sequences(struct suit_decoder_state *state)
 		state->decoded_manifest->text_status = UNAVAILABLE;
 	}
 
-	/* Parse severable manifest members extentions. */
+	/* Parse severable manifest members extensions. */
 	if (state->manifest._SUIT_Manifest__SUIT_Severable_Members_Choice._SUIT_Severable_Members_Choice__severable_manifest_members_choice_extensions_present) {
 		const struct SUIT_Severable_Members_Choice__severable_manifest_members_choice_extensions *ext = &state->manifest._SUIT_Manifest__SUIT_Severable_Members_Choice._SUIT_Severable_Members_Choice__severable_manifest_members_choice_extensions;
 		const struct severable_manifest_members_choice_extensions_suit_dependency_resolution *dependency_resolution_ext = &ext->_SUIT_Severable_Members_Choice__severable_manifest_members_choice_extensions;
