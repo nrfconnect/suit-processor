@@ -33,6 +33,11 @@ execute_process(
 )
 endif()
 
+# Dirty fix until proper one is added to zcbor - NCSDK-23327
+file(READ "${ZCBOR_DIR}/cose.cmake" COSE_CMAKE_TEXT)
+string(REPLACE "\\" "/" COSE_CMAKE_TEXT "${COSE_CMAKE_TEXT}")
+file(WRITE "${ZCBOR_DIR}/cose.cmake" "${COSE_CMAKE_TEXT}")
+
 # Create cmake target to track changes in the input cddl file
 add_custom_command(
   OUTPUT "${ZCBOR_DIR}/cose.cmake"
@@ -70,6 +75,11 @@ execute_process(
   COMMAND_ERROR_IS_FATAL ANY
 )
 endif()
+
+# Dirty fix until proper one is added to zcbor - NCSDK-23327
+file(READ "${ZCBOR_DIR}/manifest.cmake" MANIFEST_CMAKE_TEXT)
+string(REPLACE "\\" "/" MANIFEST_CMAKE_TEXT "${MANIFEST_CMAKE_TEXT}")
+file(WRITE "${ZCBOR_DIR}/manifest.cmake" "${MANIFEST_CMAKE_TEXT}")
 
 # Create cmake target to track changes in the input cddl file
 add_custom_command(
