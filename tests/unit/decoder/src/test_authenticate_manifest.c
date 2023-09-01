@@ -348,6 +348,49 @@ static uint8_t signed_envelope_with_key[] = {
 		'M', 'a', 'n', 'i', 'f', 'e', 's', 't',
 };
 
+static uint8_t signed_envelope_with_32bit_key[] = {
+	0xd8, 0x6b, /* tag(107) : SUIT_Envelope */
+	0xa2, /* map (2 elements) */
+
+	0x02, /* suit-authentication-wrapper */
+		0x58, 0x7A, /* bytes(122) */
+		0x82, /* array (2 elements) */
+			0x58, 0x24, /* bytes(36) */
+			0x82, /* array (2 elements) */
+			0x2f, /* suit-digest-algorithm-id: cose-alg-sha-256 */
+			0x58, 0x20, /* suit-digest-bytes: bytes(32) */
+			0x66, 0x58, 0xea, 0x56, 0x02, 0x62, 0x69, 0x6d,
+			0xd1, 0xf1, 0x3b, 0x78, 0x22, 0x39, 0xa0, 0x64,
+			0xda, 0x7c, 0x6c, 0x5c, 0xba, 0xf5, 0x2f, 0xde,
+			0xd4, 0x28, 0xa6, 0xfc, 0x83, 0xc7, 0xe5, 0xaf,
+
+			0x58, 0x51, /* bytes(81): SUIT_Authentication_Block */
+			0xd2, /* tag(18) : COSE_Sign1 */
+			0x84, /* array (4 elements) */
+			0x4A, /* protected: bytes(10) / serialized map */
+				0xa2, /* header_map (2 elements) */
+				0x01, /* alg_id */ 0x26, /* ES256 */
+				0x04, /* key_id */
+					0x45, /* bytes(5) */
+					0x1A, /* 32-bit unsigned integer */
+					0x7F, 0xFF, 0xFF, 0xE0,
+			0xa0, /* unprotected: header_map (0 elements) */
+			0xf6, /* payload: nil */
+			0x58, 0x40, /* bytes(64) : signature */
+			0xe3, 0x50, 0x5f, 0x7a, 0xb7, 0x0b, 0xd3, 0xa0,
+			0xe0, 0x49, 0x16, 0xf3, 0x7b, 0x0d, 0x72, 0x51,
+			0xaa, 0x6f, 0x52, 0xca, 0x12, 0xc7, 0xed, 0xaa,
+			0x88, 0x6a, 0x41, 0x29, 0xa2, 0x98, 0xca, 0x6a,
+			0x1e, 0xcc, 0x2a, 0x57, 0x95, 0x5c, 0x6b, 0xf4,
+			0xcc, 0xb9, 0xf0, 0x1d, 0x68, 0x4d, 0x5d, 0x1c,
+			0x47, 0x74, 0xdf, 0xfb, 0xe5, 0x08, 0xa0, 0x34,
+			0x43, 0x1f, 0xea, 0xfa, 0x60, 0x84, 0x8a, 0x2c,
+
+	0x03, /* suit-manifest */
+	0x48, /* bytes(8) */
+		'M', 'a', 'n', 'i', 'f', 'e', 's', 't',
+};
+
 static uint8_t signed_envelope_with_2keys[] = {
 	0xd8, 0x6b, /* tag(107) : SUIT_Envelope */
 	0xa2, /* map (2 elements) */
@@ -458,6 +501,16 @@ static struct zcbor_string exp_key = {
 	.len = 1,
 };
 
+static uint8_t key_id_32bit_cbor[] = {
+	0x1A,
+	0x7F, 0xFF, 0xFF, 0xE0,
+};
+
+static struct zcbor_string exp_32bit_key = {
+	.value = key_id_32bit_cbor,
+	.len = sizeof(key_id_32bit_cbor),
+};
+
 static uint8_t key2_id_cbor[] = {
 	0xBB,
 };
@@ -491,6 +544,33 @@ static uint8_t signature1_wkey_cbor[] = {
 static struct zcbor_string exp_data_wkey = {
 	.value = signature1_wkey_cbor,
 	.len = sizeof(signature1_wkey_cbor),
+};
+
+static uint8_t signature1_w32bitkey_cbor[] = {
+	0x84, /* Sig_structure1: array(4) */
+		0x6A, /* context: text(10) */
+			'S', 'i', 'g', 'n', 'a', 't', 'u', 'r', 'e', '1',
+		0x4A, /* protected: bytes(10) / serialized map */
+			0xa2, /* header_map (2 elements) */
+			0x01, /* alg_id */ 0x26, /* ES256 */
+			0x04, /* key_id */
+				0x45, /* bytes(5) */
+				0x1A, /* 32-bit unsigned intger */
+				0x7F, 0xFF, 0xFF, 0xE0,
+		0x40, /* external_aad: bytes(0) */
+		0x58, 0x24, /* payload: bytes(36) */
+			0x82, /* array (2 elements) */
+			0x2f, /* suit-digest-algorithm-id: cose-alg-sha-256 */
+			0x58, 0x20, /* suit-digest-bytes: bytes(32) */
+			0x66, 0x58, 0xea, 0x56, 0x02, 0x62, 0x69, 0x6d,
+			0xd1, 0xf1, 0x3b, 0x78, 0x22, 0x39, 0xa0, 0x64,
+			0xda, 0x7c, 0x6c, 0x5c, 0xba, 0xf5, 0x2f, 0xde,
+			0xd4, 0x28, 0xa6, 0xfc, 0x83, 0xc7, 0xe5, 0xaf,
+};
+
+static struct zcbor_string exp_data_w32bitkey = {
+	.value = signature1_w32bitkey_cbor,
+	.len = sizeof(signature1_w32bitkey_cbor),
 };
 
 static uint8_t signature1_wkey2_cbor[] = {
@@ -674,6 +754,18 @@ void test_authenticate_signed_manifest_with_key(void)
 	state.step = MANIFEST_DECODED;
 
 	__cmock_suit_plat_authenticate_manifest_ExpectComplexArgsAndReturn(&state.decoded_manifest->manifest_component_id, suit_cose_es256, &exp_key, &exp_signature, &exp_data_wkey, SUIT_SUCCESS);
+	ret = suit_decoder_authenticate_manifest(&state);
+	TEST_ASSERT_EQUAL_MESSAGE(SUIT_SUCCESS, ret, "The signed manifest with key authentication failed");
+}
+
+void test_authenticate_signed_manifest_with_32bit_key(void)
+{
+	int ret = SUIT_SUCCESS;
+
+	init_decode_signed_envelope(signed_envelope_with_32bit_key, sizeof(signed_envelope_with_32bit_key), 1);
+	state.step = MANIFEST_DECODED;
+
+	__cmock_suit_plat_authenticate_manifest_ExpectComplexArgsAndReturn(&state.decoded_manifest->manifest_component_id, suit_cose_es256, &exp_32bit_key, &exp_signature, &exp_data_w32bitkey, SUIT_SUCCESS);
 	ret = suit_decoder_authenticate_manifest(&state);
 	TEST_ASSERT_EQUAL_MESSAGE(SUIT_SUCCESS, ret, "The signed manifest with key authentication failed");
 }
