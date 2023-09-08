@@ -121,6 +121,7 @@ int suit_processor_load_envelope(struct suit_processor_state *state, uint8_t *en
 	}
 
 	if (state->manifest_stack_height >= ZCBOR_ARRAY_SIZE(state->manifest_stack)) {
+		SUIT_ERR("Unable to load manifest: %p. Stack too small (%d).\r\n", envelope_str, state->manifest_stack_height);
 		return SUIT_ERR_OVERFLOW;
 	}
 
@@ -147,22 +148,27 @@ int suit_processor_load_envelope(struct suit_processor_state *state, uint8_t *en
 	}
 
 	if (retval == SUIT_SUCCESS) {
+		SUIT_DBG("Create component handles\r\n");
+		retval = suit_decoder_create_components(&state->decoder_state);
+	}
+
+	if (retval == SUIT_SUCCESS) {
+		state->manifest_stack_height++;
 		SUIT_DBG("Authorize sequence number: %d for sequence: %d\r\n", manifest_state->sequence_number, state->current_seq);
 		/** Check that the provided sequence number for a given manifest is recent enough. */
 		retval = suit_plat_authorize_sequence_num(
 			state->current_seq,
 			&manifest_state->manifest_component_id,
 			manifest_state->sequence_number);
+
+		if (retval != SUIT_SUCCESS) {
+			(void)suit_manifest_release(manifest_state);
+			state->manifest_stack_height--;
+		}
 	}
 
-	if (retval == SUIT_SUCCESS) {
-		SUIT_DBG("Create component handles\r\n");
-		retval = suit_decoder_create_components(&state->decoder_state);
-	}
-
-	if (retval == SUIT_SUCCESS) {
-		SUIT_DBG("Manifest loaded\r\n");
-		state->manifest_stack_height++;
+	if (retval != SUIT_SUCCESS) {
+		SUIT_ERR("Failed to load manifest\r\n");
 	}
 
 	return retval;
@@ -279,6 +285,12 @@ int suit_processor_get_manifest_metadata(uint8_t *envelope_str, size_t envelope_
 		return SUIT_ERR_DECODING;
 	}
 
+	if ((decoder_state->step != INVALID) &&
+	    (decoder_state->step != COMPONENTS_CREATED) &&
+	    (decoder_state->step != LAST_STEP)) {
+		return SUIT_ERR_WAIT;
+	}
+
 	if (ret == SUIT_SUCCESS) {
 		manifest = &state->manifest_stack[state->manifest_stack_height];
 		ret = suit_processor_decode_envelope(decoder_state, manifest, envelope_str, envelope_len);
@@ -326,8 +338,8 @@ int suit_processor_get_manifest_metadata(uint8_t *envelope_str, size_t envelope_
 	}
 
 	/* There is no need to call suit_manifest_release(..) because
-	 * the manifest was only parsed and no component were created.
+	 * the manifest was only parsed and no components were created.
 	 */
 
-	return SUIT_SUCCESS;
+	return ret;
 }

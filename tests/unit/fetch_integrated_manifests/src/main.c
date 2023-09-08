@@ -93,7 +93,7 @@ void test_suit_decode_envelope(void)
 		&manifest_component_id, &digest, &seq_num);
 
 	TEST_ASSERT_EQUAL_MESSAGE(SUIT_SUCCESS, ret, "Unable to decode input manifest");
-	TEST_ASSERT_EQUAL_MESSAGE(0, seq_num, "Unexpected sequence number value");
+	TEST_ASSERT_EQUAL_MESSAGE(1, seq_num, "Unexpected sequence number value");
 	assert_zcbor_string(&exp_root_manifest_id, &manifest_component_id);
 	assert_zcbor_string(&exp_root_manifest_digest, &digest);
 }
