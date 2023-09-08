@@ -416,6 +416,12 @@ int suit_directive_process_dependency(struct suit_processor_state *state, struct
 		seq_exec_state->cmd_exec_state++;
 
 	} else if (seq_exec_state->cmd_exec_state == SUIT_SEQ_MAX + 2) {
+		if (seq_exec_state->retval == SUIT_SUCCESS) {
+			seq_exec_state->retval = suit_plat_sequence_completed(state->current_seq,
+				&manifest_state->manifest_component_id,
+				manifest_state->envelope_str.value,
+				manifest_state->envelope_str.len);
+		}
 		if (seq_exec_state->retval != SUIT_ERR_AGAIN) {
 			SUIT_DBG("Command sequence %d executed. Status: %d\r\n", state->current_seq, seq_exec_state->retval);
 		}
