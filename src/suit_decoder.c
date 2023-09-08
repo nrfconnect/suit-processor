@@ -11,68 +11,32 @@
 #include <cose_decode.h>
 #include <suit_manifest.h>
 
-/** Verify that the header matches the expected length.
- */
-static bool header_check(const uint8_t *cbstr, size_t exp_len)
+/** Extract the major type, i.e. the first 3 bits of the header byte. */
+#define MAJOR_TYPE(header_byte) ((zcbor_major_type_t)(((header_byte) >> 5) & 0x7))
+
+/* Copied from zcbor 0.7.0, can be removed when 0.7.0 is integrated. */
+static size_t zcbor_header_len(size_t num_elems)
 {
-	uint8_t byte = *cbstr;
-
-	/* Verify the expected length by decoding the ZCBOR header manually.
-	 *
-	 * The first byte indicates the type of the data:
-	 *  - 0x40:0x58 is a byte string with the length encoded as a sum with 0x40.
-	 *  - 0x58 is a byte string with the length encoded on the next byte.
-	 *  - 0x59 is a byte string with the length encoded on the next two bytes.
-	 *  - 0x80:0x88 is an array with the length encoded as a sum with 0x80.
-	 *  - 0x98 is an array with the length encoded on the next byte.
-	 *  - 0x99 is an array with the length encoded on the next two bytes.
-	 *
-	 * Indefinite length structures, as well as those with length encoded on
-	 * 4 bytes (0x5A and 0x9A) are not supported.
-	 * For more details, see the description of major types in RFC 7049.
-	 *
-	 * It is expected, that the decoding will be covered by the ZCBOR library
-	 * in the near future, but currently the implementation of the
-	 * zcbor_header_len(..) is not robust enough to pass the unit tests.
-	 */
-	if ((byte >= 0x40) && (byte < 0x58)) {
-		return (byte == (0x40 + exp_len));
-	} else if (byte == 0x58) {
-		return (cbstr[1] == exp_len);
-	} else if (byte == 0x59) {
-		return ((cbstr[1] * 256 + cbstr[2]) == exp_len);
-	} else if ((byte >= 0x80) && (byte < 0x88)) {
-		return (byte == (0x80 + exp_len));
-	} else if (byte == 0x98) {
-		return (cbstr[1] == exp_len);
-	} else if (byte == 0x99) {
-		return ((cbstr[1] * 256 + cbstr[2]) == exp_len);
+	if (num_elems <= ZCBOR_VALUE_IN_HEADER) {
+		return 1;
+	} else if (num_elems <= 0xFF) {
+		return 2;
+	} else if (num_elems <= 0xFFFF) {
+		return 3;
+	} else if (num_elems <= 0xFFFFFFFF) {
+		return 5;
+	} else {
+		return 9;
 	}
-
-	return false;
 }
-
 
 /** Calculate the length of the CBOR byte string and array header
  */
-static int header_len(size_t len, const uint8_t *value)
+static int header_len(size_t len, const uint8_t *value, zcbor_major_type_t major_type)
 {
-	int exp_len = -1;
-	bool header_ok = false;
+	int exp_len = zcbor_header_len(len);
 
-	if (len <= 23) {
-		exp_len = 1;
-	} else if (len <= 255) {
-		exp_len = 2;
-	} else if (len <= 0xFFFF) {
-		exp_len = 3;
-	}
-
-	if (exp_len > 0) {
-		header_ok = header_check(value - exp_len, len);
-	}
-
-	if (!header_ok) {
+	if (MAJOR_TYPE(*(value - exp_len)) != major_type) {
 		return -1;
 	}
 
@@ -82,7 +46,7 @@ static int header_len(size_t len, const uint8_t *value)
 static int verify_suit_digest(struct SUIT_Digest *digest, struct zcbor_string *data_bstr)
 {
 	/* Include CBOR header (type, length) in digest calculation */
-	int offset = header_len(data_bstr->len, &data_bstr->value[0]);
+	int offset = header_len(data_bstr->len, &data_bstr->value[0], ZCBOR_MAJOR_TYPE_BSTR);
 
 	if (offset < 0) {
 		return SUIT_ERR_DECODING;
@@ -193,39 +157,33 @@ static int get_component_id_str(struct zcbor_string *out_component_id,
 	const struct SUIT_Component_Identifier *component_id)
 {
 	const struct zcbor_string *first_bstr = &component_id->_SUIT_Component_Identifier_bstr[0];
-	size_t payload_len = 0;
-
-	int first_bstr_len = header_len(first_bstr->len, &first_bstr->value[0]);
+	int first_bstr_len = header_len(first_bstr->len, &first_bstr->value[0], ZCBOR_MAJOR_TYPE_BSTR);
 
 	if (first_bstr_len < 0) {
 		return SUIT_ERR_DECODING;
 	}
 
-	int extra_header_len = header_len(component_id->_SUIT_Component_Identifier_bstr_count, &(first_bstr->value[0]) - first_bstr_len);
+	int extra_header_len = header_len(component_id->_SUIT_Component_Identifier_bstr_count, &(first_bstr->value[0]) - first_bstr_len, ZCBOR_MAJOR_TYPE_LIST);
 
 	if (extra_header_len < 0) {
 		return SUIT_ERR_DECODING;
 	}
 
-	/* Do not allow empty lists as components ID values (already verified by CDDL). */
+	/* Do checks on component ID parts. */
+	for (int i = 0; i < component_id->_SUIT_Component_Identifier_bstr_count; i++) {
+		const struct zcbor_string *comp_bstr = &component_id->_SUIT_Component_Identifier_bstr[i];
 
-	for (size_t i = 0; i < component_id->_SUIT_Component_Identifier_bstr_count; i++) {
-		/* Do not allow empty byte strings as component ID values. */
-		if (component_id->_SUIT_Component_Identifier_bstr[i].len == 0) {
+		if (header_len(comp_bstr->len, &comp_bstr->value[0], ZCBOR_MAJOR_TYPE_BSTR) < 0
+				|| comp_bstr->len == 0) {
 			return SUIT_ERR_DECODING;
 		}
-
-		int chunk_len = header_len(component_id->_SUIT_Component_Identifier_bstr[i].len, &component_id->_SUIT_Component_Identifier_bstr[i].value[0]);
-
-		if (chunk_len < 0) {
-			return SUIT_ERR_DECODING;
-		}
-		payload_len += chunk_len;
-		payload_len += component_id->_SUIT_Component_Identifier_bstr[i].len;
 	}
 
+	const struct zcbor_string *last_bstr = &component_id->_SUIT_Component_Identifier_bstr[
+					component_id->_SUIT_Component_Identifier_bstr_count - 1];
+
 	out_component_id->value = first_bstr->value - extra_header_len - first_bstr_len;
-	out_component_id->len = extra_header_len + payload_len;
+	out_component_id->len = last_bstr->value + last_bstr->len - out_component_id->value;
 
 	return SUIT_SUCCESS;
 }
