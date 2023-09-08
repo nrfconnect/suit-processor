@@ -8,6 +8,7 @@
 #include <manifest_decode.h>
 #include <suit_platform.h>
 #include <suit_manifest.h>
+#include <zcbor_decode.h>
 
 
 static int backup_and_reset_components(struct suit_seq_exec_state *seq_exec_state)

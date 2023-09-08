@@ -391,7 +391,7 @@ static uint8_t minimal_decodable_manifest[] = {
 	0x48, /* bytes(8) */
 	0xa3, /* map (3 elements) */
 	0x01, /* suit-manifest-version */ 0x01,
-	0x02, /* suit-manifest-sequence-number */ 0x00,
+	0x02, /* suit-manifest-sequence-number */ 0x11,
 	0x03, /* suit-common */
 		0x41, /* bytes(1) */
 		0xA0, /* map (0 elements) */
@@ -410,7 +410,7 @@ static uint8_t manifest_with_component_id[] = {
 	0x4c, /* bytes(12) */
 	0xa4, /* map (4 elements) */
 	0x01, /* suit-manifest-version */ 0x01,
-	0x02, /* suit-manifest-sequence-number */ 0x00,
+	0x02, /* suit-manifest-sequence-number */ 0x12,
 	0x03, /* suit-common */
 		0x41, /* bytes(1) */
 		0xA0, /* map (0 elements) */
@@ -461,6 +461,7 @@ void test_decode_manifest_minimal(void)
 	TEST_ASSERT_EQUAL_MESSAGE(MANIFEST_DECODED, state.step, "Invalid state transition after manifest decoding");
 	TEST_ASSERT_EQUAL_MESSAGE(0, state.decoded_manifest->manifest_component_id.len, "Invalid length of the manifest component ID");
 	TEST_ASSERT_EQUAL_MESSAGE(NULL, state.decoded_manifest->manifest_component_id.value, "Invalid value of the manifest component ID");
+	TEST_ASSERT_EQUAL_MESSAGE(0x11, state.decoded_manifest->sequence_number, "Incorrect manifest sequence number value");
 }
 
 void test_decode_manifest_invalid_input_bytes(void)
@@ -581,4 +582,5 @@ void test_decode_manifest_with_component_id(void)
 
 	TEST_ASSERT_EQUAL_MESSAGE(3, state.decoded_manifest->manifest_component_id.len, "Invalid length of the manifest component ID");
 	TEST_ASSERT_EQUAL_MEMORY_MESSAGE(manifest_component_id, state.decoded_manifest->manifest_component_id.value, sizeof(manifest_component_id), "Invalid value of the manifest component ID");
+	TEST_ASSERT_EQUAL_MESSAGE(0x12, state.decoded_manifest->sequence_number, "Incorrect manifest sequence number value");
 }

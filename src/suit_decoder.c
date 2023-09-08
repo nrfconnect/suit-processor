@@ -440,6 +440,8 @@ int suit_decoder_decode_manifest(struct suit_decoder_state *state)
 
 	manifest_bstr = state->envelope._SUIT_Envelope_suit_manifest;
 
+	/* Verify manifest version - enforced by the CDDL and checked by the ZCBOR parser code */
+
 	ret = cbor_decode_SUIT_Manifest(
 		manifest_bstr.value,
 		manifest_bstr.len,
@@ -458,6 +460,13 @@ int suit_decoder_decode_manifest(struct suit_decoder_state *state)
 
 			ret = get_component_id_str(&state->decoded_manifest->manifest_component_id, manifest_component);
 		}
+	}
+
+	if (ret == ZCBOR_SUCCESS) {
+		/* Cannot perform universal sequence number authorization.
+		 * Skip this check in decoder logic and store the sequence number value inside the output structure.
+		 */
+		state->decoded_manifest->sequence_number = state->manifest._SUIT_Manifest_suit_manifest_sequence_number;
 	}
 
 	if (ret == ZCBOR_SUCCESS) {
@@ -560,13 +569,6 @@ int suit_decoder_authorize_manifest(struct suit_decoder_state *state)
 	if (state->step != MANIFEST_AUTHENTICATED) {
 		return SUIT_ERR_ORDER;
 	}
-
-	/* Verify manifest version - enforced by the CDDL and checked by the ZCBOR parser code */
-
-	/* Cannot perform universal sequence number authorization.
-	 * Skip this check in decoder logic and store the sequence number value inside the output structure.
-	 */
-	state->decoded_manifest->sequence_number = state->manifest._SUIT_Manifest_suit_manifest_sequence_number;
 
 	/* Verify common sequence */
 	common = &state->manifest._SUIT_Manifest_suit_common_cbor;
