@@ -343,3 +343,16 @@ int suit_processor_get_manifest_metadata(uint8_t *envelope_str, size_t envelope_
 
 	return ret;
 }
+
+#ifdef CONFIG_UNITY
+int suit_processor_override_state(struct suit_processor_state *new_state)
+{
+	if (new_state == NULL) {
+		return SUIT_ERR_CRASH;
+	}
+
+	state = new_state;
+
+	return SUIT_SUCCESS;
+}
+#endif /* CONFIG_UNITY */

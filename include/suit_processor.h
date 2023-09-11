@@ -229,4 +229,17 @@ struct suit_processor_state {
  */
 int suit_processor_load_envelope(struct suit_processor_state *state, uint8_t *envelope_str, size_t envelope_len);
 
+#ifdef CONFIG_UNITY
+/** @brief Override the internal state variable with a pointer to the external memory.
+ *
+ * @details This API is meant to be used inside unit tests, so the test runner
+ *          is able to control and assert on the internal state of the module.
+ *
+ * @param[in]  new_state  The pointer to the SUIT processor state to use.
+ *
+ * @returns SUIT_SUCCESS if the operation succeeds, error code otherwise.
+ */
+int suit_processor_override_state(struct suit_processor_state *new_state);
+#endif /* CONFIG_UNITY */
+
 #endif /* SUIT_PROCESSOR_H__ */
