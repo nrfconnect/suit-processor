@@ -187,6 +187,11 @@ static int suit_directive_override_parameter(struct SUIT_Parameters_ *param, str
 		dst->source_component = param->_SUIT_Parameters_suit_parameter_source_component;
 		dst->source_component_set = true;
 		break;
+	case _SUIT_Parameters_suit_parameter_invoke_args:
+		SUIT_DBG("Override invoke args (handle: 0x%lx)\r\n", dst->component_handle);
+		dst->invoke_args = param->_SUIT_Parameters_suit_parameter_invoke_args;
+		dst->invoke_args_set = true;
+		break;
 	case _SUIT_Parameters_suit_parameter_device_identifier:
 		SUIT_DBG("Override DID (handle: 0x%lx)\r\n", dst->component_handle);
 		memcpy(&dst->did, &param->_SUIT_Parameters_suit_parameter_device_identifier, sizeof(dst->did));
@@ -291,6 +296,9 @@ static int suit_directive_set_parameter(struct SUIT_Parameters_ *param, struct s
 		break;
 	case _SUIT_Parameters_suit_parameter_source_component:
 		parameter_set = dst->source_component_set;
+		break;
+	case _SUIT_Parameters_suit_parameter_invoke_args:
+		parameter_set = dst->invoke_args_set;
 		break;
 	case _SUIT_Parameters_suit_parameter_device_identifier:
 		parameter_set = dst->did_set;
