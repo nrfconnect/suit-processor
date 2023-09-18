@@ -84,7 +84,7 @@ static uint8_t uri_cmd[] = {
 
 struct zcbor_string exp_uri = {
 	.value = "#app.bin",
-	.len = strlen("#app.bin"),
+	.len = sizeof("#app.bin") - 1,
 };
 
 static uint8_t source_component_cmd[] = {
