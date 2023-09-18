@@ -337,6 +337,9 @@ int suit_processor_get_manifest_metadata(uint8_t *envelope_str, size_t envelope_
 		}
 	}
 
+	/* Reset the decoder state */
+	decoder_state->step = INVALID;
+
 	/* There is no need to call suit_manifest_release(..) because
 	 * the manifest was only parsed and no components were created.
 	 */
