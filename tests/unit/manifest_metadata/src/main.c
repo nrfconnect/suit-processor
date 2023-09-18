@@ -112,12 +112,15 @@ void test_invalid_input(void)
 
 	int ret = suit_processor_override_state(NULL);
 	TEST_ASSERT_EQUAL_MESSAGE(SUIT_ERR_CRASH, ret, "Setting SUIT processor state to NULL did not fail");
+	TEST_ASSERT_EQUAL_MESSAGE(INVALID, state.decoder_state.step, "SUIT decoder state not reset after decoding");
 
 	ret = suit_processor_get_manifest_metadata(NULL, envelope_len, false, NULL, NULL, NULL);
 	TEST_ASSERT_EQUAL_MESSAGE(SUIT_ERR_DECODING, ret, "Envelope was set to NULL and was decoded");
+	TEST_ASSERT_EQUAL_MESSAGE(INVALID, state.decoder_state.step, "SUIT decoder state not reset after decoding");
 
 	ret = suit_processor_get_manifest_metadata(&envelope_str[0], 0, false, NULL, NULL, NULL);
 	TEST_ASSERT_EQUAL_MESSAGE(SUIT_ERR_DECODING, ret, "Envelope length was set to zero and was decoded");
+	TEST_ASSERT_EQUAL_MESSAGE(INVALID, state.decoder_state.step, "SUIT decoder state not reset after decoding");
 }
 
 void test_invalid_decoder_state(void)
@@ -154,9 +157,11 @@ void test_invalid_decoder_state(void)
 
 			int ret = suit_processor_get_manifest_metadata(&envelope_str[0], envelope_len, false, NULL, NULL, NULL);
 			TEST_ASSERT_EQUAL_MESSAGE(SUIT_ERR_UNSUPPORTED_COMPONENT_ID, ret, "Envelope decoder was not busy, but the metadata API failed");
+			TEST_ASSERT_EQUAL_MESSAGE(INVALID, state.decoder_state.step, "SUIT decoder state not reset after decoding");
 		} else {
 			int ret = suit_processor_get_manifest_metadata(&envelope_str[0], envelope_len, false, NULL, NULL, NULL);
 			TEST_ASSERT_EQUAL_MESSAGE(SUIT_ERR_WAIT, ret, "Envelope decoder was busy, but it was overwritten by the metadata API");
+			TEST_ASSERT_EQUAL_MESSAGE(decoder_states[i], state.decoder_state.step, "SUIT decoder state was busy and has been reset");
 		}
 	}
 }
@@ -175,6 +180,7 @@ void test_decoder_init_failed(void)
 		SUIT_ERR_UNSUPPORTED_COMPONENT_ID);
 	int ret = suit_processor_get_manifest_metadata(&envelope_str[0], envelope_len, false, NULL, NULL, NULL);
 	TEST_ASSERT_EQUAL_MESSAGE(SUIT_ERR_UNSUPPORTED_COMPONENT_ID, ret, "Envelope decoder was not busy, but the metadata API failed");
+	TEST_ASSERT_EQUAL_MESSAGE(INVALID, state.decoder_state.step, "SUIT decoder state not reset after decoding");
 }
 
 void test_decode_envelope_failed(void)
@@ -197,6 +203,7 @@ void test_decode_envelope_failed(void)
 
 	int ret = suit_processor_get_manifest_metadata(&envelope_str[0], envelope_len, false, NULL, NULL, NULL);
 	TEST_ASSERT_EQUAL_MESSAGE(SUIT_ERR_UNSUPPORTED_COMPONENT_ID, ret, "Envelope decoding failed, but error code was not returned");
+	TEST_ASSERT_EQUAL_MESSAGE(INVALID, state.decoder_state.step, "SUIT decoder state not reset after decoding");
 }
 
 void test_check_manifest_digest_failed(void)
@@ -222,6 +229,7 @@ void test_check_manifest_digest_failed(void)
 
 	int ret = suit_processor_get_manifest_metadata(&envelope_str[0], envelope_len, false, NULL, NULL, NULL);
 	TEST_ASSERT_EQUAL_MESSAGE(SUIT_ERR_UNSUPPORTED_COMPONENT_ID, ret, "Manifest digest check failed, but error code was not returned");
+	TEST_ASSERT_EQUAL_MESSAGE(INVALID, state.decoder_state.step, "SUIT decoder state not reset after decoding");
 }
 
 void test_decode_manifest_failed(void)
@@ -250,6 +258,7 @@ void test_decode_manifest_failed(void)
 
 	int ret = suit_processor_get_manifest_metadata(&envelope_str[0], envelope_len, false, NULL, NULL, NULL);
 	TEST_ASSERT_EQUAL_MESSAGE(SUIT_ERR_UNSUPPORTED_COMPONENT_ID, ret, "Manifest decoding failed, but error code was not returned");
+	TEST_ASSERT_EQUAL_MESSAGE(INVALID, state.decoder_state.step, "SUIT decoder state not reset after decoding");
 }
 
 void test_authenticate_manifest_failed(void)
@@ -281,6 +290,7 @@ void test_authenticate_manifest_failed(void)
 
 	int ret = suit_processor_get_manifest_metadata(&envelope_str[0], envelope_len, true, NULL, NULL, NULL);
 	TEST_ASSERT_EQUAL_MESSAGE(SUIT_ERR_UNSUPPORTED_COMPONENT_ID, ret, "Manifest authentication failed, but error code was not returned");
+	TEST_ASSERT_EQUAL_MESSAGE(INVALID, state.decoder_state.step, "SUIT decoder state not reset after decoding");
 }
 
 void test_authorize_manifest_failed(void)
@@ -315,6 +325,7 @@ void test_authorize_manifest_failed(void)
 
 	int ret = suit_processor_get_manifest_metadata(&envelope_str[0], envelope_len, true, NULL, NULL, NULL);
 	TEST_ASSERT_EQUAL_MESSAGE(SUIT_ERR_UNSUPPORTED_COMPONENT_ID, ret, "Manifest authorization failed, but error code was not returned");
+	TEST_ASSERT_EQUAL_MESSAGE(INVALID, state.decoder_state.step, "SUIT decoder state not reset after decoding");
 }
 
 void test_invalid_decoded_digest_bstr(void)
@@ -344,6 +355,7 @@ void test_invalid_decoded_digest_bstr(void)
 
 	int ret = suit_processor_get_manifest_metadata(&envelope_str[0], envelope_len, false, NULL, NULL, NULL);
 	TEST_ASSERT_EQUAL_MESSAGE(SUIT_ERR_DECODING, ret, "Invalid manifest digest decoded, but error code was not returned");
+	TEST_ASSERT_EQUAL_MESSAGE(INVALID, state.decoder_state.step, "SUIT decoder state not reset after decoding");
 }
 
 void test_invalid_decoded_digest_length(void)
@@ -373,6 +385,7 @@ void test_invalid_decoded_digest_length(void)
 
 	int ret = suit_processor_get_manifest_metadata(&envelope_str[0], envelope_len, false, NULL, NULL, NULL);
 	TEST_ASSERT_EQUAL_MESSAGE(SUIT_ERR_DECODING, ret, "Invalid manifest digest length decoded, but error code was not returned");
+	TEST_ASSERT_EQUAL_MESSAGE(INVALID, state.decoder_state.step, "SUIT decoder state not reset after decoding");
 }
 
 void test_no_metadata_returned(void)
@@ -402,6 +415,7 @@ void test_no_metadata_returned(void)
 
 	int ret = suit_processor_get_manifest_metadata(&envelope_str[0], envelope_len, false, NULL, NULL, NULL);
 	TEST_ASSERT_EQUAL_MESSAGE(SUIT_SUCCESS, ret, "Manifest decoded, but error code was returned");
+	TEST_ASSERT_EQUAL_MESSAGE(INVALID, state.decoder_state.step, "SUIT decoder state not reset after decoding");
 }
 
 void test_no_metadata_returned_auth(void)
@@ -437,6 +451,7 @@ void test_no_metadata_returned_auth(void)
 
 	int ret = suit_processor_get_manifest_metadata(&envelope_str[0], envelope_len, true, NULL, NULL, NULL);
 	TEST_ASSERT_EQUAL_MESSAGE(SUIT_SUCCESS, ret, "Manifest decoded with authentication, but error code was returned");
+	TEST_ASSERT_EQUAL_MESSAGE(INVALID, state.decoder_state.step, "SUIT decoder state not reset after decoding");
 }
 
 void test_metadata_digest(void)
@@ -469,6 +484,7 @@ void test_metadata_digest(void)
 	TEST_ASSERT_EQUAL_MESSAGE(SUIT_SUCCESS, ret, "Manifest decoded, but error code was returned");
 	TEST_ASSERT_EQUAL_MESSAGE(exp_manifest_digest.value, digest.value, "Invalid manifest digest returned");
 	TEST_ASSERT_EQUAL_MESSAGE(exp_manifest_digest.len, digest.len, "Invalid manifest digest returned");
+	TEST_ASSERT_EQUAL_MESSAGE(INVALID, state.decoder_state.step, "SUIT decoder state not reset after decoding");
 }
 
 void test_metadata_digest_auth(void)
@@ -507,6 +523,7 @@ void test_metadata_digest_auth(void)
 	TEST_ASSERT_EQUAL_MESSAGE(SUIT_SUCCESS, ret, "Manifest decoded with authentication, but error code was returned");
 	TEST_ASSERT_EQUAL_MESSAGE(exp_manifest_digest.value, digest.value, "Invalid manifest digest returned");
 	TEST_ASSERT_EQUAL_MESSAGE(exp_manifest_digest.len, digest.len, "Invalid manifest digest returned");
+	TEST_ASSERT_EQUAL_MESSAGE(INVALID, state.decoder_state.step, "SUIT decoder state not reset after decoding");
 }
 
 void test_metadata_seq_num(void)
@@ -538,6 +555,7 @@ void test_metadata_seq_num(void)
 	int ret = suit_processor_get_manifest_metadata(&envelope_str[0], envelope_len, false, NULL, NULL, &seq_num);
 	TEST_ASSERT_EQUAL_MESSAGE(SUIT_SUCCESS, ret, "Manifest decoded, but error code was returned");
 	TEST_ASSERT_EQUAL_MESSAGE(exp_seq_num, seq_num, "Invalid manifest sequence number returned");
+	TEST_ASSERT_EQUAL_MESSAGE(INVALID, state.decoder_state.step, "SUIT decoder state not reset after decoding");
 }
 
 void test_metadata_seq_num_auth(void)
@@ -575,6 +593,7 @@ void test_metadata_seq_num_auth(void)
 	int ret = suit_processor_get_manifest_metadata(&envelope_str[0], envelope_len, true, NULL, NULL, &seq_num);
 	TEST_ASSERT_EQUAL_MESSAGE(SUIT_SUCCESS, ret, "Manifest decoded with authentication, but error code was returned");
 	TEST_ASSERT_EQUAL_MESSAGE(exp_seq_num, seq_num, "Invalid manifest sequence number returned");
+	TEST_ASSERT_EQUAL_MESSAGE(INVALID, state.decoder_state.step, "SUIT decoder state not reset after decoding");
 }
 
 void test_metadata_manifest_component_id(void)
@@ -607,6 +626,7 @@ void test_metadata_manifest_component_id(void)
 	TEST_ASSERT_EQUAL_MESSAGE(SUIT_SUCCESS, ret, "Manifest decoded, but error code was returned");
 	TEST_ASSERT_EQUAL_MESSAGE(exp_manifest_component_id.value, manifest_component_id.value, "Invalid manifest component ID returned");
 	TEST_ASSERT_EQUAL_MESSAGE(exp_manifest_component_id.len, manifest_component_id.len, "Invalid manifest component ID returned");
+	TEST_ASSERT_EQUAL_MESSAGE(INVALID, state.decoder_state.step, "SUIT decoder state not reset after decoding");
 }
 
 void test_metadata_manifest_component_id_auth(void)
@@ -645,6 +665,7 @@ void test_metadata_manifest_component_id_auth(void)
 	TEST_ASSERT_EQUAL_MESSAGE(SUIT_SUCCESS, ret, "Manifest decoded with authentication, but error code was returned");
 	TEST_ASSERT_EQUAL_MESSAGE(exp_manifest_component_id.value, manifest_component_id.value, "Invalid manifest component ID returned");
 	TEST_ASSERT_EQUAL_MESSAGE(exp_manifest_component_id.len, manifest_component_id.len, "Invalid manifest component ID returned");
+	TEST_ASSERT_EQUAL_MESSAGE(INVALID, state.decoder_state.step, "SUIT decoder state not reset after decoding");
 }
 
 void test_metadata_all(void)
@@ -682,6 +703,7 @@ void test_metadata_all(void)
 	TEST_ASSERT_EQUAL_MESSAGE(exp_seq_num, seq_num, "Invalid manifest sequence number returned");
 	TEST_ASSERT_EQUAL_MESSAGE(exp_manifest_component_id.value, manifest_component_id.value, "Invalid manifest component ID returned");
 	TEST_ASSERT_EQUAL_MESSAGE(exp_manifest_component_id.len, manifest_component_id.len, "Invalid manifest component ID returned");
+	TEST_ASSERT_EQUAL_MESSAGE(INVALID, state.decoder_state.step, "SUIT decoder state not reset after decoding");
 }
 
 void test_metadata_all_auth(void)
@@ -725,6 +747,7 @@ void test_metadata_all_auth(void)
 	TEST_ASSERT_EQUAL_MESSAGE(exp_seq_num, seq_num, "Invalid manifest sequence number returned");
 	TEST_ASSERT_EQUAL_MESSAGE(exp_manifest_component_id.value, manifest_component_id.value, "Invalid manifest component ID returned");
 	TEST_ASSERT_EQUAL_MESSAGE(exp_manifest_component_id.len, manifest_component_id.len, "Invalid manifest component ID returned");
+	TEST_ASSERT_EQUAL_MESSAGE(INVALID, state.decoder_state.step, "SUIT decoder state not reset after decoding");
 }
 
 
