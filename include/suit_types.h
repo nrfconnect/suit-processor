@@ -75,6 +75,7 @@ enum suit_command_sequence {
 enum suit_cose_alg {
 	suit_cose_sha256 = -16,
 	suit_cose_es256 = -7,
+	suit_cose_EdDSA = -8,
 };
 
 struct suit_arg {
