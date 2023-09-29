@@ -73,6 +73,7 @@ enum suit_command_sequence {
 
 /** https://www.iana.org/assignments/cose/cose.xhtml */
 enum suit_cose_alg {
+	suit_cose_sha512 = -44,
 	suit_cose_sha256 = -16,
 	suit_cose_es256 = -7,
 	suit_cose_EdDSA = -8,
