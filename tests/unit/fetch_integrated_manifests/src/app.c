@@ -148,11 +148,11 @@ void app_assert_envelope_integrity(bool installed)
 	TEST_ASSERT_EQUAL_MEMORY_MESSAGE(&(signature1_cbor[23]), manifest_digest, sizeof(manifest_digest), "Please fix the test: application manifest digest inside signature structure is incorrect");
 
 	/* read manifest from the candidate component data */
-	__cmock_suit_plat_retrive_manifest_ExpectAndReturn(checked_component, NULL, NULL, SUIT_SUCCESS);
-	__cmock_suit_plat_retrive_manifest_IgnoreArg_envelope_str();
-	__cmock_suit_plat_retrive_manifest_ReturnThruPtr_envelope_str((uint8_t**)&exp_app_envelope_payload.value);
-	__cmock_suit_plat_retrive_manifest_IgnoreArg_envelope_len();
-	__cmock_suit_plat_retrive_manifest_ReturnThruPtr_envelope_len(&exp_app_envelope_payload.len);
+	__cmock_suit_plat_retrieve_manifest_ExpectAndReturn(checked_component, NULL, NULL, SUIT_SUCCESS);
+	__cmock_suit_plat_retrieve_manifest_IgnoreArg_envelope_str();
+	__cmock_suit_plat_retrieve_manifest_ReturnThruPtr_envelope_str((uint8_t**)&exp_app_envelope_payload.value);
+	__cmock_suit_plat_retrieve_manifest_IgnoreArg_envelope_len();
+	__cmock_suit_plat_retrieve_manifest_ReturnThruPtr_envelope_len(&exp_app_envelope_payload.len);
 
 	/* authorization */
 	__cmock_suit_plat_check_digest_ExpectComplexArgsAndReturn(suit_cose_sha256, &exp_manifest_digest, &exp_manifest_payload, SUIT_SUCCESS);
@@ -179,11 +179,11 @@ void app_assert_envelope_authorization(bool installed)
 	suit_component_t checked_component = installed ? app_component_handle : candidate_component_handle;
 
 	/* read manifest from the candidate component data */
-	__cmock_suit_plat_retrive_manifest_ExpectAndReturn(checked_component, NULL, NULL, SUIT_SUCCESS);
-	__cmock_suit_plat_retrive_manifest_IgnoreArg_envelope_str();
-	__cmock_suit_plat_retrive_manifest_ReturnThruPtr_envelope_str((uint8_t**)&exp_app_envelope_payload.value);
-	__cmock_suit_plat_retrive_manifest_IgnoreArg_envelope_len();
-	__cmock_suit_plat_retrive_manifest_ReturnThruPtr_envelope_len(&exp_app_envelope_payload.len);
+	__cmock_suit_plat_retrieve_manifest_ExpectAndReturn(checked_component, NULL, NULL, SUIT_SUCCESS);
+	__cmock_suit_plat_retrieve_manifest_IgnoreArg_envelope_str();
+	__cmock_suit_plat_retrieve_manifest_ReturnThruPtr_envelope_str((uint8_t**)&exp_app_envelope_payload.value);
+	__cmock_suit_plat_retrieve_manifest_IgnoreArg_envelope_len();
+	__cmock_suit_plat_retrieve_manifest_ReturnThruPtr_envelope_len(&exp_app_envelope_payload.len);
 
 	__cmock_suit_plat_check_digest_ExpectComplexArgsAndReturn(suit_cose_sha256, &exp_manifest_digest, &exp_manifest_payload, SUIT_SUCCESS);
 	__cmock_suit_plat_authenticate_manifest_ExpectComplexArgsAndReturn(&exp_app_manifest_id, suit_cose_es256, NULL, &signature, &exp_signature, SUIT_SUCCESS);

@@ -158,7 +158,7 @@ int suit_condition_dependency_integrity(struct suit_processor_state *state,
 
 	if (seq_exec_state->cmd_exec_state == SUIT_SEQ_EXEC_DEFAULT_STATE) {
 		/** Return a pointer to the manifest contents, stored inside the component. */
-		retval = suit_plat_retrive_manifest(component_params->component_handle, &envelope_str, &envelope_len);
+		retval = suit_plat_retrieve_manifest(component_params->component_handle, &envelope_str, &envelope_len);
 
 		if (retval == SUIT_SUCCESS) {
 			retval = suit_processor_load_envelope(state, envelope_str, envelope_len);
