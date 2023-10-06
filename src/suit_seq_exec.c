@@ -180,7 +180,7 @@ int suit_seq_exec_schedule(struct suit_processor_state *state, struct suit_manif
 		return SUIT_ERR_AGAIN;
 	}
 
-	SUIT_ERR("Unable to schedule sequece execution: execution stack overflow\r\n");
+	SUIT_ERR("Unable to schedule sequence execution: execution stack overflow\r\n");
 
 	return SUIT_ERR_OVERFLOW;
 }

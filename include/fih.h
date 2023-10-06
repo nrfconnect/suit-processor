@@ -395,7 +395,7 @@ void fih_cfi_decrement(void);
  * The FIH_CFI_PRECALL_BLOCK/FIH_CFI_POSTCALL_BLOCK pair mainly protect function
  * calls from fault injection. Fault injection may attack a function to skip its
  * critical steps which are not function calls. It is difficult for the caller
- * to dectect the injection as long as the function successfully returns.
+ * to detect the injection as long as the function successfully returns.
  *
  * The following macros can be called in a function to track the critical steps,
  * especially those which are not function calls.

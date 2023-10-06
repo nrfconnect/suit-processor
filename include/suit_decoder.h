@@ -38,7 +38,7 @@ int suit_decoder_decode_envelope(struct suit_decoder_state *state, uint8_t *enve
 
 /** @brief Verify the SUIT manifest digest.
  *
- * @details In this step the manifest payload will be checked agains the digest, stored inside the authentication wrapper.
+ * @details In this step the manifest payload will be checked against the digest, stored inside the authentication wrapper.
  *          This step does not decode the manifest payload contents.
  *
  * @note This function checks the integrity of the manifest structure.
@@ -68,7 +68,7 @@ int suit_decoder_decode_manifest(struct suit_decoder_state *state);
 
 /** @brief Authenticate the SUIT manifest.
  *
- * @details In this step the manifest digest will be checked agains all of the signatures present
+ * @details In this step the manifest digest will be checked against all of the signatures present
  *          inside the authentication wrappers.
  *          If the envelope does not contain signatures, the @p suit_plat_authorize_unsigned_manifest
  *          platform API will be used to authorize the manifest.
@@ -101,7 +101,7 @@ int suit_decoder_authorize_manifest(struct suit_decoder_state *state);
  * @details In this step the pointers to the command sequences inside the output
  *          manifest structure are populated.
  *          All of the severed sequences are verified through their digests.
- *          If there is a severed sequence without a digest, this funtion will fail.
+ *          If there is a severed sequence without a digest, this function will fail.
  *
  * @note This function does not check the command sequences contents.
  *

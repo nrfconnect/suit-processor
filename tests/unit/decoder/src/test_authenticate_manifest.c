@@ -555,7 +555,7 @@ static uint8_t signature1_w32bitkey_cbor[] = {
 			0x01, /* alg_id */ 0x26, /* ES256 */
 			0x04, /* key_id */
 				0x45, /* bytes(5) */
-				0x1A, /* 32-bit unsigned intger */
+				0x1A, /* 32-bit unsigned integer */
 				0x7F, 0xFF, 0xFF, 0xE0,
 		0x40, /* external_aad: bytes(0) */
 		0x58, 0x24, /* payload: bytes(36) */
