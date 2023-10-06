@@ -8,6 +8,7 @@
 #include <stdint.h>
 #include <bootstrap_envelope.h>
 #include <suit_schedule_seq.h>
+#include "suit_platform/cmock_suit_platform.h"
 #include <common_parameters.h>
 
 extern struct suit_processor_state state;
@@ -266,4 +267,55 @@ void test_seq_execution_set_parameter_soft_failure(void)
 	int retval = execute_command_sequence(&state, &seq);
 
 	TEST_ASSERT_EQUAL_MESSAGE(SUIT_ERR_UNSUPPORTED_PARAMETER, retval, "Soft failure should not be settable through suit-directive-set-parameters");
+}
+
+void test_seq_execution_set_parameter_multiple_components_image_size_failed(void)
+{
+	uint8_t seq_cmd[128];
+	struct zcbor_string seq = {
+		.value = seq_cmd,
+		.len = 0,
+	};
+
+	/* Common header */
+	seq_cmd[0] = 0x84; /* list (4 elements - 2 commands) */
+	seq_cmd[1] = 0x0c, /* uint(suit-directive-set-component-index) */
+	seq_cmd[2] = 0xf5, /* True */
+	seq_cmd[3] = 0x13; /* uint(suit-directive-set-parameters) */
+	seq_cmd[4] = 0xa1; /* map (1) */
+
+	enum parameter_values params[] = {
+		IMAGE_SIZE,
+	};
+
+	seq.len = bootstrap_parameters(params, ZCBOR_ARRAY_SIZE(params), &seq_cmd[5], sizeof(seq_cmd) - 5) + 5;
+
+	bootstrap_envelope_empty(&state);
+	bootstrap_envelope_components(&state, 4);
+	state.components[0].image_size_set = true;
+	state.components[1].image_size_set = false;
+	state.components[2].image_size_set = true;
+	state.components[3].image_size_set = false;
+
+	__cmock_suit_plat_override_image_size_ExpectAndReturn(ASSIGNED_COMPONENT_HANDLE + 1, exp_image_size, SUIT_ERR_CRASH);
+
+	int retval = execute_command_sequence(&state, &seq);
+
+	TEST_ASSERT_EQUAL_MESSAGE(SUIT_ERR_CRASH, retval, "Failed to set parameters");
+
+	for (size_t i = 0; i < 4; i++) {
+		TEST_ASSERT_EQUAL_MESSAGE(false, state.components[i].vid_set, "Vendor ID not set, but flag was updated");
+		TEST_ASSERT_EQUAL_MESSAGE(false, state.components[i].cid_set, "Class ID not set, but flag was updated");
+		TEST_ASSERT_EQUAL_MESSAGE(false, state.components[i].image_digest_set, "Image digest not set, but flag was updated");
+		TEST_ASSERT_EQUAL_MESSAGE(false, state.components[i].component_slot_set, "Component slot not set, but flag was updated");
+		TEST_ASSERT_EQUAL_MESSAGE(false, state.components[i].uri_set, "URI not set, but flag was updated");
+		TEST_ASSERT_EQUAL_MESSAGE(false, state.components[i].source_component_set, "Source component not set, but flag was updated");
+		TEST_ASSERT_EQUAL_MESSAGE(false, state.components[i].invoke_args_set, "Invoke args not set, but flag was updated");
+		TEST_ASSERT_EQUAL_MESSAGE(false, state.components[i].did_set, "Device ID not set, but flag was updated");
+	}
+
+	TEST_ASSERT_EQUAL_MESSAGE(true, state.components[0].image_size_set, "Image size set before command execution, but flag was updated");
+	TEST_ASSERT_EQUAL_MESSAGE(false, state.components[1].image_size_set, "Image size set failed, but flag was updated");
+	TEST_ASSERT_EQUAL_MESSAGE(true, state.components[2].image_size_set, "Image size set before command execution, but flag was updated");
+	TEST_ASSERT_EQUAL_MESSAGE(false, state.components[3].image_size_set, "Image size set failed on previous component, but the flag was updated");
 }

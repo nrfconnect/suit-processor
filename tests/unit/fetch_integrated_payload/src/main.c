@@ -284,6 +284,7 @@ void test_suit_process_seq_install(void)
 
 	__cmock_suit_plat_authorize_sequence_num_ExpectAndReturn(SUIT_SEQ_INSTALL, &exp_manifest_id, 1, SUIT_SUCCESS);
 	__cmock_suit_plat_authorize_sequence_num_AddCallback(authorize_sequence_num_callback);
+	__cmock_suit_plat_override_image_size_ExpectAndReturn(ASSIGNED_COMPONENT_HANDLE, 256, SUIT_SUCCESS);
 	__cmock_suit_plat_check_vid_ExpectComplexArgsAndReturn(ASSIGNED_COMPONENT_HANDLE, &exp_vid_uuid, SUIT_SUCCESS);
 	__cmock_suit_plat_check_cid_ExpectComplexArgsAndReturn(ASSIGNED_COMPONENT_HANDLE, &exp_cid_uuid, SUIT_SUCCESS);
 	__cmock_suit_plat_fetch_integrated_ExpectComplexArgsAndReturn(ASSIGNED_COMPONENT_HANDLE, &exp_image_payload, SUIT_SUCCESS);
@@ -307,6 +308,7 @@ void test_suit_process_seq_validate(void)
 #endif /* SUIT_PLATFORM_DRY_RUN_SUPPORT */
 
 	__cmock_suit_plat_authorize_sequence_num_ExpectAndReturn(SUIT_SEQ_VALIDATE, &exp_manifest_id, 1, SUIT_SUCCESS);
+	__cmock_suit_plat_override_image_size_ExpectAndReturn(ASSIGNED_COMPONENT_HANDLE, 256, SUIT_SUCCESS);
 	__cmock_suit_plat_check_vid_ExpectComplexArgsAndReturn(ASSIGNED_COMPONENT_HANDLE, &exp_vid_uuid, SUIT_SUCCESS);
 	__cmock_suit_plat_check_cid_ExpectComplexArgsAndReturn(ASSIGNED_COMPONENT_HANDLE, &exp_cid_uuid, SUIT_SUCCESS);
 	__cmock_suit_plat_check_image_match_ExpectComplexArgsAndReturn(ASSIGNED_COMPONENT_HANDLE, suit_cose_sha256, &exp_image_digest, 256, SUIT_SUCCESS);
@@ -345,6 +347,7 @@ void test_suit_process_seq_invoke(void)
 #endif /* SUIT_PLATFORM_DRY_RUN_SUPPORT */
 
 	__cmock_suit_plat_authorize_sequence_num_ExpectAndReturn(SUIT_SEQ_INVOKE, &exp_manifest_id, 1, SUIT_SUCCESS);
+	__cmock_suit_plat_override_image_size_ExpectAndReturn(ASSIGNED_COMPONENT_HANDLE, 256, SUIT_SUCCESS);
 	__cmock_suit_plat_check_vid_ExpectComplexArgsAndReturn(ASSIGNED_COMPONENT_HANDLE, &exp_vid_uuid, SUIT_SUCCESS);
 	__cmock_suit_plat_check_cid_ExpectComplexArgsAndReturn(ASSIGNED_COMPONENT_HANDLE, &exp_cid_uuid, SUIT_SUCCESS);
 	__cmock_suit_plat_invoke_ExpectAndReturn(ASSIGNED_COMPONENT_HANDLE, NULL, SUIT_SUCCESS);

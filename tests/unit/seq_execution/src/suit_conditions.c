@@ -260,6 +260,8 @@ void test_seq_execution_condition_image_match_unsupported_algorithm(void)
 	bootstrap_envelope_empty(&state);
 	bootstrap_envelope_components(&state, 1);
 
+	__cmock_suit_plat_override_image_size_ExpectAndReturn(ASSIGNED_COMPONENT_HANDLE, exp_image_size, SUIT_SUCCESS);
+
 	int retval = execute_command_sequence(&state, &seq);
 
 	TEST_ASSERT_EQUAL(SUIT_ERR_DECODING, retval);
@@ -294,6 +296,8 @@ void test_seq_execution_condition_image_match_invalid_digest_length(void)
 
 	bootstrap_envelope_empty(&state);
 	bootstrap_envelope_components(&state, 1);
+
+	__cmock_suit_plat_override_image_size_ExpectAndReturn(ASSIGNED_COMPONENT_HANDLE, exp_image_size, SUIT_SUCCESS);
 
 	int retval = execute_command_sequence(&state, &seq);
 
@@ -334,6 +338,7 @@ void test_seq_execution_condition_image_match_failed(void)
 	bootstrap_envelope_empty(&state);
 	bootstrap_envelope_components(&state, 1);
 
+	__cmock_suit_plat_override_image_size_ExpectAndReturn(ASSIGNED_COMPONENT_HANDLE, exp_image_size, SUIT_SUCCESS);
 	__cmock_suit_plat_check_image_match_ExpectComplexArgsAndReturn(
 		ASSIGNED_COMPONENT_HANDLE,
 		suit_cose_sha256,
@@ -379,6 +384,7 @@ void test_seq_execution_condition_image_match(void)
 	bootstrap_envelope_empty(&state);
 	bootstrap_envelope_components(&state, 1);
 
+	__cmock_suit_plat_override_image_size_ExpectAndReturn(ASSIGNED_COMPONENT_HANDLE, exp_image_size, SUIT_SUCCESS);
 	__cmock_suit_plat_check_image_match_ExpectComplexArgsAndReturn(
 		ASSIGNED_COMPONENT_HANDLE,
 		suit_cose_sha256,

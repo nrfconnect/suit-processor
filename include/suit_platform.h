@@ -252,6 +252,15 @@ int suit_plat_sequence_completed(enum suit_command_sequence seq_name, struct zcb
  */
 int suit_plat_retrieve_manifest(suit_component_t component_handle, uint8_t **envelope_str, size_t *envelope_len);
 
+/** @brief Set the current image size value, stored inside the platform component metadata.
+ *
+ * @param[in]  handle  A reference to the component, describing the SUIT envelope.
+ * @param[in]  size    The component size, set by the manifest command.
+ *
+ * @returns SUIT_SUCCESS if the size was set, error code otherwise.
+ */
+int suit_plat_override_image_size(suit_component_t handle, size_t size);
+
 #ifdef SUIT_PLATFORM_DRY_RUN_SUPPORT
 /** @brief Check that the given fetch operation can be performed.
  *
