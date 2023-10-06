@@ -42,4 +42,11 @@ void bootstrap_envelope_sequence(struct suit_processor_state *state, enum suit_c
  */
 void bootstrap_envelope_components(struct suit_processor_state *state, size_t num_components);
 
+/** @brief Preconfigure dependency components inside the SUIT processor state.
+ *
+ * @param  state           Manifest processor state to be modified.
+ * @param  num_components  The number of dependency components to be preconfigured.
+ */
+void bootstrap_envelope_dependency_components(struct suit_processor_state *state, size_t num_components);
+
 #endif /* BOOTSTRAP_ENVELOPE_H__ */
