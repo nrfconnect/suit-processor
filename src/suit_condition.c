@@ -10,6 +10,7 @@
 #include <suit_seq_exec.h>
 #include <suit_schedule_seq.h>
 #include <suit_manifest.h>
+#include <suit.h>
 
 
 int suit_condition_vendor_identifier(struct suit_processor_state *state,
@@ -91,14 +92,39 @@ int suit_condition_image_match(struct suit_processor_state *state,
 
 #ifdef SUIT_PLATFORM_DRY_RUN_SUPPORT
 	if (state->dry_run != suit_bool_false) {
-		return SUIT_SUCCESS;
+		return ret;
 	}
 #endif /* SUIT_PLATFORM_DRY_RUN_SUPPORT */
 
-	return suit_plat_check_image_match(component_params->component_handle,
+	if (component_params->is_dependency == suit_bool_true) {
+		uint8_t *envelope_str;
+		size_t envelope_len;
+		struct zcbor_string manifest_digest;
+
+		ret = suit_plat_retrieve_manifest(component_params->component_handle, &envelope_str, &envelope_len);
+		if (ret != SUIT_SUCCESS) {
+			SUIT_ERR("Failed to check image digest: unable to retrieve manifest contents (handle: %p)\r\n", (void *)component_params->component_handle);
+			return ret;
+		}
+
+		ret = suit_processor_get_manifest_metadata(envelope_str, envelope_len, false, NULL, &manifest_digest, NULL);
+		if (ret != SUIT_SUCCESS) {
+			SUIT_ERR("Failed to check image digest: unable to read manifest digest (handle: %p)\r\n", (void *)component_params->component_handle);
+			return ret;
+		}
+
+		if (!suit_compare_zcbor_strings(&digest._SUIT_Digest_suit_digest_bytes, &manifest_digest)) {
+			SUIT_ERR("Manifest digest check failed: digest values does not match (handle: %p)\r\n", (void *)component_params->component_handle);
+			ret = SUIT_FAIL_CONDITION;
+		}
+	} else {
+		ret = suit_plat_check_image_match(component_params->component_handle,
 			suit_cose_sha256,
 			&digest._SUIT_Digest_suit_digest_bytes,
 			component_params->image_size);
+	}
+
+	return ret;
 }
 
 

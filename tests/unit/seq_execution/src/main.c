@@ -43,6 +43,10 @@ void test_seq_execution_condition_image_match_unsupported_algorithm(void);
 void test_seq_execution_condition_image_match_invalid_digest_length(void);
 void test_seq_execution_condition_image_match_failed(void);
 void test_seq_execution_condition_image_match(void);
+void test_seq_execution_condition_image_match_dependency(void);
+void test_seq_execution_condition_image_match_dependency_with_invalid_digest(void);
+void test_seq_execution_condition_image_match_dependency_with_different_digest(void);
+void test_seq_execution_condition_image_match_dependency_missing_payload(void);
 
 /* suit-condition-component-slot tests */
 void test_seq_execution_condition_component_slot_no_slot(void);

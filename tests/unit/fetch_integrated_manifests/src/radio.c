@@ -67,7 +67,7 @@ static uint8_t manifest_digest[] = {
 	0x10, 0x31, 0x47, 0x85, 0xB0, 0xA0, 0xAF, 0xAE,
 	0xF4, 0x85, 0xA5, 0x05, 0x14, 0xE8, 0x38, 0x56,
 };
-static struct zcbor_string exp_manifest_digest = {
+struct zcbor_string exp_radio_manifest_digest = {
 	.value = manifest_digest,
 	.len = sizeof(manifest_digest),
 };
@@ -76,24 +76,13 @@ struct zcbor_string exp_radio_envelope_payload = {
 	.value = &manifest_buf[582],
 	.len = 568,
 };
-static struct zcbor_string exp_manifest_payload = {
+struct zcbor_string exp_radio_manifest_payload = {
 	.value = &manifest_buf[704],
 	.len = 177,
 };
 struct zcbor_string exp_radio_fw_payload = {
 	.value = &manifest_buf[894],
 	.len = 256,
-};
-
-static uint8_t envelope_digest[] = {
-	0x56, 0xAF, 0x11, 0x01, 0xB2, 0xE9, 0x51, 0x9E,
-	0x66, 0x3A, 0x72, 0x1F, 0xDD, 0x1F, 0x83, 0xCC,
-	0x87, 0x70, 0x8A, 0xBE, 0x88, 0x92, 0x87, 0x51,
-	0x2C, 0xD9, 0xCD, 0x17, 0xC4, 0x70, 0xFA, 0x1B,
-};
-struct zcbor_string exp_radio_envelope_digest = {
-	.value = envelope_digest,
-	.len = sizeof(envelope_digest),
 };
 
 struct zcbor_string exp_radio_manifest_id = {
@@ -155,7 +144,7 @@ void radio_assert_envelope_integrity(bool installed)
 	__cmock_suit_plat_retrieve_manifest_ReturnThruPtr_envelope_len(&exp_radio_envelope_payload.len);
 
 	/* authorization */
-	__cmock_suit_plat_check_digest_ExpectComplexArgsAndReturn(suit_cose_sha256, &exp_manifest_digest, &exp_manifest_payload, SUIT_SUCCESS);
+	__cmock_suit_plat_check_digest_ExpectComplexArgsAndReturn(suit_cose_sha256, &exp_radio_manifest_digest, &exp_radio_manifest_payload, SUIT_SUCCESS);
 	__cmock_suit_plat_authenticate_manifest_ExpectComplexArgsAndReturn(&exp_radio_manifest_id, suit_cose_es256, NULL, &signature, &exp_signature, SUIT_SUCCESS);
 
 	/* component creation */
@@ -185,7 +174,7 @@ void radio_assert_envelope_authorization(bool installed)
 	__cmock_suit_plat_retrieve_manifest_IgnoreArg_envelope_len();
 	__cmock_suit_plat_retrieve_manifest_ReturnThruPtr_envelope_len(&exp_radio_envelope_payload.len);
 
-	__cmock_suit_plat_check_digest_ExpectComplexArgsAndReturn(suit_cose_sha256, &exp_manifest_digest, &exp_manifest_payload, SUIT_SUCCESS);
+	__cmock_suit_plat_check_digest_ExpectComplexArgsAndReturn(suit_cose_sha256, &exp_radio_manifest_digest, &exp_radio_manifest_payload, SUIT_SUCCESS);
 	__cmock_suit_plat_authenticate_manifest_ExpectComplexArgsAndReturn(&exp_radio_manifest_id, suit_cose_es256, NULL, &signature, &exp_signature, SUIT_SUCCESS);
 }
 

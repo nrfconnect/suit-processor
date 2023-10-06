@@ -101,6 +101,26 @@ void bootstrap_envelope_components(struct suit_processor_state *state, size_t nu
 	for (size_t i = 0; i < num_components; i++) {
 		state->components[i].component_handle = ASSIGNED_COMPONENT_HANDLE + i;
 		state->components[i].ref_count = 1;
+		state->components[i].is_dependency = suit_bool_false;
+		manifest->component_map[i] = i;
+	}
+}
+
+void bootstrap_envelope_dependency_components(struct suit_processor_state *state, size_t num_components)
+{
+	struct suit_manifest_state *manifest;
+
+	if ((state == NULL) || (state->manifest_stack_height != 1)) {
+		return;
+	}
+
+	manifest = &state->manifest_stack[0];
+	manifest->components_count = num_components;
+
+	for (size_t i = 0; i < num_components; i++) {
+		state->components[i].component_handle = ASSIGNED_COMPONENT_HANDLE + i;
+		state->components[i].ref_count = 1;
+		state->components[i].is_dependency = suit_bool_true;
 		manifest->component_map[i] = i;
 	}
 }

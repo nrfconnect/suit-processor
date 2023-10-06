@@ -67,7 +67,7 @@ static uint8_t manifest_digest[] = {
 	0x60, 0x2B, 0xDD, 0xC5, 0x2A, 0xBE, 0x32, 0x70,
 	0x57, 0x37, 0xF9, 0x26, 0x36, 0x6A, 0xA6, 0x05,
 };
-static struct zcbor_string exp_manifest_digest = {
+struct zcbor_string exp_app_manifest_digest = {
 	.value = manifest_digest,
 	.len = sizeof(manifest_digest),
 };
@@ -76,24 +76,13 @@ struct zcbor_string exp_app_envelope_payload = {
 	.value = &manifest_buf[1163],
 	.len = 568,
 };
-static struct zcbor_string exp_manifest_payload = {
+struct zcbor_string exp_app_manifest_payload = {
 	.value = &manifest_buf[1285],
 	.len = 177,
 };
 struct zcbor_string exp_app_fw_payload = {
 	.value = &manifest_buf[1475],
 	.len = 256,
-};
-
-static uint8_t envelope_digest[] = {
-	0xCF, 0x50, 0xB3, 0x7E, 0xC5, 0xB2, 0x8E, 0x80,
-	0x40, 0x88, 0xEE, 0x1B, 0x1C, 0x8A, 0x5B, 0x33,
-	0xCD, 0xC9, 0x4E, 0x5B, 0x0B, 0xD1, 0x0E, 0xC8,
-	0x93, 0xEC, 0x1E, 0x42, 0x07, 0xAA, 0x86, 0xB2,
-};
-struct zcbor_string exp_app_envelope_digest = {
-	.value = envelope_digest,
-	.len = sizeof(envelope_digest),
 };
 
 struct zcbor_string exp_app_manifest_id = {
@@ -155,7 +144,7 @@ void app_assert_envelope_integrity(bool installed)
 	__cmock_suit_plat_retrieve_manifest_ReturnThruPtr_envelope_len(&exp_app_envelope_payload.len);
 
 	/* authorization */
-	__cmock_suit_plat_check_digest_ExpectComplexArgsAndReturn(suit_cose_sha256, &exp_manifest_digest, &exp_manifest_payload, SUIT_SUCCESS);
+	__cmock_suit_plat_check_digest_ExpectComplexArgsAndReturn(suit_cose_sha256, &exp_app_manifest_digest, &exp_app_manifest_payload, SUIT_SUCCESS);
 	__cmock_suit_plat_authenticate_manifest_ExpectComplexArgsAndReturn(&exp_app_manifest_id, suit_cose_es256, NULL, &signature, &exp_signature, SUIT_SUCCESS);
 
 	/* component creation */
@@ -185,7 +174,7 @@ void app_assert_envelope_authorization(bool installed)
 	__cmock_suit_plat_retrieve_manifest_IgnoreArg_envelope_len();
 	__cmock_suit_plat_retrieve_manifest_ReturnThruPtr_envelope_len(&exp_app_envelope_payload.len);
 
-	__cmock_suit_plat_check_digest_ExpectComplexArgsAndReturn(suit_cose_sha256, &exp_manifest_digest, &exp_manifest_payload, SUIT_SUCCESS);
+	__cmock_suit_plat_check_digest_ExpectComplexArgsAndReturn(suit_cose_sha256, &exp_app_manifest_digest, &exp_app_manifest_payload, SUIT_SUCCESS);
 	__cmock_suit_plat_authenticate_manifest_ExpectComplexArgsAndReturn(&exp_app_manifest_id, suit_cose_es256, NULL, &signature, &exp_signature, SUIT_SUCCESS);
 }
 
