@@ -31,7 +31,7 @@ The platform contains everything that has side-effects, i.e. writing of payloads
  * Resolving of component IDs, which amounts to keeping track of the memory layout
  * Storing and comparing sequence numbers, because this should be hardware-backed to prevent tampering
  * Comparing vendor/class/device IDs, because this needs to be aware of component IDs.
- * Fetching of payloads, since this needs to be performed on whatever protcols are available on the platform.
+ * Fetching of payloads, since this needs to be performed on whatever protocols are available on the platform.
  * Booting of images, because this is dependent on the architecture of the platform, as well as the OS.
 
 The platform is implemented either in this repository or out-of-tree.
@@ -85,7 +85,7 @@ Or, a temporary component (described below) will typically have a matching read_
 ### Temporary components
 
 Whenever a manifest needs somewhere arbitrary to put a payload while performing the update, it can request a temporary component.
-"Temporary" means the component will live only until the current invokation of the manifest is complete, either
+"Temporary" means the component will live only until the current invocation of the manifest is complete, either
 
  * During the update (during suit-payload-fetch + suit-install), or
  * During secure boot (during suit-validate + suit-load + suit-invoke)
