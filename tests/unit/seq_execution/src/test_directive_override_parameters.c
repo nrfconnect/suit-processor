@@ -8,6 +8,7 @@
 #include <stdint.h>
 #include <bootstrap_envelope.h>
 #include <suit_schedule_seq.h>
+#include "suit_platform/cmock_suit_platform.h"
 #include <common_parameters.h>
 
 extern struct suit_processor_state state;
@@ -101,6 +102,8 @@ void test_seq_execution_override_parameter_single_component_6params(void)
 	bootstrap_envelope_empty(&state);
 	bootstrap_envelope_components(&state, 1);
 
+	__cmock_suit_plat_override_image_size_ExpectAndReturn(ASSIGNED_COMPONENT_HANDLE, exp_image_size, SUIT_SUCCESS);
+
 	int retval = execute_command_sequence(&state, &seq);
 
 	TEST_ASSERT_EQUAL_MESSAGE(SUIT_SUCCESS, retval, "Failed to set parameters");
@@ -159,6 +162,8 @@ void test_seq_execution_override_parameter_single_component_7params(void)
 
 	bootstrap_envelope_empty(&state);
 	bootstrap_envelope_components(&state, 1);
+
+	__cmock_suit_plat_override_image_size_ExpectAndReturn(ASSIGNED_COMPONENT_HANDLE, exp_image_size, SUIT_SUCCESS);
 
 	int retval = execute_command_sequence(&state, &seq);
 

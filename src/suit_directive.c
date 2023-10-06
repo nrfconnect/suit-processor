@@ -167,11 +167,17 @@ static int suit_directive_override_parameter(struct SUIT_Parameters_ *param, str
 		memcpy(&dst->image_digest, &param->_SUIT_Parameters_suit_parameter_image_digest, sizeof(dst->image_digest));
 		dst->image_digest_set = true;
 		break;
-	case _SUIT_Parameters_suit_parameter_image_size:
-		SUIT_DBG("Override image size (handle: 0x%lx)\r\n", dst->component_handle);
-		dst->image_size = param->_SUIT_Parameters_suit_parameter_image_size;
-		dst->image_size_set = true;
-		break;
+	case _SUIT_Parameters_suit_parameter_image_size: {
+		int ret = suit_plat_override_image_size(dst->component_handle, param->_SUIT_Parameters_suit_parameter_image_size);
+		if (ret == SUIT_SUCCESS) {
+			SUIT_DBG("Override image size (handle: 0x%lx)\r\n", dst->component_handle);
+			dst->image_size = param->_SUIT_Parameters_suit_parameter_image_size;
+			dst->image_size_set = true;
+		} else {
+			SUIT_DBG("Unable to override image size (handle: 0x%lx, status: %d)\r\n", dst->component_handle, ret);
+			return ret;
+		}
+	} break;
 	case _SUIT_Parameters_suit_parameter_component_slot:
 		SUIT_DBG("Override slot (handle: 0x%lx)\r\n", dst->component_handle);
 		dst->component_slot = param->_SUIT_Parameters_suit_parameter_component_slot;

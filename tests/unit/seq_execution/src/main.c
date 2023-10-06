@@ -65,6 +65,7 @@ void test_seq_execution_set_parameter_single_component_6params(void);
 void test_seq_execution_set_parameter_single_component_7params(void);
 void test_seq_execution_set_parameter_multiple_components_3params(void);
 void test_seq_execution_set_parameter_soft_failure(void);
+void test_seq_execution_set_parameter_multiple_components_image_size_failed(void);
 
 /* suit-directive-fetch tests */
 void test_seq_execution_fetch_no_uri(void);
