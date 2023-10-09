@@ -55,6 +55,15 @@ void test_seq_execution_condition_component_slot(void);
 /* suit-condition-abort tests */
 void test_seq_execution_condition_abort(void);
 
+/* suit-condition-is-dependency tests */
+void test_seq_execution_condition_dependency_fail(void);
+void test_seq_execution_condition_dependency_success(void);
+void test_seq_execution_condition_dependency_invalid(void);
+void test_seq_execution_condition_dependency_mixed(void);
+void test_seq_execution_condition_dependency_multiple_dependencies(void);
+void test_seq_execution_condition_dependency_integrity_fail(void);
+void test_seq_execution_condition_dependency_integrity_invalid(void);
+
 /* suit-directive-override-parameters tests */
 void test_seq_execution_override_parameter_single_component_3params(void);
 void test_seq_execution_override_parameter_single_component_6params(void);

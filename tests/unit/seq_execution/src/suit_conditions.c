@@ -241,3 +241,150 @@ void test_seq_execution_condition_abort(void)
 
 	TEST_ASSERT_EQUAL(SUIT_FAIL_CONDITION, retval);
 }
+
+void test_seq_execution_condition_dependency_fail(void)
+{
+	uint8_t seq_cmd[] = {
+		0x82, /* list (2 elements - 1 command) */
+			0x08, /* uint(suit-condition-is_dependency) */
+			0x00, /* uint(SUIT_Rep_Policy::None) */
+	};
+	struct zcbor_string seq = {
+		.value = seq_cmd,
+		.len = sizeof(seq_cmd),
+	};
+
+	bootstrap_envelope_empty(&state);
+	bootstrap_envelope_components(&state, 1);
+
+	int retval = execute_command_sequence(&state, &seq);
+
+	TEST_ASSERT_EQUAL(SUIT_FAIL_CONDITION, retval);
+}
+
+void test_seq_execution_condition_dependency_success(void)
+{
+	uint8_t seq_cmd[] = {
+		0x82, /* list (2 elements - 1 command) */
+			0x08, /* uint(suit-condition-is_dependency) */
+			0x00, /* uint(SUIT_Rep_Policy::None) */
+	};
+	struct zcbor_string seq = {
+		.value = seq_cmd,
+		.len = sizeof(seq_cmd),
+	};
+
+	bootstrap_envelope_empty(&state);
+	bootstrap_envelope_dependency_components(&state, 1);
+
+	int retval = execute_command_sequence(&state, &seq);
+
+	TEST_ASSERT_EQUAL(SUIT_SUCCESS, retval);
+}
+
+void test_seq_execution_condition_dependency_invalid(void)
+{
+	uint8_t seq_cmd[] = {
+		0x82, /* list (2 elements - 1 command) */
+			0x08, /* uint(suit-condition-is_dependency) */
+			0x00, /* uint(SUIT_Rep_Policy::None) */
+	};
+	struct zcbor_string seq = {
+		.value = seq_cmd,
+		.len = sizeof(seq_cmd),
+	};
+
+	bootstrap_envelope_empty(&state);
+	bootstrap_envelope_dependency_components(&state, 1);
+	state.components[0].is_dependency = true;
+
+	int retval = execute_command_sequence(&state, &seq);
+
+	TEST_ASSERT_EQUAL(SUIT_ERR_TAMP, retval);
+}
+
+void test_seq_execution_condition_dependency_mixed(void)
+{
+	uint8_t seq_cmd[] = {
+		0x84, /* list (4 elements - 2 commands) */
+			0x0c, /* uint(suit-directive-set-component-index) */
+			0xf5, /* True */
+			0x08, /* uint(suit-condition-is_dependency) */
+			0x00, /* uint(SUIT_Rep_Policy::None) */
+	};
+	struct zcbor_string seq = {
+		.value = seq_cmd,
+		.len = sizeof(seq_cmd),
+	};
+
+	bootstrap_envelope_empty(&state);
+	bootstrap_envelope_dependency_components(&state, 3);
+	state.components[1].is_dependency = suit_bool_false;
+
+	int retval = execute_command_sequence(&state, &seq);
+
+	TEST_ASSERT_EQUAL(SUIT_FAIL_CONDITION, retval);
+}
+
+void test_seq_execution_condition_dependency_multiple_dependencies(void)
+{
+	uint8_t seq_cmd[] = {
+		0x84, /* list (4 elements - 2 commands) */
+			0x0c, /* uint(suit-directive-set-component-index) */
+			0xf5, /* True */
+			0x08, /* uint(suit-condition-is_dependency) */
+			0x00, /* uint(SUIT_Rep_Policy::None) */
+	};
+	struct zcbor_string seq = {
+		.value = seq_cmd,
+		.len = sizeof(seq_cmd),
+	};
+
+	bootstrap_envelope_empty(&state);
+	bootstrap_envelope_dependency_components(&state, 3);
+
+	int retval = execute_command_sequence(&state, &seq);
+
+	TEST_ASSERT_EQUAL(SUIT_SUCCESS, retval);
+}
+
+void test_seq_execution_condition_dependency_integrity_fail(void)
+{
+	uint8_t seq_cmd[] = {
+		0x82, /* list (2 elements - 1 command) */
+			0x07, /* uint(suit-condition-dependency-integrity) */
+			0x00, /* uint(SUIT_Rep_Policy::None) */
+	};
+	struct zcbor_string seq = {
+		.value = seq_cmd,
+		.len = sizeof(seq_cmd),
+	};
+
+	bootstrap_envelope_empty(&state);
+	bootstrap_envelope_components(&state, 1);
+
+	int retval = execute_command_sequence(&state, &seq);
+
+	TEST_ASSERT_EQUAL(SUIT_FAIL_CONDITION, retval);
+}
+
+void test_seq_execution_condition_dependency_integrity_invalid(void)
+{
+	uint8_t seq_cmd[] = {
+		0x82, /* list (2 elements - 1 command) */
+			0x07, /* uint(suit-condition-dependency-integrity) */
+			0x00, /* uint(SUIT_Rep_Policy::None) */
+	};
+	struct zcbor_string seq = {
+		.value = seq_cmd,
+		.len = sizeof(seq_cmd),
+	};
+
+	bootstrap_envelope_empty(&state);
+	bootstrap_envelope_dependency_components(&state, 1);
+	state.components[0].is_dependency = true;
+
+	int retval = execute_command_sequence(&state, &seq);
+
+	TEST_ASSERT_EQUAL(SUIT_ERR_TAMP, retval);
+}
