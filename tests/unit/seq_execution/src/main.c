@@ -98,6 +98,18 @@ void test_seq_execution_swap(void);
 void test_seq_execution_invoke_no_args(void);
 void test_seq_execution_invoke_with_args(void);
 
+/* NULL args in suit directives tests */
+void test_set_current_components_null_args(void);
+void test_try_each_null_args(void);
+void test_run_sequence_null_args(void);
+void test_override_parameters_null_args(void);
+void test_set_parameters_null_args(void);
+void test_process_dependency_null_args(void);
+void test_fetch_null_args(void);
+void test_copy_null_args(void);
+void test_swap_null_args(void);
+void test_invoke_null_args(void);
+
 
 /* It is required to be added to each test. That is because unity's
  * main may return nonzero, while zephyr's main currently must

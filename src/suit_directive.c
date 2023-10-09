@@ -357,6 +357,11 @@ int suit_directive_process_dependency(struct suit_processor_state *state, struct
 	struct suit_seq_exec_state *seq_exec_state;
 	struct suit_manifest_state *manifest_state;
 
+	if ((state == NULL) || (component_params == NULL)) {
+		SUIT_ERR("Unable to execute process-dependency directive: invalid argument\r\n");
+		return SUIT_ERR_DECODING;
+	}
+
 	if (component_params->is_dependency == suit_bool_false) {
 		SUIT_ERR("Unsupported component id (not a dependency manifest)\r\n");
 		return SUIT_ERR_UNSUPPORTED_COMPONENT_ID;
