@@ -106,8 +106,8 @@ static struct zcbor_string exp_text_digest = {
 	.len = sizeof(text_digest),
 };
 static struct zcbor_string exp_text_payload = {
-	.value = &(manifest_buf[301]),
-	.len = 138,
+	.value = &(manifest_buf[299]),
+	.len = 140,
 };
 
 
