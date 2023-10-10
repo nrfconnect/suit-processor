@@ -544,15 +544,19 @@ void test_decode_sequences_text_with_valid_digest(void)
 		.value = &digest[4],
 		.len = 32,
 	};
-	struct zcbor_string exp_payload = {
-		.value = "D",
-		.len = 1,
+	uint8_t text_payload[] = {
+		0x41, /* bytes(1) */
+		'D',
+	};
+	struct zcbor_string exp_text_payload = {
+		.value = text_payload,
+		.len = sizeof(text_payload),
 	};
 
 	init_decode_manifest_with_text(minimal_with_shared_and_text, sizeof(minimal_with_shared_and_text));
 	state.step = MANIFEST_AUTHORIZED;
 
-	__cmock_suit_plat_check_digest_ExpectComplexArgsAndReturn(suit_cose_sha256, &exp_digest, &exp_payload, SUIT_SUCCESS);
+	__cmock_suit_plat_check_digest_ExpectComplexArgsAndReturn(suit_cose_sha256, &exp_digest, &exp_text_payload, SUIT_SUCCESS);
 
 	ret = suit_decoder_decode_sequences(&state);
 	TEST_ASSERT_EQUAL_MESSAGE(SUIT_SUCCESS, ret, "The manifest sequence decoding failed");
@@ -575,15 +579,19 @@ void test_decode_sequences_text_with_digest_platform_fail(void)
 		.value = &digest[4],
 		.len = 32,
 	};
-	struct zcbor_string exp_payload = {
-		.value = "D",
-		.len = 1,
+	uint8_t text_payload[] = {
+		0x41, /* bytes(1) */
+		'D',
+	};
+	struct zcbor_string exp_text_payload = {
+		.value = text_payload,
+		.len = sizeof(text_payload),
 	};
 
 	init_decode_manifest_with_text(minimal_with_shared_and_text, sizeof(minimal_with_shared_and_text));
 	state.step = MANIFEST_AUTHORIZED;
 
-	__cmock_suit_plat_check_digest_ExpectComplexArgsAndReturn(suit_cose_sha256, &exp_digest, &exp_payload, SUIT_ERR_MANIFEST_VERIFICATION);
+	__cmock_suit_plat_check_digest_ExpectComplexArgsAndReturn(suit_cose_sha256, &exp_digest, &exp_text_payload, SUIT_ERR_MANIFEST_VERIFICATION);
 
 	ret = suit_decoder_decode_sequences(&state);
 	TEST_ASSERT_EQUAL_MESSAGE(SUIT_ERR_MANIFEST_VALIDATION, ret, "The manifest text field decoding did not fail");
@@ -607,15 +615,20 @@ void test_decode_sequences_all(void)
 		.value = &digest[4],
 		.len = 32,
 	};
-	struct zcbor_string exp_payload = {
-		.value = "T",
-		.len = 1,
+	uint8_t text_payload[] = {
+		0x41, /* bytes(1) */
+		'T',
 	};
+	struct zcbor_string exp_text_payload = {
+		.value = text_payload,
+		.len = sizeof(text_payload),
+	};
+
 
 	init_decode_manifest_with_text(envelope_with_all_sequences, sizeof(envelope_with_all_sequences));
 	state.step = MANIFEST_AUTHORIZED;
 
-	__cmock_suit_plat_check_digest_ExpectComplexArgsAndReturn(suit_cose_sha256, &exp_digest, &exp_payload, SUIT_SUCCESS);
+	__cmock_suit_plat_check_digest_ExpectComplexArgsAndReturn(suit_cose_sha256, &exp_digest, &exp_text_payload, SUIT_SUCCESS);
 
 	ret = suit_decoder_decode_sequences(&state);
 	TEST_ASSERT_EQUAL_MESSAGE(SUIT_SUCCESS, ret, "The manifest sequence decoding failed");

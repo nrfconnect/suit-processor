@@ -79,6 +79,32 @@ static int header_len(size_t len, const uint8_t *value)
 	return exp_len;
 }
 
+static int verify_suit_digest(struct SUIT_Digest *digest, struct zcbor_string *data_bstr)
+{
+	/* Include CBOR header (type, length) in digest calculation */
+	int offset = header_len(data_bstr->len, &data_bstr->value[0]);
+
+	if (offset < 0) {
+		return SUIT_ERR_DECODING;
+	}
+
+	/* The SHA256 algorithm is enforced by CDDL, so the digest length is known. */
+	if (digest->_SUIT_Digest_suit_digest_bytes.len != 32) {
+		return SUIT_ERR_DECODING;
+	}
+
+	struct zcbor_string data_bytes = {
+		.value = data_bstr->value - offset,
+		.len = data_bstr->len + offset,
+	};
+
+	return suit_plat_check_digest(
+		/* Value enforced by the input CDDL (manifest.cddl, suit-cose-hash-algs /= cose-alg-sha-256) */
+		suit_cose_sha256,
+		&digest->_SUIT_Digest_suit_digest_bytes,
+		&data_bytes);
+}
+
 static int cose_verify_digest(struct zcbor_string *digest_bstr, struct zcbor_string *data_bstr)
 {
 	struct SUIT_Digest digest;
@@ -90,27 +116,10 @@ static int cose_verify_digest(struct zcbor_string *digest_bstr, struct zcbor_str
 		return SUIT_ERR_DECODING;
 	}
 
-	/* The SHA256 algorithm is enforced by CDDL, so the digest length is known. */
-	if (digest._SUIT_Digest_suit_digest_bytes.len != 32) {
-		return SUIT_ERR_DECODING;
-	}
-
-	/* Include CBOR header (type, length) in digest calculation */
-	int offset = header_len(data_bstr->len, &data_bstr->value[0]);
-
-	if (offset < 0) {
-		return SUIT_ERR_DECODING;
-	}
-	struct zcbor_string data_bytes = {
-		.value = data_bstr->value - offset,
-		.len = data_bstr->len + offset,
-	};
-
-	return suit_plat_check_digest(
-		/* Value enforced by the input CDDL (manifest.cddl, suit-cose-hash-algs /= cose-alg-sha-256) */
-		suit_cose_sha256,
-		&digest._SUIT_Digest_suit_digest_bytes,
-		&data_bytes);
+	return verify_suit_digest(
+		&digest,
+		data_bstr
+	);
 }
 
 static int cose_sign1_authenticate_digest(struct zcbor_string *manifest_component_id, struct zcbor_string *COSE_Sign1_bstr, struct zcbor_string *digest_bstr)
@@ -717,9 +726,11 @@ int suit_decoder_decode_sequences(struct suit_decoder_state *state)
 	 */
 	if (state->manifest._SUIT_Manifest__SUIT_Severable_Members_Choice._SUIT_Severable_Members_Choice_suit_text_present) {
 		if (state->decoded_manifest->text_status == SEVERED) {
-			int digest_ret = suit_plat_check_digest(suit_cose_sha256,
-				&state->manifest._SUIT_Manifest__SUIT_Severable_Members_Choice._SUIT_Severable_Members_Choice_suit_text._SUIT_Severable_Members_Choice_suit_text._SUIT_Digest_suit_digest_bytes,
-				&state->decoded_manifest->text);
+			int digest_ret = verify_suit_digest(
+				&state->manifest._SUIT_Manifest__SUIT_Severable_Members_Choice._SUIT_Severable_Members_Choice_suit_text._SUIT_Severable_Members_Choice_suit_text,
+				&state->decoded_manifest->text
+			);
+
 			if (digest_ret == SUIT_SUCCESS) {
 				state->decoded_manifest->text_status = AUTHENTICATED;
 			} else {
