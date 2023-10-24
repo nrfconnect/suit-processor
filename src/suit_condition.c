@@ -89,6 +89,21 @@ int suit_condition_image_match(struct suit_processor_state *state,
 		return SUIT_ERR_DECODING;
 	}
 
+	if (digest._SUIT_Digest_suit_digest_algorithm_id._suit_cose_hash_algs_choice == _suit_cose_hash_algs__cose_alg_sha_256) {
+		/* The SHA256 algorithm is allowed by CDDL. Verify the digest length. */
+		if (digest._SUIT_Digest_suit_digest_bytes.len != 32) {
+			return SUIT_ERR_DECODING;
+		}
+	} else if (digest._SUIT_Digest_suit_digest_algorithm_id._suit_cose_hash_algs_choice == _suit_cose_hash_algs__cose_alg_sha_512) {
+		/* The SHA512 algorithm is allowed by CDDL. Verify the digest length. */
+		if (digest._SUIT_Digest_suit_digest_bytes.len != 64) {
+			return SUIT_ERR_DECODING;
+		}
+	} else {
+		/* Other algorithms are not supported. */
+		return SUIT_ERR_DECODING;
+	}
+
 #ifdef SUIT_PLATFORM_DRY_RUN_SUPPORT
 	if (state->dry_run != suit_bool_false) {
 		return ret;
@@ -99,6 +114,7 @@ int suit_condition_image_match(struct suit_processor_state *state,
 		uint8_t *envelope_str;
 		size_t envelope_len;
 		struct zcbor_string manifest_digest;
+		enum suit_cose_alg alg;
 
 		ret = suit_plat_retrieve_manifest(component_params->component_handle, &envelope_str, &envelope_len);
 		if (ret != SUIT_SUCCESS) {
@@ -106,19 +122,22 @@ int suit_condition_image_match(struct suit_processor_state *state,
 			return ret;
 		}
 
-		ret = suit_processor_get_manifest_metadata(envelope_str, envelope_len, false, NULL, &manifest_digest, NULL);
+		ret = suit_processor_get_manifest_metadata(envelope_str, envelope_len, false, NULL, &manifest_digest, &alg, NULL);
 		if (ret != SUIT_SUCCESS) {
 			SUIT_ERR("Failed to check image digest: unable to read manifest digest (handle: %p)\r\n", (void *)component_params->component_handle);
 			return ret;
 		}
 
-		if (!suit_compare_zcbor_strings(&digest._SUIT_Digest_suit_digest_bytes, &manifest_digest)) {
+		if ((enum suit_cose_alg)digest._SUIT_Digest_suit_digest_algorithm_id._suit_cose_hash_algs_choice != alg) {
+			SUIT_ERR("Manifest digest check failed: digest algorithm does not match (handle: %p)\r\n", (void *)component_params->component_handle);
+			ret = SUIT_FAIL_CONDITION;
+		} else if (!suit_compare_zcbor_strings(&digest._SUIT_Digest_suit_digest_bytes, &manifest_digest)) {
 			SUIT_ERR("Manifest digest check failed: digest values does not match (handle: %p)\r\n", (void *)component_params->component_handle);
 			ret = SUIT_FAIL_CONDITION;
 		}
 	} else {
 		ret = suit_plat_check_image_match(component_params->component_handle,
-			suit_cose_sha256,
+			digest._SUIT_Digest_suit_digest_algorithm_id._suit_cose_hash_algs_choice,
 			&digest._SUIT_Digest_suit_digest_bytes);
 	}
 

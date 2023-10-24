@@ -166,6 +166,7 @@ void test_deocde_envelope_integrated_payloads(void);
 void test_manifest_digest_invalid_input(void);
 void test_manifest_digest_invalid_state(void);
 void test_manifest_digest_minimal(void);
+void test_manifest_digest_minimal_sha512(void);
 void test_manifest_digest_invalid_input_bytes(void);
 void test_manifest_digest_minimal_platform_fail(void);
 
@@ -186,6 +187,7 @@ void test_authenticate_signed_manifest_invalid_input_bytes(void);
 void test_authenticate_signed_manifest_platform_fail(void);
 void test_authenticate_signed_manifest_with_key(void);
 void test_authenticate_signed_manifest_with_32bit_key(void);
+void test_authenticate_signed_manifest_with_32bit_key_sha512(void);
 void test_authenticate_signed_manifest_with_2keys(void);
 void test_authenticate_signed_manifest_with_2keys_first_platform_fail(void);
 void test_authenticate_signed_manifest_with_2keys_second_platform_fail(void);

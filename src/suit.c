@@ -275,7 +275,7 @@ int suit_process_sequence(uint8_t *envelope_str, size_t envelope_len, enum suit_
 	return ret;
 }
 
-int suit_processor_get_manifest_metadata(uint8_t *envelope_str, size_t envelope_len, bool authenticate, struct zcbor_string *manifest_component_id, struct zcbor_string *digest, unsigned int *seq_num)
+int suit_processor_get_manifest_metadata(uint8_t *envelope_str, size_t envelope_len, bool authenticate, struct zcbor_string *manifest_component_id, struct zcbor_string *digest, enum suit_cose_alg *alg, unsigned int *seq_num)
 {
 	int ret = SUIT_SUCCESS;
 	struct suit_decoder_state *decoder_state = &state->decoder_state;
@@ -316,14 +316,30 @@ int suit_processor_get_manifest_metadata(uint8_t *envelope_str, size_t envelope_
 		ret = cbor_decode_SUIT_Digest(digest_bstr->value, digest_bstr->len, &digest_cbor,
 					      &bytes_processed);
 
-		/* The SHA256 algorithm is enforced by CDDL, so the digest length is known. */
-		if ((bytes_processed != digest_bstr->len) ||
-		    (digest_cbor._SUIT_Digest_suit_digest_bytes.len != 32)) {
+		if ((ret != ZCBOR_SUCCESS) || (bytes_processed != digest_bstr->len)) {
+			ret = SUIT_ERR_DECODING;
+		} else if (digest_cbor._SUIT_Digest_suit_digest_algorithm_id._suit_cose_hash_algs_choice == _suit_cose_hash_algs__cose_alg_sha_256) {
+			/* The SHA256 algorithm is allowed by CDDL. Verify the digest length. */
+			if (digest_cbor._SUIT_Digest_suit_digest_bytes.len != 32) {
+				ret = SUIT_ERR_DECODING;
+			}
+		} else if (digest_cbor._SUIT_Digest_suit_digest_algorithm_id._suit_cose_hash_algs_choice == _suit_cose_hash_algs__cose_alg_sha_512) {
+			/* The SHA512 algorithm is allowed by CDDL. Verify the digest length. */
+			if (digest_cbor._SUIT_Digest_suit_digest_bytes.len != 64) {
+				ret = SUIT_ERR_DECODING;
+			}
+		} else {
+			/* Other algorithms are not supported. */
 			ret = SUIT_ERR_DECODING;
 		}
 
-		if ((ret == SUIT_SUCCESS) && (digest != NULL)) {
-			*digest = digest_cbor._SUIT_Digest_suit_digest_bytes;
+		if (ret == SUIT_SUCCESS) {
+			if ((digest != NULL) && (alg != NULL)) {
+				*digest = digest_cbor._SUIT_Digest_suit_digest_bytes;
+				*alg = digest_cbor._SUIT_Digest_suit_digest_algorithm_id._suit_cose_hash_algs_choice;
+			} else if ((digest != NULL) || (alg != NULL)) {
+				ret = SUIT_ERR_DECODING;
+			}
 		}
 	}
 

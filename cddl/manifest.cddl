@@ -11,7 +11,7 @@
 ; Force making suit-text severable.
 ; Limited the number of possible component identifiers to 4
 ; Limited the length of component identifiers to 5 strings
-; Remove all hash algs except sha256
+; Remove all hash algs except sha256 and sha512
 ; Remove most of text comprehension since the firmware isn't supposed to understand the text.
 ; Remove strict-order parameter as parallel execution is not supported.
 ; Remove custom command sequence extensions.
@@ -100,7 +100,7 @@ suit-cose-hash-algs /= cose-alg-sha-256
 ;OPTIONAL to implement:
 ; suit-cose-hash-algs /= cose-alg-shake128
 ; suit-cose-hash-algs /= cose-alg-sha-384
-; suit-cose-hash-algs /= cose-alg-sha-512
+suit-cose-hash-algs /= cose-alg-sha-512
 ; suit-cose-hash-algs /= cose-alg-shake256
 
 SUIT_Component_Identifier =  [ 1*5 bstr]
@@ -225,7 +225,7 @@ cose-alg-sha-256 = -16
 ;OPTIONAL to implement:
 ; cose-alg-shake128 = -18
 ; cose-alg-sha-384 = -43
-; cose-alg-sha-512 = -44
+cose-alg-sha-512 = -44
 ; cose-alg-shake256 = -45
 
 ;Unseverable, recipient-necessary

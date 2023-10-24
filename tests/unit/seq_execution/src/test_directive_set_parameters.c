@@ -102,6 +102,8 @@ void test_seq_execution_set_parameter_single_component_6params(void)
 	bootstrap_envelope_empty(&state);
 	bootstrap_envelope_components(&state, 1);
 
+	__cmock_suit_plat_override_image_size_ExpectAndReturn(ASSIGNED_COMPONENT_HANDLE, exp_image_size, SUIT_SUCCESS);
+
 	int retval = execute_command_sequence(&state, &seq);
 
 	TEST_ASSERT_EQUAL_MESSAGE(SUIT_SUCCESS, retval, "Failed to set parameters");
