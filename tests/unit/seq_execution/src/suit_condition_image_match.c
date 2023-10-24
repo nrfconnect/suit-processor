@@ -36,6 +36,32 @@ static struct zcbor_string seq_condition_image_match = {
 	.len = sizeof(condition_image_match),
 };
 
+static uint8_t condition_image_match_sha512[] = {
+	0x84, /* list (4 elements - 2 commands) */
+		0x14, /* uint(suit-directive-override-parameters) */
+		0xa1, /* map (1) */
+			0x03, /* uint(suit-parameter-image-digest) */
+			0x58, 0x45, /* bytes(69) */
+			0x82, /* array (2 elements) */
+				0x38, 0x2B, /* suit-digest-algorithm-id: cose-alg-sha-512 */
+				0x58, 0x40, /* suit-digest-bytes: bytes(64) */
+				0x66, 0x58, 0xea, 0x56, 0x02, 0x62, 0x69, 0x6d,
+				0xd1, 0xf1, 0x3b, 0x78, 0x22, 0x39, 0xa0, 0x64,
+				0xda, 0x7c, 0x6c, 0x5c, 0xba, 0xf5, 0x2f, 0xde,
+				0xd4, 0x28, 0xa6, 0xfc, 0x83, 0xc7, 0xe5, 0xaf,
+				0x66, 0x58, 0xea, 0x56, 0x02, 0x62, 0x69, 0x6d,
+				0xd1, 0xf1, 0x3b, 0x78, 0x22, 0x39, 0xa0, 0x64,
+				0xda, 0x7c, 0x6c, 0x5c, 0xba, 0xf5, 0x2f, 0xde,
+				0xd4, 0x28, 0xa6, 0xfc, 0x83, 0xc7, 0xe5, 0xaf,
+		0x03, /* uint(suit-condition-image-match) */
+		0x00, /* uint(SUIT_Rep_Policy::None) */
+};
+
+static struct zcbor_string seq_condition_image_match_sha512 = {
+	.value = condition_image_match_sha512,
+	.len = sizeof(condition_image_match_sha512),
+};
+
 static uint8_t envelope_minimal[] = {
 	0xd8, 0x6b, /* tag(107) : SUIT_Envelope */
 	0xa2, /* map (2 elements) */
@@ -69,6 +95,46 @@ static struct zcbor_string exp_envelope_minimal = {
 
 static struct zcbor_string exp_manifest_minimal = {
 	.value = &envelope_minimal[55 - 9],
+	.len = 9,
+};
+
+static uint8_t envelope_minimal_sha512[] = {
+	0xd8, 0x6b, /* tag(107) : SUIT_Envelope */
+	0xa2, /* map (2 elements) */
+
+	0x02, /* suit-authentication-wrapper */
+		0x58, 0x48, /* bytes(72) */
+		0x81, /* array (1 element) */
+			0x58, 0x45, /* bytes(69) */
+			0x82, /* array (2 elements) */
+			0x38, 0x2B, /* suit-digest-algorithm-id: cose-alg-sha-512 */
+			0x58, 0x40, /* suit-digest-bytes: bytes(64) */
+			0x66, 0x58, 0xea, 0x56, 0x02, 0x62, 0x69, 0x6d,
+			0xd1, 0xf1, 0x3b, 0x78, 0x22, 0x39, 0xa0, 0x64,
+			0xda, 0x7c, 0x6c, 0x5c, 0xba, 0xf5, 0x2f, 0xde,
+			0xd4, 0x28, 0xa6, 0xfc, 0x83, 0xc7, 0xe5, 0xaf,
+			0x66, 0x58, 0xea, 0x56, 0x02, 0x62, 0x69, 0x6d,
+			0xd1, 0xf1, 0x3b, 0x78, 0x22, 0x39, 0xa0, 0x64,
+			0xda, 0x7c, 0x6c, 0x5c, 0xba, 0xf5, 0x2f, 0xde,
+			0xd4, 0x28, 0xa6, 0xfc, 0x83, 0xc7, 0xe5, 0xaf,
+
+	0x03, /* suit-manifest */
+	0x48, /* bytes(8) */
+	0xa3, /* map (3 elements) */
+	0x01, /* suit-manifest-version */ 0x01,
+	0x02, /* suit-manifest-sequence-number */ 0x11,
+	0x03, /* suit-common */
+		0x41, /* bytes(1) */
+		0xA0, /* map (0 elements) */
+};
+
+static struct zcbor_string exp_envelope_minimal_sha512 = {
+	.value = envelope_minimal_sha512,
+	.len = sizeof(envelope_minimal_sha512),
+};
+
+static struct zcbor_string exp_manifest_minimal_sha512 = {
+	.value = &envelope_minimal_sha512[88 - 9],
 	.len = 9,
 };
 
@@ -160,18 +226,14 @@ void test_seq_execution_condition_image_match_unsupported_algorithm(void)
 			0x14, /* uint(suit-directive-override-parameters) */
 			0xa1, /* map (1) */
 				0x03, /* uint(suit-parameter-image-digest) */
-				0x58, 0x45, /* bytes(69) */
-				0x82, /* array (2 elements) */
-					0x38, 0x2B, /* suit-digest-algorithm-id: cose-alg-sha-512 */
-					0x58, 0x40, /* suit-digest-bytes: bytes(64) */
-					0x66, 0x58, 0xea, 0x56, 0x02, 0x62, 0x69, 0x6d,
-					0xd1, 0xf1, 0x3b, 0x78, 0x22, 0x39, 0xa0, 0x64,
-					0xda, 0x7c, 0x6c, 0x5c, 0xba, 0xf5, 0x2f, 0xde,
-					0xd4, 0x28, 0xa6, 0xfc, 0x83, 0xc7, 0xe5, 0xaf,
-					0x66, 0x58, 0xea, 0x56, 0x02, 0x62, 0x69, 0x6d,
-					0xd1, 0xf1, 0x3b, 0x78, 0x22, 0x39, 0xa0, 0x64,
-					0xda, 0x7c, 0x6c, 0x5c, 0xba, 0xf5, 0x2f, 0xde,
-					0xd4, 0x28, 0xa6, 0xfc, 0x83, 0xc7, 0xe5, 0xaf,
+				0x58, 0x24, /* bytes(36) */
+					0x82, /* array (2 elements) */
+					0x38, 0x2c, /* suit-digest-algorithm-id: cose-alg-shake256 */
+					0x58, 0x20, /* suit-digest-bytes: bytes(32) */
+						0x66, 0x58, 0xea, 0x56, 0x02, 0x62, 0x69, 0x6d,
+						0xd1, 0xf1, 0x3b, 0x78, 0x22, 0x39, 0xa0, 0x64,
+						0xda, 0x7c, 0x6c, 0x5c, 0xba, 0xf5, 0x2f, 0xde,
+						0xd4, 0x28, 0xa6, 0xfc, 0x83, 0xc7, 0xe5, 0xaf,
 			0x03, /* uint(suit-condition-image-match) */
 			0x00, /* uint(SUIT_Rep_Policy::None) */
 	};
@@ -204,6 +266,69 @@ void test_seq_execution_condition_image_match_invalid_digest_length(void)
 					0xda, 0x7c, 0x6c, 0x5c, 0xba, 0xf5, 0x2f, 0xde,
 					0xd4, 0x28, 0xa6, 0xfc, 0x83, 0xc7, 0xe5, 0xaf,
 					0xff, 0xff,
+			0x03, /* uint(suit-condition-image-match) */
+			0x00, /* uint(SUIT_Rep_Policy::None) */
+	};
+	struct zcbor_string seq = {
+		.value = seq_cmd,
+		.len = sizeof(seq_cmd),
+	};
+
+	bootstrap_envelope_empty(&state);
+	bootstrap_envelope_components(&state, 1);
+
+	int retval = execute_command_sequence(&state, &seq);
+
+	TEST_ASSERT_EQUAL(SUIT_ERR_DECODING, retval);
+}
+
+void test_seq_execution_condition_image_match_invalid_digest_length_sha256(void)
+{
+	uint8_t seq_cmd[] = {
+		0x84, /* list (4 elements - 2 commands) */
+			0x14, /* uint(suit-directive-override-parameters) */
+			0xa1, /* map (1) */
+				0x03, /* uint(suit-parameter-image-digest) */
+				0x58, 0x26, /* bytes(38) */
+				0x82, /* array (2 elements) */
+					0x2f, /* suit-digest-algorithm-id: cose-alg-sha-256 */
+					0x58, 0x22, /* suit-digest-bytes: bytes(34) */
+					0x66, 0x58, 0xea, 0x56, 0x02, 0x62, 0x69, 0x6d,
+					0xd1, 0xf1, 0x3b, 0x78, 0x22, 0x39, 0xa0, 0x64,
+					0xda, 0x7c, 0x6c, 0x5c, 0xba, 0xf5, 0x2f, 0xde,
+					0xd4, 0x28, 0xa6, 0xfc, 0x83, 0xc7, 0xe5, 0xaf,
+					0xff, 0xff,
+			0x03, /* uint(suit-condition-image-match) */
+			0x00, /* uint(SUIT_Rep_Policy::None) */
+	};
+	struct zcbor_string seq = {
+		.value = seq_cmd,
+		.len = sizeof(seq_cmd),
+	};
+
+	bootstrap_envelope_empty(&state);
+	bootstrap_envelope_components(&state, 1);
+
+	int retval = execute_command_sequence(&state, &seq);
+
+	TEST_ASSERT_EQUAL(SUIT_ERR_DECODING, retval);
+}
+
+void test_seq_execution_condition_image_match_invalid_digest_length_sha512(void)
+{
+	uint8_t seq_cmd[] = {
+		0x84, /* list (4 elements - 2 commands) */
+			0x14, /* uint(suit-directive-override-parameters) */
+			0xa1, /* map (1) */
+				0x03, /* uint(suit-parameter-image-digest) */
+				0x58, 0x25, /* bytes(37) */
+				0x82, /* array (2 elements) */
+					0x38, 0x2B, /* suit-digest-algorithm-id: cose-alg-sha-512 */
+					0x58, 0x20, /* suit-digest-bytes: bytes(32) */
+					0x66, 0x58, 0xea, 0x56, 0x02, 0x62, 0x69, 0x6d,
+					0xd1, 0xf1, 0x3b, 0x78, 0x22, 0x39, 0xa0, 0x64,
+					0xda, 0x7c, 0x6c, 0x5c, 0xba, 0xf5, 0x2f, 0xde,
+					0xd4, 0x28, 0xa6, 0xfc, 0x83, 0xc7, 0xe5, 0xaf,
 			0x03, /* uint(suit-condition-image-match) */
 			0x00, /* uint(SUIT_Rep_Policy::None) */
 	};
@@ -263,6 +388,51 @@ void test_seq_execution_condition_image_match(void)
 	TEST_ASSERT_EQUAL(SUIT_SUCCESS, retval);
 }
 
+void test_seq_execution_condition_image_match_sha512(void)
+{
+	uint8_t seq_cmd[] = {
+		0x84, /* list (4 elements - 2 commands) */
+			0x14, /* uint(suit-directive-override-parameters) */
+			0xa1, /* map (1) */
+				0x03, /* uint(suit-parameter-image-digest) */
+				0x58, 0x45, /* bytes(69) */
+				0x82, /* array (2 elements) */
+					0x38, 0x2B, /* suit-digest-algorithm-id: cose-alg-sha-512 */
+					0x58, 0x40, /* suit-digest-bytes: bytes(64) */
+					0x66, 0x58, 0xea, 0x56, 0x02, 0x62, 0x69, 0x6d,
+					0xd1, 0xf1, 0x3b, 0x78, 0x22, 0x39, 0xa0, 0x64,
+					0xda, 0x7c, 0x6c, 0x5c, 0xba, 0xf5, 0x2f, 0xde,
+					0xd4, 0x28, 0xa6, 0xfc, 0x83, 0xc7, 0xe5, 0xaf,
+					0x66, 0x58, 0xea, 0x56, 0x02, 0x62, 0x69, 0x6d,
+					0xd1, 0xf1, 0x3b, 0x78, 0x22, 0x39, 0xa0, 0x64,
+					0xda, 0x7c, 0x6c, 0x5c, 0xba, 0xf5, 0x2f, 0xde,
+					0xd4, 0x28, 0xa6, 0xfc, 0x83, 0xc7, 0xe5, 0xaf,
+			0x03, /* uint(suit-condition-image-match) */
+			0x00, /* uint(SUIT_Rep_Policy::None) */
+	};
+	struct zcbor_string seq = {
+		.value = seq_cmd,
+		.len = sizeof(seq_cmd),
+	};
+	struct zcbor_string exp_decoded_digest = {
+		.value = &seq_cmd[11],
+		.len = 64,
+	};
+
+	bootstrap_envelope_empty(&state);
+	bootstrap_envelope_components(&state, 1);
+
+	__cmock_suit_plat_check_image_match_ExpectComplexArgsAndReturn(
+		ASSIGNED_COMPONENT_HANDLE,
+		suit_cose_sha512,
+		&exp_decoded_digest,
+		SUIT_SUCCESS);
+
+	int retval = execute_command_sequence(&state, &seq);
+
+	TEST_ASSERT_EQUAL(SUIT_SUCCESS, retval);
+}
+
 void test_seq_execution_condition_image_match_dependency(void)
 {
 	struct zcbor_string exp_decoded_digest = {
@@ -285,6 +455,32 @@ void test_seq_execution_condition_image_match_dependency(void)
 		SUIT_SUCCESS);
 
 	int retval = execute_command_sequence(&state, &seq_condition_image_match);
+
+	TEST_ASSERT_EQUAL(SUIT_SUCCESS, retval);
+}
+
+void test_seq_execution_condition_image_match_dependency_sha512(void)
+{
+	struct zcbor_string exp_decoded_digest = {
+		.value = &exp_digest_sha512.value[5],
+		.len = exp_digest_sha512.len - 5,
+	};
+
+	bootstrap_envelope_empty(&state);
+	bootstrap_envelope_dependency_components(&state, 1);
+
+	__cmock_suit_plat_retrieve_manifest_ExpectAndReturn(ASSIGNED_COMPONENT_HANDLE, NULL, NULL, SUIT_SUCCESS);
+	__cmock_suit_plat_retrieve_manifest_IgnoreArg_envelope_str();
+	__cmock_suit_plat_retrieve_manifest_ReturnThruPtr_envelope_str((uint8_t **)&exp_envelope_minimal_sha512.value);
+	__cmock_suit_plat_retrieve_manifest_IgnoreArg_envelope_len();
+	__cmock_suit_plat_retrieve_manifest_ReturnThruPtr_envelope_len(&exp_envelope_minimal_sha512.len);
+	__cmock_suit_plat_check_digest_ExpectComplexArgsAndReturn(
+		suit_cose_sha512,
+		&exp_decoded_digest,
+		&exp_manifest_minimal_sha512,
+		SUIT_SUCCESS);
+
+	int retval = execute_command_sequence(&state, &seq_condition_image_match_sha512);
 
 	TEST_ASSERT_EQUAL(SUIT_SUCCESS, retval);
 }
@@ -329,6 +525,32 @@ void test_seq_execution_condition_image_match_dependency_with_different_digest(v
 		suit_cose_sha256,
 		&exp_invalid_digest,
 		&exp_manifest_minimal,
+		SUIT_SUCCESS);
+
+	int retval = execute_command_sequence(&state, &seq_condition_image_match);
+
+	TEST_ASSERT_EQUAL(SUIT_FAIL_CONDITION, retval);
+}
+
+void test_seq_execution_condition_image_match_dependency_with_different_digest_algorithm(void)
+{
+	struct zcbor_string exp_decoded_digest = {
+		.value = &exp_digest_sha512.value[5],
+		.len = exp_digest_sha512.len - 5,
+	};
+
+	bootstrap_envelope_empty(&state);
+	bootstrap_envelope_dependency_components(&state, 1);
+
+	__cmock_suit_plat_retrieve_manifest_ExpectAndReturn(ASSIGNED_COMPONENT_HANDLE, NULL, NULL, SUIT_SUCCESS);
+	__cmock_suit_plat_retrieve_manifest_IgnoreArg_envelope_str();
+	__cmock_suit_plat_retrieve_manifest_ReturnThruPtr_envelope_str((uint8_t **)&exp_envelope_minimal_sha512.value);
+	__cmock_suit_plat_retrieve_manifest_IgnoreArg_envelope_len();
+	__cmock_suit_plat_retrieve_manifest_ReturnThruPtr_envelope_len(&exp_envelope_minimal_sha512.len);
+	__cmock_suit_plat_check_digest_ExpectComplexArgsAndReturn(
+		suit_cose_sha512,
+		&exp_decoded_digest,
+		&exp_manifest_minimal_sha512,
 		SUIT_SUCCESS);
 
 	int retval = execute_command_sequence(&state, &seq_condition_image_match);

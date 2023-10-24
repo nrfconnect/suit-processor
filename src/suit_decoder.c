@@ -52,8 +52,18 @@ static int verify_suit_digest(struct SUIT_Digest *digest, struct zcbor_string *d
 		return SUIT_ERR_DECODING;
 	}
 
-	/* The SHA256 algorithm is enforced by CDDL, so the digest length is known. */
-	if (digest->_SUIT_Digest_suit_digest_bytes.len != 32) {
+	if (digest->_SUIT_Digest_suit_digest_algorithm_id._suit_cose_hash_algs_choice == _suit_cose_hash_algs__cose_alg_sha_256) {
+		/* The SHA256 algorithm is allowed by CDDL. Verify the digest length. */
+		if (digest->_SUIT_Digest_suit_digest_bytes.len != 32) {
+			return SUIT_ERR_DECODING;
+		}
+	} else if (digest->_SUIT_Digest_suit_digest_algorithm_id._suit_cose_hash_algs_choice == _suit_cose_hash_algs__cose_alg_sha_512) {
+		/* The SHA512 algorithm is allowed by CDDL. Verify the digest length. */
+		if (digest->_SUIT_Digest_suit_digest_bytes.len != 64) {
+			return SUIT_ERR_DECODING;
+		}
+	} else {
+		/* Other algorithms are not supported. */
 		return SUIT_ERR_DECODING;
 	}
 
@@ -63,8 +73,7 @@ static int verify_suit_digest(struct SUIT_Digest *digest, struct zcbor_string *d
 	};
 
 	return suit_plat_check_digest(
-		/* Value enforced by the input CDDL (manifest.cddl, suit-cose-hash-algs /= cose-alg-sha-256) */
-		suit_cose_sha256,
+		digest->_SUIT_Digest_suit_digest_algorithm_id._suit_cose_hash_algs_choice,
 		&digest->_SUIT_Digest_suit_digest_bytes,
 		&data_bytes);
 }

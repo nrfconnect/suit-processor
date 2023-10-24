@@ -169,6 +169,7 @@ void test_suit_decode_envelope(void)
 {
 	struct zcbor_string manifest_component_id;
 	struct zcbor_string digest;
+	enum suit_cose_alg alg;
 	unsigned int seq_num;
 
 	__cmock_suit_plat_check_digest_ExpectComplexArgsAndReturn(suit_cose_sha256, &exp_manifest_digest, &exp_manifest_payload, SUIT_SUCCESS);
@@ -176,10 +177,11 @@ void test_suit_decode_envelope(void)
 	/* The envelope decoding is fully handled by the ZCBOR code and does not call platform APIs */
 	int ret = suit_processor_get_manifest_metadata(
 		manifest_buf, manifest_len, false,
-		&manifest_component_id, &digest, &seq_num);
+		&manifest_component_id, &digest, &alg, &seq_num);
 
 	TEST_ASSERT_EQUAL_MESSAGE(SUIT_SUCCESS, ret, "Unable to decode input manifest");
 	TEST_ASSERT_EQUAL_MESSAGE(1, seq_num, "Unexpected sequence number value");
+	TEST_ASSERT_EQUAL_MESSAGE(suit_cose_sha256, alg, "Unexpected digest algorithm ID value");
 	assert_zcbor_string(&exp_manifest_id, &manifest_component_id);
 	assert_zcbor_string(&exp_manifest_digest, &digest);
 }
@@ -260,7 +262,7 @@ static int authorize_sequence_num_callback(enum suit_command_sequence seq_name, 
 	/* The envelope decoding is fully handled by the ZCBOR code and does not call platform APIs */
 	int ret = suit_processor_get_manifest_metadata(
 		minimal_manifest, sizeof(minimal_manifest), false,
-		NULL, NULL, &seq_num_minimal);
+		NULL, NULL, NULL, &seq_num_minimal);
 
 	TEST_ASSERT_EQUAL_MESSAGE(SUIT_SUCCESS, ret, "Unable to decode input manifest");
 	TEST_ASSERT_EQUAL_MESSAGE(12, seq_num_minimal, "Unexpected sequence number value");

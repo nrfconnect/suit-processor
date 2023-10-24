@@ -32,8 +32,11 @@ extern struct zcbor_string exp_vid;
 /** @brief Expected class identifier, embedded inside CLASS_ID sequence. */
 extern struct zcbor_string exp_cid;
 
-/** @brief Expected image digest, embedded inside IMAGE_DIGEST sequence. */
+/** @brief Expected image digest (SHA-256), embedded inside IMAGE_DIGEST sequence. */
 extern struct zcbor_string exp_digest;
+
+/** @brief Expected image digest (SHA-512), embedded inside IMAGE_DIGEST sequence. */
+extern struct zcbor_string exp_digest_sha512;
 
 /** @brief Expected slot number, embedded inside COMPONENT_SLOT sequence. */
 extern uint32_t exp_slot;
