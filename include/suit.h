@@ -9,7 +9,6 @@
 
 #include <stdint.h>
 #include <suit_types.h>
-#include <suit_legacy.h>
 
 
 /** @brief Initialize SUIT processor module
