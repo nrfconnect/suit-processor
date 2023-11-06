@@ -102,6 +102,7 @@ target_include_directories(manifest PUBLIC
 
 # Define SUIT library
 add_library(suit)
+add_library(suit_interface INTERFACE)
 target_sources(suit PRIVATE
   src/suit_manifest.c
   src/suit_decoder.c
@@ -111,9 +112,11 @@ target_sources(suit PRIVATE
   src/suit_directive.c
   src/suit.c
   )
-target_include_directories(suit PUBLIC
+
+target_include_directories(suit_interface INTERFACE
   include
   )
+target_link_libraries(suit PUBLIC suit_interface)
 
 # Link with the auto-generated code
 target_link_libraries(suit PUBLIC manifest)
