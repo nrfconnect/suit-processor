@@ -9,8 +9,7 @@
 
 #include <stdint.h>
 #include <string.h>
-#include "zcbor_common.h"
-#include "manifest_types.h"
+#include <zcbor_common.h>
 
 
 #define SUIT_MAX_NUM_SIGNERS 2  ///! The maximum number of signers.
