@@ -280,7 +280,6 @@ void test_seq_execution_condition_image_match_failed(void)
 		ASSIGNED_COMPONENT_HANDLE,
 		suit_cose_sha256,
 		&exp_decoded_digest,
-		exp_image_size,
 		SUIT_ERR_AUTHENTICATION);
 
 	int retval = execute_command_sequence(&state, &seq_condition_image_match);
@@ -303,7 +302,6 @@ void test_seq_execution_condition_image_match(void)
 		ASSIGNED_COMPONENT_HANDLE,
 		suit_cose_sha256,
 		&exp_decoded_digest,
-		exp_image_size,
 		SUIT_SUCCESS);
 
 	int retval = execute_command_sequence(&state, &seq_condition_image_match);

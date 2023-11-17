@@ -89,13 +89,11 @@ int suit_plat_release_component_handle(suit_component_t handle);
  * @param[in] handle      A reference to the checked component.
  * @param[in] alg_id      The digest verification algorithm to use.
  * @param[in] digest      Expected diest value.
- * @param[in] image_size  The size of the checked content.
  *
  * @returns SUIT_SUCCESS if the image digest matches, error code otherwise.
  */
 int suit_plat_check_image_match(suit_component_t handle,
-		enum suit_cose_alg alg_id, struct zcbor_string *digest,
-		size_t image_size);
+		enum suit_cose_alg alg_id, struct zcbor_string *digest);
 
 /** @brief Check the provided payload against the component value.
  *

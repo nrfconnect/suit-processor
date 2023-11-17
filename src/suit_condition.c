@@ -120,8 +120,7 @@ int suit_condition_image_match(struct suit_processor_state *state,
 	} else {
 		ret = suit_plat_check_image_match(component_params->component_handle,
 			suit_cose_sha256,
-			&digest._SUIT_Digest_suit_digest_bytes,
-			component_params->image_size);
+			&digest._SUIT_Digest_suit_digest_bytes);
 	}
 
 	return ret;
