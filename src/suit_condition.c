@@ -76,9 +76,8 @@ int suit_condition_image_match(struct suit_processor_state *state,
 	struct SUIT_Digest digest;
 	size_t bytes_processed;
 
-	if (!component_params->image_digest_set
-		|| !component_params->image_size_set) {
-		SUIT_ERR("Failed to check image digest: size or digest not set (handle: %p)\r\n", (void *)component_params->component_handle);
+	if (!component_params->image_digest_set) {
+		SUIT_ERR("Failed to check image digest: digest not set (handle: %p)\r\n", (void *)component_params->component_handle);
 		return SUIT_ERR_UNAVAILABLE_PARAMETER;
 	}
 

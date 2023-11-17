@@ -38,7 +38,6 @@ void test_seq_execution_condition_device_identifier(void);
 
 /* suit-condition-image-match tests */
 void test_seq_execution_condition_image_match_no_digest(void);
-void test_seq_execution_condition_image_match_no_image_size(void);
 void test_seq_execution_condition_image_match_unsupported_algorithm(void);
 void test_seq_execution_condition_image_match_invalid_digest_length(void);
 void test_seq_execution_condition_image_match_failed(void);
