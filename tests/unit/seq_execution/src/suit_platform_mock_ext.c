@@ -52,7 +52,7 @@ int __get_component_handle_callback(struct zcbor_string *component_id, suit_comp
 }
 
 COMPLEX_ARG_Q_DEFINE(__check_image_match_callback_queue);
-int __check_image_match_callback(suit_component_t image_handle, enum suit_cose_alg alg_id, struct zcbor_string *digest, size_t image_size, int cmock_num_calls)
+int __check_image_match_callback(suit_component_t image_handle, enum suit_cose_alg alg_id, struct zcbor_string *digest, int cmock_num_calls)
 {
 	(void)assert_complex_arg(&__check_image_match_callback_queue, digest);
 	return assert_complex_arg(&__check_image_match_callback_queue, NULL);

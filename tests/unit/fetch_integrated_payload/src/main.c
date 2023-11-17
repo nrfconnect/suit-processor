@@ -288,7 +288,7 @@ void test_suit_process_seq_install(void)
 	__cmock_suit_plat_check_vid_ExpectComplexArgsAndReturn(ASSIGNED_COMPONENT_HANDLE, &exp_vid_uuid, SUIT_SUCCESS);
 	__cmock_suit_plat_check_cid_ExpectComplexArgsAndReturn(ASSIGNED_COMPONENT_HANDLE, &exp_cid_uuid, SUIT_SUCCESS);
 	__cmock_suit_plat_fetch_integrated_ExpectComplexArgsAndReturn(ASSIGNED_COMPONENT_HANDLE, &exp_image_payload, SUIT_SUCCESS);
-	__cmock_suit_plat_check_image_match_ExpectComplexArgsAndReturn(ASSIGNED_COMPONENT_HANDLE, suit_cose_sha256, &exp_image_digest, 256, SUIT_SUCCESS);
+	__cmock_suit_plat_check_image_match_ExpectComplexArgsAndReturn(ASSIGNED_COMPONENT_HANDLE, suit_cose_sha256, &exp_image_digest, SUIT_SUCCESS);
 	__cmock_suit_plat_sequence_completed_ExpectAndReturn(SUIT_SEQ_INSTALL, &exp_manifest_id, manifest_buf, manifest_len, SUIT_SUCCESS);
 
 	int err = suit_process_sequence(manifest_buf, manifest_len, SUIT_SEQ_INSTALL);
@@ -311,7 +311,7 @@ void test_suit_process_seq_validate(void)
 	__cmock_suit_plat_override_image_size_ExpectAndReturn(ASSIGNED_COMPONENT_HANDLE, 256, SUIT_SUCCESS);
 	__cmock_suit_plat_check_vid_ExpectComplexArgsAndReturn(ASSIGNED_COMPONENT_HANDLE, &exp_vid_uuid, SUIT_SUCCESS);
 	__cmock_suit_plat_check_cid_ExpectComplexArgsAndReturn(ASSIGNED_COMPONENT_HANDLE, &exp_cid_uuid, SUIT_SUCCESS);
-	__cmock_suit_plat_check_image_match_ExpectComplexArgsAndReturn(ASSIGNED_COMPONENT_HANDLE, suit_cose_sha256, &exp_image_digest, 256, SUIT_SUCCESS);
+	__cmock_suit_plat_check_image_match_ExpectComplexArgsAndReturn(ASSIGNED_COMPONENT_HANDLE, suit_cose_sha256, &exp_image_digest, SUIT_SUCCESS);
 	__cmock_suit_plat_sequence_completed_ExpectAndReturn(SUIT_SEQ_VALIDATE, &exp_manifest_id, manifest_buf, manifest_len, SUIT_SUCCESS);
 
 	int err = suit_process_sequence(manifest_buf, manifest_len, SUIT_SEQ_VALIDATE);
