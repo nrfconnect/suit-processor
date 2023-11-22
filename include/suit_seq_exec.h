@@ -10,6 +10,9 @@
 #include "suit_processor.h"
 #include <manifest_types.h>
 
+#ifdef __cplusplus
+extern "C" {
+#endif /* __cplusplus */
 
 /** @brief Schedule the command sequence for execution.
  *
@@ -133,5 +136,9 @@ int suit_exec_component_handle_from_idx(struct suit_seq_exec_state *seq_exec_sta
  * @returns SUIT_SUCCESS if the integrated payload was found and returned, error code otherwise.
  */
 int suit_exec_find_integrated_payload(struct suit_seq_exec_state *seq_exec_state, struct zcbor_string *uri, struct zcbor_string *payload);
+
+#ifdef __cplusplus
+}
+#endif /* __cplusplus */
 
 #endif /* SUIT_SEQ_EXEC_H__ */

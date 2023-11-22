@@ -9,6 +9,9 @@
 
 #include "suit_processor.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif /* __cplusplus */
 
 /** Schedule execution of all commands in the sequence from the current manifest.
  *
@@ -40,5 +43,9 @@ int suit_schedule_validation(struct suit_processor_state *state, struct suit_man
  * @returns SUIT_ERR_SUCCESS if the sequence was successfully processed, error code otherwise.
  */
 int suit_process_scheduled(struct suit_processor_state *state);
+
+#ifdef __cplusplus
+}
+#endif /* __cplusplus */
 
 #endif /* SUIT_SCHEDULE_SEQ_H__ */

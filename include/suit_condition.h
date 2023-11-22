@@ -9,6 +9,9 @@
 
 #include "suit_processor.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif /* __cplusplus */
 
 /** Check a vendor ID based on the configured parameters. */
 int suit_condition_vendor_identifier(struct suit_processor_state *state,
@@ -41,5 +44,9 @@ int suit_condition_dependency_integrity(struct suit_processor_state *state,
 /** Check if component is a dependency manifest component. */
 int suit_condition_is_dependency(struct suit_processor_state *state,
 		struct suit_manifest_params *component_params);
+
+#ifdef __cplusplus
+}
+#endif /* __cplusplus */
 
 #endif /* SUIT_CONDITION_H__ */

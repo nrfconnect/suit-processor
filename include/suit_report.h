@@ -10,6 +10,9 @@
 #include "suit_types.h"
 #include <stdint.h>
 
+#ifdef __cplusplus
+extern "C" {
+#endif /* __cplusplus */
 
 /** Construct a report for the given command.
  *
@@ -22,5 +25,8 @@ int suit_construct_report(unsigned int command, int result,
 		struct suit_manifest_params *parameters,
 		struct suit_report *report);
 
+#ifdef __cplusplus
+}
+#endif /* __cplusplus */
 
 #endif /* SUIT_REPORT_H__ */

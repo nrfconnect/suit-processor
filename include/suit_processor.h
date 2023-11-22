@@ -10,6 +10,10 @@
 #include <suit_types.h>
 #include "manifest_types.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif /* __cplusplus */
+
 /* Forward declaration of the SUIT processor state, used inside the command processor callback. */
 struct suit_processor_state;
 
@@ -241,5 +245,9 @@ int suit_processor_load_envelope(struct suit_processor_state *state, uint8_t *en
  */
 int suit_processor_override_state(struct suit_processor_state *new_state);
 #endif /* CONFIG_UNITY */
+
+#ifdef __cplusplus
+}
+#endif /* __cplusplus */
 
 #endif /* SUIT_PROCESSOR_H__ */

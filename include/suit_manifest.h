@@ -9,6 +9,10 @@
 
 #include <suit_processor.h>
 
+#ifdef __cplusplus
+extern "C" {
+#endif /* __cplusplus */
+
 /** @brief Assign and initialize the memory to store SUIT component parameters.
  *
  * @param[in] params  Reference to an array holding the component parameters values.
@@ -85,5 +89,9 @@ struct zcbor_string *suit_manifest_get_command_seq(struct suit_manifest_state *m
  * @returns SUIT_SUCCESS if the integrated payload was found and the structure was returned, error code otherwise.
  */
 int suit_manifest_get_integrated_payload(struct suit_manifest_state *manifest, struct zcbor_string *uri, struct zcbor_string *payload);
+
+#ifdef __cplusplus
+}
+#endif /* __cplusplus */
 
 #endif /* SUIT_MANIFEST_H__ */

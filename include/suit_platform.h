@@ -10,6 +10,9 @@
 #include "suit_types.h"
 #include <stdint.h>
 
+#ifdef __cplusplus
+extern "C" {
+#endif /* __cplusplus */
 
 #ifndef SUIT_DBG
 #define SUIT_DBG(...)
@@ -315,5 +318,9 @@ int suit_plat_check_write(suit_component_t dst_handle, struct zcbor_string *cont
 int suit_plat_check_invoke(suit_component_t image_handle, struct zcbor_string *invoke_args);
 
 #endif /* SUIT_PLATFORM_DRY_RUN_SUPPORT */
+
+#ifdef __cplusplus
+}
+#endif /* __cplusplus */
 
 #endif /* SUIT_PLATFORM_H__ */
