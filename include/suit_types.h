@@ -11,6 +11,9 @@
 #include <string.h>
 #include <zcbor_common.h>
 
+#ifdef __cplusplus
+extern "C" {
+#endif /* __cplusplus */
 
 #define SUIT_MAX_NUM_SIGNERS 2  ///! The maximum number of signers.
 #define SUIT_MAX_NUM_COMPONENT_ID_PARTS 5  ///! The maximum number of bytestrings in a component ID.
@@ -98,5 +101,8 @@ static inline bool suit_compare_zcbor_strings(const struct zcbor_string *str1, c
 	return (str1 != NULL) && (str2 != NULL) && (str1->len == str2->len) && (memcmp(str1->value, str2->value, str1->len) == 0);
 }
 
+#ifdef __cplusplus
+}
+#endif /* __cplusplus */
 
 #endif /* SUIT_TYPES_H__ */

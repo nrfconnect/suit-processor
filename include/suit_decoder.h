@@ -9,6 +9,9 @@
 
 #include <suit_processor.h>
 
+#ifdef __cplusplus
+extern "C" {
+#endif /* __cplusplus */
 
 /** @brief Initialize the decoder context.
  *
@@ -128,5 +131,9 @@ int suit_decoder_decode_sequences(struct suit_decoder_state *state);
  * @returns SUIT_SUCCESS if the operation succeeds, error code otherwise.
  */
 int suit_decoder_create_components(struct suit_decoder_state *state);
+
+#ifdef __cplusplus
+}
+#endif /* __cplusplus */
 
 #endif /* SUIT_DECODER_H__ */

@@ -10,6 +10,9 @@
 #include <stdint.h>
 #include <suit_types.h>
 
+#ifdef __cplusplus
+extern "C" {
+#endif /* __cplusplus */
 
 /** @brief Initialize SUIT processor module
  *
@@ -47,5 +50,9 @@ int suit_process_sequence(uint8_t *envelope_str, size_t envelope_len, enum suit_
  * @returns SUIT_SUCCESS if the operation succeeds, error code otherwise.
  */
 int suit_processor_get_manifest_metadata(uint8_t *envelope_str, size_t envelope_len, bool authenticate, struct zcbor_string *manifest_component_id, struct zcbor_string *digest, enum suit_cose_alg *alg, unsigned int *seq_num);
+
+#ifdef __cplusplus
+}
+#endif /* __cplusplus */
 
 #endif /* SUIT_H__ */

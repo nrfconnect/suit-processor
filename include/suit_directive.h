@@ -10,6 +10,9 @@
 #include "suit_processor.h"
 #include <stdint.h>
 
+#ifdef __cplusplus
+extern "C" {
+#endif /* __cplusplus */
 
 /** Set the current component indices. This decides which component(s)
  *  are affected by subsequent commands. */
@@ -51,5 +54,9 @@ int suit_directive_set_parameters(struct suit_processor_state *state,
 
 /** Process the current sequence of the dependency manifest. */
 int suit_directive_process_dependency(struct suit_processor_state *state, struct suit_manifest_params *component_params);
+
+#ifdef __cplusplus
+}
+#endif /* __cplusplus */
 
 #endif /* SUIT_DIRECTIVE_H__ */
