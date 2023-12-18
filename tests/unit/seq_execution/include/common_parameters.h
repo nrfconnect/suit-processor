@@ -20,6 +20,7 @@ enum parameter_values {
 	COMPONENT_SLOT,
 	SOFT_FAILURE,
 	IMAGE_SIZE,
+	CONTENT,
 	URI,
 	SOURCE_COMPONENT,
 	INVOKE_ARGS,
@@ -43,6 +44,9 @@ extern uint32_t exp_slot;
 
 /** @brief Expected image size, embedded inside IMAGE_SIZE sequence. */
 extern size_t exp_image_size;
+
+/** @brief Expected content parameter, embedded inside CONTENT sequence. */
+extern struct zcbor_string exp_content;
 
 /** @brief Expected URI, embedded inside URI sequence. */
 extern struct zcbor_string exp_uri;
