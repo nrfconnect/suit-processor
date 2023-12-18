@@ -69,7 +69,7 @@ void test_seq_execution_condition_dependency_integrity_fail(void);
 void test_seq_execution_condition_dependency_integrity_invalid(void);
 
 /* suit-directive-override-parameters tests */
-void test_seq_execution_override_parameter_single_component_3params(void);
+void test_seq_execution_override_parameter_single_component_4params(void);
 void test_seq_execution_override_parameter_single_component_6params(void);
 void test_seq_execution_override_parameter_single_component_7params(void);
 void test_seq_execution_override_parameter_multiple_components_3params(void);
@@ -77,7 +77,7 @@ void test_seq_execution_override_parameter_soft_failure(void);
 void test_seq_execution_override_parameter_soft_failure_nested(void);
 
 /* suit-directive-set-parameters tests */
-void test_seq_execution_set_parameter_single_component_3params(void);
+void test_seq_execution_set_parameter_single_component_4params(void);
 void test_seq_execution_set_parameter_single_component_6params(void);
 void test_seq_execution_set_parameter_single_component_7params(void);
 void test_seq_execution_set_parameter_multiple_components_3params(void);

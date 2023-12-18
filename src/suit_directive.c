@@ -178,6 +178,11 @@ static int suit_directive_override_parameter(struct SUIT_Parameters_ *param, str
 			return ret;
 		}
 	} break;
+	case _SUIT_Parameters_suit_parameter_content:
+		SUIT_DBG("Override content parameter (handle: 0x%lx)\r\n", dst->component_handle);
+		memcpy(&dst->content, &param->_SUIT_Parameters_suit_parameter_content, sizeof(dst->content));
+		dst->content_set = true;
+		break;
 	case _SUIT_Parameters_suit_parameter_component_slot:
 		SUIT_DBG("Override slot (handle: 0x%lx)\r\n", dst->component_handle);
 		dst->component_slot = param->_SUIT_Parameters_suit_parameter_component_slot;
@@ -293,6 +298,9 @@ static int suit_directive_set_parameter(struct SUIT_Parameters_ *param, struct s
 		break;
 	case _SUIT_Parameters_suit_parameter_image_size:
 		parameter_set = dst->image_size_set;
+		break;
+	case _SUIT_Parameters_suit_parameter_content:
+		parameter_set = dst->content_set;
 		break;
 	case _SUIT_Parameters_suit_parameter_component_slot:
 		parameter_set = dst->component_slot_set;

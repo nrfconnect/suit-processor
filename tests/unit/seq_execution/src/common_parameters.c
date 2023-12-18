@@ -97,6 +97,17 @@ static uint8_t image_size_cmd[] = {
 
 size_t exp_image_size = 0x01020304;
 
+static uint8_t content_cmd[] = {
+	0x12, /* uint(suit-parameter-content) */
+	0x48, /* bytes (8) */
+		0x12, 0x23, 0x34, 0x45, 0x56, 0x67, 0x78, 0x89
+};
+
+struct zcbor_string exp_content = {
+	.value = &content_cmd[2],
+	.len = 8,
+};
+
 static uint8_t uri_cmd[] = {
 	0x15, /* uint(suit-parameter-uri) */
 	0x68, /* text (8 characters) */
@@ -148,6 +159,7 @@ static struct parameter_value *find_param(enum parameter_values param)
 		{COMPONENT_SLOT, component_slot_cmd, sizeof(component_slot_cmd)},
 		{SOFT_FAILURE, soft_failure_cmd, sizeof(soft_failure_cmd)},
 		{IMAGE_SIZE, image_size_cmd, sizeof(image_size_cmd)},
+		{CONTENT, content_cmd, sizeof(content_cmd)},
 		{URI, uri_cmd, sizeof(uri_cmd)},
 		{SOURCE_COMPONENT, source_component_cmd, sizeof(source_component_cmd)},
 		{INVOKE_ARGS, invoke_args_cmd, sizeof(invoke_args_cmd)},
