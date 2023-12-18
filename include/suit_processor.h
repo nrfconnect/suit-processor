@@ -54,6 +54,7 @@ struct suit_manifest_params {
 	struct zcbor_string cid;
 	struct zcbor_string image_digest;
 	size_t image_size;
+	struct zcbor_string content;
 	unsigned int component_slot;
 	struct zcbor_string uri;
 	unsigned int source_component;
@@ -64,6 +65,7 @@ struct suit_manifest_params {
 	bool cid_set;
 	bool image_digest_set;
 	bool image_size_set;
+	bool content_set;
 	bool component_slot_set;
 	bool uri_set;
 	bool source_component_set;

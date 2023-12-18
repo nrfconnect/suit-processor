@@ -185,7 +185,7 @@ $$SUIT_Parameters //= (suit-parameter-device-identifier => RFC4122_UUID)
 
 ; $$SUIT_Parameters //= (suit-parameter-custom => int/bool/tstr/bstr)
 
-; $$SUIT_Parameters //= (suit-parameter-content => bstr)
+$$SUIT_Parameters //= (suit-parameter-content => bstr)
 ; $$SUIT_Parameters //= (suit-parameter-strict-order => bool)
 $$SUIT_Parameters //= (suit-parameter-soft-failure => bool)
 
@@ -275,7 +275,7 @@ suit-parameter-component-slot    = 5
 ; suit-parameter-strict-order      = 12
 suit-parameter-soft-failure      = 13
 suit-parameter-image-size        = 14
-; suit-parameter-content           = 18
+suit-parameter-content           = 18
 
 suit-parameter-uri               = 21
 suit-parameter-source-component  = 22
