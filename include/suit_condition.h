@@ -33,6 +33,10 @@ int suit_condition_image_match(struct suit_processor_state *state,
 int suit_condition_component_slot(struct suit_processor_state *state,
 		struct suit_manifest_params *component_params);
 
+/** Check if the component content matches the configured parameter. */
+int suit_condition_check_content(struct suit_processor_state *state,
+		struct suit_manifest_params *component_params);
+
 /** Unconditionally fail. */
 int suit_condition_abort(struct suit_processor_state *state,
 		struct suit_manifest_params *component_params);

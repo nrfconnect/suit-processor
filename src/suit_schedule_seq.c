@@ -70,6 +70,7 @@ static int suit_validate_single_command(struct suit_processor_state *state, suit
 			case _SUIT_Condition___suit_condition_device_identifier:
 			case _SUIT_Condition___suit_condition_image_match:
 			case _SUIT_Condition___suit_condition_component_slot:
+			case _SUIT_Condition___suit_condition_check_content:
 			case _SUIT_Condition___suit_condition_abort:
 				SUIT_DBG("Found valid condition: %d\r\n", command->condition._SUIT_Condition_choice);
 				retval = SUIT_SUCCESS;
@@ -223,6 +224,9 @@ static int suit_run_single_command(struct suit_processor_state *state, suit_comm
 				break;
 			case _SUIT_Condition___suit_condition_component_slot:
 				retval = suit_condition_component_slot(state, params);
+				break;
+			case _SUIT_Condition___suit_condition_check_content:
+				retval = suit_condition_check_content(state, params);
 				break;
 			case _SUIT_Condition___suit_condition_abort:
 				retval = suit_condition_abort(state, params);

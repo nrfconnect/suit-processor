@@ -108,6 +108,16 @@ int __get_component_handle_callback(struct zcbor_string* component_id, suit_comp
 }
 int __check_image_match_callback(suit_component_t image_handle, enum suit_cose_alg alg_id, struct zcbor_string* digest, int cmock_num_calls);
 
+#define __cmock_suit_plat_check_content_ExpectComplexArgsAndReturn(component_handle, content, cmock_retval) { \
+	extern complex_arg_q_t __check_content_callback_queue; \
+	push_complex_arg(content, assert_zcbor_string, __check_content_callback_queue); \
+	push_retval_arg(cmock_retval, __check_content_callback_queue); \
+	__cmock_suit_plat_check_content_AddCallback(__check_content_callback); \
+	__cmock_suit_plat_check_content_ExpectAndReturn(component_handle, content, cmock_retval); \
+	__cmock_suit_plat_check_content_IgnoreArg_content(); \
+}
+int __check_content_callback(suit_component_t component_handle, struct zcbor_string* content, int cmock_num_calls);
+
 #define __cmock_suit_plat_check_vid_ExpectComplexArgsAndReturn(component_handle, vid_uuid, cmock_retval) { \
 	extern complex_arg_q_t __check_vid_callback_queue; \
 	push_complex_arg(vid_uuid, assert_zcbor_string, __check_vid_callback_queue); \

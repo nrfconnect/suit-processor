@@ -58,6 +58,13 @@ int __check_image_match_callback(suit_component_t image_handle, enum suit_cose_a
 	return assert_complex_arg(&__check_image_match_callback_queue, NULL);
 }
 
+COMPLEX_ARG_Q_DEFINE(__check_content_callback_queue);
+int __check_content_callback(suit_component_t component_handle, struct zcbor_string* content, int cmock_num_calls)
+{
+	(void)assert_complex_arg(&__check_content_callback_queue, content);
+	return assert_complex_arg(&__check_content_callback_queue, NULL);
+}
+
 COMPLEX_ARG_Q_DEFINE(__check_vid_callback_queue);
 int __check_vid_callback(suit_component_t component_handle, struct zcbor_string *vid_uuid, int cmock_num_calls)
 {
