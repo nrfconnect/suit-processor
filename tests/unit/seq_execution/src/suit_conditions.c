@@ -222,6 +222,57 @@ void test_seq_execution_condition_component_slot(void)
 	TEST_ASSERT_EQUAL(SUIT_SUCCESS, retval);
 }
 
+void test_seq_execution_condition_check_content_no_content(void)
+{
+	uint8_t seq_cmd[] = {
+		0x82, /* list (2 elements - 1 command) */
+			0x06, /* uint(suit-condition-check-content) */
+			0x00, /* uint(SUIT_Rep_Policy::None) */
+	};
+	struct zcbor_string seq = {
+		.value = seq_cmd,
+		.len = sizeof(seq_cmd),
+	};
+
+	bootstrap_envelope_empty(&state);
+	bootstrap_envelope_components(&state, 1);
+
+	int retval = execute_command_sequence(&state, &seq);
+
+	TEST_ASSERT_EQUAL(SUIT_ERR_UNAVAILABLE_PARAMETER, retval);
+}
+
+void test_seq_execution_condition_check_content(void)
+{
+	uint8_t seq_cmd[] = {
+		0x84, /* list (4 elements - 2 commands) */
+			0x14, /* uint(suit-directive-override-parameters) */
+			0xa1, /* map (1) */
+				0x12, /* uint(suit-parameter-content) */
+				0x48, /* bytes (8) */
+					0x12, 0x23, 0x34, 0x45, 0x56, 0x67, 0x78, 0x89,
+			0x06, /* uint(suit-condition-check-content) */
+			0x00, /* uint(SUIT_Rep_Policy::None) */
+	};
+
+	struct zcbor_string seq = {
+		.value = seq_cmd,
+		.len = sizeof(seq_cmd),
+	};
+
+	bootstrap_envelope_empty(&state);
+	bootstrap_envelope_components(&state, 1);
+
+	__cmock_suit_plat_check_content_ExpectComplexArgsAndReturn(
+		ASSIGNED_COMPONENT_HANDLE,
+		&exp_content,
+		SUIT_SUCCESS);
+
+	int retval = execute_command_sequence(&state, &seq);
+
+	TEST_ASSERT_EQUAL(SUIT_SUCCESS, retval);
+}
+
 void test_seq_execution_condition_abort(void)
 {
 	uint8_t seq_cmd[] = {

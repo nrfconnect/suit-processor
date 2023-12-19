@@ -71,6 +71,12 @@ static uint8_t condition_device_identifier_cmd[] = {
 		0x00, /* uint(SUIT_Rep_Policy::None) */
 };
 
+static uint8_t condition_unsupported_cmd[] = {
+	0x82, /* list (2 elements - 1 command) */
+		0xfe, /* unsupported value */
+		0x00, /* uint(SUIT_Rep_Policy::None) */
+};
+
 static uint8_t directive_process_dependency_cmd[] = {
 	0x82, /* list (2 elements - 1 command) */
 		0x0b, /* uint(suit-directive-process-dependency) */
@@ -164,11 +170,12 @@ struct cmd_support_matrix shared_support_matrix[] = {
 	{SUIT_SUCCESS, condition_class_identifier_cmd, sizeof(condition_class_identifier_cmd), "condition_class_identifier"},
 	{SUIT_SUCCESS, condition_image_match_cmd, sizeof(condition_image_match_cmd), "condition_image_match"},
 	{SUIT_SUCCESS, condition_component_slot_cmd, sizeof(condition_component_slot_cmd), "condition_component_slot"},
-	{SUIT_ERR_DECODING, condition_check_content_cmd, sizeof(condition_check_content_cmd), "condition_check_content"},
+	{SUIT_SUCCESS, condition_check_content_cmd, sizeof(condition_check_content_cmd), "condition_check_content"},
 	{SUIT_SUCCESS, condition_dependency_integrity_cmd, sizeof(condition_dependency_integrity_cmd), "condition_dependency_integrity"},
 	{SUIT_SUCCESS, condition_is_dependency_cmd, sizeof(condition_is_dependency_cmd), "condition_is_dependency"},
 	{SUIT_SUCCESS, condition_abort_cmd, sizeof(condition_abort_cmd), "condition_abort"},
 	{SUIT_SUCCESS, condition_device_identifier_cmd, sizeof(condition_device_identifier_cmd), "condition_device_identifier"},
+	{SUIT_ERR_DECODING, condition_unsupported_cmd, sizeof(condition_unsupported_cmd), "Unsupported condition"},
 	{SUIT_ERR_DECODING, directive_process_dependency_cmd, sizeof(directive_process_dependency_cmd), "directive_process_dependency"},
 	{SUIT_SUCCESS, directive_set_component_index_cmd, sizeof(directive_set_component_index_cmd), "directive_set_component_index"},
 	{ZCBOR_ERR_TO_SUIT_ERR(ZCBOR_ERR_NO_PAYLOAD), directive_try_each_empty_sequences_cmd, sizeof(directive_try_each_empty_sequences_cmd), "directive_try_each without payload"},
@@ -190,11 +197,12 @@ struct cmd_support_matrix command_support_matrix[] = {
 	{SUIT_SUCCESS, condition_class_identifier_cmd, sizeof(condition_class_identifier_cmd), "condition_class_identifier"},
 	{SUIT_SUCCESS, condition_image_match_cmd, sizeof(condition_image_match_cmd), "condition_image_match"},
 	{SUIT_SUCCESS, condition_component_slot_cmd, sizeof(condition_component_slot_cmd), "condition_component_slot"},
-	{SUIT_ERR_DECODING, condition_check_content_cmd, sizeof(condition_check_content_cmd), "condition_check_content"},
+	{SUIT_SUCCESS, condition_check_content_cmd, sizeof(condition_check_content_cmd), "condition_check_content"},
 	{SUIT_SUCCESS, condition_dependency_integrity_cmd, sizeof(condition_is_dependency_cmd), "condition_dependency_integrity"},
 	{SUIT_SUCCESS, condition_is_dependency_cmd, sizeof(condition_is_dependency_cmd), "condition_is_dependency"},
 	{SUIT_SUCCESS, condition_abort_cmd, sizeof(condition_abort_cmd), "condition_abort"},
 	{SUIT_SUCCESS, condition_device_identifier_cmd, sizeof(condition_device_identifier_cmd), "condition_device_identifier"},
+	{SUIT_ERR_DECODING, condition_unsupported_cmd, sizeof(condition_unsupported_cmd), "Unsupported condition"},
 	{SUIT_ERR_DECODING, directive_process_dependency_cmd, sizeof(directive_process_dependency_cmd), "directive_process_dependency"},
 	{SUIT_SUCCESS, directive_set_component_index_cmd, sizeof(directive_set_component_index_cmd), "directive_set_component_index"},
 	{ZCBOR_ERR_TO_SUIT_ERR(ZCBOR_ERR_NO_PAYLOAD), directive_try_each_empty_sequences_cmd, sizeof(directive_try_each_empty_sequences_cmd), "directive_try_each without payload"},

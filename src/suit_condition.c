@@ -162,6 +162,24 @@ int suit_condition_component_slot(struct suit_processor_state *state,
 	return suit_plat_check_slot(component_params->component_handle, component_params->component_slot);
 }
 
+int suit_condition_check_content(struct suit_processor_state *state,
+		struct suit_manifest_params *component_params)
+{
+	if (!component_params->content_set) {
+		SUIT_ERR("Failed to check content: value not set (handle: %p)\r\n",
+			 (void *)component_params->component_handle);
+		return SUIT_ERR_UNAVAILABLE_PARAMETER;
+	}
+
+#ifdef SUIT_PLATFORM_DRY_RUN_SUPPORT
+	if (state->dry_run != suit_bool_false) {
+		return SUIT_SUCCESS;
+	}
+#endif /* SUIT_PLATFORM_DRY_RUN_SUPPORT */
+
+	return suit_plat_check_content(component_params->component_handle,
+				       &component_params->content);
+}
 
 int suit_condition_abort(struct suit_processor_state *state,
 		struct suit_manifest_params *component_params)
