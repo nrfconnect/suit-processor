@@ -85,8 +85,12 @@ int suit_condition_image_match(struct suit_processor_state *state,
 		component_params->image_digest.value,
 		component_params->image_digest.len,
 		&digest, &bytes_processed);
-	if ((ret != 0) || (bytes_processed != component_params->image_digest.len)) {
+	if ((ret != ZCBOR_SUCCESS) || (bytes_processed != component_params->image_digest.len)) {
 		return SUIT_ERR_DECODING;
+	}
+	else
+	{
+		ret = SUIT_SUCCESS;
 	}
 
 	if (digest._SUIT_Digest_suit_digest_algorithm_id._suit_cose_hash_algs_choice == _suit_cose_hash_algs__cose_alg_sha_256) {
