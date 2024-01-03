@@ -312,10 +312,14 @@ int suit_decoder_decode_envelope(struct suit_decoder_state *state, uint8_t *enve
 	/* For development, condition on expected envelope size was modified.
 	   Now envelope_len represents max allowed size of envelope */
 	if ((ret != ZCBOR_SUCCESS) || (decoded_len > envelope_len)) {
-		ret = ZCBOR_ERR_TO_SUIT_ERR(ret);
+		ret = ZCBOR_ERR_TO_SUIT_ERR((ret != ZCBOR_SUCCESS) ? ret : ZCBOR_ERR_UNKNOWN);
+	}
+	else
+	{
+		ret = SUIT_SUCCESS;
 	}
 
-	if (ret == ZCBOR_SUCCESS) {
+	if (ret == SUIT_SUCCESS) {
 		struct SUIT_Authentication *auth = &state->envelope._SUIT_Envelope_suit_authentication_wrapper_cbor;
 
 		if ((auth->_SUIT_Authentication_bstr_count > SUIT_MAX_NUM_SIGNERS) ||
@@ -323,7 +327,7 @@ int suit_decoder_decode_envelope(struct suit_decoder_state *state, uint8_t *enve
 			ret = SUIT_ERR_DECODING;
 		}
 
-		if (ret == ZCBOR_SUCCESS) {
+		if (ret == SUIT_SUCCESS) {
 			/* Iterate through (key, signature) pairs */
 			for (int i = 0; i < auth->_SUIT_Authentication_bstr_count; i++) {
 				state->authentication_bstr[i] = auth->_SUIT_Authentication_bstr[i];
@@ -348,7 +352,7 @@ int suit_decoder_decode_envelope(struct suit_decoder_state *state, uint8_t *enve
 		}
 
 		/* Store pointers to the integrated payloads and their keys. */
-		if (ret == ZCBOR_SUCCESS) {
+		if (ret == SUIT_SUCCESS) {
 			for (size_t i = 0; i < state->envelope._SUIT_Envelope__SUIT_Integrated_Payload_count; i++) {
 				state->decoded_manifest->integrated_payloads[i].key = state->envelope._SUIT_Envelope__SUIT_Integrated_Payload[i]._SUIT_Envelope__SUIT_Integrated_Payload._SUIT_Integrated_Payload_suit_integrated_payload_key_key;
 				state->decoded_manifest->integrated_payloads[i].payload = state->envelope._SUIT_Envelope__SUIT_Integrated_Payload[i]._SUIT_Envelope__SUIT_Integrated_Payload._SUIT_Integrated_Payload_suit_integrated_payload_key;
@@ -424,11 +428,15 @@ int suit_decoder_decode_manifest(struct suit_decoder_state *state)
 		&state->manifest,
 		&decoded_len);
 
-	if ((ret != ZCBOR_SUCCESS) || (decoded_len != manifest_bstr.len)) {
-		ret = ZCBOR_ERR_TO_SUIT_ERR(ret);
+	if ((ret != ZCBOR_SUCCESS) || decoded_len != manifest_bstr.len) {
+		ret = ZCBOR_ERR_TO_SUIT_ERR((ret != ZCBOR_SUCCESS) ? ret : ZCBOR_ERR_UNKNOWN);
+	}
+	else
+	{
+		ret = SUIT_SUCCESS;
 	}
 
-	if (ret == ZCBOR_SUCCESS) {
+	if (ret == SUIT_SUCCESS) {
 		if (state->manifest.__SUIT_Manifest_Extensions_present) {
 			const struct _SUIT_Manifest_Extensions *ext = &state->manifest.__SUIT_Manifest_Extensions;
 			const struct SUIT_Manifest_Extensions_suit_manifest_component_id *component_id_ext = &ext->__SUIT_Manifest_Extensions;
@@ -438,14 +446,14 @@ int suit_decoder_decode_manifest(struct suit_decoder_state *state)
 		}
 	}
 
-	if (ret == ZCBOR_SUCCESS) {
+	if (ret == SUIT_SUCCESS) {
 		/* Cannot perform universal sequence number authorization.
 		 * Skip this check in decoder logic and store the sequence number value inside the output structure.
 		 */
 		state->decoded_manifest->sequence_number = state->manifest._SUIT_Manifest_suit_manifest_sequence_number;
 	}
 
-	if (ret == ZCBOR_SUCCESS) {
+	if (ret == SUIT_SUCCESS) {
 		state->step = MANIFEST_DECODED;
 		SUIT_DBG("Manifest decoded\r\n");
 		return SUIT_SUCCESS;
@@ -520,7 +528,7 @@ int suit_decoder_authenticate_manifest(struct suit_decoder_state *state)
 		}
 	}
 
-	if (ret == ZCBOR_SUCCESS) {
+	if (ret == SUIT_SUCCESS) {
 		state->step = MANIFEST_AUTHENTICATED;
 		return SUIT_SUCCESS;
 	}
@@ -588,7 +596,7 @@ int suit_decoder_authorize_manifest(struct suit_decoder_state *state)
 		ret = SUIT_ERR_MANIFEST_VALIDATION;
 	}
 
-	if (ret == ZCBOR_SUCCESS) {
+	if (ret == SUIT_SUCCESS) {
 		SUIT_DBG("Manifest component IDs authorized\r\n");
 		state->step = MANIFEST_AUTHORIZED;
 		return SUIT_SUCCESS;

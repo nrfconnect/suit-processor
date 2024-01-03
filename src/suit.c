@@ -316,7 +316,9 @@ int suit_processor_get_manifest_metadata(uint8_t *envelope_str, size_t envelope_
 		ret = cbor_decode_SUIT_Digest(digest_bstr->value, digest_bstr->len, &digest_cbor,
 					      &bytes_processed);
 
-		if ((ret != ZCBOR_SUCCESS) || (bytes_processed != digest_bstr->len)) {
+		ret = (ret != ZCBOR_SUCCESS) ? ZCBOR_ERR_TO_SUIT_ERR(ret) : SUIT_SUCCESS;
+
+		if ((ret != SUIT_SUCCESS) || (bytes_processed != digest_bstr->len)) {
 			ret = SUIT_ERR_DECODING;
 		} else if (digest_cbor._SUIT_Digest_suit_digest_algorithm_id._suit_cose_hash_algs_choice == _suit_cose_hash_algs__cose_alg_sha_256) {
 			/* The SHA256 algorithm is allowed by CDDL. Verify the digest length. */
