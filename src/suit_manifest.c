@@ -249,6 +249,11 @@ struct zcbor_string *suit_manifest_get_command_seq(struct suit_manifest_state *m
 			return &manifest->shared_sequence;
 		}
 		return NULL;
+	case SUIT_SEQ_DEP_RESOLUTION:
+		if (manifest->dependency_resolution_seq_status == AUTHENTICATED) {
+			return &manifest->dependency_resolution_seq;
+		}
+		return NULL;
 	case SUIT_SEQ_PAYLOAD_FETCH:
 		if (manifest->payload_fetch_seq_status == AUTHENTICATED) {
 			return &manifest->payload_fetch_seq;
