@@ -206,7 +206,7 @@ struct suit_processor_state {
 	struct suit_manifest_params components[SUIT_MAX_NUM_COMPONENT_PARAMS];
 
 	size_t manifest_stack_height;
-	struct suit_manifest_state manifest_stack[SUIT_MAX_MANIFEST_DEPTH];
+	struct suit_manifest_state manifest_stack[SUIT_MANIFEST_STACK_MAX_ENTRIES];
 
 	size_t seq_stack_height;
 	struct suit_seq_exec_state seq_stack[SUIT_MAX_SEQ_DEPTH];
