@@ -292,6 +292,11 @@ int suit_processor_get_manifest_metadata(uint8_t *envelope_str, size_t envelope_
 	}
 
 	if (ret == SUIT_SUCCESS) {
+		if (state->manifest_stack_height >= ZCBOR_ARRAY_SIZE(state->manifest_stack)) {
+			SUIT_ERR("Unable to get manifest metadata: Stack too small (%d).\r\n", state->manifest_stack_height);
+			return SUIT_ERR_OVERFLOW;
+		}
+
 		manifest = &state->manifest_stack[state->manifest_stack_height];
 		ret = suit_processor_decode_envelope(decoder_state, manifest, envelope_str, envelope_len);
 	}
