@@ -46,13 +46,33 @@ static int suit_processor_decode_envelope(struct suit_decoder_state *decoder_sta
 }
 
 #ifdef SUIT_PLATFORM_DRY_RUN_SUPPORT
-static int suit_dry_run_manifest(struct suit_manifest_state *manifest_state)
+static int suit_dry_run_manifest(struct suit_manifest_state *manifest_state,
+				 enum suit_command_sequence seq_name)
 {
 	int ret = SUIT_ERR_TAMP;
+	enum suit_command_sequence end_seq = SUIT_SEQ_INVOKE;
+
+	if (seq_name == SUIT_SEQ_PARSE)
+	{
+		return SUIT_SUCCESS;
+	}
+
+	if (seq_name <= SUIT_SEQ_PAYLOAD_FETCH)
+	{
+		/* The dependency-resolution and payload-fetch sequences are
+		 * executed by the application, while the later sequences are
+		 * executed by the bootloader. Dry run is only performed in
+		 * the context in which the given sequence will be executed.  */
+		end_seq = SUIT_SEQ_PAYLOAD_FETCH;
+		/* Both the dependency-resolution and payload-fetch sequences
+		   are optional, so the dry run should not fail if none of these
+		   sequences is detected.  */
+		ret = SUIT_SUCCESS;
+	}
 
 	state->dry_run = suit_bool_true;
 
-	for (enum suit_command_sequence seq = SUIT_SEQ_DEP_RESOLUTION; seq < SUIT_SEQ_MAX; seq++) {
+	for (enum suit_command_sequence seq = seq_name; seq <= end_seq; seq++) {
 		SUIT_DBG("Dry-run sequence: %d\r\n", seq);
 
 		struct zcbor_string *step_seq = suit_manifest_get_command_seq(manifest_state, seq);
@@ -214,7 +234,7 @@ int suit_process_sequence(uint8_t *envelope_str, size_t envelope_len, enum suit_
 
 #ifdef SUIT_PLATFORM_DRY_RUN_SUPPORT
 		if (ret == SUIT_SUCCESS) {
-			ret = suit_dry_run_manifest(manifest_state);
+			ret = suit_dry_run_manifest(manifest_state, seq_name);
 		}
 #endif /* SUIT_PLATFORM_DRY_RUN_SUPPORT */
 	} else {
