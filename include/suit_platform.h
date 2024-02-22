@@ -262,6 +262,20 @@ int suit_plat_retrieve_manifest(suit_component_t component_handle, uint8_t **env
  */
 int suit_plat_override_image_size(suit_component_t handle, size_t size);
 
+/** @brief Authorize execution of the given sequence of the dependency manifest.
+ *
+ * @details This function allow to restrict different manifest topologies, depending on the execution context.
+ *          For example, it may be allowed to include a manifest as dependency for the update procedure, but prohibited
+ *          to boot it's components.
+ *
+ * @param[in]  parent_component_id  Parent manifest component ID.
+ * @param[in]  child_component_id   Child manifest component ID.
+ * @param[in]  seq_name             The sequence to authorize.
+ *
+ * @returns SUIT_SUCCESS if the manifest was returned, error code otherwise.
+ */
+int suit_plat_authorize_process_dependency(struct zcbor_string *parent_component_id, struct zcbor_string *child_component_id, enum suit_command_sequence seq_name);
+
 #ifdef SUIT_PLATFORM_DRY_RUN_SUPPORT
 /** @brief Check that the given fetch operation can be performed.
  *

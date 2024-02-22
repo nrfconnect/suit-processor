@@ -11,6 +11,18 @@
 #include <suit_seq_exec.h>
 #include <suit_schedule_seq.h>
 
+
+static void component_modified(struct suit_manifest_params *component_params)
+{
+	/* Reset integrity validation flag, whenever the dependency component is modified.
+	 * This is required, so each manifest processed through CAND_MFST component must be
+	 * checked for integrity before processing.
+	 */
+	if ((component_params != NULL) && (component_params->is_dependency == suit_bool_true)) {
+		component_params->integrity_checked = false;
+	}
+}
+
 int suit_directive_set_current_components(struct suit_processor_state *state, struct IndexArg_ *index_arg)
 {
 	struct suit_seq_exec_state *seq_exec_state;
@@ -182,6 +194,7 @@ static int suit_directive_override_parameter(struct SUIT_Parameters_ *param, str
 		break;
 	case _SUIT_Parameters_suit_parameter_component_slot:
 		SUIT_DBG("Override slot (handle: 0x%lx)\r\n", dst->component_handle);
+		component_modified(dst);
 		dst->component_slot = param->_SUIT_Parameters_suit_parameter_component_slot;
 		dst->component_slot_set = true;
 		break;
@@ -402,6 +415,14 @@ int suit_directive_process_dependency(struct suit_processor_state *state, struct
 		}
 
 		if (retval == SUIT_SUCCESS) {
+			SUIT_DBG("Authorize execution of sequence\r\n");
+			retval = suit_plat_authorize_process_dependency(
+				&state->manifest_stack[state->manifest_stack_height - 2].manifest_component_id,
+				&state->manifest_stack[state->manifest_stack_height - 1].manifest_component_id,
+				state->current_seq);
+		}
+
+		if (retval == SUIT_SUCCESS) {
 			SUIT_DBG("Validate sequences\r\n");
 			seq_exec_state->cmd_exec_state = SUIT_SEQ_SHARED;
 			seq_exec_state->retval = SUIT_SUCCESS;
@@ -496,9 +517,11 @@ int suit_directive_fetch(struct suit_processor_state *state, struct suit_manifes
 		if (state->dry_run != suit_bool_false) {
 			ret = suit_plat_check_fetch(component_params->component_handle, &component_params->uri);
 		} else {
+			component_modified(component_params);
 			ret = suit_plat_fetch(component_params->component_handle, &component_params->uri);
 		}
 #else /* SUIT_PLATFORM_DRY_RUN_SUPPORT */
+		component_modified(component_params);
 		ret = suit_plat_fetch(component_params->component_handle, &component_params->uri);
 #endif /* SUIT_PLATFORM_DRY_RUN_SUPPORT */
 	} else {
@@ -506,9 +529,11 @@ int suit_directive_fetch(struct suit_processor_state *state, struct suit_manifes
 		if (state->dry_run != suit_bool_false) {
 			ret = suit_plat_check_fetch_integrated(component_params->component_handle, &integrated_payload);
 		} else {
+			component_modified(component_params);
 			ret = suit_plat_fetch_integrated(component_params->component_handle, &integrated_payload);
 		}
 #else /* SUIT_PLATFORM_DRY_RUN_SUPPORT */
+		component_modified(component_params);
 		ret = suit_plat_fetch_integrated(component_params->component_handle, &integrated_payload);
 #endif /* SUIT_PLATFORM_DRY_RUN_SUPPORT */
 	}
@@ -547,9 +572,11 @@ int suit_directive_copy(struct suit_processor_state *state, struct suit_manifest
 	if (state->dry_run != suit_bool_false) {
 		return suit_plat_check_copy(dst_handle, src_handle);
 	} else {
+		component_modified(component_params);
 		return suit_plat_copy(dst_handle, src_handle);
 	}
 #else /* SUIT_PLATFORM_DRY_RUN_SUPPORT */
+	component_modified(component_params);
 	return suit_plat_copy(dst_handle, src_handle);
 #endif /* SUIT_PLATFORM_DRY_RUN_SUPPORT */
 }
@@ -569,9 +596,11 @@ int suit_directive_write(struct suit_processor_state *state, struct suit_manifes
 		if (state->dry_run != suit_bool_false) {
 			return suit_plat_check_write(component_params->component_handle, &component_params->content);
 		} else {
+			component_modified(component_params);
 			return suit_plat_write(component_params->component_handle, &component_params->content);
 		}
 #else /* SUIT_PLATFORM_DRY_RUN_SUPPORT */
+		component_modified(component_params);
 		return suit_plat_write(component_params->component_handle, &component_params->content);
 #endif /* SUIT_PLATFORM_DRY_RUN_SUPPORT */
 }

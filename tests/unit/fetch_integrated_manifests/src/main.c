@@ -149,6 +149,7 @@ void test_suit_process_seq_dependency_resolution(void)
 
 	/* Execute radio manifest */
 	radio_assert_envelope_integrity(false);
+	__cmock_suit_plat_authorize_process_dependency_ExpectComplexArgsAndReturn(&exp_root_manifest_id, &exp_radio_manifest_id, SUIT_SEQ_DEP_RESOLUTION, SUIT_SUCCESS);
 	__cmock_suit_plat_authorize_sequence_num_ExpectComplexArgsAndReturn(SUIT_SEQ_DEP_RESOLUTION, &exp_radio_manifest_id, 1, SUIT_SUCCESS);
 	radio_assert_envelope_authorization(false);
 	radio_assert_component_creation();
@@ -166,6 +167,7 @@ void test_suit_process_seq_dependency_resolution(void)
 
 	/* Execute application manifest */
 	app_assert_envelope_integrity(false);
+	__cmock_suit_plat_authorize_process_dependency_ExpectComplexArgsAndReturn(&exp_root_manifest_id, &exp_app_manifest_id, SUIT_SEQ_DEP_RESOLUTION, SUIT_SUCCESS);
 	__cmock_suit_plat_authorize_sequence_num_ExpectComplexArgsAndReturn(SUIT_SEQ_DEP_RESOLUTION, &exp_app_manifest_id, 1, SUIT_SUCCESS);
 	app_assert_envelope_authorization(false);
 	app_assert_component_creation();
@@ -208,6 +210,7 @@ void test_suit_process_seq_payload_fetch(void)
 
 	/* Execute radio manifest */
 	radio_assert_envelope_integrity(false);
+	__cmock_suit_plat_authorize_process_dependency_ExpectComplexArgsAndReturn(&exp_root_manifest_id, &exp_radio_manifest_id, SUIT_SEQ_PAYLOAD_FETCH, SUIT_SUCCESS);
 	__cmock_suit_plat_authorize_sequence_num_ExpectComplexArgsAndReturn(SUIT_SEQ_PAYLOAD_FETCH, &exp_radio_manifest_id, 1, SUIT_SUCCESS);
 	radio_assert_envelope_authorization(false);
 	radio_assert_component_creation();
@@ -225,6 +228,7 @@ void test_suit_process_seq_payload_fetch(void)
 
 	/* Execute application manifest */
 	app_assert_envelope_integrity(false);
+	__cmock_suit_plat_authorize_process_dependency_ExpectComplexArgsAndReturn(&exp_root_manifest_id, &exp_app_manifest_id, SUIT_SEQ_PAYLOAD_FETCH, SUIT_SUCCESS);
 	__cmock_suit_plat_authorize_sequence_num_ExpectComplexArgsAndReturn(SUIT_SEQ_PAYLOAD_FETCH, &exp_app_manifest_id, 1, SUIT_SUCCESS);
 	app_assert_envelope_authorization(false);
 	app_assert_component_creation();
@@ -267,6 +271,7 @@ void test_suit_process_seq_install(void)
 
 	/* Execute radio manifest */
 	radio_assert_envelope_integrity(false);
+	__cmock_suit_plat_authorize_process_dependency_ExpectComplexArgsAndReturn(&exp_root_manifest_id, &exp_radio_manifest_id, SUIT_SEQ_INSTALL, SUIT_SUCCESS);
 	__cmock_suit_plat_authorize_sequence_num_ExpectComplexArgsAndReturn(SUIT_SEQ_INSTALL, &exp_radio_manifest_id, 1, SUIT_SUCCESS);
 	radio_assert_envelope_authorization(false);
 	radio_assert_component_creation();
@@ -289,6 +294,7 @@ void test_suit_process_seq_install(void)
 
 	/* Execute application manifest */
 	app_assert_envelope_integrity(false);
+	__cmock_suit_plat_authorize_process_dependency_ExpectComplexArgsAndReturn(&exp_root_manifest_id, &exp_app_manifest_id, SUIT_SEQ_INSTALL, SUIT_SUCCESS);
 	__cmock_suit_plat_authorize_sequence_num_ExpectComplexArgsAndReturn(SUIT_SEQ_INSTALL, &exp_app_manifest_id, 1, SUIT_SUCCESS);
 	app_assert_envelope_authorization(false);
 	app_assert_component_creation();
@@ -349,8 +355,10 @@ void test_suit_process_seq_validate(void)
 
 	/* Execute dependency_integrity check on radio and application manifest */
 	radio_assert_envelope_integrity(true);
+	__cmock_suit_plat_authorize_process_dependency_ExpectComplexArgsAndReturn(&exp_root_manifest_id, &exp_radio_manifest_id, SUIT_SEQ_VALIDATE, SUIT_SUCCESS);
 	__cmock_suit_plat_authorize_sequence_num_ExpectComplexArgsAndReturn(SUIT_SEQ_VALIDATE, &exp_radio_manifest_id, 1, SUIT_SUCCESS);
 	app_assert_envelope_integrity(true);
+	__cmock_suit_plat_authorize_process_dependency_ExpectComplexArgsAndReturn(&exp_root_manifest_id, &exp_app_manifest_id, SUIT_SEQ_VALIDATE, SUIT_SUCCESS);
 	__cmock_suit_plat_authorize_sequence_num_ExpectComplexArgsAndReturn(SUIT_SEQ_VALIDATE, &exp_app_manifest_id, 1, SUIT_SUCCESS);
 
 	/* Process radio manifest */
@@ -408,8 +416,10 @@ void test_suit_process_seq_load(void)
 
 	/* Execute dependency_integrity check on radio and application manifest */
 	radio_assert_envelope_integrity(true);
+	__cmock_suit_plat_authorize_process_dependency_ExpectComplexArgsAndReturn(&exp_root_manifest_id, &exp_radio_manifest_id, SUIT_SEQ_LOAD, SUIT_SUCCESS);
 	__cmock_suit_plat_authorize_sequence_num_ExpectComplexArgsAndReturn(SUIT_SEQ_LOAD, &exp_radio_manifest_id, 1, SUIT_SUCCESS);
 	app_assert_envelope_integrity(true);
+	__cmock_suit_plat_authorize_process_dependency_ExpectComplexArgsAndReturn(&exp_root_manifest_id, &exp_app_manifest_id, SUIT_SEQ_LOAD, SUIT_SUCCESS);
 	__cmock_suit_plat_authorize_sequence_num_ExpectComplexArgsAndReturn(SUIT_SEQ_LOAD, &exp_app_manifest_id, 1, SUIT_SUCCESS);
 
 	/* Process radio manifest */
@@ -463,8 +473,10 @@ void test_suit_process_seq_invoke(void)
 
 	/* Execute dependency_integrity check on radio and application manifest */
 	radio_assert_envelope_integrity(true);
+	__cmock_suit_plat_authorize_process_dependency_ExpectComplexArgsAndReturn(&exp_root_manifest_id, &exp_radio_manifest_id, SUIT_SEQ_INVOKE, SUIT_SUCCESS);
 	__cmock_suit_plat_authorize_sequence_num_ExpectComplexArgsAndReturn(SUIT_SEQ_INVOKE, &exp_radio_manifest_id, 1, SUIT_SUCCESS);
 	app_assert_envelope_integrity(true);
+	__cmock_suit_plat_authorize_process_dependency_ExpectComplexArgsAndReturn(&exp_root_manifest_id, &exp_app_manifest_id, SUIT_SEQ_INVOKE, SUIT_SUCCESS);
 	__cmock_suit_plat_authorize_sequence_num_ExpectComplexArgsAndReturn(SUIT_SEQ_INVOKE, &exp_app_manifest_id, 1, SUIT_SUCCESS);
 
 	/* Process radio manifest */
