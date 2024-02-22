@@ -128,3 +128,11 @@ int __sequence_completed_callback(enum suit_command_sequence seq_name, struct zc
 	(void)assert_complex_arg(&__sequence_completed_callback_queue, manifest_component_id);
 	return assert_complex_arg(&__sequence_completed_callback_queue, NULL);
 }
+
+COMPLEX_ARG_Q_DEFINE(__dependency_seq_authorize_callback_queue);
+int __dependency_seq_authorize_callback(struct zcbor_string *parent_component_id, struct zcbor_string *child_component_id, enum suit_command_sequence seq_name, int cmock_num_calls)
+{
+	(void)assert_complex_arg(&__dependency_seq_authorize_callback_queue, parent_component_id);
+	(void)assert_complex_arg(&__dependency_seq_authorize_callback_queue, child_component_id);
+	return assert_complex_arg(&__dependency_seq_authorize_callback_queue, NULL);
+}
