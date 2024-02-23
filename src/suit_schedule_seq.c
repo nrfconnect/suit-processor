@@ -113,6 +113,7 @@ static int suit_validate_single_command(struct suit_processor_state *state, suit
 				break;
 			case _SUIT_Directive___suit_directive_fetch:
 			case _SUIT_Directive___suit_directive_copy:
+			case _SUIT_Directive___suit_directive_write:
 			case _SUIT_Directive___suit_directive_invoke:
 				if (!is_shared_sequence) {
 					SUIT_DBG("Found valid directive: %d\r\n", command->directive._SUIT_Directive_choice);
@@ -267,6 +268,9 @@ static int suit_run_single_command(struct suit_processor_state *state, suit_comm
 				break;
 			case _SUIT_Directive___suit_directive_copy:
 				retval = suit_directive_copy(state, params);
+				break;
+			case _SUIT_Directive___suit_directive_write:
+				retval = suit_directive_write(state, params);
 				break;
 			case _SUIT_Directive___suit_directive_invoke:
 				retval = suit_directive_invoke(state, params);

@@ -40,6 +40,9 @@ int suit_directive_fetch(struct suit_processor_state *state, struct suit_manifes
 /** Copy a payload based on the configured parameters. */
 int suit_directive_copy(struct suit_processor_state *state, struct suit_manifest_params *component_params);
 
+/** Write a small block of data to component */
+int suit_directive_write(struct suit_processor_state *state, struct suit_manifest_params *component_params);
+
 /** Swap a payload based on the configured parameters. */
 int suit_directive_swap(struct suit_processor_state *state, struct suit_manifest_params *component_params);
 

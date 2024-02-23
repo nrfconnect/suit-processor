@@ -11,7 +11,6 @@
 #include <suit_seq_exec.h>
 #include <suit_schedule_seq.h>
 
-
 int suit_directive_set_current_components(struct suit_processor_state *state, struct IndexArg_ *index_arg)
 {
 	struct suit_seq_exec_state *seq_exec_state;
@@ -115,7 +114,6 @@ int suit_directive_try_each(struct suit_processor_state *state, struct SUIT_Dire
 	return SUIT_ERR_CRASH;
 }
 
-
 int suit_directive_run_sequence(struct suit_processor_state *state, struct zcbor_string *command_sequence)
 {
 	struct suit_seq_exec_state *seq_exec_state;
@@ -147,7 +145,6 @@ int suit_directive_run_sequence(struct suit_processor_state *state, struct zcbor
 
 	return seq_exec_state->retval;
 }
-
 
 static int suit_directive_override_parameter(struct SUIT_Parameters_ *param, struct suit_manifest_params *dst)
 {
@@ -213,7 +210,6 @@ static int suit_directive_override_parameter(struct SUIT_Parameters_ *param, str
 	}
 	return SUIT_SUCCESS;
 }
-
 
 int suit_directive_override_parameters(struct suit_processor_state *state,
 		struct __suit_directive_override_parameters_map__SUIT_Parameters *params,
@@ -520,7 +516,6 @@ int suit_directive_fetch(struct suit_processor_state *state, struct suit_manifes
 	return ret;
 }
 
-
 int suit_directive_copy(struct suit_processor_state *state, struct suit_manifest_params *component_params)
 {
 	struct suit_seq_exec_state *seq_exec_state;
@@ -559,6 +554,27 @@ int suit_directive_copy(struct suit_processor_state *state, struct suit_manifest
 #endif /* SUIT_PLATFORM_DRY_RUN_SUPPORT */
 }
 
+int suit_directive_write(struct suit_processor_state *state, struct suit_manifest_params *component_params)
+{
+	if ((state == NULL) || (component_params == NULL)) {
+		SUIT_ERR("Unable to execute write directive: invalid argument\r\n");
+		return SUIT_ERR_DECODING;
+	}
+
+	if (!component_params->content_set) {
+		return SUIT_ERR_UNAVAILABLE_PAYLOAD;
+	}
+
+#ifdef SUIT_PLATFORM_DRY_RUN_SUPPORT
+		if (state->dry_run != suit_bool_false) {
+			return suit_plat_check_write(component_params->component_handle, &component_params->content);
+		} else {
+			return suit_plat_write(component_params->component_handle, &component_params->content);
+		}
+#else /* SUIT_PLATFORM_DRY_RUN_SUPPORT */
+		return suit_plat_write(component_params->component_handle, &component_params->content);
+#endif /* SUIT_PLATFORM_DRY_RUN_SUPPORT */
+}
 
 int suit_directive_swap(struct suit_processor_state *state, struct suit_manifest_params *component_params)
 {
@@ -569,7 +585,6 @@ int suit_directive_swap(struct suit_processor_state *state, struct suit_manifest
 
 	return SUIT_ERR_UNSUPPORTED_COMMAND;
 }
-
 
 int suit_directive_invoke(struct suit_processor_state *state, struct suit_manifest_params *component_params)
 {
