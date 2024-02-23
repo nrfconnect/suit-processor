@@ -19,7 +19,6 @@
 ; Remove cbor-pen support
 ; Remove SUIT_Dependency due to CDDL parsing issues
 ; Set the maximum number of parameters inside suit-directive-override-parameters to 6
-; Remove suit-directive-write (not yet supported)
 ; Set the maximum number of try-each cases 5
 ;
 
@@ -139,7 +138,7 @@ SUIT_Condition //= (suit-condition-component-slot,    SUIT_Rep_Policy)
 SUIT_Condition //= (suit-condition-check-content,     SUIT_Rep_Policy)
 SUIT_Condition //= (suit-condition-abort,             SUIT_Rep_Policy)
 
-; SUIT_Directive //= (suit-directive-write,             SUIT_Rep_Policy)
+SUIT_Directive //= (suit-directive-write,             SUIT_Rep_Policy)
 SUIT_Directive //= (suit-directive-set-component-index,  IndexArg)
 SUIT_Directive //= (suit-directive-run-sequence,
     bstr .cbor SUIT_Command_Sequence)
@@ -257,7 +256,7 @@ suit-condition-device-identifier        = 24
 
 suit-directive-set-component-index      = 12
 suit-directive-try-each                 = 15
-; suit-directive-write                    = 18
+suit-directive-write                    = 18
 suit-directive-override-parameters      = 20
 suit-directive-fetch                    = 21
 suit-directive-copy                     = 22
