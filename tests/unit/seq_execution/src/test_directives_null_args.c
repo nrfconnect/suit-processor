@@ -235,26 +235,6 @@ void test_copy_null_args(void)
 	TEST_ASSERT_EQUAL_MESSAGE(SUIT_ERR_CRASH, retval, "Invalid execution state was not detected");
 }
 
-void test_write_null_args(void)
-{
-	struct suit_manifest_params component_params;
-
-	memset(&component_params, 0, sizeof(component_params));
-
-	component_params.content.value = "test_data";
-	component_params.content.len = strlen("test_data");
-	component_params.content_set = true;
-
-	int retval = suit_directive_write(NULL, NULL);
-	TEST_ASSERT_EQUAL_MESSAGE(SUIT_ERR_DECODING, retval, "Invalid arguments (NULL, NULL) were not detected");
-
-	retval = suit_directive_write(&state, NULL);
-	TEST_ASSERT_EQUAL_MESSAGE(SUIT_ERR_DECODING, retval, "NULL arguments (_, NULL) were not detected");
-
-	retval = suit_directive_write(NULL, &component_params);
-	TEST_ASSERT_EQUAL_MESSAGE(SUIT_ERR_DECODING, retval, "NULL arguments (NULL, _) were not detected");
-}
-
 void test_swap_null_args(void)
 {
 	struct suit_manifest_params component_params;

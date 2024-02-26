@@ -99,10 +99,6 @@ void test_seq_execution_copy_src_invalid(void);
 void test_seq_execution_copy_current_not_set(void);
 void test_seq_execution_copy_ok(void);
 
-/* suit-directive-write tests */
-void test_seq_execution_write_no_content(void);
-void test_seq_execution_write_content(void);
-
 /* suit-directive-swap tests */
 void test_seq_execution_swap(void);
 
@@ -119,7 +115,6 @@ void test_set_parameters_null_args(void);
 void test_process_dependency_null_args(void);
 void test_fetch_null_args(void);
 void test_copy_null_args(void);
-void test_write_null_args(void);
 void test_swap_null_args(void);
 void test_invoke_null_args(void);
 

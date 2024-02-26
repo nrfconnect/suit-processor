@@ -210,6 +210,7 @@ int __check_fetch_integrated_callback(suit_component_t dst_handle, struct zcbor_
 }
 int __fetch_integrated_callback(suit_component_t dst_handle, struct zcbor_string* payload, int cmock_num_calls);
 
+
 #define __cmock_suit_plat_sequence_completed_ExpectComplexArgsAndReturn(seq_name, manifest_component_id, envelope_str, envelope_len, cmock_retval) { \
 	extern complex_arg_q_t __sequence_completed_callback_queue; \
 	push_complex_arg(manifest_component_id, assert_zcbor_string, __sequence_completed_callback_queue); \
@@ -220,23 +221,4 @@ int __fetch_integrated_callback(suit_component_t dst_handle, struct zcbor_string
 }
 int __sequence_completed_callback(enum suit_command_sequence seq_name, struct zcbor_string *manifest_component_id, const uint8_t *envelope_str, size_t envelope_len, int cmock_num_calls);
 
-#define __cmock_suit_plat_check_write_ExpectComplexArgsAndReturn(dst_handle, content, cmock_retval) { \
-	extern complex_arg_q_t __check_write_callback_queue; \
-	push_complex_arg(content, assert_zcbor_string, __check_write_callback_queue); \
-	push_retval_arg(cmock_retval, __check_write_callback_queue); \
-	__cmock_suit_plat_check_write_AddCallback(__check_write_callback); \
-	__cmock_suit_plat_check_write_ExpectAndReturn(dst_handle, content, cmock_retval); \
-	__cmock_suit_plat_check_write_IgnoreArg_content(); \
-}
-int __check_write_callback(suit_component_t dst_handle, struct zcbor_string *content, int cmock_num_calls);
-
-#define __cmock_suit_plat_write_ExpectComplexArgsAndReturn(dst_handle, content, cmock_retval) { \
-	extern complex_arg_q_t __write_callback_queue; \
-	push_complex_arg(content, assert_zcbor_string, __write_callback_queue); \
-	push_retval_arg(cmock_retval, __write_callback_queue); \
-	__cmock_suit_plat_write_AddCallback(__write_callback); \
-	__cmock_suit_plat_write_ExpectAndReturn(dst_handle, content, cmock_retval); \
-	__cmock_suit_plat_write_IgnoreArg_content(); \
-}
-int __write_callback(suit_component_t dst_handle, struct zcbor_string *content, int cmock_num_calls);
 #endif /* _SUIT_PLATFORM_MOCK_EXT_H */

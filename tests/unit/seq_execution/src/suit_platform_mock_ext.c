@@ -135,17 +135,3 @@ int __sequence_completed_callback(enum suit_command_sequence seq_name, struct zc
 	(void)assert_complex_arg(&__sequence_completed_callback_queue, manifest_component_id);
 	return assert_complex_arg(&__sequence_completed_callback_queue, NULL);
 }
-
-COMPLEX_ARG_Q_DEFINE(__check_write_callback_queue);
-int __check_write_callback(suit_component_t dst_handle, struct zcbor_string *content, int cmock_num_calls)
-{
-	(void)assert_complex_arg(&__check_write_callback_queue, content);
-	return assert_complex_arg(&__check_write_callback_queue, NULL);
-}
-
-COMPLEX_ARG_Q_DEFINE(__write_callback_queue);
-int __write_callback(suit_component_t dst_handle, struct zcbor_string *content, int cmock_num_calls)
-{
-	(void)assert_complex_arg(&__write_callback_queue, content);
-	return assert_complex_arg(&__write_callback_queue, NULL);
-}
