@@ -235,12 +235,16 @@ int suit_condition_dependency_integrity(struct suit_processor_state *state,
 			seq_exec_state->retval = SUIT_SUCCESS;
 			retval = SUIT_ERR_AGAIN;
 		} else {
+			/* Any issue in loading of the manifest should fail the condition, not the processing. */
+			retval = SUIT_FAIL_CONDITION;
 			seq_exec_state->retval = retval;
 		}
 
 	} else if ((seq_exec_state->cmd_exec_state >= SUIT_SEQ_SHARED) && (seq_exec_state->cmd_exec_state < SUIT_SEQ_MAX)) {
 		if (seq_exec_state->retval != SUIT_SUCCESS) {
-			retval = seq_exec_state->retval;
+			/* Any issue in validation of the manifest should fail the condition, not the processing. */
+			retval = SUIT_FAIL_CONDITION;
+			seq_exec_state->retval = retval;
 		} else {
 			seq_exec_state->retval = suit_schedule_validation(state, manifest_state, seq_exec_state->cmd_exec_state);
 			if (seq_exec_state->retval == SUIT_ERR_UNAVAILABLE_COMMAND_SEQ) {
@@ -263,9 +267,19 @@ int suit_condition_dependency_integrity(struct suit_processor_state *state,
 		SUIT_DBG("Release manifest\r\n");
 		/* Remove the checked manifest from the stack */
 		int ret = suit_manifest_release(manifest_state);
+
+		/* Do not allow component release to spread over more than one iteration. */
+		if (ret == SUIT_ERR_AGAIN) {
+			ret = SUIT_ERR_CRASH;
+		}
+
 		state->manifest_stack_height--;
 		if (retval == SUIT_SUCCESS) {
+			if (ret != SUIT_SUCCESS) {
+				component_params->integrity_checked = false;
+			}
 			seq_exec_state->retval = ret;
+			retval = ret;
 		}
 	}
 

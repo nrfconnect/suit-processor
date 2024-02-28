@@ -415,6 +415,8 @@ int suit_directive_process_dependency(struct suit_processor_state *state, struct
 		}
 
 		if (retval == SUIT_SUCCESS) {
+			/* Change state to mark that the manifest stack was populated. */
+			seq_exec_state->cmd_exec_state = SUIT_SEQ_SHARED;
 			SUIT_DBG("Authorize execution of sequence\r\n");
 			retval = suit_plat_authorize_process_dependency(
 				&state->manifest_stack[state->manifest_stack_height - 2].manifest_component_id,
@@ -424,10 +426,13 @@ int suit_directive_process_dependency(struct suit_processor_state *state, struct
 
 		if (retval == SUIT_SUCCESS) {
 			SUIT_DBG("Validate sequences\r\n");
-			seq_exec_state->cmd_exec_state = SUIT_SEQ_SHARED;
 			seq_exec_state->retval = SUIT_SUCCESS;
 			retval = SUIT_ERR_AGAIN;
 		} else {
+			if (retval == SUIT_ERR_AGAIN) {
+				/* It is not allowed to spread manifest parsing over more than one iteration. */
+				retval = SUIT_ERR_CRASH;
+			}
 			seq_exec_state->retval = retval;
 		}
 
@@ -477,9 +482,16 @@ int suit_directive_process_dependency(struct suit_processor_state *state, struct
 		SUIT_DBG("Release manifest\r\n");
 		/* Remove the checked manifest from the stack */
 		int ret = suit_manifest_release(manifest_state);
+
+		/* Do not allow component release to spread over more than one iteration. */
+		if (ret == SUIT_ERR_AGAIN) {
+			ret = SUIT_ERR_CRASH;
+		}
+
 		state->manifest_stack_height--;
 		if (retval == SUIT_SUCCESS) {
 			seq_exec_state->retval = ret;
+			retval = ret;
 		}
 	}
 
