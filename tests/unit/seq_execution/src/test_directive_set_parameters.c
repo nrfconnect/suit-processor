@@ -224,7 +224,7 @@ void test_seq_execution_set_parameter_multiple_components_3params(void)
 		TEST_ASSERT_EQUAL_MESSAGE(false, state.components[i].image_digest_set, "Image digest not set, but flag was updated");
 		TEST_ASSERT_EQUAL_MESSAGE(false, state.components[i].component_slot_set, "Component slot not set, but flag was updated");
 		TEST_ASSERT_EQUAL_MESSAGE(false, state.components[i].image_size_set, "Image size not set, but flag was updated");
-		TEST_ASSERT_EQUAL_MESSAGE(false, state.components[0].content_set, "Content not set, but flag was updated");
+		TEST_ASSERT_EQUAL_MESSAGE(false, state.components[i].content_set, "Content not set, but flag was updated");
 		TEST_ASSERT_EQUAL_MESSAGE(false, state.components[i].uri_set, "URI not set, but flag was updated");
 
 		TEST_ASSERT_EQUAL_MESSAGE(true, state.components[i].source_component_set, "Source component set, but flag is not updated");
@@ -250,6 +250,86 @@ void test_seq_execution_set_parameter_multiple_components_3params(void)
 		} else {
 			TEST_ASSERT_EQUAL_MESSAGE(0, state.components[i].did.len, "Device ID length overwritten, but was set before sequence execution");
 			TEST_ASSERT_EQUAL_MESSAGE(NULL, state.components[i].did.value, "Device ID value overwritten, but was set before sequence execution");
+		}
+	}
+}
+
+void test_seq_execution_set_parameter_two_components_3params(void)
+{
+	uint8_t seq_cmd[128];
+	struct zcbor_string seq = {
+		.value = seq_cmd,
+		.len = 0,
+	};
+
+	/* Common header */
+	seq_cmd[0] = 0x84; /* list (4 elements - 2 commands) */
+	seq_cmd[1] = 0x0c, /* uint(suit-directive-set-component-index) */
+		seq_cmd[2] = 0x82, /* list (2 elements) */
+		seq_cmd[3] = 0x01; /* uint(2nd component) */
+		seq_cmd[4] = 0x02; /* uint(3rd component) */
+	seq_cmd[5] = 0x13; /* uint(suit-directive-set-parameters) */
+	seq_cmd[6] = 0xa3; /* map (3) */
+
+	enum parameter_values params[] = {
+		SOURCE_COMPONENT,
+		INVOKE_ARGS,
+		DEVICE_ID,
+	};
+
+	seq.len = bootstrap_parameters(params, ZCBOR_ARRAY_SIZE(params), &seq_cmd[7], sizeof(seq_cmd) - 7) + 7;
+
+	bootstrap_envelope_empty(&state);
+	bootstrap_envelope_components(&state, 4);
+	state.components[0].source_component_set = true;
+	state.components[1].invoke_args_set = true;
+	state.components[2].did_set = true;
+
+	int retval = execute_command_sequence(&state, &seq);
+
+	TEST_ASSERT_EQUAL_MESSAGE(SUIT_SUCCESS, retval, "Failed to set parameters");
+
+	for (size_t i = 0; i < 4; i++) {
+		TEST_ASSERT_EQUAL_MESSAGE(false, state.components[i].vid_set, "Vendor ID not set, but flag was updated");
+		TEST_ASSERT_EQUAL_MESSAGE(false, state.components[i].cid_set, "Class ID not set, but flag was updated");
+		TEST_ASSERT_EQUAL_MESSAGE(false, state.components[i].image_digest_set, "Image digest not set, but flag was updated");
+		TEST_ASSERT_EQUAL_MESSAGE(false, state.components[i].component_slot_set, "Component slot not set, but flag was updated");
+		TEST_ASSERT_EQUAL_MESSAGE(false, state.components[i].image_size_set, "Image size not set, but flag was updated");
+		TEST_ASSERT_EQUAL_MESSAGE(false, state.components[i].content_set, "Content not set, but flag was updated");
+		TEST_ASSERT_EQUAL_MESSAGE(false, state.components[i].uri_set, "URI not set, but flag was updated");
+
+		if (i == 3) {
+			TEST_ASSERT_EQUAL_MESSAGE(false, state.components[i].source_component_set, "Source component set for unselected component");
+		} else if (i == 0) {
+			TEST_ASSERT_EQUAL_MESSAGE(true, state.components[i].source_component_set, "Source component set, but flag is not updated");
+			TEST_ASSERT_EQUAL_MESSAGE(0, state.components[i].source_component, "Source component overwritten, but was set before sequence execution");
+		} else {
+			TEST_ASSERT_EQUAL_MESSAGE(true, state.components[i].source_component_set, "Source component set, but flag is not updated");
+			TEST_ASSERT_EQUAL_MESSAGE(exp_source_component, state.components[i].source_component, "Source component set with invalid value");
+		}
+
+		if (i == 1) {
+			TEST_ASSERT_EQUAL_MESSAGE(true, state.components[i].invoke_args_set, "Invoke args set, but flag is not updated");
+			TEST_ASSERT_EQUAL_MESSAGE(0, state.components[i].invoke_args.len, "Invoke args length overwritten, but was set before sequence execution");
+			TEST_ASSERT_EQUAL_MESSAGE(NULL, state.components[i].invoke_args.value, "Invoke args value overwritten, but was set before sequence execution");
+		} else if (i == 2) {
+			TEST_ASSERT_EQUAL_MESSAGE(true, state.components[i].invoke_args_set, "Invoke args set, but flag is not updated");
+			TEST_ASSERT_EQUAL_MESSAGE(exp_args.len, state.components[i].invoke_args.len, "Invoke args set with invalid length");
+			TEST_ASSERT_EQUAL_MEMORY_MESSAGE(exp_args.value, state.components[i].invoke_args.value, exp_args.len, "Invoke args set with invalid value");
+		} else {
+			TEST_ASSERT_EQUAL_MESSAGE(false, state.components[i].invoke_args_set, "Invoke args set for unselected component");
+		}
+
+		if (i == 2) {
+			TEST_ASSERT_EQUAL_MESSAGE(true, state.components[i].did_set, "Device ID set, but flag is not updated");
+			TEST_ASSERT_EQUAL_MESSAGE(0, state.components[i].did.len, "Device ID length overwritten, but was set before sequence execution");
+			TEST_ASSERT_EQUAL_MESSAGE(NULL, state.components[i].did.value, "Device ID value overwritten, but was set before sequence execution");
+		} else if (i == 1) {
+			TEST_ASSERT_EQUAL_MESSAGE(true, state.components[i].did_set, "Device ID set, but flag is not updated");
+			TEST_ASSERT_EQUAL_MESSAGE(exp_did.len, state.components[i].did.len, "Device ID set with invalid length");
+			TEST_ASSERT_EQUAL_MEMORY_MESSAGE(exp_did.value, state.components[i].did.value, exp_did.len, "Device ID set with invalid value");
+		} else {
+			TEST_ASSERT_EQUAL_MESSAGE(false, state.components[i].did_set, "Device ID set for unselected component");
 		}
 	}
 }
@@ -311,7 +391,111 @@ void test_seq_execution_set_parameter_multiple_components_image_size_failed(void
 
 	int retval = execute_command_sequence(&state, &seq);
 
-	TEST_ASSERT_EQUAL_MESSAGE(SUIT_ERR_CRASH, retval, "Failed to set parameters");
+	TEST_ASSERT_EQUAL_MESSAGE(SUIT_ERR_CRASH, retval, "Image size set failed, but processing succeeded");
+
+	for (size_t i = 0; i < 4; i++) {
+		TEST_ASSERT_EQUAL_MESSAGE(false, state.components[i].vid_set, "Vendor ID not set, but flag was updated");
+		TEST_ASSERT_EQUAL_MESSAGE(false, state.components[i].cid_set, "Class ID not set, but flag was updated");
+		TEST_ASSERT_EQUAL_MESSAGE(false, state.components[i].image_digest_set, "Image digest not set, but flag was updated");
+		TEST_ASSERT_EQUAL_MESSAGE(false, state.components[i].component_slot_set, "Component slot not set, but flag was updated");
+		TEST_ASSERT_EQUAL_MESSAGE(false, state.components[i].uri_set, "URI not set, but flag was updated");
+		TEST_ASSERT_EQUAL_MESSAGE(false, state.components[i].source_component_set, "Source component not set, but flag was updated");
+		TEST_ASSERT_EQUAL_MESSAGE(false, state.components[i].invoke_args_set, "Invoke args not set, but flag was updated");
+		TEST_ASSERT_EQUAL_MESSAGE(false, state.components[i].did_set, "Device ID not set, but flag was updated");
+		TEST_ASSERT_EQUAL_MESSAGE(false, state.components[0].content_set, "Content not set, but flag was updated");
+	}
+
+	TEST_ASSERT_EQUAL_MESSAGE(true, state.components[0].image_size_set, "Image size set before command execution, but flag was updated");
+	TEST_ASSERT_EQUAL_MESSAGE(false, state.components[1].image_size_set, "Image size set failed, but flag was updated");
+	TEST_ASSERT_EQUAL_MESSAGE(true, state.components[2].image_size_set, "Image size set before command execution, but flag was updated");
+	TEST_ASSERT_EQUAL_MESSAGE(false, state.components[3].image_size_set, "Image size set failed on previous component, but the flag was updated");
+}
+
+void test_seq_execution_set_parameter_several_components_with_invalid_index(void)
+{
+	uint8_t seq_cmd[128];
+	struct zcbor_string seq = {
+		.value = seq_cmd,
+		.len = 0,
+	};
+
+	/* Common header */
+	seq_cmd[0] = 0x84; /* list (4 elements - 2 commands) */
+	seq_cmd[1] = 0x0c, /* uint(suit-directive-set-component-index) */
+		seq_cmd[2] = 0x82, /* list (2 elements) */
+		seq_cmd[3] = 0x01; /* uint(2nd component) */
+		seq_cmd[4] = 0x05; /* uint(5th component) */
+	seq_cmd[5] = 0x13; /* uint(suit-directive-set-parameters) */
+	seq_cmd[6] = 0xa3; /* map (3) */
+
+	enum parameter_values params[] = {
+		IMAGE_SIZE,
+	};
+
+	seq.len = bootstrap_parameters(params, ZCBOR_ARRAY_SIZE(params), &seq_cmd[7], sizeof(seq_cmd) - 7) + 7;
+
+	bootstrap_envelope_empty(&state);
+	bootstrap_envelope_components(&state, 4);
+	state.components[0].image_size_set = true;
+	state.components[1].image_size_set = false;
+	state.components[2].image_size_set = true;
+	state.components[3].image_size_set = false;
+
+	int retval = execute_command_sequence(&state, &seq);
+
+	TEST_ASSERT_EQUAL_MESSAGE(SUIT_ERR_MISSING_COMPONENT, retval, "Invalid component index not detected");
+
+	for (size_t i = 0; i < 4; i++) {
+		TEST_ASSERT_EQUAL_MESSAGE(false, state.components[i].vid_set, "Vendor ID not set, but flag was updated");
+		TEST_ASSERT_EQUAL_MESSAGE(false, state.components[i].cid_set, "Class ID not set, but flag was updated");
+		TEST_ASSERT_EQUAL_MESSAGE(false, state.components[i].image_digest_set, "Image digest not set, but flag was updated");
+		TEST_ASSERT_EQUAL_MESSAGE(false, state.components[i].component_slot_set, "Component slot not set, but flag was updated");
+		TEST_ASSERT_EQUAL_MESSAGE(false, state.components[i].uri_set, "URI not set, but flag was updated");
+		TEST_ASSERT_EQUAL_MESSAGE(false, state.components[i].source_component_set, "Source component not set, but flag was updated");
+		TEST_ASSERT_EQUAL_MESSAGE(false, state.components[i].invoke_args_set, "Invoke args not set, but flag was updated");
+		TEST_ASSERT_EQUAL_MESSAGE(false, state.components[i].did_set, "Device ID not set, but flag was updated");
+		TEST_ASSERT_EQUAL_MESSAGE(false, state.components[0].content_set, "Content not set, but flag was updated");
+	}
+
+	TEST_ASSERT_EQUAL_MESSAGE(true, state.components[0].image_size_set, "Image size set before command execution, but flag was updated");
+	TEST_ASSERT_EQUAL_MESSAGE(false, state.components[1].image_size_set, "Image size set failed, but flag was updated");
+	TEST_ASSERT_EQUAL_MESSAGE(true, state.components[2].image_size_set, "Image size set before command execution, but flag was updated");
+	TEST_ASSERT_EQUAL_MESSAGE(false, state.components[3].image_size_set, "Image size set failed, but the flag was updated");
+}
+
+void test_seq_execution_set_parameter_lazy_platform_image_size_set(void)
+{
+	uint8_t seq_cmd[128];
+	struct zcbor_string seq = {
+		.value = seq_cmd,
+		.len = 0,
+	};
+
+	/* Common header */
+	seq_cmd[0] = 0x84; /* list (4 elements - 2 commands) */
+	seq_cmd[1] = 0x0c, /* uint(suit-directive-set-component-index) */
+	seq_cmd[2] = 0xf5, /* True */
+	seq_cmd[3] = 0x13; /* uint(suit-directive-set-parameters) */
+	seq_cmd[4] = 0xa1; /* map (1) */
+
+	enum parameter_values params[] = {
+		IMAGE_SIZE,
+	};
+
+	seq.len = bootstrap_parameters(params, ZCBOR_ARRAY_SIZE(params), &seq_cmd[5], sizeof(seq_cmd) - 5) + 5;
+
+	bootstrap_envelope_empty(&state);
+	bootstrap_envelope_components(&state, 4);
+	state.components[0].image_size_set = true;
+	state.components[1].image_size_set = false;
+	state.components[2].image_size_set = true;
+	state.components[3].image_size_set = false;
+
+	__cmock_suit_plat_override_image_size_ExpectAndReturn(ASSIGNED_COMPONENT_HANDLE + 1, exp_image_size, SUIT_ERR_AGAIN);
+
+	int retval = execute_command_sequence(&state, &seq);
+
+	TEST_ASSERT_EQUAL_MESSAGE(SUIT_ERR_TAMP, retval, "Image size set is not allowed to take more than one iteration");
 
 	for (size_t i = 0; i < 4; i++) {
 		TEST_ASSERT_EQUAL_MESSAGE(false, state.components[i].vid_set, "Vendor ID not set, but flag was updated");

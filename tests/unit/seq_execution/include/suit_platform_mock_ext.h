@@ -239,4 +239,17 @@ int __check_write_callback(suit_component_t dst_handle, struct zcbor_string *con
 	__cmock_suit_plat_write_IgnoreArg_content(); \
 }
 int __write_callback(suit_component_t dst_handle, struct zcbor_string *content, int cmock_num_calls);
+
+#define __cmock_suit_plat_authorize_process_dependency_ExpectComplexArgsAndReturn(parent_component_id, child_component_id, seq_name, cmock_retval) { \
+	extern complex_arg_q_t __dependency_seq_authorize_callback_queue; \
+	push_complex_arg(parent_component_id, assert_zcbor_string, __dependency_seq_authorize_callback_queue); \
+	push_complex_arg(child_component_id, assert_zcbor_string, __dependency_seq_authorize_callback_queue); \
+	push_retval_arg(cmock_retval, __dependency_seq_authorize_callback_queue); \
+	__cmock_suit_plat_authorize_process_dependency_AddCallback(__dependency_seq_authorize_callback); \
+	__cmock_suit_plat_authorize_process_dependency_ExpectAndReturn(parent_component_id, child_component_id, seq_name, cmock_retval); \
+	__cmock_suit_plat_authorize_process_dependency_IgnoreArg_parent_component_id(); \
+	__cmock_suit_plat_authorize_process_dependency_IgnoreArg_child_component_id(); \
+}
+int __dependency_seq_authorize_callback(struct zcbor_string *parent_component_id, struct zcbor_string *child_component_id, enum suit_command_sequence seq_name, int cmock_num_calls);
+
 #endif /* _SUIT_PLATFORM_MOCK_EXT_H */
