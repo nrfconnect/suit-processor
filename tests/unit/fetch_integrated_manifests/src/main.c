@@ -337,22 +337,8 @@ void test_suit_process_seq_validate(void)
 	__cmock_suit_plat_check_vid_ExpectComplexArgsAndReturn(app_component_handle, &exp_app_vid_uuid, SUIT_SUCCESS);
 	__cmock_suit_plat_check_cid_ExpectComplexArgsAndReturn(app_component_handle, &exp_app_cid_uuid, SUIT_SUCCESS);
 	/* SUIT_VALIDATE sequence from the root manifest */
-	__cmock_suit_plat_retrieve_manifest_ExpectAndReturn(radio_component_handle, NULL, NULL, SUIT_SUCCESS);
-	__cmock_suit_plat_retrieve_manifest_IgnoreArg_envelope_str();
-	__cmock_suit_plat_retrieve_manifest_ReturnThruPtr_envelope_str((uint8_t**)&exp_radio_envelope_payload.value);
-	__cmock_suit_plat_retrieve_manifest_IgnoreArg_envelope_len();
-	__cmock_suit_plat_retrieve_manifest_ReturnThruPtr_envelope_len(&exp_radio_envelope_payload.len);
-	/* suit_plat_check_digest is called as part of RADIO manifest decoding */
-	__cmock_suit_plat_check_digest_ExpectComplexArgsAndReturn(suit_cose_sha256, &exp_radio_manifest_digest, &exp_radio_manifest_payload, SUIT_SUCCESS);
-
-	__cmock_suit_plat_retrieve_manifest_ExpectAndReturn(app_component_handle, NULL, NULL, SUIT_SUCCESS);
-	__cmock_suit_plat_retrieve_manifest_IgnoreArg_envelope_str();
-	__cmock_suit_plat_retrieve_manifest_ReturnThruPtr_envelope_str((uint8_t**)&exp_app_envelope_payload.value);
-	__cmock_suit_plat_retrieve_manifest_IgnoreArg_envelope_len();
-	__cmock_suit_plat_retrieve_manifest_ReturnThruPtr_envelope_len(&exp_app_envelope_payload.len);
-	/* suit_plat_check_digest is called as part of APP manifest decoding */
-	__cmock_suit_plat_check_digest_ExpectComplexArgsAndReturn(suit_cose_sha256, &exp_app_manifest_digest, &exp_app_manifest_payload, SUIT_SUCCESS);
-
+	__cmock_suit_plat_check_image_match_ExpectComplexArgsAndReturn(radio_component_handle, suit_cose_sha256, &exp_radio_manifest_digest, SUIT_SUCCESS);
+	__cmock_suit_plat_check_image_match_ExpectComplexArgsAndReturn(app_component_handle, suit_cose_sha256, &exp_app_manifest_digest, SUIT_SUCCESS);
 	/* Execute dependency_integrity check on radio and application manifest */
 	radio_assert_envelope_integrity(true);
 	__cmock_suit_plat_authorize_process_dependency_ExpectComplexArgsAndReturn(&exp_root_manifest_id, &exp_radio_manifest_id, SUIT_SEQ_VALIDATE, SUIT_SUCCESS);
