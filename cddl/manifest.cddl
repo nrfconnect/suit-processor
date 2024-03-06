@@ -90,7 +90,7 @@ SUIT_Common = {
   0*1 $$SUIT_Common-extensions,
 }
 
-SUIT_Components           = [ 1*4 SUIT_Component_Identifier ]
+SUIT_Components           = [ 1*5 SUIT_Component_Identifier ]
 
 ;REQUIRED to implement:
 suit-cose-hash-algs /= cose-alg-sha-256

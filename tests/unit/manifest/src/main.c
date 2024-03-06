@@ -169,19 +169,19 @@ void test_append_component_fill_array(void)
 	 * The remaining component IDs will be created by changing the length of the static string.
 	 */
 	static struct zcbor_string sample_component_0 = {
-		.value = "TEST_COMPONENT_0123456789abcdef67890",
+		.value = "TEST_COMPONENT_0123456789abcdef67890abcd",
 		.len = sizeof("TEST_COMPONENT_0"),
 	};
 
 	/* Verify that the test boundaries can be reached. */
 	TEST_ASSERT_LESS_THAN_MESSAGE(
-		sizeof("TEST_COMPONENT_0123456789abcdef67890") - sizeof("TEST_COMPONENT_0"),
+		sizeof("TEST_COMPONENT_0123456789abcdef67890abcd") - sizeof("TEST_COMPONENT_0"),
 		SUIT_MAX_NUM_COMPONENTS,
 		"Unable to reach maximum number of components. Please extend the component ID generator"
 	);
 
 	TEST_ASSERT_LESS_THAN_MESSAGE(
-		sizeof("TEST_COMPONENT_0123456789abcdef67890") - sizeof("TEST_COMPONENT_0"),
+		sizeof("TEST_COMPONENT_0123456789abcdef67890abcd") - sizeof("TEST_COMPONENT_0"),
 		SUIT_MAX_NUM_COMPONENT_PARAMS,
 		"Unable to reach maximum number of components. Please extend the component ID generator"
 	);
@@ -474,19 +474,19 @@ void test_append_dependency_fill_array(void)
 	 * The remaining component IDs will be created by changing the length of the static string.
 	 */
 	static struct zcbor_string sample_component_0 = {
-		.value = "TEST_COMPONENT_0123456789abcdef67890",
+		.value = "TEST_COMPONENT_0123456789abcdef67890abcd",
 		.len = sizeof("TEST_COMPONENT_0"),
 	};
 
 	/* Verify that the test boundaries can be reached. */
 	TEST_ASSERT_LESS_THAN_MESSAGE(
-		sizeof("TEST_COMPONENT_0123456789abcdef67890") - sizeof("TEST_COMPONENT_0"),
+		sizeof("TEST_COMPONENT_0123456789abcdef67890abcd") - sizeof("TEST_COMPONENT_0"),
 		SUIT_MAX_NUM_COMPONENTS,
 		"Unable to reach maximum number of components. Please extend the component ID generator"
 	);
 
 	TEST_ASSERT_LESS_THAN_MESSAGE(
-		sizeof("TEST_COMPONENT_0123456789abcdef67890") - sizeof("TEST_COMPONENT_0"),
+		sizeof("TEST_COMPONENT_0123456789abcdef67890abcd") - sizeof("TEST_COMPONENT_0"),
 		SUIT_MAX_NUM_COMPONENT_PARAMS,
 		"Unable to reach maximum number of components. Please extend the component ID generator"
 	);

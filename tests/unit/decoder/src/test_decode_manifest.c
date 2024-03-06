@@ -249,7 +249,7 @@ static uint8_t cbor_envelope_with_single_null_component[] = {
 				0x80, /* array (0 elements) */
 };
 
-static uint8_t cbor_envelope_with_5_components[] = {
+static uint8_t cbor_envelope_with_6_components[] = {
 	0xd8, 0x6b, /* tag(107) : SUIT_Envelope */
 	0xa2, /* map (2 elements) */
 
@@ -259,15 +259,18 @@ static uint8_t cbor_envelope_with_5_components[] = {
 			0x40, /* bytes(0) */
 
 	0x03, /* suit-manifest */
-	0x58, 0x19, /* bytes(25) */
+	0x58, 0x1c, /* bytes(28) */
 	0xa3, /* map (3 elements) */
 	0x01, /* suit-manifest-version */ 0x01,
 	0x02, /* suit-manifest-sequence-number */ 0x10,
 	0x03, /* suit-common */
-		0x52, /* bytes(18) */
+		0x55, /* bytes(21) */
 		0xA1, /* map (1 element) */
 			0x02, /* suit-components */
-				0x85, /* array (5 elements) */
+				0x86, /* array (6 elements) */
+				0x81, /* array (1 element) */
+					0x41, /* bytes(1) */
+					'M',
 				0x81, /* array (1 element) */
 					0x41, /* bytes(1) */
 					'M',
@@ -530,8 +533,8 @@ void test_decode_manifest_invalid_input_bytes(void)
 			.exp_ret = ZCBOR_ERR_TO_SUIT_ERR(ZCBOR_ERR_PAYLOAD_NOT_CONSUMED),
 		},
 		{
-			.envelope = cbor_envelope_with_5_components,
-			.envelope_size = sizeof(cbor_envelope_with_5_components),
+			.envelope = cbor_envelope_with_6_components,
+			.envelope_size = sizeof(cbor_envelope_with_6_components),
 			.exp_ret = ZCBOR_ERR_TO_SUIT_ERR(ZCBOR_ERR_PAYLOAD_NOT_CONSUMED),
 		},
 		{
