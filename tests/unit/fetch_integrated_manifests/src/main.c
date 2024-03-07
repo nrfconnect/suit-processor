@@ -248,6 +248,69 @@ void test_suit_process_seq_payload_fetch(void)
 	TEST_ASSERT_EQUAL(SUIT_SUCCESS, err);
 }
 
+void test_suit_process_seq_candidate_verification(void)
+{
+	/* SUIT_SEQ_CAND_VERIFICATION command sequence is not present in the sample manifest.
+	 */
+	root_assert_envelope_authorization();
+	root_assert_component_creation();
+#ifdef SUIT_PLATFORM_DRY_RUN_SUPPORT
+	root_assert_dry_run_execution();
+#endif /* SUIT_PLATFORM_DRY_RUN_SUPPORT */
+
+	__cmock_suit_plat_authorize_sequence_num_ExpectComplexArgsAndReturn(SUIT_SEQ_CAND_VERIFICATION, &exp_root_manifest_id, 1, SUIT_SUCCESS);
+
+	/* SUIT_COMMMON sequence from the root manifest */
+	__cmock_suit_plat_override_image_size_ExpectAndReturn(radio_component_handle, exp_radio_envelope_payload.len, SUIT_SUCCESS);
+	__cmock_suit_plat_override_image_size_ExpectAndReturn(app_component_handle, exp_app_envelope_payload.len, SUIT_SUCCESS);
+	__cmock_suit_plat_check_vid_ExpectComplexArgsAndReturn(radio_component_handle, &exp_radio_vid_uuid, SUIT_SUCCESS);
+	__cmock_suit_plat_check_cid_ExpectComplexArgsAndReturn(radio_component_handle, &exp_radio_cid_uuid, SUIT_SUCCESS);
+	__cmock_suit_plat_check_vid_ExpectComplexArgsAndReturn(app_component_handle, &exp_app_vid_uuid, SUIT_SUCCESS);
+	__cmock_suit_plat_check_cid_ExpectComplexArgsAndReturn(app_component_handle, &exp_app_cid_uuid, SUIT_SUCCESS);
+
+	/* Fetch the dependency manifest (radio) */
+	__cmock_suit_plat_fetch_integrated_ExpectComplexArgsAndReturn(candidate_component_handle, &exp_radio_envelope_payload, SUIT_SUCCESS);
+
+	/* Execute radio manifest */
+	radio_assert_envelope_integrity(false);
+	__cmock_suit_plat_authorize_process_dependency_ExpectComplexArgsAndReturn(&exp_root_manifest_id, &exp_radio_manifest_id, SUIT_SEQ_CAND_VERIFICATION, SUIT_SUCCESS);
+	__cmock_suit_plat_authorize_sequence_num_ExpectComplexArgsAndReturn(SUIT_SEQ_CAND_VERIFICATION, &exp_radio_manifest_id, 1, SUIT_SUCCESS);
+	radio_assert_envelope_authorization(false);
+	radio_assert_component_creation();
+	__cmock_suit_plat_authorize_sequence_num_ExpectComplexArgsAndReturn(SUIT_SEQ_CAND_VERIFICATION, &exp_radio_manifest_id, 1, SUIT_SUCCESS);
+	/* SUIT_COMMON sequence from the radio manifest */
+	__cmock_suit_plat_override_image_size_ExpectAndReturn(radio_fw_component_handle, exp_radio_fw_payload.len, SUIT_SUCCESS);
+	__cmock_suit_plat_override_image_size_ExpectAndReturn(radio_fw_memptr_component_handle, exp_radio_fw_payload.len, SUIT_SUCCESS);
+	__cmock_suit_plat_check_vid_ExpectComplexArgsAndReturn(radio_fw_component_handle, &exp_radio_vid_uuid, SUIT_SUCCESS);
+	__cmock_suit_plat_check_cid_ExpectComplexArgsAndReturn(radio_fw_component_handle, &exp_radio_cid_uuid, SUIT_SUCCESS);
+	__cmock_suit_plat_sequence_completed_ExpectComplexArgsAndReturn(SUIT_SEQ_CAND_VERIFICATION, &exp_radio_manifest_id, exp_radio_envelope_payload.value, exp_radio_envelope_payload.len, SUIT_SUCCESS);
+	radio_assert_component_deletion();
+
+	/* Fetch the dependency manifest (application) */
+	__cmock_suit_plat_fetch_integrated_ExpectComplexArgsAndReturn(candidate_component_handle, &exp_app_envelope_payload, SUIT_SUCCESS);
+
+	/* Execute application manifest */
+	app_assert_envelope_integrity(false);
+	__cmock_suit_plat_authorize_process_dependency_ExpectComplexArgsAndReturn(&exp_root_manifest_id, &exp_app_manifest_id, SUIT_SEQ_CAND_VERIFICATION, SUIT_SUCCESS);
+	__cmock_suit_plat_authorize_sequence_num_ExpectComplexArgsAndReturn(SUIT_SEQ_CAND_VERIFICATION, &exp_app_manifest_id, 1, SUIT_SUCCESS);
+	app_assert_envelope_authorization(false);
+	app_assert_component_creation();
+	__cmock_suit_plat_authorize_sequence_num_ExpectComplexArgsAndReturn(SUIT_SEQ_CAND_VERIFICATION, &exp_app_manifest_id, 1, SUIT_SUCCESS);
+	/* SUIT_COMMON sequence from the application manifest */
+	__cmock_suit_plat_override_image_size_ExpectAndReturn(app_fw_component_handle, exp_app_fw_payload.len, SUIT_SUCCESS);
+	__cmock_suit_plat_override_image_size_ExpectAndReturn(app_fw_memptr_component_handle, exp_app_fw_payload.len, SUIT_SUCCESS);
+	__cmock_suit_plat_check_vid_ExpectComplexArgsAndReturn(app_fw_component_handle, &exp_app_vid_uuid, SUIT_SUCCESS);
+	__cmock_suit_plat_check_cid_ExpectComplexArgsAndReturn(app_fw_component_handle, &exp_app_cid_uuid, SUIT_SUCCESS);
+	__cmock_suit_plat_sequence_completed_ExpectComplexArgsAndReturn(SUIT_SEQ_CAND_VERIFICATION, &exp_app_manifest_id, exp_app_envelope_payload.value, exp_app_envelope_payload.len, SUIT_SUCCESS);
+	app_assert_component_deletion();
+
+	__cmock_suit_plat_sequence_completed_ExpectComplexArgsAndReturn(SUIT_SEQ_CAND_VERIFICATION, &exp_root_manifest_id, manifest_buf, manifest_len, SUIT_SUCCESS);
+	root_assert_component_deletion();
+
+	int err = suit_process_sequence(manifest_buf, manifest_len, SUIT_SEQ_CAND_VERIFICATION);
+	TEST_ASSERT_EQUAL(SUIT_SUCCESS, err);
+}
+
 void test_suit_process_seq_install(void)
 {
 	root_assert_envelope_authorization();

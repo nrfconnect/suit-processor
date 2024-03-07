@@ -37,7 +37,7 @@ struct zcbor_string exp_radio_vid_uuid = {
 };
 
 static struct zcbor_string signature = {
-	.value = &(manifest_buf[639]),
+	.value = &(manifest_buf[687]),
 	.len = 64,
 };
 static uint8_t signature1_cbor[] = {
@@ -73,15 +73,15 @@ struct zcbor_string exp_radio_manifest_digest = {
 };
 
 struct zcbor_string exp_radio_envelope_payload = {
-	.value = &manifest_buf[582],
+	.value = &manifest_buf[630],
 	.len = 568,
 };
 struct zcbor_string exp_radio_manifest_payload = {
-	.value = &manifest_buf[704],
+	.value = &manifest_buf[752],
 	.len = 177,
 };
 struct zcbor_string exp_radio_fw_payload = {
-	.value = &manifest_buf[894],
+	.value = &manifest_buf[942],
 	.len = 256,
 };
 

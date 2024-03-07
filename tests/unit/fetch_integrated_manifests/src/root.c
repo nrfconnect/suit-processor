@@ -55,7 +55,7 @@ struct zcbor_string exp_root_manifest_digest = {
 
 struct zcbor_string exp_root_manifest_payload = {
 	.value = &(manifest_buf[122]),
-	.len = 445,
+	.len = 493,
 };
 
 static uint8_t root_component_uuid[] = {

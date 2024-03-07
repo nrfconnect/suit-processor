@@ -29,6 +29,7 @@ void bootstrap_envelope_empty(struct suit_processor_state *state)
 	manifest_state->dependency_resolution_seq_status = UNAVAILABLE;
 	manifest_state->payload_fetch_seq_status = UNAVAILABLE;
 	manifest_state->install_seq_status = UNAVAILABLE;
+	manifest_state->candidate_verification_seq_status = UNAVAILABLE;
 	manifest_state->validate_seq_status = UNAVAILABLE;
 	manifest_state->load_seq_status = UNAVAILABLE;
 	manifest_state->invoke_seq_status = UNAVAILABLE;
