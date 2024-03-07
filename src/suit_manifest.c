@@ -259,6 +259,11 @@ struct zcbor_string *suit_manifest_get_command_seq(struct suit_manifest_state *m
 			return &manifest->payload_fetch_seq;
 		}
 		return NULL;
+	case SUIT_SEQ_CAND_VERIFICATION:
+		if (manifest->candidate_verification_seq_status == AUTHENTICATED) {
+			return &manifest->candidate_verification_seq;
+		}
+		return NULL;
 	case SUIT_SEQ_INSTALL:
 		if (manifest->install_seq_status == AUTHENTICATED) {
 			return &manifest->install_seq;

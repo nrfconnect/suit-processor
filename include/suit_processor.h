@@ -156,6 +156,9 @@ struct suit_manifest_state {
 	struct zcbor_string payload_fetch_seq;
 	enum suit_seq_status payload_fetch_seq_status;
 
+	struct zcbor_string candidate_verification_seq;
+	enum suit_seq_status candidate_verification_seq_status;
+
 	struct zcbor_string install_seq;
 	enum suit_seq_status install_seq_status;
 
