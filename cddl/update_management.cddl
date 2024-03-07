@@ -1,0 +1,191 @@
+; Adapted from draft-ietf-suit-update-management-06 (https://datatracker.ietf.org/doc/html/draft-ietf-suit-update-management-06)
+; This is meant to be used in the firmware implementation.
+; For that reason it has been simplified for that use case:
+;
+; Removed unused extensions
+; Remove suit-set-version
+; Remove suit-coswid
+; Remove suit-condition-image-not-match
+; Remove suit-condition-use-before
+; Remove suit-condition-minimum-battery
+; Remove suit-condition-update-authorized
+; Remove suit-directive-wait and wait events
+; Remove suit-directive-override-multiple
+; Remove suit-directive-copy-params
+; Remove suit-parameter-use-before
+; Remove suit-parameter-minimum-battery
+; Remove suit-parameter-update-priority
+; Remove suit-parameter-wait-info
+; Remove component metadata
+; Set the maximum length of version array to 5
+;
+
+$$unseverable-manifest-member-extensions //= (
+    suit-current-version => \
+        bstr .cbor SUIT_Condition_Version_Comparison_Value
+)
+; $$SUIT_severable-members-extensions //= (
+;     suit-coswid => bstr)
+;    suit-coswid => bstr .cbor concise-swid-tag)
+
+; $$severable-manifest-members-choice-extensions //= (
+;     suit-coswid => bstr .cbor SUIT_Command_Sequence / SUIT_Digest
+; )
+
+; SUIT_Condition //= (
+;     suit-condition-image-not-match,   SUIT_Rep_Policy)
+; SUIT_Condition //= (
+;     suit-condition-use-before,        SUIT_Rep_Policy)
+; SUIT_Condition //= (
+;     suit-condition-minimum-battery,   SUIT_Rep_Policy)
+; SUIT_Condition //= (
+;     suit-condition-update-authorized, SUIT_Rep_Policy)
+SUIT_Condition //= (
+    suit-condition-version,           SUIT_Rep_Policy)
+
+; SUIT_Directive //= (
+;     suit-directive-wait,              SUIT_Rep_Policy)
+
+; SUIT_Directive //= (
+;     suit-directive-override-multiple, SUIT_Override_Mult_Arg)
+; SUIT_Directive //=(
+;     suit-directive-copy-params,       SUIT_Directive_Copy_Params)
+
+
+; SUIT_Override_Mult_Arg = {
+;     + uint => {+ $$SUIT_Parameters}
+; }
+; SUIT_Directive_Copy_Params = {
+;     + uint => [+ int]
+; }
+
+; SUIT_Wait_Event = { + SUIT_Wait_Events }
+
+; SUIT_Wait_Events //= (suit-wait-event-authorization => int)
+; SUIT_Wait_Events //= (suit-wait-event-power => int)
+; SUIT_Wait_Events //= (suit-wait-event-network => int)
+; SUIT_Wait_Events //= (suit-wait-event-other-device-version
+;     => SUIT_Wait_Event_Argument_Other_Device_Version)
+; SUIT_Wait_Events //= (suit-wait-event-time => uint); Timestamp
+; SUIT_Wait_Events //= (suit-wait-event-time-of-day
+;     => uint); Time of Day (seconds since 00:00:00)
+; SUIT_Wait_Events //= (suit-wait-event-day-of-week
+;     => uint); Days since Sunday
+
+; SUIT_Wait_Event_Argument_Other_Device_Version = [
+;     other-device: bstr,
+;     other-device-version: [ + SUIT_Parameter_Version_Match ]
+; ]
+
+; SUIT_Parameters //= (suit-parameter-use-before => uint)
+; SUIT_Parameters //= (suit-parameter-minimum-battery => uint)
+; SUIT_Parameters //= (suit-parameter-update-priority => int)
+SUIT_Parameters //= (suit-parameter-version =>
+    bstr .cbor SUIT_Parameter_Version_Match)
+; SUIT_Parameters //= (suit-parameter-wait-info =>
+;     bstr .cbor SUIT_Wait_Event)
+; SUIT_Parameters //= (suit-parameter-component-metadata =>
+;     bstr .cbor SUIT_Component_Metadata)
+
+SUIT_Parameter_Version_Match = [
+    suit-condition-version-comparison-type:
+        SUIT_Condition_Version_Comparison_Types,
+    suit-condition-version-comparison-value:
+        SUIT_Condition_Version_Comparison_Value
+]
+SUIT_Condition_Version_Comparison_Types /=
+    suit-condition-version-comparison-greater
+SUIT_Condition_Version_Comparison_Types /=
+    suit-condition-version-comparison-greater-equal
+SUIT_Condition_Version_Comparison_Types /=
+    suit-condition-version-comparison-equal
+SUIT_Condition_Version_Comparison_Types /=
+    suit-condition-version-comparison-lesser-equal
+SUIT_Condition_Version_Comparison_Types /=
+    suit-condition-version-comparison-lesser
+
+suit-condition-version-comparison-greater = 1
+suit-condition-version-comparison-greater-equal = 2
+suit-condition-version-comparison-equal = 3
+suit-condition-version-comparison-lesser-equal = 4
+suit-condition-version-comparison-lesser = 5
+
+SUIT_Condition_Version_Comparison_Value = [ 0*5 int]
+
+
+; SUIT_Component_Metadata = {
+;     ? suit-meta-default-permissions => SUIT_meta_permissions,
+;     ? suit-meta-user-permissions => SUIT_meta_permission_map,
+;     ? suit-meta-group-permissions => SUIT_meta_permission_map,
+;     ? suit-meta-role-permissions => SUIT_meta_permission_map,
+;     ? suit-meta-file-type => SUIT_Filetype,
+;     ? suit-meta-modification-time => CBOR_Datetime,
+;     ? suit-meta-creation-time => CBOR_Datetime,
+;     ? suit-meta-creator => SUIT_meta_actor_id,
+;     * $$SUIT_Component_Metadata_Extensions
+; }
+
+; SUIT_meta_permissions = uint .bits SUIT_meta_permission_bits
+; SUIT_meta_permission_bits = &(
+;     write_attr_ex: 13,
+;     read_attr_ex: 12,
+;     sync: 11,
+;     delete: 10,
+;     recurse_delete: 9,
+;     write_attr: 8,
+;     change_owner: 7,
+;     change_perm: 6,
+;     read_perm: 5,
+;     read_attr: 4,
+;     creatdir_append: 3,
+;     list_read: 2,
+;     create_write: 1,
+;     traverse_exec: 0,
+;     * $$SUIT_meta_permission_bits_extensions
+; )
+
+; SUIT_meta_permission_map = {
+;     + SUIT_meta_actor_id => SUIT_meta_permissions
+; }
+
+; SUIT_meta_actor_id = UUID_Tagged / bstr / str / int
+; UUID_Tagged = #6.37(bstr)
+
+
+
+$$suit-text-component-key-extensions //= (
+    suit-text-version-required => tstr)
+$$suit-text-component-key-extensions //= (
+    suit-text-current-version => tstr)
+
+; Define missing identifiers
+suit-current-version = 6
+
+; suit-set-version = 6
+; suit-coswid = 14
+; suit-condition-use-before        = 4
+; suit-condition-image-not-match          = 25
+; suit-condition-minimum-battery          = 26
+; suit-condition-update-authorized        = 27
+suit-condition-version                  = 28
+
+; suit-directive-wait                     = 29
+; suit-directive-override-multiple        = 34
+; suit-directive-copy-params              = 35
+
+; suit-wait-event-authorization        = 1
+; suit-wait-event-power                = 2
+; suit-wait-event-network              = 3
+; suit-wait-event-other-device-version = 4
+; suit-wait-event-time                 = 5
+; suit-wait-event-time-of-day          = 6
+; suit-wait-event-day-of-week          = 7
+
+; suit-parameter-use-before        = 4
+; suit-parameter-minimum-battery   = 26
+; suit-parameter-update-priority   = 27
+suit-parameter-version           = 28
+; suit-parameter-wait-info         = 29
+
+suit-text-version-required      = 7
+suit-text-current-version       = 8
