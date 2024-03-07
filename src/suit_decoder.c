@@ -484,6 +484,17 @@ int suit_decoder_decode_manifest(struct suit_decoder_state *state)
 			const struct SUIT_Component_Identifier *manifest_component = &component_id_ext->SUIT_Manifest_Extensions_suit_manifest_component_id;
 
 			ret = get_component_id_str(&state->decoded_manifest->manifest_component_id, manifest_component);
+		} else {
+			state->decoded_manifest->manifest_component_id = (struct zcbor_string){NULL, 0};
+		}
+
+		if (state->manifest.SUIT_Manifest_SUIT_Unseverable_Members_m.SUIT_Unseverable_Members_unseverable_manifest_member_extensions_m_present) {
+			const struct SUIT_Unseverable_Members_unseverable_manifest_member_extensions_m *ext = &state->manifest.SUIT_Manifest_SUIT_Unseverable_Members_m.SUIT_Unseverable_Members_unseverable_manifest_member_extensions_m;
+			const struct unseverable_manifest_member_extensions_suit_current_version *version_ext = &ext->SUIT_Unseverable_Members_unseverable_manifest_member_extensions_m;
+
+			state->decoded_manifest->current_version = version_ext->unseverable_manifest_member_extensions_suit_current_version;
+		} else {
+			state->decoded_manifest->current_version = (struct zcbor_string){NULL, 0};
 		}
 	}
 
