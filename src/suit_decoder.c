@@ -748,7 +748,14 @@ int suit_decoder_decode_sequences(struct suit_decoder_state *state)
 
 			case _severable_manifest_members_choice_extensions_suit_candidate_verification:
 				ext_seq = &ext->_severable_manifest_members_choice_extensions_suit_candidate_verification;
-				ret = SUIT_ERR_MANIFEST_VALIDATION;
+
+				if (state->decoded_manifest->candidate_verification_seq_status == UNAVAILABLE) {
+					state->decoded_manifest->candidate_verification_seq = *ext_seq;
+					state->decoded_manifest->candidate_verification_seq_status = AUTHENTICATED;
+				} else {
+					state->decoded_manifest->candidate_verification_seq_status = UNAVAILABLE;
+					ret = SUIT_ERR_MANIFEST_VALIDATION;
+				}
 				break;
 
 			default:
@@ -764,6 +771,14 @@ int suit_decoder_decode_sequences(struct suit_decoder_state *state)
 	if ((state->decoded_manifest->dependency_resolution_seq_status != AUTHENTICATED) &&
 	    (state->decoded_manifest->dependency_resolution_seq_status != UNAVAILABLE)) {
 		state->decoded_manifest->dependency_resolution_seq_status = UNAVAILABLE;
+		if (ret == SUIT_SUCCESS) {
+			ret = SUIT_ERR_MANIFEST_VALIDATION;
+		}
+	}
+
+	if ((state->decoded_manifest->candidate_verification_seq_status != AUTHENTICATED) &&
+	    (state->decoded_manifest->candidate_verification_seq_status != UNAVAILABLE)) {
+		state->decoded_manifest->candidate_verification_seq_status = UNAVAILABLE;
 		if (ret == SUIT_SUCCESS) {
 			ret = SUIT_ERR_MANIFEST_VALIDATION;
 		}

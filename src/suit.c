@@ -57,13 +57,13 @@ static int suit_dry_run_manifest(struct suit_manifest_state *manifest_state,
 		/**
 		 * The PARSE sequence is used by tests to verify various aspects how will the firmware
 		 * react on invalid manifests. It is currently only run on the Secure Domain FW, which
-		 * is why the scope of the dry run is the same as the scope for the INSTALL sequence
+		 * is why the scope of the dry run is the same as the scope for the CANDIDATE_VERIFICATION sequence
 		 * (all sequences run by the Secure Domain).
 		 * Currently the PARSE sequence is useless in context of the application core.
 		 * TODO: NCSDK-26242 - discuss what should be the scope of the manifest validation
 		 * by the PARSE sequence and on the application core side.
 		 */
-		seq_name = SUIT_SEQ_INSTALL;
+		seq_name = SUIT_SEQ_CAND_VERIFICATION;
 	}
 
 	if (seq_name <= SUIT_SEQ_PAYLOAD_FETCH)
