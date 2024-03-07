@@ -93,7 +93,7 @@ void test_suit_decode_envelope(void)
 	/* The envelope decoding is fully handled by the ZCBOR code and does not call platform APIs */
 	int ret = suit_processor_get_manifest_metadata(
 		manifest_buf, manifest_len, false,
-		&manifest_component_id, &digest, &alg, &seq_num);
+		&manifest_component_id, NULL, NULL, &digest, &alg, &seq_num);
 
 	TEST_ASSERT_EQUAL_MESSAGE(SUIT_SUCCESS, ret, "Unable to decode input manifest");
 	TEST_ASSERT_EQUAL_MESSAGE(1, seq_num, "Unexpected sequence number value");

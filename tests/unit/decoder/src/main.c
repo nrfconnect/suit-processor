@@ -177,6 +177,8 @@ void test_decode_manifest_minimal(void);
 void test_decode_manifest_max_components(void);
 void test_decode_manifest_invalid_input_bytes(void);
 void test_decode_manifest_with_component_id(void);
+void test_decode_manifest_with_empty_sem_ver(void);
+void test_decode_manifest_with_valid_sem_ver(void);
 
 /* Authenticate manifest tests */
 void test_authenticate_manifest_invalid_input(void);

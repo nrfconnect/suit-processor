@@ -37,19 +37,31 @@ int suit_process_sequence(const uint8_t *envelope_str, size_t envelope_len, enum
 /** Extract metadata from the given envelope.
  *
  * @details This API will decode and (optionally) authenticate the input manifest data structure.
+ *          The user may ask for the following sets of metadata independently:
+ *           - component ID
+ *           - semantic version and version length
+ *           - digest and digest algorithm ID
+ *           - sequence number
+ *          The metadata sets that should not be returned can be skipped by passing the NULL pointer.
  *
  * @note The output structures will be set to point to the correct places within the input envelope.
  *
- * @param[in]   envelope_str           Reference to the input envelope to be parsed.
- * @param[in]   envelope_len           Length of the input envelope.
- * @param[in]   authenticate           Boolean flag, indicating if the input manifest should be authenticated.
- * @param[out]  manifest_component_id  Pointer to the structure in which the manifest component ID value will be stored.
- * @param[out]  digest                 Pointer to the structure in which the manifest digest value will be stored.
- * @param[out]  alg                    Algorithm, used to calculate the digest.
- * @param[out]  seq_num                Pointer to the structure in which the manifest sequence number will be stored.
+ * @param[in]     envelope_str           Reference to the input envelope to be parsed.
+ * @param[in]     envelope_len           Length of the input envelope.
+ * @param[in]     authenticate           Boolean flag, indicating if the input manifest should be authenticated.
+ * @param[out]    manifest_component_id  Pointer to the structure in which the manifest component ID value will
+ *                                       be stored.
+ * @param[out]    version                Pointer to an array that will be filled with the manifest version (semantic)
+ *                                       value.
+ * @param[inout]  version_len            As input - maximum length of the version array.
+ *                                       As output - length of the manifest version.
+ * @param[out]    digest                 Pointer to the structure in which the manifest digest value will be stored.
+ * @param[out]    alg                    Algorithm, used to calculate the digest.
+ * @param[out]    seq_num                Pointer to the structure in which the manifest sequence number will be stored.
+ *
  * @returns SUIT_SUCCESS if the operation succeeds, error code otherwise.
  */
-int suit_processor_get_manifest_metadata(const uint8_t *envelope_str, size_t envelope_len, bool authenticate, struct zcbor_string *manifest_component_id, struct zcbor_string *digest, enum suit_cose_alg *alg, unsigned int *seq_num);
+int suit_processor_get_manifest_metadata(const uint8_t *envelope_str, size_t envelope_len, bool authenticate, struct zcbor_string *manifest_component_id, int *version, size_t *version_len, struct zcbor_string *digest, enum suit_cose_alg *alg, unsigned int *seq_num);
 
 #ifdef __cplusplus
 }

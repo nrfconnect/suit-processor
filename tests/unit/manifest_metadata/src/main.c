@@ -12,6 +12,21 @@
 
 static struct suit_processor_state state;
 
+static const uint8_t valid_version_cbor[] = {
+	0x83, /* array (3 elements) */
+	0x01, 0x02, 0x03, /* v1.2.3 */
+};
+
+static const struct suit_semver exp_version = {
+	.value = {1, 2, 3},
+	.count = 3,
+};
+
+static const struct suit_semver empty_version = {
+	.value = {0, 0, 0, 0, 0},
+	.count = 0,
+};
+
 static const uint8_t valid_digest_bstr_cbor[] = {
 	0x82, /* array (2 elements) */
 	0x2f, /* suit-digest-algorithm-id: cose-alg-sha-256 */
@@ -125,9 +140,87 @@ static int mock_valid_manifest(struct suit_decoder_state* decoder_state, int cmo
 	decoder_state->decoded_manifest->sequence_number = exp_seq_num;
 	decoder_state->decoded_manifest->manifest_component_id = exp_manifest_component_id;
 
+	decoder_state->decoded_manifest->current_version.value = valid_version_cbor;
+	decoder_state->decoded_manifest->current_version.len = sizeof(valid_version_cbor);
+
 	return SUIT_SUCCESS;
 }
 
+static int mock_manifest_no_version(struct suit_decoder_state* decoder_state, int cmock_num_calls)
+{
+	decoder_state->manifest_digest_bytes.value = valid_digest_bstr_cbor;
+	decoder_state->manifest_digest_bytes.len = sizeof(valid_digest_bstr_cbor);
+
+	decoder_state->decoded_manifest = &state.manifest_stack[0];
+	decoder_state->decoded_manifest->sequence_number = exp_seq_num;
+	decoder_state->decoded_manifest->manifest_component_id = exp_manifest_component_id;
+
+	decoder_state->decoded_manifest->current_version.value = NULL;
+	decoder_state->decoded_manifest->current_version.len = 0;
+
+	return SUIT_SUCCESS;
+}
+
+static int mock_manifest_empty_version(struct suit_decoder_state* decoder_state, int cmock_num_calls)
+{
+	static const uint8_t empty_version_cbor[] = {
+		0x80, /* array (0 elements) */
+	};
+
+	decoder_state->manifest_digest_bytes.value = valid_digest_bstr_cbor;
+	decoder_state->manifest_digest_bytes.len = sizeof(valid_digest_bstr_cbor);
+
+	decoder_state->decoded_manifest = &state.manifest_stack[0];
+	decoder_state->decoded_manifest->sequence_number = exp_seq_num;
+	decoder_state->decoded_manifest->manifest_component_id = exp_manifest_component_id;
+
+	decoder_state->decoded_manifest->current_version.value = empty_version_cbor;
+	decoder_state->decoded_manifest->current_version.len = sizeof(empty_version_cbor);
+
+	return SUIT_SUCCESS;
+}
+
+static int mock_manifest_too_long_version(struct suit_decoder_state* decoder_state, int cmock_num_calls)
+{
+	static const uint8_t invalid_version_cbor[] = {
+		0x86, /* array (6 elements) */
+		0x01, 0x02, 0x03, 0x04, 0x05, 0x06, /* v1.2.3.4.5.6 */
+	};
+
+	decoder_state->manifest_digest_bytes.value = valid_digest_bstr_cbor;
+	decoder_state->manifest_digest_bytes.len = sizeof(valid_digest_bstr_cbor);
+
+	decoder_state->decoded_manifest = &state.manifest_stack[0];
+	decoder_state->decoded_manifest->sequence_number = exp_seq_num;
+	decoder_state->decoded_manifest->manifest_component_id = exp_manifest_component_id;
+
+	decoder_state->decoded_manifest->current_version.value = invalid_version_cbor;
+	decoder_state->decoded_manifest->current_version.len = sizeof(invalid_version_cbor);
+
+	return SUIT_SUCCESS;
+}
+
+static int mock_manifest_invalid_version(struct suit_decoder_state* decoder_state, int cmock_num_calls)
+{
+	static const uint8_t invalid_version_cbor[] = {
+		0x83, /* array (3 elements) */
+		0x01, 0x02, 0x03, /* v1.2.3 */
+		0x81, /* array (1 element) */
+		0x04, /* 4 */
+	};
+
+	decoder_state->manifest_digest_bytes.value = valid_digest_bstr_cbor;
+	decoder_state->manifest_digest_bytes.len = sizeof(valid_digest_bstr_cbor);
+
+	decoder_state->decoded_manifest = &state.manifest_stack[0];
+	decoder_state->decoded_manifest->sequence_number = exp_seq_num;
+	decoder_state->decoded_manifest->manifest_component_id = exp_manifest_component_id;
+
+	decoder_state->decoded_manifest->current_version.value = invalid_version_cbor;
+	decoder_state->decoded_manifest->current_version.len = sizeof(invalid_version_cbor);
+
+	return SUIT_SUCCESS;
+}
 static int mock_valid_manifest_sha512(struct suit_decoder_state* decoder_state, int cmock_num_calls)
 {
 	decoder_state->manifest_digest_bytes.value = valid_digest_bstr_cbor_sha512;
@@ -163,11 +256,11 @@ void test_invalid_input(void)
 	TEST_ASSERT_EQUAL_MESSAGE(SUIT_ERR_CRASH, ret, "Setting SUIT processor state to NULL did not fail");
 	TEST_ASSERT_EQUAL_MESSAGE(INVALID, state.decoder_state.step, "SUIT decoder state not reset after decoding");
 
-	ret = suit_processor_get_manifest_metadata(NULL, envelope_len, false, NULL, NULL, NULL, NULL);
+	ret = suit_processor_get_manifest_metadata(NULL, envelope_len, false, NULL, NULL, NULL, NULL, NULL, NULL);
 	TEST_ASSERT_EQUAL_MESSAGE(SUIT_ERR_DECODING, ret, "Envelope was set to NULL and was decoded");
 	TEST_ASSERT_EQUAL_MESSAGE(INVALID, state.decoder_state.step, "SUIT decoder state not reset after decoding");
 
-	ret = suit_processor_get_manifest_metadata(&envelope_str[0], 0, false, NULL, NULL, NULL, NULL);
+	ret = suit_processor_get_manifest_metadata(&envelope_str[0], 0, false, NULL, NULL, NULL, NULL, NULL, NULL);
 	TEST_ASSERT_EQUAL_MESSAGE(SUIT_ERR_DECODING, ret, "Envelope length was set to zero and was decoded");
 	TEST_ASSERT_EQUAL_MESSAGE(INVALID, state.decoder_state.step, "SUIT decoder state not reset after decoding");
 }
@@ -204,11 +297,11 @@ void test_invalid_decoder_state(void)
 				&state.manifest_stack[0],
 				SUIT_ERR_UNSUPPORTED_COMPONENT_ID);
 
-			int ret = suit_processor_get_manifest_metadata(&envelope_str[0], envelope_len, false, NULL, NULL, NULL, NULL);
+			int ret = suit_processor_get_manifest_metadata(&envelope_str[0], envelope_len, false, NULL, NULL, NULL, NULL, NULL, NULL);
 			TEST_ASSERT_EQUAL_MESSAGE(SUIT_ERR_UNSUPPORTED_COMPONENT_ID, ret, "Envelope decoder was not busy, but the metadata API failed");
 			TEST_ASSERT_EQUAL_MESSAGE(INVALID, state.decoder_state.step, "SUIT decoder state not reset after decoding");
 		} else {
-			int ret = suit_processor_get_manifest_metadata(&envelope_str[0], envelope_len, false, NULL, NULL, NULL, NULL);
+			int ret = suit_processor_get_manifest_metadata(&envelope_str[0], envelope_len, false, NULL, NULL, NULL, NULL, NULL, NULL);
 			TEST_ASSERT_EQUAL_MESSAGE(SUIT_ERR_WAIT, ret, "Envelope decoder was busy, but it was overwritten by the metadata API");
 			TEST_ASSERT_EQUAL_MESSAGE(decoder_states[i], state.decoder_state.step, "SUIT decoder state was busy and has been reset");
 		}
@@ -227,7 +320,7 @@ void test_decoder_init_failed(void)
 		&state.decoder_state,
 		&state.manifest_stack[0],
 		SUIT_ERR_UNSUPPORTED_COMPONENT_ID);
-	int ret = suit_processor_get_manifest_metadata(&envelope_str[0], envelope_len, false, NULL, NULL, NULL, NULL);
+	int ret = suit_processor_get_manifest_metadata(&envelope_str[0], envelope_len, false, NULL, NULL, NULL, NULL, NULL, NULL);
 	TEST_ASSERT_EQUAL_MESSAGE(SUIT_ERR_UNSUPPORTED_COMPONENT_ID, ret, "Envelope decoder was not busy, but the metadata API failed");
 	TEST_ASSERT_EQUAL_MESSAGE(INVALID, state.decoder_state.step, "SUIT decoder state not reset after decoding");
 }
@@ -250,7 +343,7 @@ void test_decode_envelope_failed(void)
 		envelope_len,
 		SUIT_ERR_UNSUPPORTED_COMPONENT_ID);
 
-	int ret = suit_processor_get_manifest_metadata(&envelope_str[0], envelope_len, false, NULL, NULL, NULL, NULL);
+	int ret = suit_processor_get_manifest_metadata(&envelope_str[0], envelope_len, false, NULL, NULL, NULL, NULL, NULL, NULL);
 	TEST_ASSERT_EQUAL_MESSAGE(SUIT_ERR_UNSUPPORTED_COMPONENT_ID, ret, "Envelope decoding failed, but error code was not returned");
 	TEST_ASSERT_EQUAL_MESSAGE(INVALID, state.decoder_state.step, "SUIT decoder state not reset after decoding");
 }
@@ -276,7 +369,7 @@ void test_check_manifest_digest_failed(void)
 		&state.decoder_state,
 		SUIT_ERR_UNSUPPORTED_COMPONENT_ID);
 
-	int ret = suit_processor_get_manifest_metadata(&envelope_str[0], envelope_len, false, NULL, NULL, NULL, NULL);
+	int ret = suit_processor_get_manifest_metadata(&envelope_str[0], envelope_len, false, NULL, NULL, NULL, NULL, NULL, NULL);
 	TEST_ASSERT_EQUAL_MESSAGE(SUIT_ERR_UNSUPPORTED_COMPONENT_ID, ret, "Manifest digest check failed, but error code was not returned");
 	TEST_ASSERT_EQUAL_MESSAGE(INVALID, state.decoder_state.step, "SUIT decoder state not reset after decoding");
 }
@@ -305,7 +398,7 @@ void test_decode_manifest_failed(void)
 		&state.decoder_state,
 		SUIT_ERR_UNSUPPORTED_COMPONENT_ID);
 
-	int ret = suit_processor_get_manifest_metadata(&envelope_str[0], envelope_len, false, NULL, NULL, NULL, NULL);
+	int ret = suit_processor_get_manifest_metadata(&envelope_str[0], envelope_len, false, NULL, NULL, NULL, NULL, NULL, NULL);
 	TEST_ASSERT_EQUAL_MESSAGE(SUIT_ERR_UNSUPPORTED_COMPONENT_ID, ret, "Manifest decoding failed, but error code was not returned");
 	TEST_ASSERT_EQUAL_MESSAGE(INVALID, state.decoder_state.step, "SUIT decoder state not reset after decoding");
 }
@@ -337,7 +430,7 @@ void test_authenticate_manifest_failed(void)
 		&state.decoder_state,
 		SUIT_ERR_UNSUPPORTED_COMPONENT_ID);
 
-	int ret = suit_processor_get_manifest_metadata(&envelope_str[0], envelope_len, true, NULL, NULL, NULL, NULL);
+	int ret = suit_processor_get_manifest_metadata(&envelope_str[0], envelope_len, true, NULL, NULL, NULL, NULL, NULL, NULL);
 	TEST_ASSERT_EQUAL_MESSAGE(SUIT_ERR_UNSUPPORTED_COMPONENT_ID, ret, "Manifest authentication failed, but error code was not returned");
 	TEST_ASSERT_EQUAL_MESSAGE(INVALID, state.decoder_state.step, "SUIT decoder state not reset after decoding");
 }
@@ -372,7 +465,7 @@ void test_authorize_manifest_failed(void)
 		&state.decoder_state,
 		SUIT_ERR_UNSUPPORTED_COMPONENT_ID);
 
-	int ret = suit_processor_get_manifest_metadata(&envelope_str[0], envelope_len, true, NULL, NULL, NULL, NULL);
+	int ret = suit_processor_get_manifest_metadata(&envelope_str[0], envelope_len, true, NULL, NULL, NULL, NULL, NULL, NULL);
 	TEST_ASSERT_EQUAL_MESSAGE(SUIT_ERR_UNSUPPORTED_COMPONENT_ID, ret, "Manifest authorization failed, but error code was not returned");
 	TEST_ASSERT_EQUAL_MESSAGE(INVALID, state.decoder_state.step, "SUIT decoder state not reset after decoding");
 }
@@ -402,7 +495,7 @@ void test_invalid_decoded_digest_bstr(void)
 		SUIT_SUCCESS);
 	__cmock_suit_decoder_decode_manifest_StubWithCallback(mock_manifest_invalid_digest_bstr);
 
-	int ret = suit_processor_get_manifest_metadata(&envelope_str[0], envelope_len, false, NULL, NULL, NULL, NULL);
+	int ret = suit_processor_get_manifest_metadata(&envelope_str[0], envelope_len, false, NULL, NULL, NULL, NULL, NULL, NULL);
 	TEST_ASSERT_EQUAL_MESSAGE(SUIT_ERR_DECODING, ret, "Invalid manifest digest decoded, but error code was not returned");
 	TEST_ASSERT_EQUAL_MESSAGE(INVALID, state.decoder_state.step, "SUIT decoder state not reset after decoding");
 }
@@ -432,7 +525,7 @@ void test_invalid_decoded_digest_length(void)
 		SUIT_SUCCESS);
 	__cmock_suit_decoder_decode_manifest_StubWithCallback(mock_manifest_invalid_digest_length);
 
-	int ret = suit_processor_get_manifest_metadata(&envelope_str[0], envelope_len, false, NULL, NULL, NULL, NULL);
+	int ret = suit_processor_get_manifest_metadata(&envelope_str[0], envelope_len, false, NULL, NULL, NULL, NULL, NULL, NULL);
 	TEST_ASSERT_EQUAL_MESSAGE(SUIT_ERR_DECODING, ret, "Invalid manifest digest length decoded, but error code was not returned");
 	TEST_ASSERT_EQUAL_MESSAGE(INVALID, state.decoder_state.step, "SUIT decoder state not reset after decoding");
 }
@@ -462,7 +555,7 @@ void test_invalid_decoded_digest_length_sha512(void)
 		SUIT_SUCCESS);
 	__cmock_suit_decoder_decode_manifest_StubWithCallback(mock_manifest_invalid_digest_length_sha512);
 
-	int ret = suit_processor_get_manifest_metadata(&envelope_str[0], envelope_len, false, NULL, NULL, NULL, NULL);
+	int ret = suit_processor_get_manifest_metadata(&envelope_str[0], envelope_len, false, NULL, NULL, NULL, NULL, NULL, NULL);
 	TEST_ASSERT_EQUAL_MESSAGE(SUIT_ERR_DECODING, ret, "Invalid manifest digest (SHA-512) length decoded, but error code was not returned");
 	TEST_ASSERT_EQUAL_MESSAGE(INVALID, state.decoder_state.step, "SUIT decoder state not reset after decoding");
 }
@@ -493,7 +586,7 @@ void test_metadata_digest_no_alg(void)
 		SUIT_SUCCESS);
 	__cmock_suit_decoder_decode_manifest_StubWithCallback(mock_valid_manifest);
 
-	int ret = suit_processor_get_manifest_metadata(&envelope_str[0], envelope_len, false, NULL, &digest, NULL, NULL);
+	int ret = suit_processor_get_manifest_metadata(&envelope_str[0], envelope_len, false, NULL, NULL, NULL, &digest, NULL, NULL);
 	TEST_ASSERT_EQUAL_MESSAGE(SUIT_ERR_DECODING, ret, "Algorithm ID was set to NULL and digest was returned");
 	TEST_ASSERT_EQUAL_MESSAGE(INVALID, state.decoder_state.step, "SUIT decoder state not reset after decoding");
 }
@@ -524,8 +617,144 @@ void test_metadata_digest_no_digest_bstr(void)
 		SUIT_SUCCESS);
 	__cmock_suit_decoder_decode_manifest_StubWithCallback(mock_valid_manifest);
 
-	int ret = suit_processor_get_manifest_metadata(&envelope_str[0], envelope_len, false, NULL, NULL, &alg, NULL);
+	int ret = suit_processor_get_manifest_metadata(&envelope_str[0], envelope_len, false, NULL, NULL, NULL, NULL, &alg, NULL);
 	TEST_ASSERT_EQUAL_MESSAGE(SUIT_ERR_DECODING, ret, "Digest bstr was set to NULL and algorithm ID was returned");
+	TEST_ASSERT_EQUAL_MESSAGE(INVALID, state.decoder_state.step, "SUIT decoder state not reset after decoding");
+}
+
+void test_metadata_manifest_version_no_version(void)
+{
+	uint8_t envelope_str[] = {
+		0xd8, 0x6b, /* tag(107) : SUIT_Envelope */
+		0xa0, /* map (0 elements) */
+	};
+	size_t envelope_len = sizeof(envelope_str);
+	struct suit_semver version;
+
+	version.count = ZCBOR_ARRAY_SIZE(version.value);
+
+	__cmock_suit_decoder_init_ExpectAndReturn(
+		&state.decoder_state,
+		&state.manifest_stack[0],
+		SUIT_SUCCESS);
+	__cmock_suit_decoder_decode_envelope_ExpectAndReturn(
+		&state.decoder_state,
+		&envelope_str[0],
+		envelope_len,
+		SUIT_SUCCESS);
+	__cmock_suit_decoder_check_manifest_digest_ExpectAndReturn(
+		&state.decoder_state,
+		SUIT_SUCCESS);
+	__cmock_suit_decoder_decode_manifest_ExpectAndReturn(
+		&state.decoder_state,
+		SUIT_SUCCESS);
+	__cmock_suit_decoder_decode_manifest_StubWithCallback(mock_manifest_no_version);
+
+	int ret = suit_processor_get_manifest_metadata(&envelope_str[0], envelope_len, false, NULL, version.value, &version.count, NULL, NULL, NULL);
+	TEST_ASSERT_EQUAL_MESSAGE(SUIT_SUCCESS, ret, "Manifest decoded, but error code was returned");
+	TEST_ASSERT_EQUAL_MESSAGE(0, version.count, "Invalid manifest version length returned");
+	TEST_ASSERT_EQUAL_INT_ARRAY_MESSAGE(empty_version.value, version.value, ZCBOR_ARRAY_SIZE(version.value), "Invalid manifest version value returned");
+	TEST_ASSERT_EQUAL_MESSAGE(INVALID, state.decoder_state.step, "SUIT decoder state not reset after decoding");
+}
+
+void test_metadata_manifest_version_empty_version(void)
+{
+	uint8_t envelope_str[] = {
+		0xd8, 0x6b, /* tag(107) : SUIT_Envelope */
+		0xa0, /* map (0 elements) */
+	};
+	size_t envelope_len = sizeof(envelope_str);
+	struct suit_semver version;
+
+	version.count = ZCBOR_ARRAY_SIZE(version.value);
+
+	__cmock_suit_decoder_init_ExpectAndReturn(
+		&state.decoder_state,
+		&state.manifest_stack[0],
+		SUIT_SUCCESS);
+	__cmock_suit_decoder_decode_envelope_ExpectAndReturn(
+		&state.decoder_state,
+		&envelope_str[0],
+		envelope_len,
+		SUIT_SUCCESS);
+	__cmock_suit_decoder_check_manifest_digest_ExpectAndReturn(
+		&state.decoder_state,
+		SUIT_SUCCESS);
+	__cmock_suit_decoder_decode_manifest_ExpectAndReturn(
+		&state.decoder_state,
+		SUIT_SUCCESS);
+	__cmock_suit_decoder_decode_manifest_StubWithCallback(mock_manifest_empty_version);
+
+	int ret = suit_processor_get_manifest_metadata(&envelope_str[0], envelope_len, false, NULL, version.value, &version.count, NULL, NULL, NULL);
+	TEST_ASSERT_EQUAL_MESSAGE(SUIT_SUCCESS, ret, "Manifest decoded, but error code was returned");
+	TEST_ASSERT_EQUAL_MESSAGE(0, version.count, "Invalid manifest version length returned");
+	TEST_ASSERT_EQUAL_INT_ARRAY_MESSAGE(empty_version.value, version.value, ZCBOR_ARRAY_SIZE(version.value), "Invalid manifest version value returned");
+	TEST_ASSERT_EQUAL_MESSAGE(INVALID, state.decoder_state.step, "SUIT decoder state not reset after decoding");
+}
+
+void test_metadata_manifest_version_too_long_version(void)
+{
+	uint8_t envelope_str[] = {
+		0xd8, 0x6b, /* tag(107) : SUIT_Envelope */
+		0xa0, /* map (0 elements) */
+	};
+	size_t envelope_len = sizeof(envelope_str);
+	struct suit_semver version;
+
+	version.count = ZCBOR_ARRAY_SIZE(version.value);
+
+	__cmock_suit_decoder_init_ExpectAndReturn(
+		&state.decoder_state,
+		&state.manifest_stack[0],
+		SUIT_SUCCESS);
+	__cmock_suit_decoder_decode_envelope_ExpectAndReturn(
+		&state.decoder_state,
+		&envelope_str[0],
+		envelope_len,
+		SUIT_SUCCESS);
+	__cmock_suit_decoder_check_manifest_digest_ExpectAndReturn(
+		&state.decoder_state,
+		SUIT_SUCCESS);
+	__cmock_suit_decoder_decode_manifest_ExpectAndReturn(
+		&state.decoder_state,
+		SUIT_SUCCESS);
+	__cmock_suit_decoder_decode_manifest_StubWithCallback(mock_manifest_too_long_version);
+
+	int ret = suit_processor_get_manifest_metadata(&envelope_str[0], envelope_len, false, NULL, version.value, &version.count, NULL, NULL, NULL);
+	TEST_ASSERT_EQUAL_MESSAGE(SUIT_ERR_DECODING, ret, "Invalid manifest version (too long) decoded, but error code was not returned");
+	TEST_ASSERT_EQUAL_MESSAGE(INVALID, state.decoder_state.step, "SUIT decoder state not reset after decoding");
+}
+
+void test_metadata_manifest_version_invalid_version(void)
+{
+	uint8_t envelope_str[] = {
+		0xd8, 0x6b, /* tag(107) : SUIT_Envelope */
+		0xa0, /* map (0 elements) */
+	};
+	size_t envelope_len = sizeof(envelope_str);
+	struct suit_semver version;
+
+	version.count = ZCBOR_ARRAY_SIZE(version.value);
+
+	__cmock_suit_decoder_init_ExpectAndReturn(
+		&state.decoder_state,
+		&state.manifest_stack[0],
+		SUIT_SUCCESS);
+	__cmock_suit_decoder_decode_envelope_ExpectAndReturn(
+		&state.decoder_state,
+		&envelope_str[0],
+		envelope_len,
+		SUIT_SUCCESS);
+	__cmock_suit_decoder_check_manifest_digest_ExpectAndReturn(
+		&state.decoder_state,
+		SUIT_SUCCESS);
+	__cmock_suit_decoder_decode_manifest_ExpectAndReturn(
+		&state.decoder_state,
+		SUIT_SUCCESS);
+	__cmock_suit_decoder_decode_manifest_StubWithCallback(mock_manifest_invalid_version);
+
+	int ret = suit_processor_get_manifest_metadata(&envelope_str[0], envelope_len, false, NULL, version.value, &version.count, NULL, NULL, NULL);
+	TEST_ASSERT_EQUAL_MESSAGE(SUIT_ERR_DECODING, ret, "Invalid manifest version (too long) decoded, but error code was not returned");
 	TEST_ASSERT_EQUAL_MESSAGE(INVALID, state.decoder_state.step, "SUIT decoder state not reset after decoding");
 }
 
@@ -554,7 +783,7 @@ void test_no_metadata_returned(void)
 		SUIT_SUCCESS);
 	__cmock_suit_decoder_decode_manifest_StubWithCallback(mock_valid_manifest);
 
-	int ret = suit_processor_get_manifest_metadata(&envelope_str[0], envelope_len, false, NULL, NULL, NULL, NULL);
+	int ret = suit_processor_get_manifest_metadata(&envelope_str[0], envelope_len, false, NULL, NULL, NULL, NULL, NULL, NULL);
 	TEST_ASSERT_EQUAL_MESSAGE(SUIT_SUCCESS, ret, "Manifest decoded, but error code was returned");
 	TEST_ASSERT_EQUAL_MESSAGE(INVALID, state.decoder_state.step, "SUIT decoder state not reset after decoding");
 }
@@ -590,7 +819,7 @@ void test_no_metadata_returned_auth(void)
 		&state.decoder_state,
 		SUIT_SUCCESS);
 
-	int ret = suit_processor_get_manifest_metadata(&envelope_str[0], envelope_len, true, NULL, NULL, NULL, NULL);
+	int ret = suit_processor_get_manifest_metadata(&envelope_str[0], envelope_len, true, NULL, NULL, NULL, NULL, NULL, NULL);
 	TEST_ASSERT_EQUAL_MESSAGE(SUIT_SUCCESS, ret, "Manifest decoded with authentication, but error code was returned");
 	TEST_ASSERT_EQUAL_MESSAGE(INVALID, state.decoder_state.step, "SUIT decoder state not reset after decoding");
 }
@@ -622,7 +851,7 @@ void test_metadata_digest(void)
 		SUIT_SUCCESS);
 	__cmock_suit_decoder_decode_manifest_StubWithCallback(mock_valid_manifest);
 
-	int ret = suit_processor_get_manifest_metadata(&envelope_str[0], envelope_len, false, NULL, &digest, &alg, NULL);
+	int ret = suit_processor_get_manifest_metadata(&envelope_str[0], envelope_len, false, NULL, NULL, NULL, &digest, &alg, NULL);
 	TEST_ASSERT_EQUAL_MESSAGE(SUIT_SUCCESS, ret, "Manifest decoded, but error code was returned");
 	TEST_ASSERT_EQUAL_MESSAGE(suit_cose_sha256, alg, "Invalid manifest digest algorithm ID returned");
 	TEST_ASSERT_EQUAL_PTR_MESSAGE(exp_manifest_digest.value, digest.value, "Invalid manifest digest returned");
@@ -657,7 +886,7 @@ void test_metadata_digest_sha512(void)
 		SUIT_SUCCESS);
 	__cmock_suit_decoder_decode_manifest_StubWithCallback(mock_valid_manifest_sha512);
 
-	int ret = suit_processor_get_manifest_metadata(&envelope_str[0], envelope_len, false, NULL, &digest, &alg, NULL);
+	int ret = suit_processor_get_manifest_metadata(&envelope_str[0], envelope_len, false, NULL, NULL, NULL, &digest, &alg, NULL);
 	TEST_ASSERT_EQUAL_MESSAGE(SUIT_SUCCESS, ret, "Manifest decoded, but error code was returned");
 	TEST_ASSERT_EQUAL_MESSAGE(suit_cose_sha512, alg, "Invalid manifest digest algorithm ID returned");
 	TEST_ASSERT_EQUAL_PTR_MESSAGE(exp_manifest_digest_sha512.value, digest.value, "Invalid manifest digest (SHA-512) returned");
@@ -698,7 +927,7 @@ void test_metadata_digest_auth(void)
 		&state.decoder_state,
 		SUIT_SUCCESS);
 
-	int ret = suit_processor_get_manifest_metadata(&envelope_str[0], envelope_len, true, NULL, &digest, &alg, NULL);
+	int ret = suit_processor_get_manifest_metadata(&envelope_str[0], envelope_len, true, NULL, NULL, NULL, &digest, &alg, NULL);
 	TEST_ASSERT_EQUAL_MESSAGE(SUIT_SUCCESS, ret, "Manifest decoded with authentication, but error code was returned");
 	TEST_ASSERT_EQUAL_MESSAGE(suit_cose_sha256, alg, "Invalid manifest digest algorithm ID returned");
 	TEST_ASSERT_EQUAL_PTR_MESSAGE(exp_manifest_digest.value, digest.value, "Invalid manifest digest returned");
@@ -732,7 +961,7 @@ void test_metadata_seq_num(void)
 		SUIT_SUCCESS);
 	__cmock_suit_decoder_decode_manifest_StubWithCallback(mock_valid_manifest);
 
-	int ret = suit_processor_get_manifest_metadata(&envelope_str[0], envelope_len, false, NULL, NULL, NULL, &seq_num);
+	int ret = suit_processor_get_manifest_metadata(&envelope_str[0], envelope_len, false, NULL, NULL, NULL, NULL, NULL, &seq_num);
 	TEST_ASSERT_EQUAL_MESSAGE(SUIT_SUCCESS, ret, "Manifest decoded, but error code was returned");
 	TEST_ASSERT_EQUAL_MESSAGE(exp_seq_num, seq_num, "Invalid manifest sequence number returned");
 	TEST_ASSERT_EQUAL_MESSAGE(INVALID, state.decoder_state.step, "SUIT decoder state not reset after decoding");
@@ -770,7 +999,7 @@ void test_metadata_seq_num_auth(void)
 		&state.decoder_state,
 		SUIT_SUCCESS);
 
-	int ret = suit_processor_get_manifest_metadata(&envelope_str[0], envelope_len, true, NULL, NULL, NULL, &seq_num);
+	int ret = suit_processor_get_manifest_metadata(&envelope_str[0], envelope_len, true, NULL, NULL, NULL, NULL, NULL, &seq_num);
 	TEST_ASSERT_EQUAL_MESSAGE(SUIT_SUCCESS, ret, "Manifest decoded with authentication, but error code was returned");
 	TEST_ASSERT_EQUAL_MESSAGE(exp_seq_num, seq_num, "Invalid manifest sequence number returned");
 	TEST_ASSERT_EQUAL_MESSAGE(INVALID, state.decoder_state.step, "SUIT decoder state not reset after decoding");
@@ -802,7 +1031,7 @@ void test_metadata_manifest_component_id(void)
 		SUIT_SUCCESS);
 	__cmock_suit_decoder_decode_manifest_StubWithCallback(mock_valid_manifest);
 
-	int ret = suit_processor_get_manifest_metadata(&envelope_str[0], envelope_len, false, &manifest_component_id, NULL, NULL, NULL);
+	int ret = suit_processor_get_manifest_metadata(&envelope_str[0], envelope_len, false, &manifest_component_id, NULL, NULL, NULL, NULL, NULL);
 	TEST_ASSERT_EQUAL_MESSAGE(SUIT_SUCCESS, ret, "Manifest decoded, but error code was returned");
 	TEST_ASSERT_EQUAL_PTR_MESSAGE(exp_manifest_component_id.value, manifest_component_id.value, "Invalid manifest component ID returned");
 	TEST_ASSERT_EQUAL_MESSAGE(exp_manifest_component_id.len, manifest_component_id.len, "Invalid manifest component ID returned");
@@ -841,24 +1070,23 @@ void test_metadata_manifest_component_id_auth(void)
 		&state.decoder_state,
 		SUIT_SUCCESS);
 
-	int ret = suit_processor_get_manifest_metadata(&envelope_str[0], envelope_len, true, &manifest_component_id, NULL, NULL, NULL);
+	int ret = suit_processor_get_manifest_metadata(&envelope_str[0], envelope_len, true, &manifest_component_id, NULL, NULL, NULL, NULL, NULL);
 	TEST_ASSERT_EQUAL_MESSAGE(SUIT_SUCCESS, ret, "Manifest decoded with authentication, but error code was returned");
 	TEST_ASSERT_EQUAL_PTR_MESSAGE(exp_manifest_component_id.value, manifest_component_id.value, "Invalid manifest component ID returned");
 	TEST_ASSERT_EQUAL_MESSAGE(exp_manifest_component_id.len, manifest_component_id.len, "Invalid manifest component ID returned");
 	TEST_ASSERT_EQUAL_MESSAGE(INVALID, state.decoder_state.step, "SUIT decoder state not reset after decoding");
 }
 
-void test_metadata_all(void)
+void test_metadata_manifest_version(void)
 {
 	uint8_t envelope_str[] = {
 		0xd8, 0x6b, /* tag(107) : SUIT_Envelope */
 		0xa0, /* map (0 elements) */
 	};
 	size_t envelope_len = sizeof(envelope_str);
-	struct zcbor_string manifest_component_id;
-	struct zcbor_string digest;
-	enum suit_cose_alg alg;
-	unsigned int seq_num;
+	struct suit_semver version;
+
+	version.count = ZCBOR_ARRAY_SIZE(version.value);
 
 	__cmock_suit_decoder_init_ExpectAndReturn(
 		&state.decoder_state,
@@ -877,28 +1105,23 @@ void test_metadata_all(void)
 		SUIT_SUCCESS);
 	__cmock_suit_decoder_decode_manifest_StubWithCallback(mock_valid_manifest);
 
-	int ret = suit_processor_get_manifest_metadata(&envelope_str[0], envelope_len, false, &manifest_component_id, &digest, &alg, &seq_num);
+	int ret = suit_processor_get_manifest_metadata(&envelope_str[0], envelope_len, false, NULL, version.value, &version.count, NULL, NULL, NULL);
 	TEST_ASSERT_EQUAL_MESSAGE(SUIT_SUCCESS, ret, "Manifest decoded, but error code was returned");
-	TEST_ASSERT_EQUAL_MESSAGE(suit_cose_sha256, alg, "Invalid manifest digest algorithm ID returned");
-	TEST_ASSERT_EQUAL_PTR_MESSAGE(exp_manifest_digest.value, digest.value, "Invalid manifest digest returned");
-	TEST_ASSERT_EQUAL_MESSAGE(exp_manifest_digest.len, digest.len, "Invalid manifest digest returned");
-	TEST_ASSERT_EQUAL_MESSAGE(exp_seq_num, seq_num, "Invalid manifest sequence number returned");
-	TEST_ASSERT_EQUAL_PTR_MESSAGE(exp_manifest_component_id.value, manifest_component_id.value, "Invalid manifest component ID returned");
-	TEST_ASSERT_EQUAL_MESSAGE(exp_manifest_component_id.len, manifest_component_id.len, "Invalid manifest component ID returned");
+	TEST_ASSERT_EQUAL_MESSAGE(exp_version.count, version.count, "Invalid manifest version length returned");
+	TEST_ASSERT_EQUAL_INT_ARRAY_MESSAGE(exp_version.value, version.value, version.count, "Invalid manifest version value returned");
 	TEST_ASSERT_EQUAL_MESSAGE(INVALID, state.decoder_state.step, "SUIT decoder state not reset after decoding");
 }
 
-void test_metadata_all_auth(void)
+void test_metadata_manifest_version_auth(void)
 {
 	uint8_t envelope_str[] = {
 		0xd8, 0x6b, /* tag(107) : SUIT_Envelope */
 		0xa0, /* map (0 elements) */
 	};
 	size_t envelope_len = sizeof(envelope_str);
-	struct zcbor_string manifest_component_id;
-	struct zcbor_string digest;
-	enum suit_cose_alg alg;
-	unsigned int seq_num;
+	struct suit_semver version;
+
+	version.count = ZCBOR_ARRAY_SIZE(version.value);
 
 	__cmock_suit_decoder_init_ExpectAndReturn(
 		&state.decoder_state,
@@ -923,8 +1146,100 @@ void test_metadata_all_auth(void)
 		&state.decoder_state,
 		SUIT_SUCCESS);
 
-	int ret = suit_processor_get_manifest_metadata(&envelope_str[0], envelope_len, true, &manifest_component_id, &digest, &alg, &seq_num);
+	int ret = suit_processor_get_manifest_metadata(&envelope_str[0], envelope_len, true, NULL, version.value, &version.count, NULL, NULL, NULL);
+	TEST_ASSERT_EQUAL_MESSAGE(SUIT_SUCCESS, ret, "Manifest decoded with authentication, but error code was returned");
+	TEST_ASSERT_EQUAL_MESSAGE(exp_version.count, version.count, "Invalid manifest version length returned");
+	TEST_ASSERT_EQUAL_INT_ARRAY_MESSAGE(exp_version.value, version.value, version.count, "Invalid manifest version value returned");
+	TEST_ASSERT_EQUAL_MESSAGE(INVALID, state.decoder_state.step, "SUIT decoder state not reset after decoding");
+}
+
+void test_metadata_all(void)
+{
+	uint8_t envelope_str[] = {
+		0xd8, 0x6b, /* tag(107) : SUIT_Envelope */
+		0xa0, /* map (0 elements) */
+	};
+	size_t envelope_len = sizeof(envelope_str);
+	struct zcbor_string manifest_component_id;
+	struct zcbor_string digest;
+	enum suit_cose_alg alg;
+	unsigned int seq_num;
+	struct suit_semver version;
+
+	version.count = ZCBOR_ARRAY_SIZE(version.value);
+
+	__cmock_suit_decoder_init_ExpectAndReturn(
+		&state.decoder_state,
+		&state.manifest_stack[0],
+		SUIT_SUCCESS);
+	__cmock_suit_decoder_decode_envelope_ExpectAndReturn(
+		&state.decoder_state,
+		&envelope_str[0],
+		envelope_len,
+		SUIT_SUCCESS);
+	__cmock_suit_decoder_check_manifest_digest_ExpectAndReturn(
+		&state.decoder_state,
+		SUIT_SUCCESS);
+	__cmock_suit_decoder_decode_manifest_ExpectAndReturn(
+		&state.decoder_state,
+		SUIT_SUCCESS);
+	__cmock_suit_decoder_decode_manifest_StubWithCallback(mock_valid_manifest);
+
+	int ret = suit_processor_get_manifest_metadata(&envelope_str[0], envelope_len, false, &manifest_component_id, version.value, &version.count, &digest, &alg, &seq_num);
 	TEST_ASSERT_EQUAL_MESSAGE(SUIT_SUCCESS, ret, "Manifest decoded, but error code was returned");
+	TEST_ASSERT_EQUAL_MESSAGE(exp_version.count, version.count, "Invalid manifest version length returned");
+	TEST_ASSERT_EQUAL_INT_ARRAY_MESSAGE(exp_version.value, version.value, version.count, "Invalid manifest version value returned");
+	TEST_ASSERT_EQUAL_MESSAGE(suit_cose_sha256, alg, "Invalid manifest digest algorithm ID returned");
+	TEST_ASSERT_EQUAL_PTR_MESSAGE(exp_manifest_digest.value, digest.value, "Invalid manifest digest returned");
+	TEST_ASSERT_EQUAL_MESSAGE(exp_manifest_digest.len, digest.len, "Invalid manifest digest returned");
+	TEST_ASSERT_EQUAL_MESSAGE(exp_seq_num, seq_num, "Invalid manifest sequence number returned");
+	TEST_ASSERT_EQUAL_PTR_MESSAGE(exp_manifest_component_id.value, manifest_component_id.value, "Invalid manifest component ID returned");
+	TEST_ASSERT_EQUAL_MESSAGE(exp_manifest_component_id.len, manifest_component_id.len, "Invalid manifest component ID returned");
+	TEST_ASSERT_EQUAL_MESSAGE(INVALID, state.decoder_state.step, "SUIT decoder state not reset after decoding");
+}
+
+void test_metadata_all_auth(void)
+{
+	uint8_t envelope_str[] = {
+		0xd8, 0x6b, /* tag(107) : SUIT_Envelope */
+		0xa0, /* map (0 elements) */
+	};
+	size_t envelope_len = sizeof(envelope_str);
+	struct zcbor_string manifest_component_id;
+	struct zcbor_string digest;
+	enum suit_cose_alg alg;
+	unsigned int seq_num;
+	struct suit_semver version;
+
+	version.count = ZCBOR_ARRAY_SIZE(version.value);
+
+	__cmock_suit_decoder_init_ExpectAndReturn(
+		&state.decoder_state,
+		&state.manifest_stack[0],
+		SUIT_SUCCESS);
+	__cmock_suit_decoder_decode_envelope_ExpectAndReturn(
+		&state.decoder_state,
+		&envelope_str[0],
+		envelope_len,
+		SUIT_SUCCESS);
+	__cmock_suit_decoder_check_manifest_digest_ExpectAndReturn(
+		&state.decoder_state,
+		SUIT_SUCCESS);
+	__cmock_suit_decoder_decode_manifest_ExpectAndReturn(
+		&state.decoder_state,
+		SUIT_SUCCESS);
+	__cmock_suit_decoder_decode_manifest_StubWithCallback(mock_valid_manifest);
+	__cmock_suit_decoder_authenticate_manifest_ExpectAndReturn(
+		&state.decoder_state,
+		SUIT_SUCCESS);
+	__cmock_suit_decoder_authorize_manifest_ExpectAndReturn(
+		&state.decoder_state,
+		SUIT_SUCCESS);
+
+	int ret = suit_processor_get_manifest_metadata(&envelope_str[0], envelope_len, true, &manifest_component_id, version.value, &version.count, &digest, &alg, &seq_num);
+	TEST_ASSERT_EQUAL_MESSAGE(SUIT_SUCCESS, ret, "Manifest decoded, but error code was returned");
+	TEST_ASSERT_EQUAL_MESSAGE(exp_version.count, version.count, "Invalid manifest version length returned");
+	TEST_ASSERT_EQUAL_INT_ARRAY_MESSAGE(exp_version.value, version.value, version.count, "Invalid manifest version value returned");
 	TEST_ASSERT_EQUAL_MESSAGE(suit_cose_sha256, alg, "Invalid manifest digest algorithm ID returned");
 	TEST_ASSERT_EQUAL_PTR_MESSAGE(exp_manifest_digest.value, digest.value, "Invalid manifest digest returned");
 	TEST_ASSERT_EQUAL_MESSAGE(exp_manifest_digest.len, digest.len, "Invalid manifest digest returned");
