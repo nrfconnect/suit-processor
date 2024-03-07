@@ -728,20 +728,45 @@ int suit_decoder_decode_sequences(struct suit_decoder_state *state)
 	}
 
 	/* Parse severable manifest members extensions. */
-	if (state->manifest._SUIT_Manifest__SUIT_Severable_Members_Choice._SUIT_Severable_Members_Choice__severable_manifest_members_choice_extensions_present) {
-		const struct SUIT_Severable_Members_Choice__severable_manifest_members_choice_extensions *ext = &state->manifest._SUIT_Manifest__SUIT_Severable_Members_Choice._SUIT_Severable_Members_Choice__severable_manifest_members_choice_extensions;
-		const struct severable_manifest_members_choice_extensions_suit_dependency_resolution *dependency_resolution_ext = &ext->_SUIT_Severable_Members_Choice__severable_manifest_members_choice_extensions;
-		const struct zcbor_string *dependency_resolution_seq = &dependency_resolution_ext->_severable_manifest_members_choice_extensions_suit_dependency_resolution;
+	const size_t ext_count = state->manifest._SUIT_Manifest__SUIT_Severable_Members_Choice._SUIT_Severable_Members_Choice__severable_manifest_members_choice_extensions_count;
+	for (size_t ext_i = 0; ext_i < ext_count; ext_i++) {
+		const struct severable_manifest_members_choice_extensions_ *ext = &state->manifest._SUIT_Manifest__SUIT_Severable_Members_Choice._SUIT_Severable_Members_Choice__severable_manifest_members_choice_extensions[ext_i]._SUIT_Severable_Members_Choice__severable_manifest_members_choice_extensions;
+		const struct zcbor_string *ext_seq = NULL;
 
-		if (state->decoded_manifest->dependency_resolution_seq_status == UNAVAILABLE) {
-			state->decoded_manifest->dependency_resolution_seq = *dependency_resolution_seq;
-			state->decoded_manifest->dependency_resolution_seq_status = AUTHENTICATED;
-		} else {
-			state->decoded_manifest->dependency_resolution_seq_status = UNAVAILABLE;
+		switch (ext->_severable_manifest_members_choice_extensions_choice) {
+			case _severable_manifest_members_choice_extensions_suit_dependency_resolution:
+				ext_seq = &ext->_severable_manifest_members_choice_extensions_suit_dependency_resolution;
+
+				if (state->decoded_manifest->dependency_resolution_seq_status == UNAVAILABLE) {
+					state->decoded_manifest->dependency_resolution_seq = *ext_seq;
+					state->decoded_manifest->dependency_resolution_seq_status = AUTHENTICATED;
+				} else {
+					state->decoded_manifest->dependency_resolution_seq_status = UNAVAILABLE;
+					ret = SUIT_ERR_MANIFEST_VALIDATION;
+				}
+				break;
+
+			case _severable_manifest_members_choice_extensions_suit_candidate_verification:
+				ext_seq = &ext->_severable_manifest_members_choice_extensions_suit_candidate_verification;
+				ret = SUIT_ERR_MANIFEST_VALIDATION;
+				break;
+
+			default:
+				ret = SUIT_ERR_DECODING;
+				break;
+		}
+
+		if (ret != SUIT_SUCCESS) {
+			break;
+		}
+	}
+
+	if ((state->decoded_manifest->dependency_resolution_seq_status != AUTHENTICATED) &&
+	    (state->decoded_manifest->dependency_resolution_seq_status != UNAVAILABLE)) {
+		state->decoded_manifest->dependency_resolution_seq_status = UNAVAILABLE;
+		if (ret == SUIT_SUCCESS) {
 			ret = SUIT_ERR_MANIFEST_VALIDATION;
 		}
-	} else {
-		state->decoded_manifest->dependency_resolution_seq_status = UNAVAILABLE;
 	}
 
 	if (ret == SUIT_SUCCESS) {

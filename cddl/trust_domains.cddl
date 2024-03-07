@@ -1,4 +1,4 @@
-; Adapted from draft-ietf-suit-trust-domains-03 (https://datatracker.ietf.org/doc/html/draft-ietf-suit-trust-domains-03)
+; Adapted from draft-ietf-suit-trust-domains-06 (https://datatracker.ietf.org/doc/html/draft-ietf-suit-trust-domains-06)
 ; This is meant to be used in the firmware implementation.
 ; For that reason it has been simplified for that use case:
 ;
@@ -6,9 +6,12 @@
 ; Set the maximum number of parameters inside suit-directive-set-parameters to 6
 ; Limited the number of possible dependency manifests to 4
 ; Remove the possibility of severing dependency-resolution sequence.
+; Remove the possibility of severing suit-candidate-verification sequence.
 ; Remove suit-directive-unlink
 ; Remove suit-uninstall sequence support
 ; Remove delegation chains
+; Make the suit-dependencies field optional
+; Add suit-candidate-verification to manifest members extensions
 ;
 
 ; $$SUIT_Envelope_Extensions //=
@@ -26,6 +29,9 @@ $$SUIT_Manifest_Extensions //=
 ; $$SUIT_severable-members-extensions //=
 ;     (suit-dependency-resolution => bstr .cbor SUIT_Command_Sequence)
 
+; $$SUIT_severable-members-extensions //=
+;     (suit-candidate-verification => bstr .cbor SUIT_Command_Sequence)
+
 ; $$unseverable-manifest-member-extensions //=
 ;     (suit-uninstall => bstr .cbor SUIT_Command_Sequence)
 
@@ -34,7 +40,12 @@ suit-integrated-dependency-key = tstr
 $$severable-manifest-members-choice-extensions //= (
     suit-dependency-resolution =>
         bstr .cbor SUIT_Command_Sequence ; / SUIT_Digest
-    )
+)
+
+$$severable-manifest-members-choice-extensions //= (
+    suit-candidate-verification =>
+        bstr .cbor SUIT_Command_Sequence ; / SUIT_Digest
+)
 
 $$SUIT_Common-extensions //= (
     ? suit-dependencies => SUIT_Dependencies
@@ -64,6 +75,7 @@ suit-manifest-component-id = 5
 ; suit-delegation = 1
 ;Severable, recipient-necessary
 suit-dependency-resolution = 15
+suit-candidate-verification = 18
 ; suit-uninstall = 24
 
 suit-dependencies = 1
