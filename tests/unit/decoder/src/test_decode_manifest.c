@@ -619,6 +619,48 @@ static uint8_t manifest_with_component_id[] = {
 			0x0C, /* 12 */
 };
 
+static uint8_t manifest_with_empty_sem_version[] = {
+	0xd8, 0x6b, /* tag(107) : SUIT_Envelope */
+	0xa2, /* map (2 elements) */
+
+	0x02, /* suit-authentication-wrapper */
+		0x42, /* bytes(2) */
+		0x81, /* array (1 element) */
+			0x40, /* bytes(36) */
+
+	0x03, /* suit-manifest */
+	0x4b, /* bytes(11) */
+	0xa4, /* map (4 elements) */
+	0x01, /* suit-manifest-version */ 0x01,
+	0x02, /* suit-manifest-sequence-number */ 0x11,
+	0x03, /* suit-common */
+		0x41, /* bytes(1) */
+		0xA0, /* map (0 elements) */
+	0x06, /* suit-current-version */ 0x41, /* bytes(1) */
+		0x80, /* empty array */
+};
+
+static uint8_t manifest_with_valid_sem_version[] = {
+	0xd8, 0x6b, /* tag(107) : SUIT_Envelope */
+	0xa2, /* map (2 elements) */
+
+	0x02, /* suit-authentication-wrapper */
+		0x42, /* bytes(2) */
+		0x81, /* array (1 element) */
+			0x40, /* bytes(36) */
+
+	0x03, /* suit-manifest */
+	0x50, /* bytes(16) */
+	0xa4, /* map (4 elements) */
+	0x01, /* suit-manifest-version */ 0x01,
+	0x02, /* suit-manifest-sequence-number */ 0x11,
+	0x03, /* suit-common */
+		0x41, /* bytes(1) */
+		0xA0, /* map (0 elements) */
+	0x06, /* suit-current-version */ 0x46, /* bytes(6) */
+		0x85, /* array (5 elements) */
+		0x01, 0x02, 0x03, 0x20, 0x05, /* v1.2.3-rc.5 */
+};
 
 void test_decode_manifest_invalid_input(void)
 {
@@ -817,4 +859,44 @@ void test_decode_manifest_with_component_id(void)
 	TEST_ASSERT_EQUAL_MESSAGE(3, state.decoded_manifest->manifest_component_id.len, "Invalid length of the manifest component ID");
 	TEST_ASSERT_EQUAL_MEMORY_MESSAGE(manifest_component_id, state.decoded_manifest->manifest_component_id.value, sizeof(manifest_component_id), "Invalid value of the manifest component ID");
 	TEST_ASSERT_EQUAL_MESSAGE(0x12, state.decoded_manifest->sequence_number, "Incorrect manifest sequence number value");
+	TEST_ASSERT_EQUAL_MESSAGE(0, state.decoded_manifest->current_version.len, "Invalid length of the manifest semantic version");
+	TEST_ASSERT_NULL_MESSAGE(state.decoded_manifest->current_version.value, "Invalid value of the manifest semantic version");
+}
+
+void test_decode_manifest_with_empty_sem_ver(void)
+{
+	int ret = SUIT_SUCCESS;
+	uint8_t empty_version[] = {
+		0x80,
+	};
+
+	init_decode_envelope(manifest_with_empty_sem_version, sizeof(manifest_with_empty_sem_version));
+	state.step = MANIFEST_DIGEST_VERIFIED;
+
+	ret = suit_decoder_decode_manifest(&state);
+	TEST_ASSERT_EQUAL_MESSAGE(SUIT_SUCCESS, ret, "The manifest decoding failed");
+	TEST_ASSERT_EQUAL_MESSAGE(MANIFEST_DECODED, state.step, "Invalid state transition after manifest decoding");
+
+	TEST_ASSERT_EQUAL_MESSAGE(sizeof(empty_version), state.decoded_manifest->current_version.len, "Invalid length of the manifest semantic version");
+	TEST_ASSERT_EQUAL_MEMORY_MESSAGE(empty_version, state.decoded_manifest->current_version.value, sizeof(empty_version), "Invalid value of the manifest semantic version");
+	TEST_ASSERT_EQUAL_MESSAGE(0x11, state.decoded_manifest->sequence_number, "Incorrect manifest sequence number value");
+}
+
+void test_decode_manifest_with_valid_sem_ver(void)
+{
+	int ret = SUIT_SUCCESS;
+	uint8_t valid_version[] = {
+		0x85, 0x01, 0x02, 0x03, 0x20, 0x05,
+	};
+
+	init_decode_envelope(manifest_with_valid_sem_version, sizeof(manifest_with_valid_sem_version));
+	state.step = MANIFEST_DIGEST_VERIFIED;
+
+	ret = suit_decoder_decode_manifest(&state);
+	TEST_ASSERT_EQUAL_MESSAGE(SUIT_SUCCESS, ret, "The manifest decoding failed");
+	TEST_ASSERT_EQUAL_MESSAGE(MANIFEST_DECODED, state.step, "Invalid state transition after manifest decoding");
+
+	TEST_ASSERT_EQUAL_MESSAGE(sizeof(valid_version), state.decoded_manifest->current_version.len, "Invalid length of the manifest semantic version");
+	TEST_ASSERT_EQUAL_MEMORY_MESSAGE(valid_version, state.decoded_manifest->current_version.value, sizeof(valid_version), "Invalid value of the manifest semantic version");
+	TEST_ASSERT_EQUAL_MESSAGE(0x11, state.decoded_manifest->sequence_number, "Incorrect manifest sequence number value");
 }
