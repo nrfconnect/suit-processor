@@ -37,7 +37,7 @@ struct zcbor_string exp_app_vid_uuid = {
 };
 
 static struct zcbor_string signature = {
-	.value = &(manifest_buf[1220]),
+	.value = &(manifest_buf[1268]),
 	.len = 64,
 };
 static uint8_t signature1_cbor[] = {
@@ -73,15 +73,15 @@ struct zcbor_string exp_app_manifest_digest = {
 };
 
 struct zcbor_string exp_app_envelope_payload = {
-	.value = &manifest_buf[1163],
+	.value = &manifest_buf[1211],
 	.len = 568,
 };
 struct zcbor_string exp_app_manifest_payload = {
-	.value = &manifest_buf[1285],
+	.value = &manifest_buf[1333],
 	.len = 177,
 };
 struct zcbor_string exp_app_fw_payload = {
-	.value = &manifest_buf[1475],
+	.value = &manifest_buf[1523],
 	.len = 256,
 };
 

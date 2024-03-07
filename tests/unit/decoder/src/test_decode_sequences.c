@@ -186,6 +186,29 @@ static uint8_t minimal_with_shared_and_dependency_resolution[] = {
 		0x40, /* bytes(0) */
 };
 
+static uint8_t minimal_with_shared_and_candidate_verification[] = {
+	0xd8, 0x6b, /* tag(107) : SUIT_Envelope */
+	0xa2, /* map (2 elements) */
+
+	0x02, /* suit-authentication-wrapper */
+		0x42, /* bytes(2) */
+		0x81, /* array (1 element) */
+			0x40, /* bytes(0) */
+
+	0x03, /* suit-manifest */
+	0x4c, /* bytes(12) */
+	0xa4, /* map (4 elements) */
+	0x01, /* suit-manifest-version */ 0x01,
+	0x02, /* suit-manifest-sequence-number */ 0x10,
+	0x03, /* suit-common */
+		0x43, /* bytes(3) */
+		0xA1, /* map (1 element) */
+			0x04, /* suit-shared-sequence */
+			0x40, /* bytes(0) */
+	0x12, /* suit-candidate-verification */
+		0x40, /* bytes(0) */
+};
+
 static uint8_t minimal_with_shared_and_text[] = {
 	0xd8, 0x6b, /* tag(107) : SUIT_Envelope */
 	0xa3, /* map (3 elements) */
@@ -254,8 +277,8 @@ static uint8_t envelope_with_all_sequences[] = {
 			0x40, /* bytes(0) */
 
 	0x03, /* suit-manifest */
-	0x58, 0x41, /* bytes(65) */
-	0xaa, /* map (10 elements) */
+	0x58, 0x44, /* bytes(68) */
+	0xab, /* map (11 elements) */
 	0x01, /* suit-manifest-version */ 0x01,
 	0x02, /* suit-manifest-sequence-number */ 0x10,
 	0x03, /* suit-common */
@@ -290,6 +313,9 @@ static uint8_t envelope_with_all_sequences[] = {
 	0x0f, /* suit-dependency-resolution */
 		0x41, /* bytes(1) */
 			'D',
+	0x12, /* suit-candidate-verification */
+		0x41, /* bytes(1) */
+			'C',
 
 	0x17, /* suit-text (severed - value) */
 		0x41, /* bytes(1) */
@@ -390,6 +416,11 @@ void test_decode_sequences_invalid_sequence_state(void)
 			.envelope_size = sizeof(minimal_with_shared_and_dependency_resolution),
 			.exp_ret = SUIT_ERR_MANIFEST_VALIDATION,
 		},
+		{
+			.envelope = minimal_with_shared_and_candidate_verification,
+			.envelope_size = sizeof(minimal_with_shared_and_candidate_verification),
+			.exp_ret = SUIT_ERR_MANIFEST_VALIDATION,
+		},
 	};
 
 	enum suit_seq_status *seq_status[] = {
@@ -400,6 +431,7 @@ void test_decode_sequences_invalid_sequence_state(void)
 		&manifest.payload_fetch_seq_status,
 		&manifest.install_seq_status,
 		&manifest.dependency_resolution_seq_status,
+		&manifest.candidate_verification_seq_status,
 	};
 
 	for (size_t i = 0; i < ZCBOR_ARRAY_SIZE(envelopes); i++) {
@@ -468,6 +500,11 @@ void test_decode_sequences_shared_and_one_sequence(void)
 			.envelope_size = sizeof(minimal_with_shared_and_dependency_resolution),
 			.exp_ret = SUIT_SUCCESS,
 		},
+		{
+			.envelope = minimal_with_shared_and_candidate_verification,
+			.envelope_size = sizeof(minimal_with_shared_and_candidate_verification),
+			.exp_ret = SUIT_SUCCESS,
+		},
 	};
 
 	enum suit_seq_status *seq_status[] = {
@@ -477,6 +514,7 @@ void test_decode_sequences_shared_and_one_sequence(void)
 		&manifest.payload_fetch_seq_status,
 		&manifest.install_seq_status,
 		&manifest.dependency_resolution_seq_status,
+		&manifest.candidate_verification_seq_status,
 	};
 
 	for (size_t i = 0; i < ZCBOR_ARRAY_SIZE(envelopes); i++) {
@@ -663,4 +701,8 @@ void test_decode_sequences_all(void)
 	TEST_ASSERT_EQUAL_MESSAGE(AUTHENTICATED, manifest.dependency_resolution_seq_status, "Dependency-resolution sequence decoded but not marked as authenticated");
 	TEST_ASSERT_EQUAL_MESSAGE(1, manifest.dependency_resolution_seq.len, "Dependency-resolution sequence length does not match");
 	TEST_ASSERT_EQUAL_MESSAGE('D', manifest.dependency_resolution_seq.value[0], "Dependency-resolution sequence value does not match");
+
+	TEST_ASSERT_EQUAL_MESSAGE(AUTHENTICATED, manifest.candidate_verification_seq_status, "Candidate-verification sequence decoded but not marked as authenticated");
+	TEST_ASSERT_EQUAL_MESSAGE(1, manifest.candidate_verification_seq.len, "Candidate-verification sequence length does not match");
+	TEST_ASSERT_EQUAL_MESSAGE('C', manifest.candidate_verification_seq.value[0], "Candidate-verification sequence value does not match");
 }
