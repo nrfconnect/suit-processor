@@ -49,6 +49,10 @@ int suit_condition_dependency_integrity(struct suit_processor_state *state,
 int suit_condition_is_dependency(struct suit_processor_state *state,
 		struct suit_manifest_params *component_params);
 
+/** Check if component version matches the range configured by the parameter. */
+int suit_condition_version(struct suit_processor_state *state,
+		struct suit_manifest_params *component_params);
+
 #ifdef __cplusplus
 }
 #endif /* __cplusplus */

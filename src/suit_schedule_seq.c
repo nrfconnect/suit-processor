@@ -72,6 +72,7 @@ static int suit_validate_single_command(struct suit_processor_state *state, suit
 			case SUIT_Condition_suit_condition_component_slot_m_l_c:
 			case SUIT_Condition_suit_condition_check_content_m_l_c:
 			case SUIT_Condition_suit_condition_abort_m_l_c:
+			case SUIT_Condition_suit_condition_version_m_l_c:
 				SUIT_DBG("Found valid condition: %d\r\n", command->condition.SUIT_Condition_choice);
 				retval = SUIT_SUCCESS;
 				break;
@@ -237,6 +238,9 @@ static int suit_run_single_command(struct suit_processor_state *state, suit_comm
 				break;
 			case SUIT_Condition_suit_condition_is_dependency_m_l_c:
 				retval = suit_condition_is_dependency(state, params);
+				break;
+			case SUIT_Condition_suit_condition_version_m_l_c:
+				retval = suit_condition_version(state, params);
 				break;
 			default:
 				retval = SUIT_ERR_DECODING;

@@ -13,6 +13,90 @@
 #include <suit.h>
 
 
+enum comparison_type {
+	comparison_greater = SUIT_Condition_Version_Comparison_Types_suit_condition_version_comparison_greater_m_c,
+	comparison_greater_equal = SUIT_Condition_Version_Comparison_Types_suit_condition_version_comparison_greater_equal_m_c,
+	comparison_equal = SUIT_Condition_Version_Comparison_Types_suit_condition_version_comparison_equal_m_c,
+	comparison_lesser_equal = SUIT_Condition_Version_Comparison_Types_suit_condition_version_comparison_lesser_equal_m_c,
+	comparison_lesser = SUIT_Condition_Version_Comparison_Types_suit_condition_version_comparison_lesser_m_c,
+};
+
+static int parse_version_check(struct zcbor_string *version_check_cbor, struct suit_semver *version, enum comparison_type *comparison)
+{
+	struct SUIT_Parameter_Version_Match result = {0};
+	size_t result_len = 0;
+
+	if ((version_check_cbor == NULL) || (version == NULL) || (comparison == NULL)) {
+		return SUIT_ERR_CRASH;
+	}
+
+	int ret = cbor_decode_SUIT_Parameter_Version_Match(
+		version_check_cbor->value,
+		version_check_cbor->len,
+		&result,
+		&result_len
+	);
+
+	if ((ret != ZCBOR_SUCCESS) || (result_len != version_check_cbor->len)) {
+		return SUIT_ERR_DECODING;
+	}
+
+	*comparison = (enum comparison_type)result
+		.SUIT_Parameter_Version_Match_suit_condition_version_comparison_type
+		.SUIT_Condition_Version_Comparison_Types_choice;
+	version->count = result
+		.SUIT_Parameter_Version_Match_suit_condition_version_comparison_value
+		.SUIT_Condition_Version_Comparison_Value_int_count;
+	if (version->count > ZCBOR_ARRAY_SIZE(version->value)) {
+		version->count = 0;
+		return SUIT_ERR_DECODING;
+	}
+
+	for (size_t i = 0; i < version->count; i++) {
+		version->value[i] = result
+			.SUIT_Parameter_Version_Match_suit_condition_version_comparison_value
+			.SUIT_Condition_Version_Comparison_Value_int[i];
+	}
+
+	return SUIT_SUCCESS;
+}
+
+static int compare_versions(struct suit_semver *version_a, struct suit_semver *version_b)
+{
+	if ((version_a == NULL) || (version_b == NULL)) {
+		return 0;
+	}
+	/* Add "0" for all pre-releases to simplify comparison. */
+	if (version_a->count == 4) {
+		version_a->value[4] = 0;
+		version_a->count = 5;
+	}
+	if (version_b->count == 4) {
+		version_b->value[4] = 0;
+		version_b->count = 5;
+	}
+	const size_t max_i = MIN(version_a->count, version_b->count);
+
+	for (size_t i = 0; i < max_i; i++) {
+		if (version_a->value[i] > version_b->value[i]) {
+			return 1;
+		} else if (version_a->value[i] < version_b->value[i]) {
+			return -1;
+		}
+	}
+
+	/* If we compare pre-relase with a regular release, the latter is greater. */
+	if ((version_b->count < 4) && (version_a->count >= 4)) {
+		return -1;
+	}
+	if ((version_a->count < 4) && (version_b->count >= 4)) {
+		return 1;
+	}
+
+	/* If we compare regular releases with different lengths, report equality. */
+	return 0;
+}
+
 int suit_condition_vendor_identifier(struct suit_processor_state *state,
 		struct suit_manifest_params *component_params)
 {
@@ -267,4 +351,69 @@ int suit_condition_is_dependency(struct suit_processor_state *state,
 	}
 
 	return SUIT_ERR_TAMP;
+}
+
+int suit_condition_version(struct suit_processor_state *state,
+		struct suit_manifest_params *component_params)
+{
+	struct suit_semver component_version = {
+		.value = {0, 0, 0, 0, 0},
+		.count = 0,
+	};
+	struct suit_semver cmp_version = {
+		.value = {0, 0, 0, 0, 0},
+		.count = 0,
+	};
+	enum comparison_type comparison;
+	bool result = false;
+
+	if (!component_params->version_set) {
+		SUIT_ERR("Failed to check version: value not set (handle: %p)\r\n", (void *)component_params->component_handle);
+		return SUIT_ERR_UNAVAILABLE_PARAMETER;
+	}
+
+	int ret = parse_version_check(&component_params->version, &cmp_version, &comparison);
+	if (ret != SUIT_SUCCESS) {
+		return ret;
+	}
+
+#ifdef SUIT_PLATFORM_DRY_RUN_SUPPORT
+	if (state->dry_run != suit_bool_false) {
+		return SUIT_SUCCESS;
+	}
+#endif /* SUIT_PLATFORM_DRY_RUN_SUPPORT */
+
+	component_version.count = ZCBOR_ARRAY_SIZE(component_version.value);
+
+	ret = suit_plat_component_version_get(component_params->component_handle, component_version.value, &component_version.count);
+	if (ret != SUIT_SUCCESS) {
+		return ret;
+	}
+
+	int cmp = compare_versions(&component_version, &cmp_version);
+	switch (comparison) {
+		case comparison_greater:
+			result = (cmp > 0);
+			break;
+		case comparison_greater_equal:
+			result = (cmp >= 0);
+			break;
+		case comparison_equal:
+			result = (cmp == 0);
+			break;
+		case comparison_lesser_equal:
+			result = (cmp <= 0);
+			break;
+		case comparison_lesser:
+			result = (cmp < 0);
+			break;
+		default:
+			return SUIT_ERR_DECODING;
+	}
+
+	if (result) {
+		return SUIT_SUCCESS;
+	}
+
+	return SUIT_FAIL_CONDITION;
 }
