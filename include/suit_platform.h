@@ -276,6 +276,18 @@ int suit_plat_override_image_size(suit_component_t handle, size_t size);
  */
 int suit_plat_authorize_process_dependency(struct zcbor_string *parent_component_id, struct zcbor_string *child_component_id, enum suit_command_sequence seq_name);
 
+/** @brief Read the current version of the component.
+ *
+ * @param[in]     handle       A reference to the component.
+ * @param[out]    version      Pointer to an array that should be filled with the manifest version (semantic)
+ *                             value.
+ * @param[inout]  version_len  As input - maximum length of the version array.
+ *                             As output - length of the manifest version.
+ *
+ * @returns SUIT_SUCCESS if the version was returned, error code otherwise.
+ */
+int suit_plat_component_version_get(suit_component_t handle, int *version, size_t *version_len);
+
 #ifdef SUIT_PLATFORM_DRY_RUN_SUPPORT
 /** @brief Check that the given fetch operation can be performed.
  *
