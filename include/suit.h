@@ -32,7 +32,7 @@ int suit_processor_init(void);
  *
  * @returns SUIT_SUCCESS if the operation succeeds, error code otherwise.
  */
-int suit_process_sequence(uint8_t *envelope_str, size_t envelope_len, enum suit_command_sequence seq_name);
+int suit_process_sequence(const uint8_t *envelope_str, size_t envelope_len, enum suit_command_sequence seq_name);
 
 /** Extract metadata from the given envelope.
  *
@@ -49,7 +49,7 @@ int suit_process_sequence(uint8_t *envelope_str, size_t envelope_len, enum suit_
  * @param[out]  seq_num                Pointer to the structure in which the manifest sequence number will be stored.
  * @returns SUIT_SUCCESS if the operation succeeds, error code otherwise.
  */
-int suit_processor_get_manifest_metadata(uint8_t *envelope_str, size_t envelope_len, bool authenticate, struct zcbor_string *manifest_component_id, struct zcbor_string *digest, enum suit_cose_alg *alg, unsigned int *seq_num);
+int suit_processor_get_manifest_metadata(const uint8_t *envelope_str, size_t envelope_len, bool authenticate, struct zcbor_string *manifest_component_id, struct zcbor_string *digest, enum suit_cose_alg *alg, unsigned int *seq_num);
 
 #ifdef __cplusplus
 }

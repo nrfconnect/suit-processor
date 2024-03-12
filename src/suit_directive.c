@@ -369,7 +369,7 @@ int suit_directive_set_parameters(struct suit_processor_state *state,
 
 int suit_directive_process_dependency(struct suit_processor_state *state, struct suit_manifest_params *component_params)
 {
-	uint8_t *envelope_str = NULL;
+	const uint8_t *envelope_str = NULL;
 	size_t envelope_len = 0;
 	struct suit_seq_exec_state *seq_exec_state;
 	struct suit_manifest_state *manifest_state;

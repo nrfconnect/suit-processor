@@ -293,7 +293,7 @@ int suit_decoder_init(struct suit_decoder_state *state, struct suit_manifest_sta
 	return SUIT_SUCCESS;
 }
 
-int suit_decoder_decode_envelope(struct suit_decoder_state *state, uint8_t *envelope_str, size_t envelope_len)
+int suit_decoder_decode_envelope(struct suit_decoder_state *state, const uint8_t *envelope_str, size_t envelope_len)
 {
 	size_t decoded_len = 0;
 	int ret = SUIT_SUCCESS;
@@ -307,7 +307,7 @@ int suit_decoder_decode_envelope(struct suit_decoder_state *state, uint8_t *enve
 	}
 
 	ret = cbor_decode_SUIT_Envelope_Tagged(
-		envelope_str, envelope_len, &state->envelope, &decoded_len);
+		(uint8_t *)envelope_str, envelope_len, &state->envelope, &decoded_len);
 
 	/* For development, condition on expected envelope size was modified.
 	   Now envelope_len represents max allowed size of envelope */

@@ -139,7 +139,7 @@ void app_assert_envelope_integrity(bool installed)
 	/* read manifest from the candidate component data */
 	__cmock_suit_plat_retrieve_manifest_ExpectAndReturn(checked_component, NULL, NULL, SUIT_SUCCESS);
 	__cmock_suit_plat_retrieve_manifest_IgnoreArg_envelope_str();
-	__cmock_suit_plat_retrieve_manifest_ReturnThruPtr_envelope_str((uint8_t**)&exp_app_envelope_payload.value);
+	__cmock_suit_plat_retrieve_manifest_ReturnThruPtr_envelope_str(&exp_app_envelope_payload.value);
 	__cmock_suit_plat_retrieve_manifest_IgnoreArg_envelope_len();
 	__cmock_suit_plat_retrieve_manifest_ReturnThruPtr_envelope_len(&exp_app_envelope_payload.len);
 
@@ -170,7 +170,7 @@ void app_assert_envelope_authorization(bool installed)
 	/* read manifest from the candidate component data */
 	__cmock_suit_plat_retrieve_manifest_ExpectAndReturn(checked_component, NULL, NULL, SUIT_SUCCESS);
 	__cmock_suit_plat_retrieve_manifest_IgnoreArg_envelope_str();
-	__cmock_suit_plat_retrieve_manifest_ReturnThruPtr_envelope_str((uint8_t**)&exp_app_envelope_payload.value);
+	__cmock_suit_plat_retrieve_manifest_ReturnThruPtr_envelope_str(&exp_app_envelope_payload.value);
 	__cmock_suit_plat_retrieve_manifest_IgnoreArg_envelope_len();
 	__cmock_suit_plat_retrieve_manifest_ReturnThruPtr_envelope_len(&exp_app_envelope_payload.len);
 

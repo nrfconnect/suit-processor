@@ -251,7 +251,7 @@ int suit_plat_sequence_completed(enum suit_command_sequence seq_name, struct zcb
  *
  * @returns SUIT_SUCCESS if the manifest was returned, error code otherwise.
  */
-int suit_plat_retrieve_manifest(suit_component_t component_handle, uint8_t **envelope_str, size_t *envelope_len);
+int suit_plat_retrieve_manifest(suit_component_t component_handle, const uint8_t **envelope_str, size_t *envelope_len);
 
 /** @brief Set the current image size value, stored inside the platform component metadata.
  *

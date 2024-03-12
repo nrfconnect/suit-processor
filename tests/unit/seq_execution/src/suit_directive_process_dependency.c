@@ -323,7 +323,7 @@ void test_seq_execution_process_dependency_invalid_dependency_payload(void)
 
 	__cmock_suit_plat_retrieve_manifest_ExpectAndReturn(ASSIGNED_COMPONENT_HANDLE, NULL, NULL, SUIT_SUCCESS);
 	__cmock_suit_plat_retrieve_manifest_IgnoreArg_envelope_str();
-	__cmock_suit_plat_retrieve_manifest_ReturnThruPtr_envelope_str((uint8_t **)&exp_invalid_envelope.value);
+	__cmock_suit_plat_retrieve_manifest_ReturnThruPtr_envelope_str(&exp_invalid_envelope.value);
 	__cmock_suit_plat_retrieve_manifest_IgnoreArg_envelope_len();
 	__cmock_suit_plat_retrieve_manifest_ReturnThruPtr_envelope_len(&exp_invalid_envelope.len);
 
@@ -351,7 +351,7 @@ void test_seq_execution_process_dependency_unauthorized_dependency(void)
 
 	__cmock_suit_plat_retrieve_manifest_ExpectAndReturn(ASSIGNED_COMPONENT_HANDLE, NULL, NULL, SUIT_SUCCESS);
 	__cmock_suit_plat_retrieve_manifest_IgnoreArg_envelope_str();
-	__cmock_suit_plat_retrieve_manifest_ReturnThruPtr_envelope_str((uint8_t **)&exp_unsupported_envelope.value);
+	__cmock_suit_plat_retrieve_manifest_ReturnThruPtr_envelope_str(&exp_unsupported_envelope.value);
 	__cmock_suit_plat_retrieve_manifest_IgnoreArg_envelope_len();
 	__cmock_suit_plat_retrieve_manifest_ReturnThruPtr_envelope_len(&exp_unsupported_envelope.len);
 
@@ -396,7 +396,7 @@ void test_seq_execution_process_dependency_invalid_dependency_contents(void)
 
 	__cmock_suit_plat_retrieve_manifest_ExpectAndReturn(ASSIGNED_COMPONENT_HANDLE, NULL, NULL, SUIT_SUCCESS);
 	__cmock_suit_plat_retrieve_manifest_IgnoreArg_envelope_str();
-	__cmock_suit_plat_retrieve_manifest_ReturnThruPtr_envelope_str((uint8_t **)&exp_unsupported_envelope.value);
+	__cmock_suit_plat_retrieve_manifest_ReturnThruPtr_envelope_str(&exp_unsupported_envelope.value);
 	__cmock_suit_plat_retrieve_manifest_IgnoreArg_envelope_len();
 	__cmock_suit_plat_retrieve_manifest_ReturnThruPtr_envelope_len(&exp_unsupported_envelope.len);
 
@@ -441,7 +441,7 @@ void test_seq_execution_process_dependency_processing_failed(void)
 
 	__cmock_suit_plat_retrieve_manifest_ExpectAndReturn(ASSIGNED_COMPONENT_HANDLE, NULL, NULL, SUIT_SUCCESS);
 	__cmock_suit_plat_retrieve_manifest_IgnoreArg_envelope_str();
-	__cmock_suit_plat_retrieve_manifest_ReturnThruPtr_envelope_str((uint8_t **)&exp_valid_envelope.value);
+	__cmock_suit_plat_retrieve_manifest_ReturnThruPtr_envelope_str(&exp_valid_envelope.value);
 	__cmock_suit_plat_retrieve_manifest_IgnoreArg_envelope_len();
 	__cmock_suit_plat_retrieve_manifest_ReturnThruPtr_envelope_len(&exp_valid_envelope.len);
 
@@ -489,7 +489,7 @@ void test_seq_execution_process_dependency_seq_completion_failed(void)
 
 	__cmock_suit_plat_retrieve_manifest_ExpectAndReturn(ASSIGNED_COMPONENT_HANDLE, NULL, NULL, SUIT_SUCCESS);
 	__cmock_suit_plat_retrieve_manifest_IgnoreArg_envelope_str();
-	__cmock_suit_plat_retrieve_manifest_ReturnThruPtr_envelope_str((uint8_t **)&exp_valid_envelope.value);
+	__cmock_suit_plat_retrieve_manifest_ReturnThruPtr_envelope_str(&exp_valid_envelope.value);
 	__cmock_suit_plat_retrieve_manifest_IgnoreArg_envelope_len();
 	__cmock_suit_plat_retrieve_manifest_ReturnThruPtr_envelope_len(&exp_valid_envelope.len);
 
@@ -538,7 +538,7 @@ void test_seq_execution_process_dependency_corrupted_component_stack(void)
 
 	__cmock_suit_plat_retrieve_manifest_ExpectAndReturn(ASSIGNED_COMPONENT_HANDLE, NULL, NULL, SUIT_SUCCESS);
 	__cmock_suit_plat_retrieve_manifest_IgnoreArg_envelope_str();
-	__cmock_suit_plat_retrieve_manifest_ReturnThruPtr_envelope_str((uint8_t **)&exp_valid_envelope.value);
+	__cmock_suit_plat_retrieve_manifest_ReturnThruPtr_envelope_str(&exp_valid_envelope.value);
 	__cmock_suit_plat_retrieve_manifest_IgnoreArg_envelope_len();
 	__cmock_suit_plat_retrieve_manifest_ReturnThruPtr_envelope_len(&exp_valid_envelope.len);
 
@@ -587,7 +587,7 @@ void test_seq_execution_process_dependency_lazy_component_release(void)
 
 	__cmock_suit_plat_retrieve_manifest_ExpectAndReturn(ASSIGNED_COMPONENT_HANDLE, NULL, NULL, SUIT_SUCCESS);
 	__cmock_suit_plat_retrieve_manifest_IgnoreArg_envelope_str();
-	__cmock_suit_plat_retrieve_manifest_ReturnThruPtr_envelope_str((uint8_t **)&exp_valid_envelope.value);
+	__cmock_suit_plat_retrieve_manifest_ReturnThruPtr_envelope_str(&exp_valid_envelope.value);
 	__cmock_suit_plat_retrieve_manifest_IgnoreArg_envelope_len();
 	__cmock_suit_plat_retrieve_manifest_ReturnThruPtr_envelope_len(&exp_valid_envelope.len);
 
@@ -636,7 +636,7 @@ void test_seq_execution_process_dependency_valid_dependency(void)
 
 	__cmock_suit_plat_retrieve_manifest_ExpectAndReturn(ASSIGNED_COMPONENT_HANDLE, NULL, NULL, SUIT_SUCCESS);
 	__cmock_suit_plat_retrieve_manifest_IgnoreArg_envelope_str();
-	__cmock_suit_plat_retrieve_manifest_ReturnThruPtr_envelope_str((uint8_t **)&exp_valid_envelope.value);
+	__cmock_suit_plat_retrieve_manifest_ReturnThruPtr_envelope_str(&exp_valid_envelope.value);
 	__cmock_suit_plat_retrieve_manifest_IgnoreArg_envelope_len();
 	__cmock_suit_plat_retrieve_manifest_ReturnThruPtr_envelope_len(&exp_valid_envelope.len);
 

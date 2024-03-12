@@ -236,7 +236,7 @@ struct suit_processor_state {
  *
  * @returns SUIT_SUCCESS if the operation succeeds, error code otherwise.
  */
-int suit_processor_load_envelope(struct suit_processor_state *state, uint8_t *envelope_str, size_t envelope_len);
+int suit_processor_load_envelope(struct suit_processor_state *state, const uint8_t *envelope_str, size_t envelope_len);
 
 #ifdef CONFIG_UNITY
 /** @brief Override the internal state variable with a pointer to the external memory.
