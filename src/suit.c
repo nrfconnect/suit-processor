@@ -16,7 +16,7 @@ static struct suit_processor_state *state = &processor_state;
 
 
 static int suit_processor_decode_envelope(struct suit_decoder_state *decoder_state, struct suit_manifest_state *manifest,
-	uint8_t *envelope_str, size_t envelope_len)
+	const uint8_t *envelope_str, size_t envelope_len)
 {
 	int ret = SUIT_SUCCESS;
 
@@ -146,7 +146,7 @@ int suit_processor_init(void)
 	return SUIT_SUCCESS;
 }
 
-int suit_processor_load_envelope(struct suit_processor_state *state, uint8_t *envelope_str, size_t envelope_len)
+int suit_processor_load_envelope(struct suit_processor_state *state, const uint8_t *envelope_str, size_t envelope_len)
 {
 	struct suit_manifest_state *manifest_state = NULL;
 	int retval = SUIT_SUCCESS;
@@ -209,7 +209,7 @@ int suit_processor_load_envelope(struct suit_processor_state *state, uint8_t *en
 	return retval;
 }
 
-int suit_process_sequence(uint8_t *envelope_str, size_t envelope_len, enum suit_command_sequence seq_name)
+int suit_process_sequence(const uint8_t *envelope_str, size_t envelope_len, enum suit_command_sequence seq_name)
 {
 	int ret = SUIT_SUCCESS;
 	struct suit_manifest_state *manifest_state = NULL;
@@ -310,7 +310,7 @@ int suit_process_sequence(uint8_t *envelope_str, size_t envelope_len, enum suit_
 	return ret;
 }
 
-int suit_processor_get_manifest_metadata(uint8_t *envelope_str, size_t envelope_len, bool authenticate, struct zcbor_string *manifest_component_id, struct zcbor_string *digest, enum suit_cose_alg *alg, unsigned int *seq_num)
+int suit_processor_get_manifest_metadata(const uint8_t *envelope_str, size_t envelope_len, bool authenticate, struct zcbor_string *manifest_component_id, struct zcbor_string *digest, enum suit_cose_alg *alg, unsigned int *seq_num)
 {
 	int ret = SUIT_SUCCESS;
 	struct suit_decoder_state *decoder_state = &state->decoder_state;

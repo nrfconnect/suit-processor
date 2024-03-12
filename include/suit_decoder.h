@@ -37,7 +37,7 @@ int suit_decoder_init(struct suit_decoder_state *state, struct suit_manifest_sta
  *
  * @returns SUIT_SUCCESS if the operation succeeds, error code otherwise.
  */
-int suit_decoder_decode_envelope(struct suit_decoder_state *state, uint8_t *envelope_str, size_t envelope_len);
+int suit_decoder_decode_envelope(struct suit_decoder_state *state, const uint8_t *envelope_str, size_t envelope_len);
 
 /** @brief Verify the SUIT manifest digest.
  *
