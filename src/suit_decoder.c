@@ -64,7 +64,7 @@ static int verify_suit_digest(struct SUIT_Digest *digest, struct zcbor_string *d
 		}
 	} else {
 		/* Other algorithms are not supported. */
-		return SUIT_ERR_DECODING;
+		return SUIT_ERR_UNSUPPORTED_ALG;
 	}
 
 	struct zcbor_string data_bytes = {
@@ -110,12 +110,12 @@ static int cose_sign1_authenticate_digest(struct zcbor_string *manifest_componen
 		&cose_sign1_struct,
 		&cose_sign1_struct_size);
 	if ((ret != ZCBOR_SUCCESS) || (cose_sign1_struct_size != COSE_Sign1_bstr->len)) {
-		return SUIT_ERR_DECODING;
+		return SUIT_ERR_UNSUPPORTED_COSE;
 	}
 
 	/* The ES256 algorithm is enforced by CDDL, so the signature length is known. */
 	if (cose_sign1_struct._COSE_Sign1_signature.len != 64) {
-		return SUIT_ERR_DECODING;
+		return SUIT_ERR_UNSUPPORTED_ALG;
 	}
 
 	/* Construct Sig_structure1 structure */

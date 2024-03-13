@@ -105,7 +105,7 @@ int suit_condition_image_match(struct suit_processor_state *state,
 		}
 	} else {
 		/* Other algorithms are not supported. */
-		return SUIT_ERR_DECODING;
+		return SUIT_ERR_UNSUPPORTED_ALG;
 	}
 
 #ifdef SUIT_PLATFORM_DRY_RUN_SUPPORT

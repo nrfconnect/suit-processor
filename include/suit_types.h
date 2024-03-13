@@ -29,8 +29,9 @@ extern "C" {
 
 /** Errors from the suit API
  *
- * See also https://www.ietf.org/archive/id/draft-ietf-suit-manifest-17.html#name-manifest-processor-setup
- * for more error conditions.
+ * See also https://www.ietf.org/archive/id/draft-ietf-suit-manifest-25.html#name-manifest-processor-setup
+ * and https://www.ietf.org/archive/id/draft-ietf-suit-report-08.html#section-4-14
+ * for more report reasons and error conditions.
  */
 #define SUIT_SUCCESS                      0
 #define SUIT_FAIL_CONDITION               1 // Test failed (e.g. Vendor ID/Class ID).
@@ -51,6 +52,9 @@ extern "C" {
 #define SUIT_ERR_MISSING_COMPONENT        17 // Missing required component from a Component Set.
 #define SUIT_ERR_CRASH                    18 // Application crashed when executed.
 #define SUIT_ERR_TIMEOUT                  19 // Watchdog timeout occurred.
+#define SUIT_ERR_UNSUPPORTED_COSE         20 // Unsupported type of COSE structure encountered.
+#define SUIT_ERR_UNSUPPORTED_ALG          21 // Unsupported COSE algorithm encountered.
+#define SUIT_ERR_UNAUTHORIZED_COMPONENT   22 // Unauthorized component ID.
 #define SUIT_ERR_AGAIN                    100 // The execution has not yet finished. Call the API again.
 #define SUIT_ERR_OVERFLOW                 101 // The execution context is too small to handle the command sequence.
 #define SUIT_FAIL_SOFT_CONDITION          102 // Test failed (e.g. Vendor ID/Class ID) and soft-failure parameter was set to true.
