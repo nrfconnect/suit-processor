@@ -366,7 +366,7 @@ int suit_processor_get_manifest_metadata(uint8_t *envelope_str, size_t envelope_
 			}
 		} else {
 			/* Other algorithms are not supported. */
-			ret = SUIT_ERR_DECODING;
+			ret = SUIT_ERR_UNSUPPORTED_ALG;
 		}
 
 		if (ret == SUIT_SUCCESS) {
