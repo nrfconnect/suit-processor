@@ -7,7 +7,6 @@
 ; Limited the number of possible authentication blocks to 2
 ; Removed unused COSE types
 ; Removed COSE authentication block from manifest CDDL - defined and parsed by Cose CDDL
-; Remove the possibility of severing payload-fetch and install.
 ; Force making suit-text severable.
 ; Limited the number of possible component identifiers to 5
 ; Limited the length of component identifiers to 5 strings
@@ -49,13 +48,13 @@ SUIT_Digest = [
 ; SUIT_Authentication_Block /= COSE_Sign1_Tagged
 
 SUIT_Severable_Manifest_Members = (
-;  ? suit-payload-fetch => bstr .cbor SUIT_Command_Sequence,
-;  ? suit-install => bstr .cbor SUIT_Command_Sequence,
+  ? suit-payload-fetch => bstr .cbor SUIT_Command_Sequence,
+  ? suit-install => bstr .cbor SUIT_Command_Sequence,
   ? suit-text => bstr .cbor SUIT_Text_Map,
 ; Reserve slots for:
 ; - suit-dependency-resolution
 ; - suit-candidate-verification
-;  0*2 $$SUIT_severable-members-extensions,
+ 0*2 $$SUIT_severable-members-extensions,
 )
 
 SUIT_Integrated_Payload = (suit-integrated-payload-key => bstr)
@@ -85,8 +84,9 @@ SUIT_Unseverable_Members = (
 )
 
 SUIT_Severable_Members_Choice = (
-  ? suit-payload-fetch => bstr .cbor SUIT_Command_Sequence,
-  ? suit-install => bstr .cbor SUIT_Command_Sequence,
+  ? suit-payload-fetch => SUIT_Digest /
+      bstr .cbor SUIT_Command_Sequence,
+  ? suit-install => SUIT_Digest / bstr .cbor SUIT_Command_Sequence,
   ? suit-text => SUIT_Digest, ; / bstr .cbor SUIT_Text_Map,
 ; Reserve slots for:
 ; - suit-dependency-resolution
