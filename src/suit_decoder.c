@@ -632,6 +632,52 @@ int suit_decoder_authorize_manifest(struct suit_decoder_state *state)
 	return SUIT_ERR_TAMP;
 }
 
+#define UNSEVERABLE_SEQUENCE_DECODE(sequence) \
+	if (state->manifest._SUIT_Manifest__SUIT_Unseverable_Members._SUIT_Unseverable_Members_suit_##sequence##_present) { \
+		if (state->decoded_manifest->sequence##_seq_status == UNAVAILABLE) { \
+			state->decoded_manifest->sequence##_seq = state->manifest._SUIT_Manifest__SUIT_Unseverable_Members._SUIT_Unseverable_Members_suit_##sequence._SUIT_Unseverable_Members_suit_##sequence; \
+			state->decoded_manifest->sequence##_seq_status = AUTHENTICATED; \
+		} else { \
+			state->decoded_manifest->sequence##_seq_status = UNAVAILABLE; \
+			ret = SUIT_ERR_MANIFEST_VALIDATION; \
+		} \
+	} else { \
+		state->decoded_manifest->sequence##_seq_status = UNAVAILABLE; \
+	}
+
+#define SEVERABLE_SEQUENCE_DECODE(sequence) \
+	if (state->manifest._SUIT_Manifest__SUIT_Severable_Members_Choice._SUIT_Severable_Members_Choice_suit_##sequence##_present) { \
+		if (state->manifest._SUIT_Manifest__SUIT_Severable_Members_Choice._SUIT_Severable_Members_Choice_suit_##sequence._SUIT_Severable_Members_Choice_suit_##sequence##_choice \
+			== _SUIT_Severable_Members_Choice_suit_##sequence##_SUIT_Command_Sequence_bstr) { \
+			state->decoded_manifest->sequence##_seq = state->manifest._SUIT_Manifest__SUIT_Severable_Members_Choice._SUIT_Severable_Members_Choice_suit_##sequence._SUIT_Severable_Members_Choice_suit_##sequence##_SUIT_Command_Sequence_bstr; \
+			state->decoded_manifest->sequence##_seq_status = AUTHENTICATED; \
+		} \
+		else if (state->manifest._SUIT_Manifest__SUIT_Severable_Members_Choice._SUIT_Severable_Members_Choice_suit_##sequence._SUIT_Severable_Members_Choice_suit_##sequence##_choice \
+			== _SUIT_Severable_Members_Choice_suit_##sequence##__SUIT_Digest) { \
+			if (state->decoded_manifest->sequence##_seq_status == SEVERED) { \
+				int digest_ret = verify_suit_digest( \
+					&state->manifest._SUIT_Manifest__SUIT_Severable_Members_Choice._SUIT_Severable_Members_Choice_suit_##sequence._SUIT_Severable_Members_Choice_suit_##sequence##__SUIT_Digest, \
+					&state->decoded_manifest->sequence##_seq \
+				); \
+				if (digest_ret == SUIT_SUCCESS) { \
+					state->decoded_manifest->sequence##_seq_status = AUTHENTICATED; \
+				} else { \
+					state->decoded_manifest->sequence##_seq_status = UNAVAILABLE; \
+					ret = SUIT_ERR_MANIFEST_VALIDATION; \
+				} \
+			} else { \
+				/* The sequence digest is present inside the manifest, but it cannot be verified, \
+				 * because the sequence has been severed. \
+				 * This is a valid case, i.e., once minified envelope is transferred into the \
+				 * SUIT storage partition. \
+				 */ \
+				state->decoded_manifest->sequence##_seq_status = UNAVAILABLE; \
+			} \
+		} \
+	} else { \
+		state->decoded_manifest->sequence##_seq_status = UNAVAILABLE; \
+	}
+
 int suit_decoder_decode_sequences(struct suit_decoder_state *state)
 {
 	int ret = SUIT_SUCCESS;
@@ -657,107 +703,13 @@ int suit_decoder_decode_sequences(struct suit_decoder_state *state)
 		ret = SUIT_ERR_MANIFEST_VALIDATION;
 	}
 
-	if (state->manifest._SUIT_Manifest__SUIT_Unseverable_Members._SUIT_Unseverable_Members_suit_validate_present) {
-		if (state->decoded_manifest->validate_seq_status == UNAVAILABLE) {
-			state->decoded_manifest->validate_seq = state->manifest._SUIT_Manifest__SUIT_Unseverable_Members._SUIT_Unseverable_Members_suit_validate._SUIT_Unseverable_Members_suit_validate;
-			state->decoded_manifest->validate_seq_status = AUTHENTICATED;
-		} else {
-			state->decoded_manifest->validate_seq_status = UNAVAILABLE;
-			ret = SUIT_ERR_MANIFEST_VALIDATION;
-		}
-	} else {
-		state->decoded_manifest->validate_seq_status = UNAVAILABLE;
-	}
 
-	if (state->manifest._SUIT_Manifest__SUIT_Unseverable_Members._SUIT_Unseverable_Members_suit_load_present) {
-		if (state->decoded_manifest->load_seq_status == UNAVAILABLE) {
-			state->decoded_manifest->load_seq = state->manifest._SUIT_Manifest__SUIT_Unseverable_Members._SUIT_Unseverable_Members_suit_load._SUIT_Unseverable_Members_suit_load;
-			state->decoded_manifest->load_seq_status = AUTHENTICATED;
-		} else {
-			state->decoded_manifest->load_seq_status = UNAVAILABLE;
-			ret = SUIT_ERR_MANIFEST_VALIDATION;
-		}
-	} else {
-		state->decoded_manifest->load_seq_status = UNAVAILABLE;
-	}
+	UNSEVERABLE_SEQUENCE_DECODE(validate);
+	UNSEVERABLE_SEQUENCE_DECODE(load);
+	UNSEVERABLE_SEQUENCE_DECODE(invoke);
 
-	if (state->manifest._SUIT_Manifest__SUIT_Unseverable_Members._SUIT_Unseverable_Members_suit_invoke_present) {
-		if (state->decoded_manifest->invoke_seq_status == UNAVAILABLE) {
-			state->decoded_manifest->invoke_seq = state->manifest._SUIT_Manifest__SUIT_Unseverable_Members._SUIT_Unseverable_Members_suit_invoke._SUIT_Unseverable_Members_suit_invoke;
-			state->decoded_manifest->invoke_seq_status = AUTHENTICATED;
-		} else {
-			state->decoded_manifest->invoke_seq_status = UNAVAILABLE;
-			ret = SUIT_ERR_MANIFEST_VALIDATION;
-		}
-	} else {
-		state->decoded_manifest->invoke_seq_status = UNAVAILABLE;
-	}
-
-	if (state->manifest._SUIT_Manifest__SUIT_Severable_Members_Choice._SUIT_Severable_Members_Choice_suit_payload_fetch_present) {
-		if (state->manifest._SUIT_Manifest__SUIT_Severable_Members_Choice._SUIT_Severable_Members_Choice_suit_payload_fetch._SUIT_Severable_Members_Choice_suit_payload_fetch_choice
-		    == _SUIT_Severable_Members_Choice_suit_payload_fetch_SUIT_Command_Sequence_bstr) {
-			state->decoded_manifest->payload_fetch_seq = state->manifest._SUIT_Manifest__SUIT_Severable_Members_Choice._SUIT_Severable_Members_Choice_suit_payload_fetch._SUIT_Severable_Members_Choice_suit_payload_fetch_SUIT_Command_Sequence_bstr;
-			state->decoded_manifest->payload_fetch_seq_status = AUTHENTICATED;
-		}
-		else if (state->manifest._SUIT_Manifest__SUIT_Severable_Members_Choice._SUIT_Severable_Members_Choice_suit_payload_fetch._SUIT_Severable_Members_Choice_suit_payload_fetch_choice
-		    == _SUIT_Severable_Members_Choice_suit_payload_fetch__SUIT_Digest) {
-			if (state->decoded_manifest->payload_fetch_seq_status == SEVERED) {
-				int digest_ret = verify_suit_digest(
-					&state->manifest._SUIT_Manifest__SUIT_Severable_Members_Choice._SUIT_Severable_Members_Choice_suit_payload_fetch._SUIT_Severable_Members_Choice_suit_payload_fetch__SUIT_Digest,
-					&state->decoded_manifest->payload_fetch_seq
-				);
-
-				if (digest_ret == SUIT_SUCCESS) {
-					state->decoded_manifest->payload_fetch_seq_status = AUTHENTICATED;
-				} else {
-					state->decoded_manifest->payload_fetch_seq_status = UNAVAILABLE;
-					ret = SUIT_ERR_MANIFEST_VALIDATION;
-				}
-			} else {
-				/* The payload_fetch digest is present inside the manifest, but it cannot be verified,
-				 * because the payload has been severed.
-				 * this is a valid case, ie once minified envelope is transferred into the
-				 * SUIT storage partition.
-				 */
-				state->decoded_manifest->payload_fetch_seq_status = UNAVAILABLE;
-			}
-		}
-	} else {
-		state->decoded_manifest->payload_fetch_seq_status = UNAVAILABLE;
-	}
-
-	if (state->manifest._SUIT_Manifest__SUIT_Severable_Members_Choice._SUIT_Severable_Members_Choice_suit_install_present) {
-		if (state->manifest._SUIT_Manifest__SUIT_Severable_Members_Choice._SUIT_Severable_Members_Choice_suit_install._SUIT_Severable_Members_Choice_suit_install_choice
-		    == _SUIT_Severable_Members_Choice_suit_install_SUIT_Command_Sequence_bstr) {
-			state->decoded_manifest->install_seq = state->manifest._SUIT_Manifest__SUIT_Severable_Members_Choice._SUIT_Severable_Members_Choice_suit_install._SUIT_Severable_Members_Choice_suit_install_SUIT_Command_Sequence_bstr;
-			state->decoded_manifest->install_seq_status = AUTHENTICATED;
-		}
-		else if (state->manifest._SUIT_Manifest__SUIT_Severable_Members_Choice._SUIT_Severable_Members_Choice_suit_install._SUIT_Severable_Members_Choice_suit_install_choice
-		    == _SUIT_Severable_Members_Choice_suit_install__SUIT_Digest) {
-			if (state->decoded_manifest->install_seq_status == SEVERED) {
-				int digest_ret = verify_suit_digest(
-					&state->manifest._SUIT_Manifest__SUIT_Severable_Members_Choice._SUIT_Severable_Members_Choice_suit_install._SUIT_Severable_Members_Choice_suit_install__SUIT_Digest,
-					&state->decoded_manifest->install_seq
-				);
-
-				if (digest_ret == SUIT_SUCCESS) {
-					state->decoded_manifest->install_seq_status = AUTHENTICATED;
-				} else {
-					state->decoded_manifest->install_seq_status = UNAVAILABLE;
-					ret = SUIT_ERR_MANIFEST_VALIDATION;
-				}
-			} else {
-				/* The install digest is present inside the manifest, but it cannot be verified,
-				 * because the install payload has been severed.
-				 * This is a valid case, ie once minified envelope is transferred into the
-				 * SUIT storage partition.
-				 */
-				state->decoded_manifest->install_seq_status = UNAVAILABLE;
-			}
-		}
-	} else {
-		state->decoded_manifest->install_seq_status = UNAVAILABLE;
-	}
+	SEVERABLE_SEQUENCE_DECODE(payload_fetch)
+	SEVERABLE_SEQUENCE_DECODE(install)
 
 	/* The CDDL enforces to severe the text field from the manifest.
 	 * Due to that fact, if the text field is present inside the manifest, it contains the digest of the severed text field.
