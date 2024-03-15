@@ -351,6 +351,28 @@ int suit_decoder_decode_envelope(struct suit_decoder_state *state, uint8_t *enve
 			}
 		}
 
+		if (state->envelope._SUIT_Envelope__SUIT_Severable_Manifest_Members._SUIT_Severable_Manifest_Members_suit_payload_fetch_present) {
+			state->decoded_manifest->payload_fetch_seq = state->envelope._SUIT_Envelope__SUIT_Severable_Manifest_Members._SUIT_Severable_Manifest_Members_suit_payload_fetch._SUIT_Severable_Manifest_Members_suit_payload_fetch;
+			if (state->decoded_manifest->payload_fetch_seq.len < 1) {
+				ret = SUIT_ERR_DECODING;
+				state->decoded_manifest->payload_fetch_seq.len = 0;
+				state->decoded_manifest->payload_fetch_seq.value = NULL;
+			} else {
+				state->decoded_manifest->payload_fetch_seq_status = SEVERED;
+			}
+		}
+
+		if (state->envelope._SUIT_Envelope__SUIT_Severable_Manifest_Members._SUIT_Severable_Manifest_Members_suit_install_present) {
+			state->decoded_manifest->install_seq = state->envelope._SUIT_Envelope__SUIT_Severable_Manifest_Members._SUIT_Severable_Manifest_Members_suit_install._SUIT_Severable_Manifest_Members_suit_install;
+			if (state->decoded_manifest->install_seq.len < 1) {
+				ret = SUIT_ERR_DECODING;
+				state->decoded_manifest->install_seq.len = 0;
+				state->decoded_manifest->install_seq.value = NULL;
+			} else {
+				state->decoded_manifest->install_seq_status = SEVERED;
+			}
+		}
+
 		/* Store pointers to the integrated payloads and their keys. */
 		if (ret == SUIT_SUCCESS) {
 			for (size_t i = 0; i < state->envelope._SUIT_Envelope__SUIT_Integrated_Payload_count; i++) {
@@ -672,24 +694,66 @@ int suit_decoder_decode_sequences(struct suit_decoder_state *state)
 	}
 
 	if (state->manifest._SUIT_Manifest__SUIT_Severable_Members_Choice._SUIT_Severable_Members_Choice_suit_payload_fetch_present) {
-		if (state->decoded_manifest->payload_fetch_seq_status == UNAVAILABLE) {
-			state->decoded_manifest->payload_fetch_seq = state->manifest._SUIT_Manifest__SUIT_Severable_Members_Choice._SUIT_Severable_Members_Choice_suit_payload_fetch._SUIT_Severable_Members_Choice_suit_payload_fetch;
+		if (state->manifest._SUIT_Manifest__SUIT_Severable_Members_Choice._SUIT_Severable_Members_Choice_suit_payload_fetch._SUIT_Severable_Members_Choice_suit_payload_fetch_choice
+		    == _SUIT_Severable_Members_Choice_suit_payload_fetch_SUIT_Command_Sequence_bstr) {
+			state->decoded_manifest->payload_fetch_seq = state->manifest._SUIT_Manifest__SUIT_Severable_Members_Choice._SUIT_Severable_Members_Choice_suit_payload_fetch._SUIT_Severable_Members_Choice_suit_payload_fetch_SUIT_Command_Sequence_bstr;
 			state->decoded_manifest->payload_fetch_seq_status = AUTHENTICATED;
-		} else {
-			state->decoded_manifest->payload_fetch_seq_status = UNAVAILABLE;
-			ret = SUIT_ERR_MANIFEST_VALIDATION;
+		}
+		else if (state->manifest._SUIT_Manifest__SUIT_Severable_Members_Choice._SUIT_Severable_Members_Choice_suit_payload_fetch._SUIT_Severable_Members_Choice_suit_payload_fetch_choice
+		    == _SUIT_Severable_Members_Choice_suit_payload_fetch__SUIT_Digest) {
+			if (state->decoded_manifest->payload_fetch_seq_status == SEVERED) {
+				int digest_ret = verify_suit_digest(
+					&state->manifest._SUIT_Manifest__SUIT_Severable_Members_Choice._SUIT_Severable_Members_Choice_suit_payload_fetch._SUIT_Severable_Members_Choice_suit_payload_fetch__SUIT_Digest,
+					&state->decoded_manifest->payload_fetch_seq
+				);
+
+				if (digest_ret == SUIT_SUCCESS) {
+					state->decoded_manifest->payload_fetch_seq_status = AUTHENTICATED;
+				} else {
+					state->decoded_manifest->payload_fetch_seq_status = UNAVAILABLE;
+					ret = SUIT_ERR_MANIFEST_VALIDATION;
+				}
+			} else {
+				/* The payload_fetch digest is present inside the manifest, but it cannot be verified,
+				 * because the payload has been severed.
+				 * this is a valid case, ie once minified envelope is transferred into the
+				 * SUIT storage partition.
+				 */
+				state->decoded_manifest->payload_fetch_seq_status = UNAVAILABLE;
+			}
 		}
 	} else {
 		state->decoded_manifest->payload_fetch_seq_status = UNAVAILABLE;
 	}
 
 	if (state->manifest._SUIT_Manifest__SUIT_Severable_Members_Choice._SUIT_Severable_Members_Choice_suit_install_present) {
-		if (state->decoded_manifest->install_seq_status == UNAVAILABLE) {
-			state->decoded_manifest->install_seq = state->manifest._SUIT_Manifest__SUIT_Severable_Members_Choice._SUIT_Severable_Members_Choice_suit_install._SUIT_Severable_Members_Choice_suit_install;
+		if (state->manifest._SUIT_Manifest__SUIT_Severable_Members_Choice._SUIT_Severable_Members_Choice_suit_install._SUIT_Severable_Members_Choice_suit_install_choice
+		    == _SUIT_Severable_Members_Choice_suit_install_SUIT_Command_Sequence_bstr) {
+			state->decoded_manifest->install_seq = state->manifest._SUIT_Manifest__SUIT_Severable_Members_Choice._SUIT_Severable_Members_Choice_suit_install._SUIT_Severable_Members_Choice_suit_install_SUIT_Command_Sequence_bstr;
 			state->decoded_manifest->install_seq_status = AUTHENTICATED;
-		} else {
-			state->decoded_manifest->install_seq_status = UNAVAILABLE;
-			ret = SUIT_ERR_MANIFEST_VALIDATION;
+		}
+		else if (state->manifest._SUIT_Manifest__SUIT_Severable_Members_Choice._SUIT_Severable_Members_Choice_suit_install._SUIT_Severable_Members_Choice_suit_install_choice
+		    == _SUIT_Severable_Members_Choice_suit_install__SUIT_Digest) {
+			if (state->decoded_manifest->install_seq_status == SEVERED) {
+				int digest_ret = verify_suit_digest(
+					&state->manifest._SUIT_Manifest__SUIT_Severable_Members_Choice._SUIT_Severable_Members_Choice_suit_install._SUIT_Severable_Members_Choice_suit_install__SUIT_Digest,
+					&state->decoded_manifest->install_seq
+				);
+
+				if (digest_ret == SUIT_SUCCESS) {
+					state->decoded_manifest->install_seq_status = AUTHENTICATED;
+				} else {
+					state->decoded_manifest->install_seq_status = UNAVAILABLE;
+					ret = SUIT_ERR_MANIFEST_VALIDATION;
+				}
+			} else {
+				/* The install digest is present inside the manifest, but it cannot be verified,
+				 * because the install payload has been severed.
+				 * This is a valid case, ie once minified envelope is transferred into the
+				 * SUIT storage partition.
+				 */
+				state->decoded_manifest->install_seq_status = UNAVAILABLE;
+			}
 		}
 	} else {
 		state->decoded_manifest->install_seq_status = UNAVAILABLE;

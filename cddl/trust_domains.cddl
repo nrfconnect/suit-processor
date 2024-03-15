@@ -5,8 +5,6 @@
 ; Removed unused extensions
 ; Set the maximum number of parameters inside suit-directive-set-parameters to 6
 ; Limited the number of possible dependency manifests to 4
-; Remove the possibility of severing dependency-resolution sequence.
-; Remove the possibility of severing suit-candidate-verification sequence.
 ; Remove suit-directive-unlink
 ; Remove suit-uninstall sequence support
 ; Remove delegation chains
@@ -26,11 +24,11 @@
 $$SUIT_Manifest_Extensions //=
     (suit-manifest-component-id => SUIT_Component_Identifier)
 
-; $$SUIT_severable-members-extensions //=
-;     (suit-dependency-resolution => bstr .cbor SUIT_Command_Sequence)
+$$SUIT_severable-members-extensions //=
+    (suit-dependency-resolution => bstr .cbor SUIT_Command_Sequence)
 
-; $$SUIT_severable-members-extensions //=
-;     (suit-candidate-verification => bstr .cbor SUIT_Command_Sequence)
+$$SUIT_severable-members-extensions //=
+    (suit-candidate-verification => bstr .cbor SUIT_Command_Sequence)
 
 ; $$unseverable-manifest-member-extensions //=
 ;     (suit-uninstall => bstr .cbor SUIT_Command_Sequence)
