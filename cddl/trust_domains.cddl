@@ -37,12 +37,12 @@ suit-integrated-dependency-key = tstr
 
 $$severable-manifest-members-choice-extensions //= (
     suit-dependency-resolution =>
-        bstr .cbor SUIT_Command_Sequence ; / SUIT_Digest
+        bstr .cbor SUIT_Command_Sequence / SUIT_Digest
 )
 
 $$severable-manifest-members-choice-extensions //= (
     suit-candidate-verification =>
-        bstr .cbor SUIT_Command_Sequence ; / SUIT_Digest
+        bstr .cbor SUIT_Command_Sequence / SUIT_Digest
 )
 
 $$SUIT_Common-extensions //= (
