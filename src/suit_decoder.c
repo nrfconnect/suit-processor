@@ -373,6 +373,45 @@ int suit_decoder_decode_envelope(struct suit_decoder_state *state, uint8_t *enve
 			}
 		}
 
+		const size_t ext_count = state->envelope._SUIT_Envelope__SUIT_Severable_Manifest_Members._SUIT_Severable_Manifest_Members__SUIT_severable_members_extensions_count;
+		for (size_t ext_i = 0; ext_i < ext_count; ext_i++) {
+			struct SUIT_severable_members_extensions_ *ext = &state->envelope._SUIT_Envelope__SUIT_Severable_Manifest_Members._SUIT_Severable_Manifest_Members__SUIT_severable_members_extensions[ext_i]._SUIT_Severable_Manifest_Members__SUIT_severable_members_extensions;
+
+			switch (ext->_SUIT_severable_members_extensions_choice) {
+				case _SUIT_severable_members_extensions_suit_dependency_resolution:
+					state->decoded_manifest->dependency_resolution_seq = ext->_SUIT_severable_members_extensions_suit_dependency_resolution;
+					if (state->decoded_manifest->dependency_resolution_seq.len < 1) {
+						ret = SUIT_ERR_DECODING;
+						state->decoded_manifest->dependency_resolution_seq.len = 0;
+						state->decoded_manifest->dependency_resolution_seq.value = NULL;
+					} else {
+						state->decoded_manifest->dependency_resolution_seq_status = SEVERED;
+					}
+
+					break;
+
+				case _SUIT_severable_members_extensions_suit_candidate_verification:
+					state->decoded_manifest->candidate_verification_seq = ext->_SUIT_severable_members_extensions_suit_candidate_verification;
+					if (state->decoded_manifest->candidate_verification_seq.len < 1) {
+						ret = SUIT_ERR_DECODING;
+						state->decoded_manifest->candidate_verification_seq.len = 0;
+						state->decoded_manifest->candidate_verification_seq.value = NULL;
+					} else {
+						state->decoded_manifest->candidate_verification_seq_status = SEVERED;
+					}
+
+					break;
+
+				default:
+					ret = SUIT_ERR_DECODING;
+					break;
+			}
+
+			if (ret != SUIT_SUCCESS) {
+				break;
+			}
+		}
+
 		/* Store pointers to the integrated payloads and their keys. */
 		if (ret == SUIT_SUCCESS) {
 			for (size_t i = 0; i < state->envelope._SUIT_Envelope__SUIT_Integrated_Payload_count; i++) {
@@ -648,7 +687,8 @@ int suit_decoder_authorize_manifest(struct suit_decoder_state *state)
 #define SEVERABLE_SEQUENCE_DECODE(sequence) \
 	if (state->manifest._SUIT_Manifest__SUIT_Severable_Members_Choice._SUIT_Severable_Members_Choice_suit_##sequence##_present) { \
 		if (state->manifest._SUIT_Manifest__SUIT_Severable_Members_Choice._SUIT_Severable_Members_Choice_suit_##sequence._SUIT_Severable_Members_Choice_suit_##sequence##_choice \
-			== _SUIT_Severable_Members_Choice_suit_##sequence##_SUIT_Command_Sequence_bstr) { \
+			== _SUIT_Severable_Members_Choice_suit_##sequence##_SUIT_Command_Sequence_bstr \
+		    && state->decoded_manifest->sequence##_seq_status == UNAVAILABLE) { \
 			state->decoded_manifest->sequence##_seq = state->manifest._SUIT_Manifest__SUIT_Severable_Members_Choice._SUIT_Severable_Members_Choice_suit_##sequence._SUIT_Severable_Members_Choice_suit_##sequence##_SUIT_Command_Sequence_bstr; \
 			state->decoded_manifest->sequence##_seq_status = AUTHENTICATED; \
 		} \
@@ -673,10 +713,46 @@ int suit_decoder_authorize_manifest(struct suit_decoder_state *state)
 				 */ \
 				state->decoded_manifest->sequence##_seq_status = UNAVAILABLE; \
 			} \
+		} else { \
+			state->decoded_manifest->sequence##_seq_status = UNAVAILABLE; \
+			ret = SUIT_ERR_MANIFEST_VALIDATION; \
 		} \
 	} else { \
 		state->decoded_manifest->sequence##_seq_status = UNAVAILABLE; \
 	}
+
+#define SEVERABLE_EXTENSION_SEQUENCE_DECODE(sequence) \
+	if (ext->_severable_manifest_members_choice_extensions_suit_##sequence##_choice \
+		== _severable_manifest_members_choice_extensions_suit_##sequence##_SUIT_Command_Sequence_bstr \
+	    && state->decoded_manifest->sequence##_seq_status == UNAVAILABLE) { \
+		state->decoded_manifest->sequence##_seq = ext->_severable_manifest_members_choice_extensions_suit_##sequence##_SUIT_Command_Sequence_bstr; \
+		state->decoded_manifest->sequence##_seq_status = AUTHENTICATED; \
+	} \
+	else if (ext->_severable_manifest_members_choice_extensions_suit_##sequence##_choice \
+					== _severable_manifest_members_choice_extensions_suit_##sequence##__SUIT_Digest) { \
+		if (state->decoded_manifest->sequence##_seq_status == SEVERED) { \
+			int digest_ret = verify_suit_digest( \
+				&ext->_severable_manifest_members_choice_extensions_suit_##sequence##__SUIT_Digest, \
+				&state->decoded_manifest->sequence##_seq \
+			); \
+			if (digest_ret == SUIT_SUCCESS) { \
+				state->decoded_manifest->sequence##_seq_status = AUTHENTICATED; \
+			} else { \
+				state->decoded_manifest->sequence##_seq_status = UNAVAILABLE; \
+				ret = SUIT_ERR_MANIFEST_VALIDATION; \
+			} \
+		} else { \
+			/* The sequence digest is present inside the manifest, but it cannot be verified, \
+			 * because the sequence has been severed. \
+			 * This is a valid case, i.e., once minified envelope is transferred into the \
+			 * SUIT storage partition. \
+			 */ \
+			state->decoded_manifest->sequence##_seq_status = UNAVAILABLE; \
+		} \
+	} else { \
+		state->decoded_manifest->sequence##_seq_status = UNAVAILABLE; \
+		ret = SUIT_ERR_MANIFEST_VALIDATION; \
+	} \
 
 int suit_decoder_decode_sequences(struct suit_decoder_state *state)
 {
@@ -746,32 +822,15 @@ int suit_decoder_decode_sequences(struct suit_decoder_state *state)
 	/* Parse severable manifest members extensions. */
 	const size_t ext_count = state->manifest._SUIT_Manifest__SUIT_Severable_Members_Choice._SUIT_Severable_Members_Choice__severable_manifest_members_choice_extensions_count;
 	for (size_t ext_i = 0; ext_i < ext_count; ext_i++) {
-		const struct severable_manifest_members_choice_extensions_ *ext = &state->manifest._SUIT_Manifest__SUIT_Severable_Members_Choice._SUIT_Severable_Members_Choice__severable_manifest_members_choice_extensions[ext_i]._SUIT_Severable_Members_Choice__severable_manifest_members_choice_extensions;
-		const struct zcbor_string *ext_seq = NULL;
+		struct severable_manifest_members_choice_extensions_ *ext = &state->manifest._SUIT_Manifest__SUIT_Severable_Members_Choice._SUIT_Severable_Members_Choice__severable_manifest_members_choice_extensions[ext_i]._SUIT_Severable_Members_Choice__severable_manifest_members_choice_extensions;
 
 		switch (ext->_severable_manifest_members_choice_extensions_choice) {
 			case _severable_manifest_members_choice_extensions_suit_dependency_resolution:
-				ext_seq = &ext->_severable_manifest_members_choice_extensions_suit_dependency_resolution;
-
-				if (state->decoded_manifest->dependency_resolution_seq_status == UNAVAILABLE) {
-					state->decoded_manifest->dependency_resolution_seq = *ext_seq;
-					state->decoded_manifest->dependency_resolution_seq_status = AUTHENTICATED;
-				} else {
-					state->decoded_manifest->dependency_resolution_seq_status = UNAVAILABLE;
-					ret = SUIT_ERR_MANIFEST_VALIDATION;
-				}
+				SEVERABLE_EXTENSION_SEQUENCE_DECODE(dependency_resolution)
 				break;
 
 			case _severable_manifest_members_choice_extensions_suit_candidate_verification:
-				ext_seq = &ext->_severable_manifest_members_choice_extensions_suit_candidate_verification;
-
-				if (state->decoded_manifest->candidate_verification_seq_status == UNAVAILABLE) {
-					state->decoded_manifest->candidate_verification_seq = *ext_seq;
-					state->decoded_manifest->candidate_verification_seq_status = AUTHENTICATED;
-				} else {
-					state->decoded_manifest->candidate_verification_seq_status = UNAVAILABLE;
-					ret = SUIT_ERR_MANIFEST_VALIDATION;
-				}
+				SEVERABLE_EXTENSION_SEQUENCE_DECODE(candidate_verification)
 				break;
 
 			default:
