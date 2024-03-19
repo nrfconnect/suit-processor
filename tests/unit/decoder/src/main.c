@@ -221,6 +221,7 @@ void test_decode_sequences_text_without_digest(void);
 void test_decode_sequences_text_with_valid_digest(void);
 void test_decode_sequences_text_with_digest_platform_fail(void);
 void test_decode_sequences_all(void);
+void test_decode_sequences_all_severed(void);
 
 /* Components creation tests */
 void test_create_components_invalid_input(void);
