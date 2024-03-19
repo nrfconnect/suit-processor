@@ -237,58 +237,74 @@ int suit_manifest_get_component_params(struct suit_manifest_state *manifest, siz
 	return SUIT_SUCCESS;
 }
 
-struct zcbor_string *suit_manifest_get_command_seq(struct suit_manifest_state *manifest, enum suit_command_sequence seq_name)
+int suit_manifest_get_command_seq(struct suit_manifest_state *manifest, enum suit_command_sequence seq_name, struct zcbor_string **sequence)
 {
-	if (manifest == NULL) {
-		return NULL;
+	if (manifest == NULL || sequence == NULL) {
+		return SUIT_ERR_CRASH;
 	}
+
+	enum suit_seq_status sequence_status = UNAVAILABLE;
 
 	switch (seq_name) {
 	case SUIT_SEQ_SHARED:
+		sequence_status = manifest->shared_sequence_status;
 		if (manifest->shared_sequence_status == AUTHENTICATED) {
-			return &manifest->shared_sequence;
+			*sequence = &manifest->shared_sequence;
 		}
-		return NULL;
+		break;
 	case SUIT_SEQ_DEP_RESOLUTION:
+		sequence_status = manifest->dependency_resolution_seq_status;
 		if (manifest->dependency_resolution_seq_status == AUTHENTICATED) {
-			return &manifest->dependency_resolution_seq;
+			*sequence = &manifest->dependency_resolution_seq;
 		}
-		return NULL;
+		break;
 	case SUIT_SEQ_PAYLOAD_FETCH:
+		sequence_status = manifest->payload_fetch_seq_status;
 		if (manifest->payload_fetch_seq_status == AUTHENTICATED) {
-			return &manifest->payload_fetch_seq;
+			*sequence = &manifest->payload_fetch_seq;
 		}
-		return NULL;
+		break;
 	case SUIT_SEQ_CAND_VERIFICATION:
+		sequence_status = manifest->candidate_verification_seq_status;
 		if (manifest->candidate_verification_seq_status == AUTHENTICATED) {
-			return &manifest->candidate_verification_seq;
+			*sequence = &manifest->candidate_verification_seq;
 		}
-		return NULL;
+		break;
 	case SUIT_SEQ_INSTALL:
+		sequence_status = manifest->install_seq_status;
 		if (manifest->install_seq_status == AUTHENTICATED) {
-			return &manifest->install_seq;
+			*sequence = &manifest->install_seq;
 		}
-		return NULL;
+		break;
 	case SUIT_SEQ_VALIDATE:
+		sequence_status = manifest->validate_seq_status;
 		if (manifest->validate_seq_status == AUTHENTICATED) {
-			return &manifest->validate_seq;
+			*sequence = &manifest->validate_seq;
 		}
-		return NULL;
+		break;
 	case SUIT_SEQ_LOAD:
+		sequence_status = manifest->load_seq_status;
 		if (manifest->load_seq_status == AUTHENTICATED) {
-			return &manifest->load_seq;
+			*sequence = &manifest->load_seq;
 		}
-		return NULL;
+		break;
 	case SUIT_SEQ_INVOKE:
+		sequence_status = manifest->invoke_seq_status;
 		if (manifest->invoke_seq_status == AUTHENTICATED) {
-			return &manifest->invoke_seq;
+			*sequence = &manifest->invoke_seq;
 		}
-		return NULL;
+		break;
 	default:
-		return NULL;
+		return SUIT_ERR_CRASH;
 	}
 
-	return NULL;
+	if (sequence_status == AUTHENTICATED) {
+		return SUIT_SUCCESS;
+	} else if (sequence_status == UNAVAILABLE) {
+		return SUIT_ERR_UNAVAILABLE_COMMAND_SEQ;
+	}
+
+	return SUIT_ERR_CRASH;
 }
 
 int suit_manifest_get_integrated_payload(struct suit_manifest_state *manifest, struct zcbor_string *uri, struct zcbor_string *payload)

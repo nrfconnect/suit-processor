@@ -73,12 +73,14 @@ int suit_manifest_get_component_params(struct suit_manifest_state *manifest, siz
  *
  * @details This function will return a command sequence only if it is marked as authenticated.
  *
- * @param[in] manifest  Manifest structure, defining the context for the command sequence.
- * @param[in] seq_name  Name of the command sequence to return.
+ * @param[in]  manifest  Manifest structure, defining the context for the command sequence.
+ * @param[in]  seq_name  Name of the command sequence to return.
+ * @param[out] payload   Reference to the pointer to ZCBOR string holding the sequence.
  *
- * @returns Reference to the command sequence if a valid, authenticated sequence was found, NULL pointer otherwise.
+ * @returns SUIT_SUCCESS if a valid, authenticated sequence was found, SUIT_ERR_UNAVAILABLE_COMMAND_SEQ if the sequence is not available,
+ *                       error code otherwise.
  */
-struct zcbor_string *suit_manifest_get_command_seq(struct suit_manifest_state *manifest, enum suit_command_sequence seq_name);
+int suit_manifest_get_command_seq(struct suit_manifest_state *manifest, enum suit_command_sequence seq_name, struct zcbor_string **sequence);
 
 /** @brief Get the reference to an integrated payload with a given URI for a given manifest.
  *

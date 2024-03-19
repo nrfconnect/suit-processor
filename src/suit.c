@@ -84,10 +84,16 @@ static int suit_dry_run_manifest(struct suit_manifest_state *manifest_state,
 	for (enum suit_command_sequence seq = seq_name; seq <= end_seq; seq++) {
 		SUIT_DBG("Dry-run sequence: %d\r\n", seq);
 
-		struct zcbor_string *step_seq = suit_manifest_get_command_seq(manifest_state, seq);
-		if (step_seq == NULL) {
-			SUIT_ERR("Failed to execute sequence %d: sequence not found\r\n", seq);
-			continue;
+		struct zcbor_string *step_seq = NULL;
+		int seq_get_ret = suit_manifest_get_command_seq(manifest_state, seq, &step_seq);
+		if (seq_get_ret != SUIT_SUCCESS) {
+			if (seq_get_ret == SUIT_ERR_UNAVAILABLE_COMMAND_SEQ)
+			{
+				SUIT_DBG("Sequence %d not defined in the manifest\r\n", seq);
+				continue;
+			}
+			SUIT_ERR("Error when getting command sequnces %d\r\n", seq);
+			return seq_get_ret;
 		}
 
 		/* Execute shared command sequence */
@@ -253,10 +259,10 @@ int suit_process_sequence(uint8_t *envelope_str, size_t envelope_len, enum suit_
 	if ((ret == SUIT_SUCCESS) && (seq_name > SUIT_SEQ_PARSE)) {
 		SUIT_DBG("Check if sequence %d is defined inside the manifest\r\n", seq_name);
 
-		struct zcbor_string *step_seq = suit_manifest_get_command_seq(manifest_state, seq_name);
-		if (step_seq == NULL) {
+		struct zcbor_string *step_seq = NULL;
+		ret = suit_manifest_get_command_seq(manifest_state, seq_name, &step_seq);
+		if (ret != SUIT_SUCCESS) {
 			SUIT_ERR("Failed to execute sequence %d: sequence not found\r\n", seq_name);
-			ret = SUIT_ERR_UNAVAILABLE_COMMAND_SEQ;
 		}
 	}
 
