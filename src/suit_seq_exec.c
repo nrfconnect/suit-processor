@@ -393,7 +393,7 @@ int suit_seq_exec_component_idx_next(struct suit_seq_exec_state *seq_exec_state,
 		seq_exec_state->current_components[seq_exec_state->current_component_idx] = false;
 	}
 
-	for (size_t i = 0; i < SUIT_MAX_NUM_COMPONENTS; i++) {
+	for (size_t i = 0; i < seq_exec_state->manifest->components_count; i++) {
 		if (seq_exec_state->current_components_backup[i]) {
 			if ((seq_exec_state->current_component_idx == SUIT_MAX_NUM_COMPONENTS) ||
 			    (seq_exec_state->current_component_idx < i)) {
