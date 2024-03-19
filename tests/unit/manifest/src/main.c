@@ -764,18 +764,20 @@ void test_get_component_params(void)
 
 void test_get_command_seq_invalid_input(void)
 {
+	int ret;
 	struct zcbor_string *seq;
 
 	enum suit_command_sequence seq_name;
 
 	for (seq_name = SUIT_SEQ_INVALID; seq_name <= SUIT_SEQ_MAX; seq_name++) {
-		seq = suit_manifest_get_command_seq(NULL, seq_name);
-		TEST_ASSERT_EQUAL_MESSAGE(NULL, seq, "Sequence returned for a NULL manifest");
+		ret = suit_manifest_get_command_seq(NULL, seq_name, &seq);
+		TEST_ASSERT_EQUAL_MESSAGE(SUIT_ERR_CRASH, ret, "Sequence did not return SUIT_ERR_CRASH for a NULL manifest");
 	}
 }
 
 void test_get_command_seq_empty_manifest(void)
 {
+	int ret;
 	struct suit_manifest_state manifest;
 	struct zcbor_string *seq;
 
@@ -785,13 +787,15 @@ void test_get_command_seq_empty_manifest(void)
 	enum suit_command_sequence seq_name;
 
 	for (seq_name = SUIT_SEQ_INVALID; seq_name <= SUIT_SEQ_MAX; seq_name++) {
-		seq = suit_manifest_get_command_seq(&manifest, seq_name);
-		TEST_ASSERT_EQUAL_MESSAGE(NULL, seq, "Sequence returned for an empty manifest");
+		ret = suit_manifest_get_command_seq(&manifest, seq_name, &seq);
+		TEST_ASSERT_NOT_EQUAL_MESSAGE(SUIT_SUCCESS, ret,
+			"Sequence returned incorrect error code for an empty manifest");
 	}
 }
 
 void test_get_command_seq_unavailable(void)
 {
+	int ret;
 	struct suit_manifest_state manifest;
 	struct zcbor_string *seq;
 
@@ -807,13 +811,14 @@ void test_get_command_seq_unavailable(void)
 	enum suit_command_sequence seq_name;
 
 	for (seq_name = SUIT_SEQ_INVALID; seq_name <= SUIT_SEQ_MAX; seq_name++) {
-		seq = suit_manifest_get_command_seq(&manifest, seq_name);
-		TEST_ASSERT_EQUAL_MESSAGE(NULL, seq, "Unavailable sequence returned");
+		ret = suit_manifest_get_command_seq(&manifest, seq_name, &seq);
+		TEST_ASSERT_NOT_EQUAL_MESSAGE(SUIT_SUCCESS, ret, "Getting unavailable sequence succeeded");
 	}
 }
 
 void test_get_command_seq_severed(void)
 {
+	int ret;
 	struct suit_manifest_state manifest;
 	struct zcbor_string *seq;
 
@@ -825,17 +830,20 @@ void test_get_command_seq_severed(void)
 	manifest.validate_seq_status = SEVERED;
 	manifest.load_seq_status = SEVERED;
 	manifest.invoke_seq_status = SEVERED;
+	manifest.dependency_resolution_seq_status = SEVERED;
+	manifest.candidate_verification_seq_status = SEVERED;
 
 	enum suit_command_sequence seq_name;
 
 	for (seq_name = SUIT_SEQ_INVALID; seq_name <= SUIT_SEQ_MAX; seq_name++) {
-		seq = suit_manifest_get_command_seq(&manifest, seq_name);
-		TEST_ASSERT_EQUAL_MESSAGE(NULL, seq, "Severed sequence returned");
+		ret = suit_manifest_get_command_seq(&manifest, seq_name, &seq);
+		TEST_ASSERT_EQUAL_MESSAGE(SUIT_ERR_CRASH, ret, "Incorrect error code returned");
 	}
 }
 
 void test_get_command_seq_authenticated(void)
 {
+	int ret;
 	struct suit_manifest_state manifest;
 	struct zcbor_string *seq;
 
@@ -852,6 +860,7 @@ void test_get_command_seq_authenticated(void)
 
 	for (seq_name = SUIT_SEQ_INVALID; seq_name <= SUIT_SEQ_MAX; seq_name++) {
 		struct zcbor_string *exp_seq = NULL;
+		seq = NULL;
 
 		switch (seq_name) {
 		case SUIT_SEQ_SHARED:
@@ -876,8 +885,15 @@ void test_get_command_seq_authenticated(void)
 			break;
 		}
 
-		seq = suit_manifest_get_command_seq(&manifest, seq_name);
-		TEST_ASSERT_EQUAL_MESSAGE(exp_seq, seq, "Invalid sequence returned");
+		ret = suit_manifest_get_command_seq(&manifest, seq_name, &seq);
+
+		if (exp_seq != NULL) {
+			TEST_ASSERT_EQUAL_MESSAGE(SUIT_SUCCESS, ret, "Getting an available sequence failed");
+			TEST_ASSERT_EQUAL_MESSAGE(exp_seq, seq, "Invalid sequence returned");
+		} else {
+			TEST_ASSERT_NOT_EQUAL_MESSAGE(SUIT_SUCCESS, ret, "Getting unavailable sequence succeeded");
+			TEST_ASSERT_EQUAL_MESSAGE(NULL, seq, "Invalid sequence returned");
+		}
 	}
 }
 

@@ -708,10 +708,12 @@ int suit_decoder_authorize_manifest(struct suit_decoder_state *state)
 			} else { \
 				/* The sequence digest is present inside the manifest, but it cannot be verified, \
 				 * because the sequence has been severed. \
-				 * This is a valid case, i.e., once minified envelope is transferred into the \
+				 * This can be a valid case, i.e., once minified envelope is transferred into the \
 				 * SUIT storage partition. \
+				 * However, if an attempt to run the sequence is made, an error should be issued, \
+				 * instead of treating the sequence as unavailable. \
 				 */ \
-				state->decoded_manifest->sequence##_seq_status = UNAVAILABLE; \
+				state->decoded_manifest->sequence##_seq_status = SEVERED; \
 			} \
 		} else { \
 			state->decoded_manifest->sequence##_seq_status = UNAVAILABLE; \
@@ -744,10 +746,12 @@ int suit_decoder_authorize_manifest(struct suit_decoder_state *state)
 		} else { \
 			/* The sequence digest is present inside the manifest, but it cannot be verified, \
 			 * because the sequence has been severed. \
-			 * This is a valid case, i.e., once minified envelope is transferred into the \
+			 * This can be a valid case, i.e., once minified envelope is transferred into the \
 			 * SUIT storage partition. \
+			 * However, if an attempt to run the sequence is made, an error should be issued, \
+			 * instead of treating the sequence as unavailable. \
 			 */ \
-			state->decoded_manifest->sequence##_seq_status = UNAVAILABLE; \
+			state->decoded_manifest->sequence##_seq_status = SEVERED; \
 		} \
 	} else { \
 		state->decoded_manifest->sequence##_seq_status = UNAVAILABLE; \

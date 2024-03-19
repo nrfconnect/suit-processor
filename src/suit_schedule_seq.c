@@ -306,15 +306,16 @@ static int suit_run_single_command(struct suit_processor_state *state, suit_comm
 
 int suit_schedule_execution(struct suit_processor_state *state, struct suit_manifest_state *manifest, enum suit_command_sequence seq_name)
 {
-	struct zcbor_string *cmd_seq_str;
+	int ret;
+	struct zcbor_string *cmd_seq_str = NULL;
 
 	if (manifest == NULL) {
 		return SUIT_ERR_CRASH;
 	}
 
-	cmd_seq_str = suit_manifest_get_command_seq(manifest, seq_name);
-	if (cmd_seq_str == NULL) {
-		return SUIT_ERR_UNAVAILABLE_COMMAND_SEQ;
+	ret = suit_manifest_get_command_seq(manifest, seq_name, &cmd_seq_str);
+	if (ret != SUIT_SUCCESS) {
+		return ret;
 	}
 
 	SUIT_DBG("Command sequence (%d) scheduled for execution\r\n", seq_name);
@@ -323,14 +324,18 @@ int suit_schedule_execution(struct suit_processor_state *state, struct suit_mani
 
 int suit_schedule_validation(struct suit_processor_state *state, struct suit_manifest_state *manifest, enum suit_command_sequence seq_name)
 {
-	struct zcbor_string *cmd_seq_str;
+	int ret;
+	struct zcbor_string *cmd_seq_str = NULL;
 
 	if (manifest == NULL) {
 		return SUIT_ERR_ORDER;
 	}
 
-	cmd_seq_str = suit_manifest_get_command_seq(manifest, seq_name);
-	if (cmd_seq_str == NULL) {
+	ret = suit_manifest_get_command_seq(manifest, seq_name, &cmd_seq_str);
+	if (ret != SUIT_SUCCESS) {
+		/* No matter of the reason of failure when getting the command sequence suit_schedule_validation
+		   should simply return that the command is unavailable. The dry run will verify if some error
+		   has occured. */
 		return SUIT_ERR_UNAVAILABLE_COMMAND_SEQ;
 	}
 
