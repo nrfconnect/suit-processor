@@ -183,6 +183,7 @@ void test_authenticate_manifest_invalid_state(void);
 void test_authenticate_unsigned_manifest(void);
 void test_authenticate_unsigned_manifest_platform_fail(void);
 void test_authenticate_signed_manifest(void);
+void test_authenticate_signed_manifest_eddsa(void);
 void test_authenticate_signed_manifest_invalid_input_bytes(void);
 void test_authenticate_signed_manifest_platform_fail(void);
 void test_authenticate_signed_manifest_with_key(void);

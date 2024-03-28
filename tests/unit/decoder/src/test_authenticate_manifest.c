@@ -534,6 +534,68 @@ static uint8_t signature1_cbor[] = {
 			0xd4, 0x28, 0xa6, 0xfc, 0x83, 0xc7, 0xe5, 0xaf,
 };
 
+static uint8_t signed_envelope_eddsa[] = {
+	0xd8, 0x6b, /* tag(107) : SUIT_Envelope */
+	0xa2, /* map (2 elements) */
+
+	0x02, /* suit-authentication-wrapper */
+		0x58, 0x73, /* bytes(115) */
+		0x82, /* array (2 elements) */
+			0x58, 0x24, /* bytes(36) */
+			0x82, /* array (2 elements) */
+			0x2f, /* suit-digest-algorithm-id: cose-alg-sha-256 */
+			0x58, 0x20, /* suit-digest-bytes: bytes(32) */
+			0x66, 0x58, 0xea, 0x56, 0x02, 0x62, 0x69, 0x6d,
+			0xd1, 0xf1, 0x3b, 0x78, 0x22, 0x39, 0xa0, 0x64,
+			0xda, 0x7c, 0x6c, 0x5c, 0xba, 0xf5, 0x2f, 0xde,
+			0xd4, 0x28, 0xa6, 0xfc, 0x83, 0xc7, 0xe5, 0xaf,
+
+			0x58, 0x4a, /* bytes(74): SUIT_Authentication_Block */
+			0xd2, /* tag(18) : COSE_Sign1 */
+			0x84, /* array (4 elements) */
+			0x43, /* protected: bytes(3) / serialized map */
+				0xa1, /* header_map (1 element) */
+				0x01, /* alg_id */ 0x27, /* EdDSA */
+			0xa0, /* unprotected: header_map (0 elements) */
+			0xf6, /* payload: nil */
+			0x58, 0x40, /* bytes(64) : signature */
+			0xe3, 0x50, 0x5f, 0x7a, 0xb7, 0x0b, 0xd3, 0xa0,
+			0xe0, 0x49, 0x16, 0xf3, 0x7b, 0x0d, 0x72, 0x51,
+			0xaa, 0x6f, 0x52, 0xca, 0x12, 0xc7, 0xed, 0xaa,
+			0x88, 0x6a, 0x41, 0x29, 0xa2, 0x98, 0xca, 0x6a,
+			0x1e, 0xcc, 0x2a, 0x57, 0x95, 0x5c, 0x6b, 0xf4,
+			0xcc, 0xb9, 0xf0, 0x1d, 0x68, 0x4d, 0x5d, 0x1c,
+			0x47, 0x74, 0xdf, 0xfb, 0xe5, 0x08, 0xa0, 0x34,
+			0x43, 0x1f, 0xea, 0xfa, 0x60, 0x84, 0x8a, 0x2c,
+
+	0x03, /* suit-manifest */
+	0x48, /* bytes(8) */
+		'M', 'a', 'n', 'i', 'f', 'e', 's', 't',
+};
+
+static uint8_t signature1_cbor_eddsa[] = {
+	0x84, /* Sig_structure1: array(4) */
+		0x6A, /* context: text(10) */
+			'S', 'i', 'g', 'n', 'a', 't', 'u', 'r', 'e', '1',
+		0x43, /* protected: bytes(3) / serialized map */
+			0xa1, /* header_map (1 element) */
+			0x01, /* alg_id */ 0x27, /* ES256 */
+		0x40, /* external_aad: bytes(0) */
+		0x58, 0x24, /* payload: bytes(36) */
+			0x82, /* array (2 elements) */
+			0x2f, /* suit-digest-algorithm-id: cose-alg-sha-256 */
+			0x58, 0x20, /* suit-digest-bytes: bytes(32) */
+			0x66, 0x58, 0xea, 0x56, 0x02, 0x62, 0x69, 0x6d,
+			0xd1, 0xf1, 0x3b, 0x78, 0x22, 0x39, 0xa0, 0x64,
+			0xda, 0x7c, 0x6c, 0x5c, 0xba, 0xf5, 0x2f, 0xde,
+			0xd4, 0x28, 0xa6, 0xfc, 0x83, 0xc7, 0xe5, 0xaf,
+};
+
+static struct zcbor_string exp_data_eddsa = {
+	.value = signature1_cbor_eddsa,
+	.len = sizeof(signature1_cbor_eddsa),
+};
+
 static struct zcbor_string exp_data = {
 	.value = signature1_cbor,
 	.len = sizeof(signature1_cbor),
@@ -742,6 +804,19 @@ void test_authenticate_signed_manifest(void)
 	state.step = MANIFEST_DECODED;
 
 	__cmock_suit_plat_authenticate_manifest_ExpectComplexArgsAndReturn(&state.decoded_manifest->manifest_component_id, suit_cose_es256, NULL, &exp_signature, &exp_data, SUIT_SUCCESS);
+	ret = suit_decoder_authenticate_manifest(&state);
+	TEST_ASSERT_EQUAL_MESSAGE(SUIT_SUCCESS, ret, "The signed manifest authentication failed");
+	TEST_ASSERT_EQUAL_MESSAGE(MANIFEST_AUTHENTICATED, state.step, "Invalid state transition after manifest authentication");
+}
+
+void test_authenticate_signed_manifest_eddsa(void)
+{
+	int ret = SUIT_SUCCESS;
+
+	init_decode_signed_envelope(signed_envelope_eddsa, sizeof(signed_envelope_eddsa), 1);
+	state.step = MANIFEST_DECODED;
+
+	__cmock_suit_plat_authenticate_manifest_ExpectComplexArgsAndReturn(&state.decoded_manifest->manifest_component_id, suit_cose_EdDSA, NULL, &exp_signature, &exp_data_eddsa, SUIT_SUCCESS);
 	ret = suit_decoder_authenticate_manifest(&state);
 	TEST_ASSERT_EQUAL_MESSAGE(SUIT_SUCCESS, ret, "The signed manifest authentication failed");
 	TEST_ASSERT_EQUAL_MESSAGE(MANIFEST_AUTHENTICATED, state.step, "Invalid state transition after manifest authentication");

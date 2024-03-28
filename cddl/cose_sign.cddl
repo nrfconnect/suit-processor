@@ -16,6 +16,7 @@ header_map = {
 }
 
 supported_algs //= (ES256: -7)
+supported_algs //= (EdDSA25519: -8)
 
 COSE_Sign_Tagged = #6.98(COSE_Sign)
 
