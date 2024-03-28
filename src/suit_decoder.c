@@ -113,7 +113,8 @@ static int cose_sign1_authenticate_digest(struct zcbor_string *manifest_componen
 		return SUIT_ERR_UNSUPPORTED_COSE;
 	}
 
-	/* The ES256 algorithm is enforced by CDDL, so the signature length is known. */
+	/* Both ES256 and EdDSA25519 algorithms which are currently supported by CDDL
+	   produce a signature of length 64. */
 	if (cose_sign1_struct._COSE_Sign1_signature.len != 64) {
 		return SUIT_ERR_UNSUPPORTED_ALG;
 	}
@@ -143,8 +144,7 @@ static int cose_sign1_authenticate_digest(struct zcbor_string *manifest_componen
 	/* Authenticate data using platform API */
 	ret = suit_plat_authenticate_manifest(
 		manifest_component_id,
-		/* Value enforced by the input CDDL (cose_sign.cddl, supported_algs //= (ES256: -7)) */
-		suit_cose_es256,
+		cose_sign1_struct._COSE_Sign1__Headers._Headers_protected_cbor._header_map_alg_id._supported_algs_choice,
 		(cose_sign1_struct._COSE_Sign1__Headers._Headers_protected_cbor._header_map_key_id_present ?
 			&cose_sign1_struct._COSE_Sign1__Headers._Headers_protected_cbor._header_map_key_id._header_map_key_id :
 			(struct zcbor_string *)NULL),
