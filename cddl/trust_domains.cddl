@@ -46,7 +46,7 @@ $$severable-manifest-members-choice-extensions //= (
 )
 
 $$SUIT_Common-extensions //= (
-    ? suit-dependencies => SUIT_Dependencies
+    suit-dependencies => SUIT_Dependencies
 )
 SUIT_Dependencies = {
     1*4 uint => SUIT_Dependency_Metadata

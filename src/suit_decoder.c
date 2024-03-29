@@ -203,11 +203,9 @@ static int check_dependency_indexes(struct SUIT_Common *common)
 
 	if (common->__SUIT_Common_extensions_present) {
 		const struct _SUIT_Common_extensions *ext = &common->__SUIT_Common_extensions;
-		const struct SUIT_Common_extensions_suit_dependencies_ *dependencies_ext = &ext->__SUIT_Common_extensions;
+		const struct SUIT_Common_extensions_suit_dependencies *dependencies_ext = &ext->__SUIT_Common_extensions;
 
-		if (dependencies_ext->_SUIT_Common_extensions_suit_dependencies_present) {
-			dependencies = &dependencies_ext->_SUIT_Common_extensions_suit_dependencies._SUIT_Common_extensions_suit_dependencies;
-		}
+		dependencies = &dependencies_ext->_SUIT_Common_extensions_suit_dependencies;
 	}
 
 	if (dependencies == NULL) {
@@ -243,11 +241,9 @@ static int find_dependency_manifest_prefix(struct SUIT_Common *common, size_t in
 
 	if (common->__SUIT_Common_extensions_present) {
 		const struct _SUIT_Common_extensions *ext = &common->__SUIT_Common_extensions;
-		const struct SUIT_Common_extensions_suit_dependencies_ *dependencies_ext = &ext->__SUIT_Common_extensions;
+		const struct SUIT_Common_extensions_suit_dependencies *dependencies_ext = &ext->__SUIT_Common_extensions;
 
-		if (dependencies_ext->_SUIT_Common_extensions_suit_dependencies_present) {
-			dependencies = &dependencies_ext->_SUIT_Common_extensions_suit_dependencies._SUIT_Common_extensions_suit_dependencies;
-		}
+		dependencies = &dependencies_ext->_SUIT_Common_extensions_suit_dependencies;
 	}
 
 	if (dependencies == NULL) {
