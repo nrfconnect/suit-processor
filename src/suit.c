@@ -360,14 +360,14 @@ int suit_processor_get_manifest_metadata(const uint8_t *envelope_str, size_t env
 
 		if ((ret != SUIT_SUCCESS) || (bytes_processed != digest_bstr->len)) {
 			ret = SUIT_ERR_DECODING;
-		} else if (digest_cbor._SUIT_Digest_suit_digest_algorithm_id._suit_cose_hash_algs_choice == _suit_cose_hash_algs__cose_alg_sha_256) {
+		} else if (digest_cbor.SUIT_Digest_suit_digest_algorithm_id.suit_cose_hash_algs_choice == suit_cose_hash_algs_cose_alg_sha_256_m_c) {
 			/* The SHA256 algorithm is allowed by CDDL. Verify the digest length. */
-			if (digest_cbor._SUIT_Digest_suit_digest_bytes.len != 32) {
+			if (digest_cbor.SUIT_Digest_suit_digest_bytes.len != 32) {
 				ret = SUIT_ERR_DECODING;
 			}
-		} else if (digest_cbor._SUIT_Digest_suit_digest_algorithm_id._suit_cose_hash_algs_choice == _suit_cose_hash_algs__cose_alg_sha_512) {
+		} else if (digest_cbor.SUIT_Digest_suit_digest_algorithm_id.suit_cose_hash_algs_choice == suit_cose_hash_algs_cose_alg_sha_512_m_c) {
 			/* The SHA512 algorithm is allowed by CDDL. Verify the digest length. */
-			if (digest_cbor._SUIT_Digest_suit_digest_bytes.len != 64) {
+			if (digest_cbor.SUIT_Digest_suit_digest_bytes.len != 64) {
 				ret = SUIT_ERR_DECODING;
 			}
 		} else {
@@ -377,8 +377,8 @@ int suit_processor_get_manifest_metadata(const uint8_t *envelope_str, size_t env
 
 		if (ret == SUIT_SUCCESS) {
 			if ((digest != NULL) && (alg != NULL)) {
-				*digest = digest_cbor._SUIT_Digest_suit_digest_bytes;
-				*alg = digest_cbor._SUIT_Digest_suit_digest_algorithm_id._suit_cose_hash_algs_choice;
+				*digest = digest_cbor.SUIT_Digest_suit_digest_bytes;
+				*alg = digest_cbor.SUIT_Digest_suit_digest_algorithm_id.suit_cose_hash_algs_choice;
 			} else if ((digest != NULL) || (alg != NULL)) {
 				ret = SUIT_ERR_DECODING;
 			}

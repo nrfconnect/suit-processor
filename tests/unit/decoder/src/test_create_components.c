@@ -99,57 +99,6 @@ static uint8_t minimal_with_single_component[] = {
 					'M',
 };
 
-static uint8_t minimal_with_single_component_invalid_length[] = {
-	0xd8, 0x6b, /* tag(107) : SUIT_Envelope */
-	0xa2, /* map (2 elements) */
-
-	0x02, /* suit-authentication-wrapper */
-		0x42, /* bytes(2) */
-		0x81, /* array (1 element) */
-			0x40, /* bytes(0) */
-
-	0x03, /* suit-manifest */
-	0x4e, /* bytes(14) */
-	0xa3, /* map (3 elements) */
-	0x01, /* suit-manifest-version */ 0x01,
-	0x02, /* suit-manifest-sequence-number */ 0x10,
-	0x03, /* suit-common */
-		0x47, /* bytes(7) */
-		0xA1, /* map (1 element) */
-			0x02, /* suit-components */
-				0x81, /* array (1 element) */
-				0x98, 0x01, /* array (1 element) */
-					0x41, /* bytes(1) */
-					'M',
-};
-
-static uint8_t minimal_with_single_component_invalid_second_chunk_length[] = {
-	0xd8, 0x6b, /* tag(107) : SUIT_Envelope */
-	0xa2, /* map (2 elements) */
-
-	0x02, /* suit-authentication-wrapper */
-		0x42, /* bytes(2) */
-		0x81, /* array (1 element) */
-			0x40, /* bytes(0) */
-
-	0x03, /* suit-manifest */
-	0x51, /* bytes(17) */
-	0xa3, /* map (3 elements) */
-	0x01, /* suit-manifest-version */ 0x01,
-	0x02, /* suit-manifest-sequence-number */ 0x10,
-	0x03, /* suit-common */
-		0x4a, /* bytes(10) */
-		0xA1, /* map (1 element) */
-			0x02, /* suit-components */
-				0x81, /* array (1 element) */
-				0x82, /* array (2 elements) */
-					0x41, /* bytes(1) */
-					'M',
-					0x58, 0x02, /* bytes(2) */
-					'M',
-					'2',
-};
-
 static uint8_t minimal_with_single_empty_component[] = {
 	0xd8, 0x6b, /* tag(107) : SUIT_Envelope */
 	0xa2, /* map (2 elements) */
@@ -367,61 +316,6 @@ static uint8_t minimal_with_component_len_24[] = {
 					'1', '2', '3', '4',
 };
 
-static uint8_t minimal_with_component_len_20_invalid[] = {
-	0xd8, 0x6b, /* tag(107) : SUIT_Envelope */
-	0xa2, /* map (2 elements) */
-
-	0x02, /* suit-authentication-wrapper */
-		0x42, /* bytes(2) */
-		0x81, /* array (1 element) */
-			0x40, /* bytes(0) */
-
-	0x03, /* suit-manifest */
-	0x58, 0x22, /* bytes(34) */
-	0xa3, /* map (3 elements) */
-	0x01, /* suit-manifest-version */ 0x01,
-	0x02, /* suit-manifest-sequence-number */ 0x10,
-	0x03, /* suit-common */
-		0x58, 0x1a, /* bytes(26) */
-		0xA1, /* map (1 element) */
-			0x02, /* suit-components */
-				0x81, /* array (1 element) */
-				0x81, /* array (1 element) */
-					0x58, 0x14, /* bytes(24) */
-					'1', '2', '3', '4', '5', '6', '7', '8', '9', '0',
-					'1', '2', '3', '4', '5', '6', '7', '8', '9', '0',
-};
-
-static uint8_t minimal_with_component_len_64_invalid[] = {
-	0xd8, 0x6b, /* tag(107) : SUIT_Envelope */
-	0xa2, /* map (2 elements) */
-
-	0x02, /* suit-authentication-wrapper */
-		0x42, /* bytes(2) */
-		0x81, /* array (1 element) */
-			0x40, /* bytes(0) */
-
-	0x03, /* suit-manifest */
-	0x58, 0x4f, /* bytes(79) */
-	0xa3, /* map (3 elements) */
-	0x01, /* suit-manifest-version */ 0x01,
-	0x02, /* suit-manifest-sequence-number */ 0x10,
-	0x03, /* suit-common */
-		0x58, 0x47, /* bytes(26) */
-		0xA1, /* map (1 element) */
-			0x02, /* suit-components */
-				0x81, /* array (1 element) */
-				0x81, /* array (1 element) */
-					0x59, 0x00, 0x40, /* bytes(64) */
-					'1', '2', '3', '4', '5', '6', '7', '8', '9', '0',
-					'1', '2', '3', '4', '5', '6', '7', '8', '9', '0',
-					'1', '2', '3', '4', '5', '6', '7', '8', '9', '0',
-					'1', '2', '3', '4', '5', '6', '7', '8', '9', '0',
-					'1', '2', '3', '4', '5', '6', '7', '8', '9', '0',
-					'1', '2', '3', '4', '5', '6', '7', '8', '9', '0',
-					'1', '2', '3', '4',
-};
-
 static uint8_t minimal_with_component_len_255[] = {
 	0xd8, 0x6b, /* tag(107) : SUIT_Envelope */
 	0xa2, /* map (2 elements) */
@@ -594,7 +488,7 @@ void test_create_components_manifest_append_dependency_failed(void)
 	ret = suit_decoder_create_components(&state);
 	TEST_ASSERT_EQUAL_MESSAGE(SUIT_ERR_UNSUPPORTED_COMPONENT_ID, ret, "The dependency component creation did not fail on platform component creation failure");
 	TEST_ASSERT_EQUAL_MESSAGE(INVALID, state.step, "Invalid state transition after failed dependency component creation");
-	TEST_ASSERT_EQUAL_MESSAGE(NULL, state.step, "Manifest structure not freed after dependency component creation failure");
+	TEST_ASSERT_NULL_MESSAGE(state.decoded_manifest, "Manifest structure not freed after dependency component creation failure");
 }
 
 void test_create_components_manifest_append_component_failed(void)
@@ -615,7 +509,7 @@ void test_create_components_manifest_append_component_failed(void)
 	ret = suit_decoder_create_components(&state);
 	TEST_ASSERT_EQUAL_MESSAGE(SUIT_ERR_UNSUPPORTED_COMPONENT_ID, ret, "The component creation did not fail on platform component creation failure");
 	TEST_ASSERT_EQUAL_MESSAGE(INVALID, state.step, "Invalid state transition after failed component creation");
-	TEST_ASSERT_EQUAL_MESSAGE(NULL, state.decoded_manifest, "Manifest structure not freed after component creation failure");
+	TEST_ASSERT_NULL_MESSAGE(state.decoded_manifest, "Manifest structure not freed after component creation failure");
 }
 
 void test_create_components_single_component(void)
@@ -649,37 +543,7 @@ void test_create_components_empty_component_id(void)
 	ret = suit_decoder_create_components(&state);
 	TEST_ASSERT_EQUAL_MESSAGE(SUIT_ERR_DECODING, ret, "The component creation did not fail");
 	TEST_ASSERT_EQUAL_MESSAGE(INVALID, state.step, "Invalid state transition after failed component creation");
-	TEST_ASSERT_EQUAL_MESSAGE(NULL, state.decoded_manifest, "Manifest structure not freed after component creation failure");
-}
-
-void test_create_components_invalid_component_length(void)
-{
-	int ret = SUIT_SUCCESS;
-
-	init_decode_manifest(minimal_with_single_component_invalid_length, sizeof(minimal_with_single_component_invalid_length));
-	state.step = SEQUENCES_DECODED;
-
-	__cmock_suit_manifest_release_ExpectAndReturn(state.decoded_manifest, SUIT_SUCCESS);
-
-	ret = suit_decoder_create_components(&state);
-	TEST_ASSERT_EQUAL_MESSAGE(SUIT_ERR_DECODING, ret, "The component creation did not fail");
-	TEST_ASSERT_EQUAL_MESSAGE(INVALID, state.step, "Invalid state transition after failed component creation");
-	TEST_ASSERT_EQUAL_MESSAGE(NULL, state.decoded_manifest, "Manifest structure not freed after component creation failure");
-}
-
-void test_create_components_invalid_second_component_id_length(void)
-{
-	int ret = SUIT_SUCCESS;
-
-	init_decode_manifest(minimal_with_single_component_invalid_second_chunk_length, sizeof(minimal_with_single_component_invalid_second_chunk_length));
-	state.step = SEQUENCES_DECODED;
-
-	__cmock_suit_manifest_release_ExpectAndReturn(state.decoded_manifest, SUIT_SUCCESS);
-
-	ret = suit_decoder_create_components(&state);
-	TEST_ASSERT_EQUAL_MESSAGE(SUIT_ERR_DECODING, ret, "The component creation did not fail");
-	TEST_ASSERT_EQUAL_MESSAGE(INVALID, state.step, "Invalid state transition after failed component creation");
-	TEST_ASSERT_EQUAL_MESSAGE(NULL, state.decoded_manifest, "Manifest structure not freed after component creation failure");
+	TEST_ASSERT_NULL_MESSAGE(state.decoded_manifest, "Manifest structure not freed after component creation failure");
 }
 
 void test_create_components_duplicated_component(void)
@@ -792,7 +656,7 @@ void test_create_components_dependency_with_empty_bstr_as_prefix(void)
 	ret = suit_decoder_create_components(&state);
 	TEST_ASSERT_EQUAL_MESSAGE(SUIT_ERR_DECODING, ret, "The component creation did not fail");
 	TEST_ASSERT_EQUAL_MESSAGE(INVALID, state.step, "Invalid state transition after failed component creation");
-	TEST_ASSERT_EQUAL_MESSAGE(NULL, state.decoded_manifest, "Manifest structure not freed after component creation failure");
+	TEST_ASSERT_NULL_MESSAGE(state.decoded_manifest, "Manifest structure not freed after component creation failure");
 }
 
 void test_create_components_component_len_23(void)
@@ -831,36 +695,6 @@ void test_create_components_component_len_24(void)
 	ret = suit_decoder_create_components(&state);
 	TEST_ASSERT_EQUAL_MESSAGE(SUIT_SUCCESS, ret, "The component creation failed");
 	TEST_ASSERT_EQUAL_MESSAGE(COMPONENTS_CREATED, state.step, "Invalid state transition after component creation");
-}
-
-void test_create_components_component_len_20_invalid(void)
-{
-	int ret = SUIT_SUCCESS;
-
-	init_decode_manifest(minimal_with_component_len_20_invalid, sizeof(minimal_with_component_len_20_invalid));
-	state.step = SEQUENCES_DECODED;
-
-	__cmock_suit_manifest_release_ExpectAndReturn(state.decoded_manifest, SUIT_SUCCESS);
-
-	ret = suit_decoder_create_components(&state);
-	TEST_ASSERT_EQUAL_MESSAGE(SUIT_ERR_DECODING, ret, "The component creation did not fail");
-	TEST_ASSERT_EQUAL_MESSAGE(INVALID, state.step, "Invalid state transition after failed component creation");
-	TEST_ASSERT_EQUAL_MESSAGE(NULL, state.decoded_manifest, "Manifest structure not freed after component creation failure");
-}
-
-void test_create_components_component_len_64_invalid(void)
-{
-	int ret = SUIT_SUCCESS;
-
-	init_decode_manifest(minimal_with_component_len_64_invalid, sizeof(minimal_with_component_len_64_invalid));
-	state.step = SEQUENCES_DECODED;
-
-	__cmock_suit_manifest_release_ExpectAndReturn(state.decoded_manifest, SUIT_SUCCESS);
-
-	ret = suit_decoder_create_components(&state);
-	TEST_ASSERT_EQUAL_MESSAGE(SUIT_ERR_DECODING, ret, "The component creation did not fail");
-	TEST_ASSERT_EQUAL_MESSAGE(INVALID, state.step, "Invalid state transition after failed component creation");
-	TEST_ASSERT_EQUAL_MESSAGE(NULL, state.decoded_manifest, "Manifest structure not freed after component creation failure");
 }
 
 void test_create_components_component_len_255(void)

@@ -93,14 +93,14 @@ int suit_condition_image_match(struct suit_processor_state *state,
 		ret = SUIT_SUCCESS;
 	}
 
-	if (digest._SUIT_Digest_suit_digest_algorithm_id._suit_cose_hash_algs_choice == _suit_cose_hash_algs__cose_alg_sha_256) {
+	if (digest.SUIT_Digest_suit_digest_algorithm_id.suit_cose_hash_algs_choice == suit_cose_hash_algs_cose_alg_sha_256_m_c) {
 		/* The SHA256 algorithm is allowed by CDDL. Verify the digest length. */
-		if (digest._SUIT_Digest_suit_digest_bytes.len != 32) {
+		if (digest.SUIT_Digest_suit_digest_bytes.len != 32) {
 			return SUIT_ERR_DECODING;
 		}
-	} else if (digest._SUIT_Digest_suit_digest_algorithm_id._suit_cose_hash_algs_choice == _suit_cose_hash_algs__cose_alg_sha_512) {
+	} else if (digest.SUIT_Digest_suit_digest_algorithm_id.suit_cose_hash_algs_choice == suit_cose_hash_algs_cose_alg_sha_512_m_c) {
 		/* The SHA512 algorithm is allowed by CDDL. Verify the digest length. */
-		if (digest._SUIT_Digest_suit_digest_bytes.len != 64) {
+		if (digest.SUIT_Digest_suit_digest_bytes.len != 64) {
 			return SUIT_ERR_DECODING;
 		}
 	} else {
@@ -115,8 +115,8 @@ int suit_condition_image_match(struct suit_processor_state *state,
 #endif /* SUIT_PLATFORM_DRY_RUN_SUPPORT */
 
 	return suit_plat_check_image_match(component_params->component_handle,
-		digest._SUIT_Digest_suit_digest_algorithm_id._suit_cose_hash_algs_choice,
-		&digest._SUIT_Digest_suit_digest_bytes);
+		digest.SUIT_Digest_suit_digest_algorithm_id.suit_cose_hash_algs_choice,
+		&digest.SUIT_Digest_suit_digest_bytes);
 }
 
 

@@ -205,7 +205,7 @@ void test_append_component_fill_array(void)
 		/* Verify the contents of the created component. */
 		TEST_ASSERT_EQUAL_MESSAGE(component_handle, components[i].component_handle, "Unexpected value of the component handle");
 		TEST_ASSERT_EQUAL_MESSAGE(1, components[i].ref_count, "Unexpected value of the reference counter");
-		TEST_ASSERT_EQUAL_MESSAGE(sample_component_0.value, components[i].component_id.value, "Unexpected value of component ID value");
+		TEST_ASSERT_EQUAL_PTR_MESSAGE(sample_component_0.value, components[i].component_id.value, "Unexpected value of component ID value");
 		TEST_ASSERT_EQUAL_MESSAGE(strlen("TEST_COMPONENT_0") + i, components[i].component_id.len, "Unexpected value of component ID length");
 		TEST_ASSERT_EQUAL_MESSAGE(suit_bool_false, components[i].is_dependency, "Unexpected value of component dependency flag");
 		TEST_ASSERT_EQUAL_MESSAGE(false, components[i].integrity_checked, "Invalid initial value of the integrity flag");
@@ -249,7 +249,7 @@ void test_append_component_fill_array(void)
 		/* Verify the contents of the created component. */
 		TEST_ASSERT_EQUAL_MESSAGE(component_handle, components[i].component_handle, "Unexpected value of the component handle");
 		TEST_ASSERT_EQUAL_MESSAGE(2, components[i].ref_count, "Unexpected value of the reference counter");
-		TEST_ASSERT_EQUAL_MESSAGE(sample_component_0.value, components[i].component_id.value, "Unexpected value of component ID value");
+		TEST_ASSERT_EQUAL_PTR_MESSAGE(sample_component_0.value, components[i].component_id.value, "Unexpected value of component ID value");
 		TEST_ASSERT_EQUAL_MESSAGE(strlen("TEST_COMPONENT_0") + i, components[i].component_id.len, "Unexpected value of component ID length");
 		TEST_ASSERT_EQUAL_MESSAGE(suit_bool_false, components[i].is_dependency, "Unexpected value of component dependency flag");
 		TEST_ASSERT_EQUAL_MESSAGE(false, components[i].integrity_checked, "Invalid initial value of the integrity flag");
@@ -274,7 +274,7 @@ void test_append_component_fill_array(void)
 		/* Verify the contents of the created component. */
 		TEST_ASSERT_EQUAL_MESSAGE(component_handle, components[i].component_handle, "Unexpected value of the component handle");
 		TEST_ASSERT_EQUAL_MESSAGE(1, components[i].ref_count, "Unexpected value of the reference counter");
-		TEST_ASSERT_EQUAL_MESSAGE(sample_component_0.value, components[i].component_id.value, "Unexpected value of component ID value");
+		TEST_ASSERT_EQUAL_PTR_MESSAGE(sample_component_0.value, components[i].component_id.value, "Unexpected value of component ID value");
 		TEST_ASSERT_EQUAL_MESSAGE(strlen("TEST_COMPONENT_0") + i, components[i].component_id.len, "Unexpected value of component ID length");
 		TEST_ASSERT_EQUAL_MESSAGE(suit_bool_false, components[i].is_dependency, "Unexpected value of component dependency flag");
 		TEST_ASSERT_EQUAL_MESSAGE(false, components[i].integrity_checked, "Invalid initial value of the integrity flag");
@@ -310,7 +310,7 @@ void test_append_component_fill_array(void)
 		/* Verify the contents of the created component. */
 		TEST_ASSERT_EQUAL_MESSAGE(component_handle, components[i].component_handle, "Unexpected value of the component handle");
 		TEST_ASSERT_EQUAL_MESSAGE(2, components[i].ref_count, "Unexpected value of the reference counter");
-		TEST_ASSERT_EQUAL_MESSAGE(sample_component_0.value, components[i].component_id.value, "Unexpected value of component ID value");
+		TEST_ASSERT_EQUAL_PTR_MESSAGE(sample_component_0.value, components[i].component_id.value, "Unexpected value of component ID value");
 		TEST_ASSERT_EQUAL_MESSAGE(strlen("TEST_COMPONENT_0") + i, components[i].component_id.len, "Unexpected value of component ID length");
 		TEST_ASSERT_EQUAL_MESSAGE(suit_bool_false, components[i].is_dependency, "Unexpected value of component dependency flag");
 		TEST_ASSERT_EQUAL_MESSAGE(false, components[i].integrity_checked, "Invalid initial value of the integrity flag");
@@ -510,7 +510,7 @@ void test_append_dependency_fill_array(void)
 		/* Verify the contents of the created component. */
 		TEST_ASSERT_EQUAL_MESSAGE(component_handle, components[i].component_handle, "Unexpected value of the component handle");
 		TEST_ASSERT_EQUAL_MESSAGE(1, components[i].ref_count, "Unexpected value of the reference counter");
-		TEST_ASSERT_EQUAL_MESSAGE(sample_component_0.value, components[i].component_id.value, "Unexpected value of component ID value");
+		TEST_ASSERT_EQUAL_PTR_MESSAGE(sample_component_0.value, components[i].component_id.value, "Unexpected value of component ID value");
 		TEST_ASSERT_EQUAL_MESSAGE(strlen("TEST_COMPONENT_0") + i, components[i].component_id.len, "Unexpected value of component ID length");
 		TEST_ASSERT_EQUAL_MESSAGE(suit_bool_true, components[i].is_dependency, "Unexpected value of component dependency flag");
 		TEST_ASSERT_EQUAL_MESSAGE(false, components[i].integrity_checked, "Invalid initial value of the integrity flag");
@@ -759,7 +759,7 @@ void test_get_component_params(void)
 	manifest.component_map[0] = 0;
 	ret = suit_manifest_get_component_params(&manifest, 0, &params);
 	TEST_ASSERT_EQUAL_MESSAGE(SUIT_SUCCESS, ret, "Unable to get component parameters");
-	TEST_ASSERT_EQUAL_MESSAGE(params, &components[0], "Invalid reference to component parameters returned");
+	TEST_ASSERT_EQUAL_PTR_MESSAGE(params, &components[0], "Invalid reference to component parameters returned");
 }
 
 void test_get_command_seq_invalid_input(void)
@@ -889,10 +889,10 @@ void test_get_command_seq_authenticated(void)
 
 		if (exp_seq != NULL) {
 			TEST_ASSERT_EQUAL_MESSAGE(SUIT_SUCCESS, ret, "Getting an available sequence failed");
-			TEST_ASSERT_EQUAL_MESSAGE(exp_seq, seq, "Invalid sequence returned");
+			TEST_ASSERT_EQUAL_PTR_MESSAGE(exp_seq, seq, "Invalid sequence returned");
 		} else {
 			TEST_ASSERT_NOT_EQUAL_MESSAGE(SUIT_SUCCESS, ret, "Getting unavailable sequence succeeded");
-			TEST_ASSERT_EQUAL_MESSAGE(NULL, seq, "Invalid sequence returned");
+			TEST_ASSERT_NULL_MESSAGE(seq, "Invalid sequence returned");
 		}
 	}
 }
@@ -966,7 +966,7 @@ void test_get_integrated_payload_nonempty_uri(void)
 
 	ret = suit_manifest_get_integrated_payload(&manifest, &uri_0, &payload);
 	TEST_ASSERT_EQUAL_MESSAGE(SUIT_SUCCESS, ret, "Unable to get integrated payload");
-	TEST_ASSERT_EQUAL_MESSAGE(payload_0.value, payload.value, "Unexpected value of payload contents");
+	TEST_ASSERT_EQUAL_PTR_MESSAGE(payload_0.value, payload.value, "Unexpected value of payload contents");
 	TEST_ASSERT_EQUAL_MESSAGE(payload_0.len, payload.len, "Unexpected value of payload length");
 
 	ret = suit_manifest_get_integrated_payload(&manifest, &uri_2, &payload);
@@ -974,7 +974,7 @@ void test_get_integrated_payload_nonempty_uri(void)
 
 	ret = suit_manifest_get_integrated_payload(&manifest, &uri_1, &payload);
 	TEST_ASSERT_EQUAL_MESSAGE(SUIT_SUCCESS, ret, "Unable to get integrated payload");
-	TEST_ASSERT_EQUAL_MESSAGE(payload_1.value, payload.value, "Unexpected value of payload contents");
+	TEST_ASSERT_EQUAL_PTR_MESSAGE(payload_1.value, payload.value, "Unexpected value of payload contents");
 	TEST_ASSERT_EQUAL_MESSAGE(payload_1.len, payload.len, "Unexpected value of payload length");
 }
 

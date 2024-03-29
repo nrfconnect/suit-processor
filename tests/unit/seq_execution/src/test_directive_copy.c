@@ -80,8 +80,7 @@ void test_seq_execution_copy_current_not_set(void)
 			0x14, /* uint(suit-directive-override-parameters) */
 			0xa1, /* map (1) */
 				0x16, /* uint(suit-parameter-source-component) */
-				0x1a, /* uint (32 bit) */
-				0x00, 0x00, 0x00, 0x01,
+				0x01, /* uint (1) */
 			0x16, /* uint(suit-directive-copy) */
 			0x00, /* uint(SUIT_Rep_Policy::None) */
 	};
@@ -107,8 +106,7 @@ void test_seq_execution_copy_ok(void)
 			0x14, /* uint(suit-directive-override-parameters) */
 			0xa1, /* map (1) */
 				0x16, /* uint(suit-parameter-source-component) */
-				0x1a, /* uint (32 bit) */
-				0x00, 0x00, 0x00, 0x01,
+				0x01, /* uint (1) */
 			0x16, /* uint(suit-directive-copy) */
 			0x00, /* uint(SUIT_Rep_Policy::None) */
 	};

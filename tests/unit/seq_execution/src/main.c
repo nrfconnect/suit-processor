@@ -100,7 +100,6 @@ void test_seq_execution_override_parameter_single_component_4params(void);
 void test_seq_execution_override_parameter_single_component_6params(void);
 void test_seq_execution_override_parameter_single_component_7params(void);
 void test_seq_execution_override_parameter_multiple_components_3params(void);
-void test_seq_execution_set_parameter_two_components_3params(void);
 void test_seq_execution_override_parameter_soft_failure(void);
 void test_seq_execution_override_parameter_soft_failure_nested(void);
 

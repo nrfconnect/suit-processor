@@ -793,7 +793,7 @@ void test_authenticate_unsigned_manifest_platform_fail(void)
 	ret = suit_decoder_authenticate_manifest(&state);
 	TEST_ASSERT_EQUAL_MESSAGE(SUIT_ERR_MANIFEST_VALIDATION, ret, "The unsigned manifest authentication did not fail");
 	TEST_ASSERT_EQUAL_MESSAGE(INVALID, state.step, "Invalid state transition after failed unsigned manifest authentication");
-	TEST_ASSERT_EQUAL_MESSAGE(NULL, state.decoded_manifest, "Manifest structure not freed after unsigned manifest authentication failure");
+	TEST_ASSERT_NULL_MESSAGE(state.decoded_manifest, "Manifest structure not freed after unsigned manifest authentication failure");
 }
 
 void test_authenticate_signed_manifest(void)
@@ -833,7 +833,7 @@ void test_authenticate_signed_manifest_platform_fail(void)
 	ret = suit_decoder_authenticate_manifest(&state);
 	TEST_ASSERT_EQUAL_MESSAGE(SUIT_ERR_AUTHENTICATION, ret, "The signed manifest authentication did not fail");
 	TEST_ASSERT_EQUAL_MESSAGE(INVALID, state.step, "Invalid state transition after failed manifest authentication");
-	TEST_ASSERT_EQUAL_MESSAGE(NULL, state.decoded_manifest, "Manifest structure not freed after manifest authentication failure");
+	TEST_ASSERT_NULL_MESSAGE(state.decoded_manifest, "Manifest structure not freed after manifest authentication failure");
 }
 
 void test_authenticate_signed_manifest_invalid_input_bytes(void)
@@ -895,7 +895,7 @@ void test_authenticate_signed_manifest_invalid_input_bytes(void)
 		ret = suit_decoder_authenticate_manifest(&state);
 		TEST_ASSERT_EQUAL_MESSAGE(envelopes[i].exp_ret, ret, "The manifest authentication did not fail");
 		TEST_ASSERT_EQUAL_MESSAGE(INVALID, state.step, "Invalid state transition after failed manifest authentication");
-		TEST_ASSERT_EQUAL_MESSAGE(NULL, state.decoded_manifest, "Manifest structure not freed after manifest authentication failure");
+		TEST_ASSERT_NULL_MESSAGE(state.decoded_manifest, "Manifest structure not freed after manifest authentication failure");
 	}
 }
 
@@ -963,7 +963,7 @@ void test_authenticate_signed_manifest_with_2keys_first_platform_fail(void)
 	ret = suit_decoder_authenticate_manifest(&state);
 	TEST_ASSERT_EQUAL_MESSAGE(SUIT_ERR_AUTHENTICATION, ret, "The signed manifest with key authentication did not fail due to platform error");
 	TEST_ASSERT_EQUAL_MESSAGE(INVALID, state.step, "Invalid state transition after failed manifest authentication");
-	TEST_ASSERT_EQUAL_MESSAGE(NULL, state.decoded_manifest, "Manifest structure not freed after manifest authentication failure");
+	TEST_ASSERT_NULL_MESSAGE(state.decoded_manifest, "Manifest structure not freed after manifest authentication failure");
 }
 
 void test_authenticate_signed_manifest_with_2keys_second_platform_fail(void)
@@ -979,7 +979,7 @@ void test_authenticate_signed_manifest_with_2keys_second_platform_fail(void)
 	ret = suit_decoder_authenticate_manifest(&state);
 	TEST_ASSERT_EQUAL_MESSAGE(SUIT_ERR_AUTHENTICATION, ret, "The signed manifest with key authentication did not fail due to platform error");
 	TEST_ASSERT_EQUAL_MESSAGE(INVALID, state.step, "Invalid state transition after failed manifest authentication");
-	TEST_ASSERT_EQUAL_MESSAGE(NULL, state.decoded_manifest, "Manifest structure not freed after manifest authentication failure");
+	TEST_ASSERT_NULL_MESSAGE(state.decoded_manifest, "Manifest structure not freed after manifest authentication failure");
 }
 
 void test_authenticate_signed_manifest_with_2keys_platform_fail(void)
@@ -995,5 +995,5 @@ void test_authenticate_signed_manifest_with_2keys_platform_fail(void)
 	ret = suit_decoder_authenticate_manifest(&state);
 	TEST_ASSERT_EQUAL_MESSAGE(SUIT_ERR_AUTHENTICATION, ret, "The signed manifest with key authentication did not fail due to platform error");
 	TEST_ASSERT_EQUAL_MESSAGE(INVALID, state.step, "Invalid state transition after failed manifest authentication");
-	TEST_ASSERT_EQUAL_MESSAGE(NULL, state.decoded_manifest, "Manifest structure not freed after manifest authentication failure");
+	TEST_ASSERT_NULL_MESSAGE(state.decoded_manifest, "Manifest structure not freed after manifest authentication failure");
 }
