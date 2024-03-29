@@ -452,7 +452,7 @@ void test_decode_sequences_no_sequences(void)
 
 	TEST_ASSERT_EQUAL_MESSAGE(SUIT_ERR_MANIFEST_VALIDATION, ret, "The manifest without sequences decoding did not fail");
 	TEST_ASSERT_EQUAL_MESSAGE(INVALID, state.step, "Invalid state transition after failed manifest sequences decoding");
-	TEST_ASSERT_EQUAL_MESSAGE(NULL, state.decoded_manifest, "Manifest structure not freed after manifest sequences decoding failure");
+	TEST_ASSERT_NULL_MESSAGE(state.decoded_manifest, "Manifest structure not freed after manifest sequences decoding failure");
 }
 
 void test_decode_sequences_shared(void)
@@ -537,7 +537,7 @@ void test_decode_sequences_invalid_sequence_state(void)
 		ret = suit_decoder_decode_sequences(&state);
 		TEST_ASSERT_EQUAL_MESSAGE(envelopes[i].exp_ret, ret, "The manifest sequence decoding did not fail");
 		TEST_ASSERT_EQUAL_MESSAGE(INVALID, state.step, "Invalid state transition after failed manifest sequences decoding");
-		TEST_ASSERT_EQUAL_MESSAGE(NULL, state.decoded_manifest, "Manifest structure not freed after manifest sequences decoding failure");
+		TEST_ASSERT_NULL_MESSAGE(state.decoded_manifest, "Manifest structure not freed after manifest sequences decoding failure");
 	}
 
 	for (size_t i = 0; i < ZCBOR_ARRAY_SIZE(envelopes); i++) {
@@ -552,7 +552,7 @@ void test_decode_sequences_invalid_sequence_state(void)
 		ret = suit_decoder_decode_sequences(&state);
 		TEST_ASSERT_EQUAL_MESSAGE(envelopes[i].exp_ret, ret, "The manifest sequences decoding did not fail");
 		TEST_ASSERT_EQUAL_MESSAGE(INVALID, state.step, "Invalid state transition after failed manifest sequences decoding");
-		TEST_ASSERT_EQUAL_MESSAGE(NULL, state.decoded_manifest, "Manifest structure not freed aftermanifest sequences decoding failure");
+		TEST_ASSERT_NULL_MESSAGE(state.decoded_manifest, "Manifest structure not freed aftermanifest sequences decoding failure");
 	}
 }
 
@@ -654,7 +654,7 @@ void test_decode_sequences_text_without_digest(void)
 
 	TEST_ASSERT_EQUAL_MESSAGE(SUIT_ERR_MANIFEST_VALIDATION, ret, "The manifest text field decoding did not fail");
 	TEST_ASSERT_EQUAL_MESSAGE(INVALID, state.step, "Invalid state transition after failed text field status check");
-	TEST_ASSERT_EQUAL_MESSAGE(NULL, state.decoded_manifest, "Manifest structure not freed after text field status check failure");
+	TEST_ASSERT_NULL_MESSAGE(state.decoded_manifest, "Manifest structure not freed after text field status check failure");
 }
 
 void test_decode_sequences_text_with_valid_digest(void)
@@ -725,7 +725,7 @@ void test_decode_sequences_text_with_digest_platform_fail(void)
 	ret = suit_decoder_decode_sequences(&state);
 	TEST_ASSERT_EQUAL_MESSAGE(SUIT_ERR_MANIFEST_VALIDATION, ret, "The manifest text field decoding did not fail");
 	TEST_ASSERT_EQUAL_MESSAGE(INVALID, state.step, "Invalid state transition after failed text field digest check");
-	TEST_ASSERT_EQUAL_MESSAGE(NULL, state.decoded_manifest, "Manifest structure not freed after text field digest check failure");
+	TEST_ASSERT_NULL_MESSAGE(state.decoded_manifest, "Manifest structure not freed after text field digest check failure");
 }
 
 void test_decode_sequences_all(void)

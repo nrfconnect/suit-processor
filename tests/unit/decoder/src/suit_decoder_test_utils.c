@@ -15,7 +15,7 @@ void init_static_mem_input(void)
 
 	ret = suit_decoder_init(&state, &manifest);
 	TEST_ASSERT_EQUAL_MESSAGE(SUIT_SUCCESS, ret, "Unable to initialize SUIT manifest decoder");
-	TEST_ASSERT_EQUAL_MESSAGE(&manifest, state.decoded_manifest, "SUIT manifest structure not initialized");
+	TEST_ASSERT_EQUAL_PTR_MESSAGE(&manifest, state.decoded_manifest, "SUIT manifest structure not initialized");
 	TEST_ASSERT_EQUAL_MESSAGE(INITIALIZED, state.step, "SUIT decoder state not initialized");
 }
 
@@ -31,7 +31,7 @@ static void init_decode_envelope_common(uint8_t *envelope, size_t envelope_size)
 
 	TEST_ASSERT_EQUAL_MESSAGE(0, state.authentication_bstr_count, "Decoding authentication block count failed");
 
-	TEST_ASSERT_EQUAL_MESSAGE(envelope, state.decoded_manifest->envelope_str.value, "Invalid reference to the decoded envelope");
+	TEST_ASSERT_EQUAL_PTR_MESSAGE(envelope, state.decoded_manifest->envelope_str.value, "Invalid reference to the decoded envelope");
 	TEST_ASSERT_EQUAL_MESSAGE(envelope_size, state.decoded_manifest->envelope_str.len, "Invalid length of the decoded envelope");
 	TEST_ASSERT_EQUAL_MESSAGE(0, state.decoded_manifest->integrated_payloads_count, "Decoding the number of integrated payloads failed");
 }
@@ -61,7 +61,7 @@ void init_decode_signed_envelope(uint8_t *envelope, size_t envelope_size, size_t
 	TEST_ASSERT_EQUAL_MESSAGE(auth_count, state.authentication_bstr_count, "Decoding authentication block count failed");
 	TEST_ASSERT_EQUAL_MESSAGE(UNAVAILABLE, state.decoded_manifest->text_status, "Decoding the severable text field failed");
 
-	TEST_ASSERT_EQUAL_MESSAGE(envelope, state.decoded_manifest->envelope_str.value, "Invalid reference to the decoded envelope");
+	TEST_ASSERT_EQUAL_PTR_MESSAGE(envelope, state.decoded_manifest->envelope_str.value, "Invalid reference to the decoded envelope");
 	TEST_ASSERT_EQUAL_MESSAGE(envelope_size, state.decoded_manifest->envelope_str.len, "Invalid length of the decoded envelope");
 	TEST_ASSERT_EQUAL_MESSAGE(0, state.decoded_manifest->integrated_payloads_count, "Decoding the number of integrated payloads failed");
 }

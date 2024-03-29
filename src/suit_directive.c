@@ -23,7 +23,7 @@ static void component_modified(struct suit_manifest_params *component_params)
 	}
 }
 
-int suit_directive_set_current_components(struct suit_processor_state *state, struct IndexArg_ *index_arg)
+int suit_directive_set_current_components(struct suit_processor_state *state, struct IndexArg_r *index_arg)
 {
 	struct suit_seq_exec_state *seq_exec_state;
 
@@ -45,21 +45,21 @@ int suit_directive_set_current_components(struct suit_processor_state *state, st
 	}
 
 	/* Single component. */
-	if (index_arg->_IndexArg_choice == _IndexArg_uint) {
-		SUIT_DBG("Select single component: %d (manifest: %p)\r\n", index_arg->_IndexArg_uint, seq_exec_state->manifest);
-		return suit_exec_select_component_idx(seq_exec_state, index_arg->_IndexArg_uint);
+	if (index_arg->IndexArg_choice == IndexArg_uint_c) {
+		SUIT_DBG("Select single component: %d (manifest: %p)\r\n", index_arg->IndexArg_uint, seq_exec_state->manifest);
+		return suit_exec_select_component_idx(seq_exec_state, index_arg->IndexArg_uint);
 	/* Multiple components. */
-	} else if (index_arg->_IndexArg_choice == _IndexArg__uint) {
-		for (int i = 0; i < index_arg->_IndexArg__uint_uint_count; i++) {
-			SUIT_DBG("Select component: %d (manifest: %p)\r\n", index_arg->_IndexArg__uint_uint[i], seq_exec_state->manifest);
-			retval = suit_exec_select_component_idx(seq_exec_state, index_arg->_IndexArg__uint_uint[i]);
+	} else if (index_arg->IndexArg_choice == IndexArg_uint_l_c) {
+		for (int i = 0; i < index_arg->IndexArg_uint_l_uint_count; i++) {
+			SUIT_DBG("Select component: %d (manifest: %p)\r\n", index_arg->IndexArg_uint_l_uint[i], seq_exec_state->manifest);
+			retval = suit_exec_select_component_idx(seq_exec_state, index_arg->IndexArg_uint_l_uint[i]);
 			if (retval != SUIT_SUCCESS) {
 				SUIT_ERR("Unable to set current components: failed to select group of components (%d)\r\n", retval);
 				return retval;
 			}
 		}
 	/* All components (if true). The false value is not allowed by CDDL. */
-	} else if (index_arg->_IndexArg_choice == _IndexArg_bool) {
+	} else if (index_arg->IndexArg_choice == IndexArg_bool_c) {
 		/* Enable all components. */
 		SUIT_DBG("Select all components (manifest: %p)\r\n", seq_exec_state->manifest);
 		return suit_exec_select_all_components(seq_exec_state);
@@ -81,7 +81,7 @@ int suit_directive_try_each(struct suit_processor_state *state, struct SUIT_Dire
 	/* Implement checks enforced by the CDDL, so the nested non-compliant
 	 * sequence will not slip through.
 	 */
-	if (try_each_arg->_SUIT_Directive_Try_Each_Argument_SUIT_Command_Sequence_bstr_count < 2) {
+	if (try_each_arg->SUIT_Directive_Try_Each_Argument_SUIT_Command_Sequence_bstr_count < 2) {
 		return SUIT_ERR_DECODING;
 	}
 
@@ -96,7 +96,7 @@ int suit_directive_try_each(struct suit_processor_state *state, struct SUIT_Dire
 			/* Handle soft condition failure - go to the next try sequence. */
 			seq_exec_state->retval = SUIT_SUCCESS;
 		} else if ((validate) && (seq_exec_state->retval == SUIT_SUCCESS) &&
-			   (seq_exec_state->cmd_exec_state < try_each_arg->_SUIT_Directive_Try_Each_Argument_SUIT_Command_Sequence_bstr_count)) {
+			   (seq_exec_state->cmd_exec_state < try_each_arg->SUIT_Directive_Try_Each_Argument_SUIT_Command_Sequence_bstr_count)) {
 			SUIT_DBG("Try sequence validated.\r\n");
 			/* In case of validation - go to the next sequence if the current one succeeds. */
 		} else {
@@ -106,9 +106,9 @@ int suit_directive_try_each(struct suit_processor_state *state, struct SUIT_Dire
 	}
 
 
-	if (seq_exec_state->cmd_exec_state < try_each_arg->_SUIT_Directive_Try_Each_Argument_SUIT_Command_Sequence_bstr_count) {
+	if (seq_exec_state->cmd_exec_state < try_each_arg->SUIT_Directive_Try_Each_Argument_SUIT_Command_Sequence_bstr_count) {
 		SUIT_DBG("Try the next command sequence.\r\n");
-		command_sequence = &try_each_arg->_SUIT_Directive_Try_Each_Argument_SUIT_Command_Sequence_bstr[seq_exec_state->cmd_exec_state];
+		command_sequence = &try_each_arg->SUIT_Directive_Try_Each_Argument_SUIT_Command_Sequence_bstr[seq_exec_state->cmd_exec_state];
 		seq_exec_state->cmd_exec_state++;
 		return suit_seq_exec_schedule(state, seq_exec_state->manifest, command_sequence, suit_bool_true, seq_exec_state->cmd_processor);
 	}
@@ -116,7 +116,7 @@ int suit_directive_try_each(struct suit_processor_state *state, struct SUIT_Dire
 	/* If the end of the list reached - verify if there is an empty element at the end.
 	 * If we came here, it means all command sequences in the try-each block failed.
 	 */
-	if (try_each_arg->_SUIT_Directive_Try_Each_Argument_nil_present) {
+	if (try_each_arg->SUIT_Directive_Try_Each_Argument_nil_present) {
 		return SUIT_SUCCESS;
 	}
 
@@ -158,64 +158,64 @@ int suit_directive_run_sequence(struct suit_processor_state *state, struct zcbor
 	return seq_exec_state->retval;
 }
 
-static int suit_directive_override_parameter(struct SUIT_Parameters_ *param, struct suit_manifest_params *dst)
+static int suit_directive_override_parameter(struct SUIT_Parameters_r *param, struct suit_manifest_params *dst)
 {
-	switch (param->_SUIT_Parameters_choice) {
-	case _SUIT_Parameters_suit_parameter_vendor_identifier:
+	switch (param->SUIT_Parameters_choice) {
+	case SUIT_Parameters_suit_parameter_vendor_identifier_c:
 		SUIT_DBG("Override VID (handle: 0x%lx)\r\n", dst->component_handle);
-		memcpy(&dst->vid, &param->_SUIT_Parameters_suit_parameter_vendor_identifier, sizeof(dst->vid));
+		memcpy(&dst->vid, &param->SUIT_Parameters_suit_parameter_vendor_identifier, sizeof(dst->vid));
 		dst->vid_set = true;
 		break;
-	case _SUIT_Parameters_suit_parameter_class_identifier:
+	case SUIT_Parameters_suit_parameter_class_identifier_c:
 		SUIT_DBG("Override CID (handle: 0x%lx)\r\n", dst->component_handle);
-		memcpy(&dst->cid, &param->_SUIT_Parameters_suit_parameter_class_identifier, sizeof(dst->cid));
+		memcpy(&dst->cid, &param->SUIT_Parameters_suit_parameter_class_identifier, sizeof(dst->cid));
 		dst->cid_set = true;
 		break;
-	case _SUIT_Parameters_suit_parameter_image_digest:
+	case SUIT_Parameters_suit_parameter_image_digest_c:
 		SUIT_DBG("Override digest (handle: 0x%lx)\r\n", dst->component_handle);
-		memcpy(&dst->image_digest, &param->_SUIT_Parameters_suit_parameter_image_digest, sizeof(dst->image_digest));
+		memcpy(&dst->image_digest, &param->SUIT_Parameters_suit_parameter_image_digest, sizeof(dst->image_digest));
 		dst->image_digest_set = true;
 		break;
-	case _SUIT_Parameters_suit_parameter_image_size: {
-		int ret = suit_plat_override_image_size(dst->component_handle, param->_SUIT_Parameters_suit_parameter_image_size);
+	case SUIT_Parameters_suit_parameter_image_size_c: {
+		int ret = suit_plat_override_image_size(dst->component_handle, param->SUIT_Parameters_suit_parameter_image_size);
 		if (ret == SUIT_SUCCESS) {
 			SUIT_DBG("Override image size (handle: 0x%lx)\r\n", dst->component_handle);
-			dst->image_size = param->_SUIT_Parameters_suit_parameter_image_size;
+			dst->image_size = param->SUIT_Parameters_suit_parameter_image_size;
 			dst->image_size_set = true;
 		} else {
 			SUIT_DBG("Unable to override image size (handle: 0x%lx, status: %d)\r\n", dst->component_handle, ret);
 			return ret;
 		}
 	} break;
-	case _SUIT_Parameters_suit_parameter_content:
+	case SUIT_Parameters_suit_parameter_content_c:
 		SUIT_DBG("Override content parameter (handle: 0x%lx)\r\n", dst->component_handle);
-		memcpy(&dst->content, &param->_SUIT_Parameters_suit_parameter_content, sizeof(dst->content));
+		memcpy(&dst->content, &param->SUIT_Parameters_suit_parameter_content, sizeof(dst->content));
 		dst->content_set = true;
 		break;
-	case _SUIT_Parameters_suit_parameter_component_slot:
+	case SUIT_Parameters_suit_parameter_component_slot_c:
 		SUIT_DBG("Override slot (handle: 0x%lx)\r\n", dst->component_handle);
 		component_modified(dst);
-		dst->component_slot = param->_SUIT_Parameters_suit_parameter_component_slot;
+		dst->component_slot = param->SUIT_Parameters_suit_parameter_component_slot;
 		dst->component_slot_set = true;
 		break;
-	case _SUIT_Parameters_suit_parameter_uri:
+	case SUIT_Parameters_suit_parameter_uri_c:
 		SUIT_DBG("Override URI (handle: 0x%lx)\r\n", dst->component_handle);
-		memcpy(&dst->uri, &param->_SUIT_Parameters_suit_parameter_uri, sizeof(dst->uri));
+		memcpy(&dst->uri, &param->SUIT_Parameters_suit_parameter_uri, sizeof(dst->uri));
 		dst->uri_set = true;
 		break;
-	case _SUIT_Parameters_suit_parameter_source_component:
+	case SUIT_Parameters_suit_parameter_source_component_c:
 		SUIT_DBG("Override source component (handle: 0x%lx)\r\n", dst->component_handle);
-		dst->source_component = param->_SUIT_Parameters_suit_parameter_source_component;
+		dst->source_component = param->SUIT_Parameters_suit_parameter_source_component;
 		dst->source_component_set = true;
 		break;
-	case _SUIT_Parameters_suit_parameter_invoke_args:
+	case SUIT_Parameters_suit_parameter_invoke_args_c:
 		SUIT_DBG("Override invoke args (handle: 0x%lx)\r\n", dst->component_handle);
-		dst->invoke_args = param->_SUIT_Parameters_suit_parameter_invoke_args;
+		dst->invoke_args = param->SUIT_Parameters_suit_parameter_invoke_args;
 		dst->invoke_args_set = true;
 		break;
-	case _SUIT_Parameters_suit_parameter_device_identifier:
+	case SUIT_Parameters_suit_parameter_device_identifier_c:
 		SUIT_DBG("Override DID (handle: 0x%lx)\r\n", dst->component_handle);
-		memcpy(&dst->did, &param->_SUIT_Parameters_suit_parameter_device_identifier, sizeof(dst->did));
+		memcpy(&dst->did, &param->SUIT_Parameters_suit_parameter_device_identifier, sizeof(dst->did));
 		dst->did_set = true;
 		break;
 	default:
@@ -225,8 +225,7 @@ static int suit_directive_override_parameter(struct SUIT_Parameters_ *param, str
 }
 
 int suit_directive_override_parameters(struct suit_processor_state *state,
-		struct __suit_directive_override_parameters_map__SUIT_Parameters *params,
-		uint_fast32_t param_count)
+		struct suit_directive_override_parameters_m_l_map_SUIT_Parameters_m *params, uint_fast32_t param_count)
 {
 	struct suit_seq_exec_state *seq_exec_state;
 	size_t component_idx;
@@ -242,9 +241,9 @@ int suit_directive_override_parameters(struct suit_processor_state *state,
 	}
 
 	for (int j = 0; j < param_count; j++) {
-		struct SUIT_Parameters_ *param = &params[j].___suit_directive_override_parameters_map__SUIT_Parameters;
+		struct SUIT_Parameters_r *param = &params[j].suit_directive_override_parameters_m_l_map_SUIT_Parameters_m;
 
-		if (param->_SUIT_Parameters_choice == _SUIT_Parameters_suit_parameter_soft_failure) {
+		if (param->SUIT_Parameters_choice == SUIT_Parameters_suit_parameter_soft_failure_c) {
 			/* The soft-failure may be set only within try-each or command sequence.
 			 * Fail if the stack contains a single entry (the manifest command sequence entry point).
 			 */
@@ -252,7 +251,7 @@ int suit_directive_override_parameters(struct suit_processor_state *state,
 				return SUIT_ERR_UNSUPPORTED_COMMAND;
 			}
 
-			seq_exec_state->soft_failure = (param->_SUIT_Parameters_suit_parameter_soft_failure ? suit_bool_true : suit_bool_false);
+			seq_exec_state->soft_failure = (param->SUIT_Parameters_suit_parameter_soft_failure ? suit_bool_true : suit_bool_false);
 			continue;
 		}
 
@@ -291,39 +290,39 @@ int suit_directive_override_parameters(struct suit_processor_state *state,
 	return retval;
 }
 
-static int suit_directive_set_parameter(struct SUIT_Parameters_ *param, struct suit_manifest_params *dst)
+static int suit_directive_set_parameter(struct SUIT_Parameters_r *param, struct suit_manifest_params *dst)
 {
 	bool parameter_set = false;
 
-	switch (param->_SUIT_Parameters_choice) {
-	case _SUIT_Parameters_suit_parameter_vendor_identifier:
+	switch (param->SUIT_Parameters_choice) {
+	case SUIT_Parameters_suit_parameter_vendor_identifier_c:
 		parameter_set = dst->vid_set;
 		break;
-	case _SUIT_Parameters_suit_parameter_class_identifier:
+	case SUIT_Parameters_suit_parameter_class_identifier_c:
 		parameter_set = dst->cid_set;
 		break;
-	case _SUIT_Parameters_suit_parameter_image_digest:
+	case SUIT_Parameters_suit_parameter_image_digest_c:
 		parameter_set = dst->image_digest_set;
 		break;
-	case _SUIT_Parameters_suit_parameter_image_size:
+	case SUIT_Parameters_suit_parameter_image_size_c:
 		parameter_set = dst->image_size_set;
 		break;
-	case _SUIT_Parameters_suit_parameter_content:
+	case SUIT_Parameters_suit_parameter_content_c:
 		parameter_set = dst->content_set;
 		break;
-	case _SUIT_Parameters_suit_parameter_component_slot:
+	case SUIT_Parameters_suit_parameter_component_slot_c:
 		parameter_set = dst->component_slot_set;
 		break;
-	case _SUIT_Parameters_suit_parameter_uri:
+	case SUIT_Parameters_suit_parameter_uri_c:
 		parameter_set = dst->uri_set;
 		break;
-	case _SUIT_Parameters_suit_parameter_source_component:
+	case SUIT_Parameters_suit_parameter_source_component_c:
 		parameter_set = dst->source_component_set;
 		break;
-	case _SUIT_Parameters_suit_parameter_invoke_args:
+	case SUIT_Parameters_suit_parameter_invoke_args_c:
 		parameter_set = dst->invoke_args_set;
 		break;
-	case _SUIT_Parameters_suit_parameter_device_identifier:
+	case SUIT_Parameters_suit_parameter_device_identifier_c:
 		parameter_set = dst->did_set;
 		break;
 	default:
@@ -338,8 +337,7 @@ static int suit_directive_set_parameter(struct SUIT_Parameters_ *param, struct s
 }
 
 int suit_directive_set_parameters(struct suit_processor_state *state,
-		struct __suit_directive_set_parameters_map__SUIT_Parameters *params,
-		uint_fast32_t param_count,
+		struct suit_directive_set_parameters_m_l_map_SUIT_Parameters_m *params, uint_fast32_t param_count,
 		struct suit_manifest_params *component_params)
 {
 	int retval = SUIT_ERR_DECODING;
@@ -350,8 +348,8 @@ int suit_directive_set_parameters(struct suit_processor_state *state,
 	}
 
 	for (int j = 0; j < param_count; j++) {
-		struct SUIT_Parameters_ *param = &params[j].___suit_directive_set_parameters_map__SUIT_Parameters;
-		SUIT_DBG("Set parameter %d (handle: 0x%lx)\r\n", param->_SUIT_Parameters_choice, component_params->component_handle);
+		struct SUIT_Parameters_r *param = &params[j].suit_directive_set_parameters_m_l_map_SUIT_Parameters_m;
+		SUIT_DBG("Set parameter %d (handle: 0x%lx)\r\n", param->SUIT_Parameters_choice, component_params->component_handle);
 
 		retval = suit_directive_set_parameter(param, component_params);
 		if (retval == SUIT_ERR_AGAIN) {

@@ -28,8 +28,8 @@ enum command_type {
 typedef struct {
 	enum command_type type;
 	union {
-		struct SUIT_Condition_ condition;
-		struct SUIT_Directive_ directive;
+		struct SUIT_Condition_r condition;
+		struct SUIT_Directive_r directive;
 	};
 } suit_command_t;
 

@@ -330,7 +330,7 @@ void test_authorize_manifest_minimal(void)
 	ret = suit_decoder_authorize_manifest(&state);
 	TEST_ASSERT_EQUAL_MESSAGE(SUIT_ERR_MANIFEST_VALIDATION, ret, "The manifest without components authorization did not fail");
 	TEST_ASSERT_EQUAL_MESSAGE(INVALID, state.step, "Invalid state transition after failed manifest authorization");
-	TEST_ASSERT_EQUAL_MESSAGE(NULL, state.decoded_manifest, "Manifest structure not freed after manifest authorization failure");
+	TEST_ASSERT_NULL_MESSAGE(state.decoded_manifest, "Manifest structure not freed after manifest authorization failure");
 }
 
 void test_authorize_manifest_minimal_without_common(void)
@@ -339,12 +339,12 @@ void test_authorize_manifest_minimal_without_common(void)
 
 	init_decode_manifest(minimal_decodable_manifest, sizeof(minimal_decodable_manifest));
 	state.step = MANIFEST_AUTHENTICATED;
-	state.manifest._SUIT_Manifest_suit_common_cbor._SUIT_Common_suit_components_present = false;
+	state.manifest.SUIT_Manifest_suit_common_cbor.SUIT_Common_suit_components_present = false;
 
 	ret = suit_decoder_authorize_manifest(&state);
 	TEST_ASSERT_EQUAL_MESSAGE(SUIT_ERR_MANIFEST_VALIDATION, ret, "The manifest without components authorization did not fail");
 	TEST_ASSERT_EQUAL_MESSAGE(INVALID, state.step, "Invalid state transition after failed manifest authorization");
-	TEST_ASSERT_EQUAL_MESSAGE(NULL, state.decoded_manifest, "Manifest structure not freed after manifest authorization failure");
+	TEST_ASSERT_NULL_MESSAGE(state.decoded_manifest, "Manifest structure not freed after manifest authorization failure");
 }
 
 void test_authorize_manifest_single_component(void)
@@ -374,7 +374,7 @@ void test_authorize_manifest_single_component_platform_fail(void)
 	ret = suit_decoder_authorize_manifest(&state);
 	TEST_ASSERT_EQUAL_MESSAGE(SUIT_ERR_UNSUPPORTED_COMPONENT_ID, ret, "The manifest without components authorization did not fail");
 	TEST_ASSERT_EQUAL_MESSAGE(INVALID, state.step, "Invalid state transition after failed manifest authorization");
-	TEST_ASSERT_EQUAL_MESSAGE(NULL, state.decoded_manifest, "Manifest structure not freed after manifest authorization failure");
+	TEST_ASSERT_NULL_MESSAGE(state.decoded_manifest, "Manifest structure not freed after manifest authorization failure");
 }
 
 
@@ -388,7 +388,7 @@ void test_authorize_manifest_with_null_bstr_component(void)
 	ret = suit_decoder_authorize_manifest(&state);
 	TEST_ASSERT_EQUAL_MESSAGE(SUIT_ERR_DECODING, ret, "The manifest without components authorization did not fail");
 	TEST_ASSERT_EQUAL_MESSAGE(INVALID, state.step, "Invalid state transition after failed manifest authorization");
-	TEST_ASSERT_EQUAL_MESSAGE(NULL, state.decoded_manifest, "Manifest structure not freed after manifest authorization failure");
+	TEST_ASSERT_NULL_MESSAGE(state.decoded_manifest, "Manifest structure not freed after manifest authorization failure");
 }
 
 void test_authorize_manifest_with_4_components(void)
@@ -403,7 +403,7 @@ void test_authorize_manifest_with_4_components(void)
 	ret = suit_decoder_authorize_manifest(&state);
 	TEST_ASSERT_EQUAL_MESSAGE(SUIT_ERR_UNSUPPORTED_COMPONENT_ID, ret, "The manifest without components authorization did not fail");
 	TEST_ASSERT_EQUAL_MESSAGE(INVALID, state.step, "Invalid state transition after failed manifest authorization");
-	TEST_ASSERT_EQUAL_MESSAGE(NULL, state.decoded_manifest, "Manifest structure not freed after manifest authorization failure");
+	TEST_ASSERT_NULL_MESSAGE(state.decoded_manifest, "Manifest structure not freed after manifest authorization failure");
 }
 
 void test_authorize_manifest_with_single_dependency_component(void)
@@ -465,7 +465,7 @@ void test_authorize_manifest_with_invalid_dependency(void)
 	ret = suit_decoder_authorize_manifest(&state);
 	TEST_ASSERT_EQUAL_MESSAGE(SUIT_ERR_MANIFEST_VALIDATION, ret, "The manifest with invalid dependency component authorization did not fail");
 	TEST_ASSERT_EQUAL_MESSAGE(INVALID, state.step, "Invalid state transition after failed manifest authorization");
-	TEST_ASSERT_EQUAL_MESSAGE(NULL, state.decoded_manifest, "Manifest structure not freed after manifest authorization failure");
+	TEST_ASSERT_NULL_MESSAGE(state.decoded_manifest, "Manifest structure not freed after manifest authorization failure");
 }
 
 void test_authorize_manifest_with_4_dependencies(void)
@@ -497,5 +497,5 @@ void test_authorize_manifest_minimal_with_dependency(void)
 	ret = suit_decoder_authorize_manifest(&state);
 	TEST_ASSERT_EQUAL_MESSAGE(SUIT_ERR_MANIFEST_VALIDATION, ret, "The manifest without components authorization did not fail");
 	TEST_ASSERT_EQUAL_MESSAGE(INVALID, state.step, "Invalid state transition after failed manifest authorization");
-	TEST_ASSERT_EQUAL_MESSAGE(NULL, state.decoded_manifest, "Manifest structure not freed after manifest authorization failure");
+	TEST_ASSERT_NULL_MESSAGE(state.decoded_manifest, "Manifest structure not freed after manifest authorization failure");
 }

@@ -625,7 +625,7 @@ void test_metadata_digest(void)
 	int ret = suit_processor_get_manifest_metadata(&envelope_str[0], envelope_len, false, NULL, &digest, &alg, NULL);
 	TEST_ASSERT_EQUAL_MESSAGE(SUIT_SUCCESS, ret, "Manifest decoded, but error code was returned");
 	TEST_ASSERT_EQUAL_MESSAGE(suit_cose_sha256, alg, "Invalid manifest digest algorithm ID returned");
-	TEST_ASSERT_EQUAL_MESSAGE(exp_manifest_digest.value, digest.value, "Invalid manifest digest returned");
+	TEST_ASSERT_EQUAL_PTR_MESSAGE(exp_manifest_digest.value, digest.value, "Invalid manifest digest returned");
 	TEST_ASSERT_EQUAL_MESSAGE(exp_manifest_digest.len, digest.len, "Invalid manifest digest returned");
 	TEST_ASSERT_EQUAL_MESSAGE(INVALID, state.decoder_state.step, "SUIT decoder state not reset after decoding");
 }
@@ -660,7 +660,7 @@ void test_metadata_digest_sha512(void)
 	int ret = suit_processor_get_manifest_metadata(&envelope_str[0], envelope_len, false, NULL, &digest, &alg, NULL);
 	TEST_ASSERT_EQUAL_MESSAGE(SUIT_SUCCESS, ret, "Manifest decoded, but error code was returned");
 	TEST_ASSERT_EQUAL_MESSAGE(suit_cose_sha512, alg, "Invalid manifest digest algorithm ID returned");
-	TEST_ASSERT_EQUAL_MESSAGE(exp_manifest_digest_sha512.value, digest.value, "Invalid manifest digest (SHA-512) returned");
+	TEST_ASSERT_EQUAL_PTR_MESSAGE(exp_manifest_digest_sha512.value, digest.value, "Invalid manifest digest (SHA-512) returned");
 	TEST_ASSERT_EQUAL_MESSAGE(exp_manifest_digest_sha512.len, digest.len, "Invalid manifest digest (SHA-512) returned");
 	TEST_ASSERT_EQUAL_MESSAGE(INVALID, state.decoder_state.step, "SUIT decoder state not reset after decoding");
 }
@@ -701,7 +701,7 @@ void test_metadata_digest_auth(void)
 	int ret = suit_processor_get_manifest_metadata(&envelope_str[0], envelope_len, true, NULL, &digest, &alg, NULL);
 	TEST_ASSERT_EQUAL_MESSAGE(SUIT_SUCCESS, ret, "Manifest decoded with authentication, but error code was returned");
 	TEST_ASSERT_EQUAL_MESSAGE(suit_cose_sha256, alg, "Invalid manifest digest algorithm ID returned");
-	TEST_ASSERT_EQUAL_MESSAGE(exp_manifest_digest.value, digest.value, "Invalid manifest digest returned");
+	TEST_ASSERT_EQUAL_PTR_MESSAGE(exp_manifest_digest.value, digest.value, "Invalid manifest digest returned");
 	TEST_ASSERT_EQUAL_MESSAGE(exp_manifest_digest.len, digest.len, "Invalid manifest digest returned");
 	TEST_ASSERT_EQUAL_MESSAGE(INVALID, state.decoder_state.step, "SUIT decoder state not reset after decoding");
 }
@@ -804,7 +804,7 @@ void test_metadata_manifest_component_id(void)
 
 	int ret = suit_processor_get_manifest_metadata(&envelope_str[0], envelope_len, false, &manifest_component_id, NULL, NULL, NULL);
 	TEST_ASSERT_EQUAL_MESSAGE(SUIT_SUCCESS, ret, "Manifest decoded, but error code was returned");
-	TEST_ASSERT_EQUAL_MESSAGE(exp_manifest_component_id.value, manifest_component_id.value, "Invalid manifest component ID returned");
+	TEST_ASSERT_EQUAL_PTR_MESSAGE(exp_manifest_component_id.value, manifest_component_id.value, "Invalid manifest component ID returned");
 	TEST_ASSERT_EQUAL_MESSAGE(exp_manifest_component_id.len, manifest_component_id.len, "Invalid manifest component ID returned");
 	TEST_ASSERT_EQUAL_MESSAGE(INVALID, state.decoder_state.step, "SUIT decoder state not reset after decoding");
 }
@@ -843,7 +843,7 @@ void test_metadata_manifest_component_id_auth(void)
 
 	int ret = suit_processor_get_manifest_metadata(&envelope_str[0], envelope_len, true, &manifest_component_id, NULL, NULL, NULL);
 	TEST_ASSERT_EQUAL_MESSAGE(SUIT_SUCCESS, ret, "Manifest decoded with authentication, but error code was returned");
-	TEST_ASSERT_EQUAL_MESSAGE(exp_manifest_component_id.value, manifest_component_id.value, "Invalid manifest component ID returned");
+	TEST_ASSERT_EQUAL_PTR_MESSAGE(exp_manifest_component_id.value, manifest_component_id.value, "Invalid manifest component ID returned");
 	TEST_ASSERT_EQUAL_MESSAGE(exp_manifest_component_id.len, manifest_component_id.len, "Invalid manifest component ID returned");
 	TEST_ASSERT_EQUAL_MESSAGE(INVALID, state.decoder_state.step, "SUIT decoder state not reset after decoding");
 }
@@ -880,10 +880,10 @@ void test_metadata_all(void)
 	int ret = suit_processor_get_manifest_metadata(&envelope_str[0], envelope_len, false, &manifest_component_id, &digest, &alg, &seq_num);
 	TEST_ASSERT_EQUAL_MESSAGE(SUIT_SUCCESS, ret, "Manifest decoded, but error code was returned");
 	TEST_ASSERT_EQUAL_MESSAGE(suit_cose_sha256, alg, "Invalid manifest digest algorithm ID returned");
-	TEST_ASSERT_EQUAL_MESSAGE(exp_manifest_digest.value, digest.value, "Invalid manifest digest returned");
+	TEST_ASSERT_EQUAL_PTR_MESSAGE(exp_manifest_digest.value, digest.value, "Invalid manifest digest returned");
 	TEST_ASSERT_EQUAL_MESSAGE(exp_manifest_digest.len, digest.len, "Invalid manifest digest returned");
 	TEST_ASSERT_EQUAL_MESSAGE(exp_seq_num, seq_num, "Invalid manifest sequence number returned");
-	TEST_ASSERT_EQUAL_MESSAGE(exp_manifest_component_id.value, manifest_component_id.value, "Invalid manifest component ID returned");
+	TEST_ASSERT_EQUAL_PTR_MESSAGE(exp_manifest_component_id.value, manifest_component_id.value, "Invalid manifest component ID returned");
 	TEST_ASSERT_EQUAL_MESSAGE(exp_manifest_component_id.len, manifest_component_id.len, "Invalid manifest component ID returned");
 	TEST_ASSERT_EQUAL_MESSAGE(INVALID, state.decoder_state.step, "SUIT decoder state not reset after decoding");
 }
@@ -926,10 +926,10 @@ void test_metadata_all_auth(void)
 	int ret = suit_processor_get_manifest_metadata(&envelope_str[0], envelope_len, true, &manifest_component_id, &digest, &alg, &seq_num);
 	TEST_ASSERT_EQUAL_MESSAGE(SUIT_SUCCESS, ret, "Manifest decoded, but error code was returned");
 	TEST_ASSERT_EQUAL_MESSAGE(suit_cose_sha256, alg, "Invalid manifest digest algorithm ID returned");
-	TEST_ASSERT_EQUAL_MESSAGE(exp_manifest_digest.value, digest.value, "Invalid manifest digest returned");
+	TEST_ASSERT_EQUAL_PTR_MESSAGE(exp_manifest_digest.value, digest.value, "Invalid manifest digest returned");
 	TEST_ASSERT_EQUAL_MESSAGE(exp_manifest_digest.len, digest.len, "Invalid manifest digest returned");
 	TEST_ASSERT_EQUAL_MESSAGE(exp_seq_num, seq_num, "Invalid manifest sequence number returned");
-	TEST_ASSERT_EQUAL_MESSAGE(exp_manifest_component_id.value, manifest_component_id.value, "Invalid manifest component ID returned");
+	TEST_ASSERT_EQUAL_PTR_MESSAGE(exp_manifest_component_id.value, manifest_component_id.value, "Invalid manifest component ID returned");
 	TEST_ASSERT_EQUAL_MESSAGE(exp_manifest_component_id.len, manifest_component_id.len, "Invalid manifest component ID returned");
 	TEST_ASSERT_EQUAL_MESSAGE(INVALID, state.decoder_state.step, "SUIT decoder state not reset after decoding");
 }
