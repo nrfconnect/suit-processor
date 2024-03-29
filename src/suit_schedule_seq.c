@@ -335,7 +335,7 @@ int suit_schedule_validation(struct suit_processor_state *state, struct suit_man
 	if (ret != SUIT_SUCCESS) {
 		/* No matter of the reason of failure when getting the command sequence suit_schedule_validation
 		   should simply return that the command is unavailable. The dry run will verify if some error
-		   has occured. */
+		   has occurred. */
 		return SUIT_ERR_UNAVAILABLE_COMMAND_SEQ;
 	}
 

@@ -92,7 +92,7 @@ static int suit_dry_run_manifest(struct suit_manifest_state *manifest_state,
 				SUIT_DBG("Sequence %d not defined in the manifest\r\n", seq);
 				continue;
 			}
-			SUIT_ERR("Error when getting command sequnces %d\r\n", seq);
+			SUIT_ERR("Error when getting command sequences %d\r\n", seq);
 			return seq_get_ret;
 		}
 
