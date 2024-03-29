@@ -246,7 +246,7 @@ static void seq_validation_nested_test_template(seq_validation_api_t validate, b
 	int retval = validate(&state, &seq);
 
 	snprintf(assert_msg, sizeof(assert_msg),
-		"Assetion failed at %s with %d nesting headers and %d components",
+		"Assetion failed at %s with %zu nesting headers and %zu components",
 		support_matrix->cmd_name,
 		depth,
 		n_components);
