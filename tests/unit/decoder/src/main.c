@@ -120,7 +120,7 @@ void test_init_static_mem_input(void)
 
 	ret = suit_decoder_init(&state, &manifest);
 	TEST_ASSERT_EQUAL_MESSAGE(SUIT_SUCCESS, ret, "Unable to initialize SUIT manifest decoder");
-	TEST_ASSERT_EQUAL_MESSAGE(&manifest, state.decoded_manifest, "SUIT manifest structure not initialized");
+	TEST_ASSERT_EQUAL_PTR_MESSAGE(&manifest, state.decoded_manifest, "SUIT manifest structure not initialized");
 	TEST_ASSERT_EQUAL_MESSAGE(INITIALIZED, state.step, "SUIT decoder state not initialized");
 }
 
@@ -233,8 +233,6 @@ void test_create_components_manifest_append_dependency_failed(void);
 void test_create_components_manifest_append_component_failed(void);
 void test_create_components_single_component(void);
 void test_create_components_empty_component_id(void);
-void test_create_components_invalid_component_length(void);
-void test_create_components_invalid_second_component_id_length(void);
 void test_create_components_duplicated_component(void);
 void test_create_components_invalid_dependency_prefix(void);
 void test_create_components_duplicated_semidependency(void);
@@ -242,8 +240,6 @@ void test_create_components_duplicated_dependency_with_two_prefixes(void);
 void test_create_components_dependency_with_empty_bstr_as_prefix(void);
 void test_create_components_component_len_23(void);
 void test_create_components_component_len_24(void);
-void test_create_components_component_len_20_invalid(void);
-void test_create_components_component_len_64_invalid(void);
 void test_create_components_component_len_255(void);
 void test_create_components_component_len_256(void);
 

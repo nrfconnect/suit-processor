@@ -240,7 +240,7 @@ void test_seq_execution_set_parameter_multiple_components_3params(void)
 			TEST_ASSERT_EQUAL_MEMORY_MESSAGE(exp_args.value, state.components[i].invoke_args.value, exp_args.len, "Invoke args set with invalid value");
 		} else {
 			TEST_ASSERT_EQUAL_MESSAGE(0, state.components[i].invoke_args.len, "Invoke args length overwritten, but was set before sequence execution");
-			TEST_ASSERT_EQUAL_MESSAGE(NULL, state.components[i].invoke_args.value, "Invoke args value overwritten, but was set before sequence execution");
+			TEST_ASSERT_NULL_MESSAGE(state.components[i].invoke_args.value, "Invoke args value overwritten, but was set before sequence execution");
 		}
 
 		TEST_ASSERT_EQUAL_MESSAGE(true, state.components[i].did_set, "Device ID set, but flag is not updated");
@@ -249,7 +249,7 @@ void test_seq_execution_set_parameter_multiple_components_3params(void)
 			TEST_ASSERT_EQUAL_MEMORY_MESSAGE(exp_did.value, state.components[i].did.value, exp_did.len, "Device ID set with invalid value");
 		} else {
 			TEST_ASSERT_EQUAL_MESSAGE(0, state.components[i].did.len, "Device ID length overwritten, but was set before sequence execution");
-			TEST_ASSERT_EQUAL_MESSAGE(NULL, state.components[i].did.value, "Device ID value overwritten, but was set before sequence execution");
+			TEST_ASSERT_NULL_MESSAGE(state.components[i].did.value, "Device ID value overwritten, but was set before sequence execution");
 		}
 	}
 }
@@ -311,7 +311,7 @@ void test_seq_execution_set_parameter_two_components_3params(void)
 		if (i == 1) {
 			TEST_ASSERT_EQUAL_MESSAGE(true, state.components[i].invoke_args_set, "Invoke args set, but flag is not updated");
 			TEST_ASSERT_EQUAL_MESSAGE(0, state.components[i].invoke_args.len, "Invoke args length overwritten, but was set before sequence execution");
-			TEST_ASSERT_EQUAL_MESSAGE(NULL, state.components[i].invoke_args.value, "Invoke args value overwritten, but was set before sequence execution");
+			TEST_ASSERT_NULL_MESSAGE(state.components[i].invoke_args.value, "Invoke args value overwritten, but was set before sequence execution");
 		} else if (i == 2) {
 			TEST_ASSERT_EQUAL_MESSAGE(true, state.components[i].invoke_args_set, "Invoke args set, but flag is not updated");
 			TEST_ASSERT_EQUAL_MESSAGE(exp_args.len, state.components[i].invoke_args.len, "Invoke args set with invalid length");
@@ -323,7 +323,7 @@ void test_seq_execution_set_parameter_two_components_3params(void)
 		if (i == 2) {
 			TEST_ASSERT_EQUAL_MESSAGE(true, state.components[i].did_set, "Device ID set, but flag is not updated");
 			TEST_ASSERT_EQUAL_MESSAGE(0, state.components[i].did.len, "Device ID length overwritten, but was set before sequence execution");
-			TEST_ASSERT_EQUAL_MESSAGE(NULL, state.components[i].did.value, "Device ID value overwritten, but was set before sequence execution");
+			TEST_ASSERT_NULL_MESSAGE(state.components[i].did.value, "Device ID value overwritten, but was set before sequence execution");
 		} else if (i == 1) {
 			TEST_ASSERT_EQUAL_MESSAGE(true, state.components[i].did_set, "Device ID set, but flag is not updated");
 			TEST_ASSERT_EQUAL_MESSAGE(exp_did.len, state.components[i].did.len, "Device ID set with invalid length");

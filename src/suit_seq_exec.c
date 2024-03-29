@@ -200,7 +200,7 @@ int suit_seq_exec_step(struct suit_processor_state *state)
 	ZCBOR_STATE_D(d_state, 1,
 		seq_exec_state->exec_ptr,
 		cmd_seq_str->len - (seq_exec_state->exec_ptr - cmd_seq_str->value),
-		1);
+		1, 0);
 
 	/* If executed for the first time on the sequence - parse the CBOR list header,
 	 * initialize command state and store the number of elements.
@@ -212,7 +212,7 @@ int suit_seq_exec_step(struct suit_processor_state *state)
 			return ZCBOR_ERR_TO_SUIT_ERR((ret != ZCBOR_SUCCESS) ? ret : ZCBOR_ERR_UNKNOWN);
 		}
 
-		if (d_state->indefinite_length_array) {
+		if (d_state->decode_state.indefinite_length_array) {
 			return SUIT_ERR_DECODING;
 		}
 
@@ -241,7 +241,7 @@ int suit_seq_exec_step(struct suit_processor_state *state)
 			&command.condition, &decoded_len) == ZCBOR_SUCCESS) {
 			SUIT_DBG("%d: Condition %d found\r\n",
 				seq_exec_state->current_command,
-				command.condition._SUIT_Condition_choice);
+				command.condition.SUIT_Condition_choice);
 
 			if (seq_exec_state->current_command == 0) {
 				/* If there is only one component, or the internal sequence is executed,
@@ -262,7 +262,7 @@ int suit_seq_exec_step(struct suit_processor_state *state)
 			&command.directive, &decoded_len) == ZCBOR_SUCCESS) {
 			SUIT_DBG("%d: Directive %d found\r\n",
 				seq_exec_state->current_command,
-				command.directive._SUIT_Directive_choice);
+				command.directive.SUIT_Directive_choice);
 
 			if (seq_exec_state->current_command == 0) {
 				/* If there is only one component, or the internal sequence is executed,
@@ -270,8 +270,8 @@ int suit_seq_exec_step(struct suit_processor_state *state)
 				 */
 				if ((seq_exec_state->manifest->components_count != 1) &&
 				    (state->seq_stack_height < 2) &&
-				    (command.directive._SUIT_Directive_choice
-					!= _SUIT_Directive___suit_directive_set_component_index)) {
+				    (command.directive.SUIT_Directive_choice
+					!= SUIT_Directive_suit_directive_set_component_index_m_l_c)) {
 					SUIT_ERR("Each sequence should begin with a set-component-index command\r\n");
 					return SUIT_ERR_MANIFEST_VALIDATION;
 				}

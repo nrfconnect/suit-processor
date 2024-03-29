@@ -179,6 +179,112 @@ static uint8_t cbor_envelope_invalid_component_id_empty_second_bstr[] = {
 			0x0E, /* 13 */
 };
 
+static uint8_t cbor_envelope_single_component_invalid_length[] = {
+	0xd8, 0x6b, /* tag(107) : SUIT_Envelope */
+	0xa2, /* map (2 elements) */
+
+	0x02, /* suit-authentication-wrapper */
+		0x42, /* bytes(2) */
+		0x81, /* array (1 element) */
+			0x40, /* bytes(0) */
+
+	0x03, /* suit-manifest */
+	0x4e, /* bytes(14) */
+	0xa3, /* map (3 elements) */
+	0x01, /* suit-manifest-version */ 0x01,
+	0x02, /* suit-manifest-sequence-number */ 0x10,
+	0x03, /* suit-common */
+		0x47, /* bytes(7) */
+		0xA1, /* map (1 element) */
+			0x02, /* suit-components */
+				0x81, /* array (1 element) */
+				0x98, 0x01, /* array (1 element) */
+					0x41, /* bytes(1) */
+					'M',
+};
+
+static uint8_t cbor_envelope_single_component_invalid_second_chunk_length[] = {
+	0xd8, 0x6b, /* tag(107) : SUIT_Envelope */
+	0xa2, /* map (2 elements) */
+
+	0x02, /* suit-authentication-wrapper */
+		0x42, /* bytes(2) */
+		0x81, /* array (1 element) */
+			0x40, /* bytes(0) */
+
+	0x03, /* suit-manifest */
+	0x51, /* bytes(17) */
+	0xa3, /* map (3 elements) */
+	0x01, /* suit-manifest-version */ 0x01,
+	0x02, /* suit-manifest-sequence-number */ 0x10,
+	0x03, /* suit-common */
+		0x4a, /* bytes(10) */
+		0xA1, /* map (1 element) */
+			0x02, /* suit-components */
+				0x81, /* array (1 element) */
+				0x82, /* array (2 elements) */
+					0x41, /* bytes(1) */
+					'M',
+					0x58, 0x02, /* bytes(2) */
+					'M',
+					'2',
+};
+
+static uint8_t cbor_envelope_component_len_20_invalid[] = {
+	0xd8, 0x6b, /* tag(107) : SUIT_Envelope */
+	0xa2, /* map (2 elements) */
+
+	0x02, /* suit-authentication-wrapper */
+		0x42, /* bytes(2) */
+		0x81, /* array (1 element) */
+			0x40, /* bytes(0) */
+
+	0x03, /* suit-manifest */
+	0x58, 0x22, /* bytes(34) */
+	0xa3, /* map (3 elements) */
+	0x01, /* suit-manifest-version */ 0x01,
+	0x02, /* suit-manifest-sequence-number */ 0x10,
+	0x03, /* suit-common */
+		0x58, 0x1a, /* bytes(26) */
+		0xA1, /* map (1 element) */
+			0x02, /* suit-components */
+				0x81, /* array (1 element) */
+				0x81, /* array (1 element) */
+					0x58, 0x14, /* bytes(24) */
+					'1', '2', '3', '4', '5', '6', '7', '8', '9', '0',
+					'1', '2', '3', '4', '5', '6', '7', '8', '9', '0',
+};
+
+static uint8_t cbor_envelope_component_len_64_invalid[] = {
+	0xd8, 0x6b, /* tag(107) : SUIT_Envelope */
+	0xa2, /* map (2 elements) */
+
+	0x02, /* suit-authentication-wrapper */
+		0x42, /* bytes(2) */
+		0x81, /* array (1 element) */
+			0x40, /* bytes(0) */
+
+	0x03, /* suit-manifest */
+	0x58, 0x4f, /* bytes(79) */
+	0xa3, /* map (3 elements) */
+	0x01, /* suit-manifest-version */ 0x01,
+	0x02, /* suit-manifest-sequence-number */ 0x10,
+	0x03, /* suit-common */
+		0x58, 0x47, /* bytes(71) */
+		0xA1, /* map (1 element) */
+			0x02, /* suit-components */
+				0x81, /* array (1 element) */
+				0x81, /* array (1 element) */
+					0x59, 0x00, 0x40, /* bytes(64) */
+					'1', '2', '3', '4', '5', '6', '7', '8', '9', '0',
+					'1', '2', '3', '4', '5', '6', '7', '8', '9', '0',
+					'1', '2', '3', '4', '5', '6', '7', '8', '9', '0',
+					'1', '2', '3', '4', '5', '6', '7', '8', '9', '0',
+					'1', '2', '3', '4', '5', '6', '7', '8', '9', '0',
+					'1', '2', '3', '4', '5', '6', '7', '8', '9', '0',
+					'1', '2', '3', '4',
+};
+
 static uint8_t cbor_envelope_two_component_ids[] = {
 	0xd8, 0x6b, /* tag(107) : SUIT_Envelope */
 	0xa2, /* map (2 elements) */
@@ -463,7 +569,7 @@ void test_decode_manifest_minimal(void)
 	TEST_ASSERT_EQUAL_MESSAGE(SUIT_SUCCESS, ret, "The manifest decoding failed");
 	TEST_ASSERT_EQUAL_MESSAGE(MANIFEST_DECODED, state.step, "Invalid state transition after manifest decoding");
 	TEST_ASSERT_EQUAL_MESSAGE(0, state.decoded_manifest->manifest_component_id.len, "Invalid length of the manifest component ID");
-	TEST_ASSERT_EQUAL_MESSAGE(NULL, state.decoded_manifest->manifest_component_id.value, "Invalid value of the manifest component ID");
+	TEST_ASSERT_NULL_MESSAGE(state.decoded_manifest->manifest_component_id.value, "Invalid value of the manifest component ID");
 	TEST_ASSERT_EQUAL_MESSAGE(0x11, state.decoded_manifest->sequence_number, "Incorrect manifest sequence number value");
 }
 
@@ -552,6 +658,26 @@ void test_decode_manifest_invalid_input_bytes(void)
 			.envelope_size = sizeof(minimal_with_shared_and_text),
 			.exp_ret = ZCBOR_ERR_TO_SUIT_ERR(ZCBOR_ERR_HIGH_ELEM_COUNT),
 		},
+		{
+			.envelope = cbor_envelope_single_component_invalid_length,
+			.envelope_size = sizeof(cbor_envelope_single_component_invalid_length),
+			.exp_ret = ZCBOR_ERR_TO_SUIT_ERR(ZCBOR_ERR_PAYLOAD_NOT_CONSUMED),
+		},
+		{
+			.envelope = cbor_envelope_single_component_invalid_second_chunk_length,
+			.envelope_size = sizeof(cbor_envelope_single_component_invalid_second_chunk_length),
+			.exp_ret = ZCBOR_ERR_TO_SUIT_ERR(ZCBOR_ERR_PAYLOAD_NOT_CONSUMED),
+		},
+		{
+			.envelope = cbor_envelope_component_len_20_invalid,
+			.envelope_size = sizeof(cbor_envelope_component_len_20_invalid),
+			.exp_ret = ZCBOR_ERR_TO_SUIT_ERR(ZCBOR_ERR_PAYLOAD_NOT_CONSUMED),
+		},
+		{
+			.envelope = cbor_envelope_component_len_64_invalid,
+			.envelope_size = sizeof(cbor_envelope_component_len_64_invalid),
+			.exp_ret = ZCBOR_ERR_TO_SUIT_ERR(ZCBOR_ERR_PAYLOAD_NOT_CONSUMED),
+		},
 	};
 
 	for (size_t i = 0; i < ZCBOR_ARRAY_SIZE(envelopes); i++) {
@@ -565,7 +691,7 @@ void test_decode_manifest_invalid_input_bytes(void)
 		ret = suit_decoder_decode_manifest(&state);
 		TEST_ASSERT_EQUAL_MESSAGE(envelopes[i].exp_ret, ret, "The manifest decoding did not fail");
 		TEST_ASSERT_EQUAL_MESSAGE(INVALID, state.step, "Invalid state transition after failed manifest decoding");
-		TEST_ASSERT_EQUAL_MESSAGE(NULL, state.decoded_manifest, "Manifest structure not freed after manifest decoding failure");
+		TEST_ASSERT_NULL_MESSAGE(state.decoded_manifest, "Manifest structure not freed after manifest decoding failure");
 	}
 }
 

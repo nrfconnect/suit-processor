@@ -93,19 +93,19 @@ static uint8_t cbor_invalid_digest_length_encoding[] = {
 	0xa2, /* map (2 elements) */
 
 	0x02, /* suit-authentication-wrapper */
-		0x58, 0x27, /* bytes(39) */
+		0x58, 0x28, /* bytes(40) */
 		0x81, /* array (1 element) */
-			0x58, 0x24, /* bytes(36) */
+			0x58, 0x25, /* bytes(37) */
 			0x82, /* array (2 elements) */
 			0x2f, /* suit-digest-algorithm-id: cose-alg-sha-256 */
-			0x58, 0x20, /* suit-digest-bytes: bytes(32) */
+			0x59, 0x00, 0x20, /* suit-digest-bytes: bytes(32) */
 			0x66, 0x58, 0xea, 0x56, 0x02, 0x62, 0x69, 0x6d,
 			0xd1, 0xf1, 0x3b, 0x78, 0x22, 0x39, 0xa0, 0x64,
 			0xda, 0x7c, 0x6c, 0x5c, 0xba, 0xf5, 0x2f, 0xde,
 			0xd4, 0x28, 0xa6, 0xfc, 0x83, 0xc7, 0xe5, 0xaf,
 
 	0x03, /* suit-manifest */
-	0x58, 0x08, /* bytes(8) */
+	0x48, /* bytes(8) */
 		'M', 'a', 'n', 'i', 'f', 'e', 's', 't',
 };
 
@@ -291,7 +291,7 @@ void test_manifest_digest_invalid_input_bytes(void)
 		ret = suit_decoder_check_manifest_digest(&state);
 		TEST_ASSERT_EQUAL_MESSAGE(envelopes[i].exp_ret, ret, "The manifest digest check failed");
 		TEST_ASSERT_EQUAL_MESSAGE(INVALID, state.step, "Invalid state transition after failed manifest digest check");
-		TEST_ASSERT_EQUAL_MESSAGE(NULL, state.decoded_manifest, "Manifest structure not freed after manifest digest check failure");
+		TEST_ASSERT_NULL_MESSAGE(state.decoded_manifest, "Manifest structure not freed after manifest digest check failure");
 	}
 }
 
@@ -324,5 +324,5 @@ void test_manifest_digest_minimal_platform_fail(void)
 	ret = suit_decoder_check_manifest_digest(&state);
 	TEST_ASSERT_EQUAL_MESSAGE(SUIT_ERR_MANIFEST_VERIFICATION, ret, "The manifest digest check failed");
 	TEST_ASSERT_EQUAL_MESSAGE(INVALID, state.step, "Invalid state transition after failed manifest digest check");
-	TEST_ASSERT_EQUAL_MESSAGE(NULL, state.decoded_manifest, "Manifest structure not freed after manifest digest check failure");
+	TEST_ASSERT_NULL_MESSAGE(state.decoded_manifest, "Manifest structure not freed after manifest digest check failure");
 }

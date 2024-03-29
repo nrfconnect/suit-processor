@@ -571,8 +571,7 @@ void test_seq_execution_condition_dependency_integrity_integrity_lost_copy(void)
 			0x14, /* uint(suit-directive-override-parameters) */
 			0xa1, /* map (1) */
 				0x16, /* uint(suit-parameter-source-component) */
-				0x1a, /* uint (32 bit) */
-				0x00, 0x00, 0x00, 0x01,
+				0x01, /* uint (1) */
 			0x07, /* uint(suit-condition-dependency-integrity) */
 			0x00, /* uint(SUIT_Rep_Policy::None) */
 			0x16, /* uint(suit-directive-copy) */

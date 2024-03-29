@@ -25,22 +25,22 @@ static int suit_validate_single_command(struct suit_processor_state *state, suit
 	int retval = SUIT_ERR_DECODING;
 
 	if ((command->type == SUIT_COMMAND_DIRECTIVE) &&
-	    ((command->directive._SUIT_Directive_choice == _SUIT_Directive___suit_directive_set_component_index) ||
-	     (command->directive._SUIT_Directive_choice == _SUIT_Directive___suit_directive_override_parameters))) {
-		switch (command->directive._SUIT_Directive_choice) {
-		case _SUIT_Directive___suit_directive_set_component_index:
+	    ((command->directive.SUIT_Directive_choice == SUIT_Directive_suit_directive_set_component_index_m_l_c) ||
+	     (command->directive.SUIT_Directive_choice == SUIT_Directive_suit_directive_override_parameters_m_l_c))) {
+		switch (command->directive.SUIT_Directive_choice) {
+		case SUIT_Directive_suit_directive_set_component_index_m_l_c:
 			retval = suit_directive_set_current_components(state,
-				&command->directive._SUIT_Directive___suit_directive_set_component_index__IndexArg);
+				&command->directive.SUIT_Directive_suit_directive_set_component_index_m_l_IndexArg_m);
 			if (retval == SUIT_ERR_MISSING_COMPONENT) {
 				retval = SUIT_ERR_MANIFEST_VALIDATION;
 			}
 			break;
-		case _SUIT_Directive___suit_directive_override_parameters:
-			SUIT_DBG("Found valid directive: %d\r\n", command->directive._SUIT_Directive_choice);
+		case SUIT_Directive_suit_directive_override_parameters_m_l_c:
+			SUIT_DBG("Found valid directive: %d\r\n", command->directive.SUIT_Directive_choice);
 			retval = SUIT_SUCCESS;
 			break;
 		default:
-			SUIT_ERR("Found invalid directive: %d\r\n", command->directive._SUIT_Directive_choice);
+			SUIT_ERR("Found invalid directive: %d\r\n", command->directive.SUIT_Directive_choice);
 			retval = SUIT_ERR_MANIFEST_VALIDATION;
 			break;
 		}
@@ -64,65 +64,65 @@ static int suit_validate_single_command(struct suit_processor_state *state, suit
 	/* If the command has finished and the component list was not exhausted, reschedule the command. */
 	while ((retval == SUIT_SUCCESS) && (component_idx != SUIT_MAX_NUM_COMPONENTS)) {
 		if (command->type == SUIT_COMMAND_CONDITION) {
-			switch (command->condition._SUIT_Condition_choice) {
-			case _SUIT_Condition___suit_condition_vendor_identifier:
-			case _SUIT_Condition___suit_condition_class_identifier:
-			case _SUIT_Condition___suit_condition_device_identifier:
-			case _SUIT_Condition___suit_condition_image_match:
-			case _SUIT_Condition___suit_condition_component_slot:
-			case _SUIT_Condition___suit_condition_check_content:
-			case _SUIT_Condition___suit_condition_abort:
-				SUIT_DBG("Found valid condition: %d\r\n", command->condition._SUIT_Condition_choice);
+			switch (command->condition.SUIT_Condition_choice) {
+			case SUIT_Condition_suit_condition_vendor_identifier_m_l_c:
+			case SUIT_Condition_suit_condition_class_identifier_m_l_c:
+			case SUIT_Condition_suit_condition_device_identifier_m_l_c:
+			case SUIT_Condition_suit_condition_image_match_m_l_c:
+			case SUIT_Condition_suit_condition_component_slot_m_l_c:
+			case SUIT_Condition_suit_condition_check_content_m_l_c:
+			case SUIT_Condition_suit_condition_abort_m_l_c:
+				SUIT_DBG("Found valid condition: %d\r\n", command->condition.SUIT_Condition_choice);
 				retval = SUIT_SUCCESS;
 				break;
-			case _SUIT_Condition___suit_condition_dependency_integrity:
-			case _SUIT_Condition___suit_condition_is_dependency:
-				SUIT_DBG("Found valid dependency condition: %d\r\n", command->condition._SUIT_Condition_choice);
+			case SUIT_Condition_suit_condition_dependency_integrity_m_l_c:
+			case SUIT_Condition_suit_condition_is_dependency_m_l_c:
+				SUIT_DBG("Found valid dependency condition: %d\r\n", command->condition.SUIT_Condition_choice);
 				retval = SUIT_SUCCESS;
 				break;
 			default:
-				SUIT_ERR("Found invalid condition: %d\r\n", command->condition._SUIT_Condition_choice);
+				SUIT_ERR("Found invalid condition: %d\r\n", command->condition.SUIT_Condition_choice);
 				retval = SUIT_ERR_MANIFEST_VALIDATION;
 				break;
 			}
 		}
 
 		else if (command->type == SUIT_COMMAND_DIRECTIVE) {
-			switch (command->directive._SUIT_Directive_choice) {
+			switch (command->directive.SUIT_Directive_choice) {
 			/* It is safe to call directive-run-sequence as well as directive-try-each during validation,
 			 * because they only parses the command string and populates the execution stack.
 			 */
-			case _SUIT_Directive___suit_directive_try_each:
-				SUIT_DBG("Found valid directive: %d\r\n", command->directive._SUIT_Directive_choice);
-				retval = suit_directive_try_each(state, &command->directive._SUIT_Directive___suit_directive_try_each__SUIT_Directive_Try_Each_Argument, true);
+			case SUIT_Directive_suit_directive_try_each_m_l_c:
+				SUIT_DBG("Found valid directive: %d\r\n", command->directive.SUIT_Directive_choice);
+				retval = suit_directive_try_each(state, &command->directive.SUIT_Directive_suit_directive_try_each_m_l_SUIT_Directive_Try_Each_Argument_m, true);
 				break;
-			case _SUIT_Directive___suit_directive_run_sequence:
-				SUIT_DBG("Validating run-sequence directive: %d\r\n", command->directive._SUIT_Directive_choice);
+			case SUIT_Directive_suit_directive_run_sequence_m_l_c:
+				SUIT_DBG("Validating run-sequence directive: %d\r\n", command->directive.SUIT_Directive_choice);
 				retval = suit_directive_run_sequence(state,
-					&command->directive._SUIT_Directive___suit_directive_run_sequence_SUIT_Command_Sequence_bstr);
+					&command->directive.SUIT_Directive_suit_directive_run_sequence_m_l_SUIT_Command_Sequence_bstr);
 				break;
-			case _SUIT_Directive___suit_directive_process_dependency:
-			case _SUIT_Directive___suit_directive_set_parameters:
+			case SUIT_Directive_suit_directive_process_dependency_m_l_c:
+			case SUIT_Directive_suit_directive_set_parameters_m_l_c:
 				if (!is_shared_sequence) {
-					SUIT_DBG("Found valid dependency directive: %d\r\n", command->directive._SUIT_Directive_choice);
+					SUIT_DBG("Found valid dependency directive: %d\r\n", command->directive.SUIT_Directive_choice);
 					retval = SUIT_SUCCESS;
 				} else {
-					SUIT_ERR("Found invalid dependency directive: %d\r\n", command->directive._SUIT_Directive_choice);
+					SUIT_ERR("Found invalid dependency directive: %d\r\n", command->directive.SUIT_Directive_choice);
 					retval = SUIT_ERR_MANIFEST_VALIDATION;
 				}
 				break;
-			case _SUIT_Directive___suit_directive_fetch:
-			case _SUIT_Directive___suit_directive_copy:
-			case _SUIT_Directive___suit_directive_write:
-			case _SUIT_Directive___suit_directive_invoke:
+			case SUIT_Directive_suit_directive_fetch_m_l_c:
+			case SUIT_Directive_suit_directive_copy_m_l_c:
+			case SUIT_Directive_suit_directive_write_m_l_c:
+			case SUIT_Directive_suit_directive_invoke_m_l_c:
 				if (!is_shared_sequence) {
-					SUIT_DBG("Found valid directive: %d\r\n", command->directive._SUIT_Directive_choice);
+					SUIT_DBG("Found valid directive: %d\r\n", command->directive.SUIT_Directive_choice);
 					retval = SUIT_SUCCESS;
 					break;
 				}
 				/* fall-through in case of shared command sequence */
 			default:
-				SUIT_ERR("Found invalid directive: %d\r\n", command->directive._SUIT_Directive_choice);
+				SUIT_ERR("Found invalid directive: %d\r\n", command->directive.SUIT_Directive_choice);
 				retval = SUIT_ERR_MANIFEST_VALIDATION;
 				break;
 			}
@@ -165,24 +165,24 @@ static int suit_run_single_command(struct suit_processor_state *state, suit_comm
 	int retval = SUIT_ERR_DECODING;
 
 	if ((command->type == SUIT_COMMAND_DIRECTIVE) &&
-	    ((command->directive._SUIT_Directive_choice == _SUIT_Directive___suit_directive_set_component_index) ||
-	     (command->directive._SUIT_Directive_choice == _SUIT_Directive___suit_directive_override_parameters))) {
-		switch (command->directive._SUIT_Directive_choice) {
-		case _SUIT_Directive___suit_directive_set_component_index:
+	    ((command->directive.SUIT_Directive_choice == SUIT_Directive_suit_directive_set_component_index_m_l_c) ||
+	     (command->directive.SUIT_Directive_choice == SUIT_Directive_suit_directive_override_parameters_m_l_c))) {
+		switch (command->directive.SUIT_Directive_choice) {
+		case SUIT_Directive_suit_directive_set_component_index_m_l_c:
 			retval = suit_directive_set_current_components(state,
-				&command->directive._SUIT_Directive___suit_directive_set_component_index__IndexArg);
+				&command->directive.SUIT_Directive_suit_directive_set_component_index_m_l_IndexArg_m);
 			break;
-		case _SUIT_Directive___suit_directive_override_parameters:
+		case SUIT_Directive_suit_directive_override_parameters_m_l_c:
 			retval = suit_directive_override_parameters(state,
-				command->directive.___suit_directive_override_parameters_map__SUIT_Parameters,
-				command->directive.___suit_directive_override_parameters_map__SUIT_Parameters_count);
+				command->directive.suit_directive_override_parameters_m_l_map_SUIT_Parameters_m,
+				command->directive.suit_directive_override_parameters_m_l_map_SUIT_Parameters_m_count);
 			break;
 		default:
 			retval = SUIT_ERR_DECODING;
 			break;
 		}
 
-		SUIT_ERR("Single command (%d) executed (status: %d)\r\n", command->directive._SUIT_Directive_choice, retval);
+		SUIT_ERR("Single command (%d) executed (status: %d)\r\n", command->directive.SUIT_Directive_choice, retval);
 
 		return retval;
 	}
@@ -207,35 +207,35 @@ static int suit_run_single_command(struct suit_processor_state *state, suit_comm
 
 		if (command->type == SUIT_COMMAND_CONDITION) {
 			SUIT_DBG("Execute condition %d for component idx: %d (manifest: %p, handle: 0x%lx)\r\n",
-				command->condition._SUIT_Condition_choice, component_idx,
+				command->condition.SUIT_Condition_choice, component_idx,
 				seq_exec_state->manifest, params->component_handle);
 
-			switch (command->condition._SUIT_Condition_choice) {
-			case _SUIT_Condition___suit_condition_vendor_identifier:
+			switch (command->condition.SUIT_Condition_choice) {
+			case SUIT_Condition_suit_condition_vendor_identifier_m_l_c:
 				retval = suit_condition_vendor_identifier(state, params);
 				break;
-			case _SUIT_Condition___suit_condition_class_identifier:
+			case SUIT_Condition_suit_condition_class_identifier_m_l_c:
 				retval = suit_condition_class_identifier(state, params);
 				break;
-			case _SUIT_Condition___suit_condition_device_identifier:
+			case SUIT_Condition_suit_condition_device_identifier_m_l_c:
 				retval = suit_condition_device_identifier(state, params);
 				break;
-			case _SUIT_Condition___suit_condition_image_match:
+			case SUIT_Condition_suit_condition_image_match_m_l_c:
 				retval = suit_condition_image_match(state, params);
 				break;
-			case _SUIT_Condition___suit_condition_component_slot:
+			case SUIT_Condition_suit_condition_component_slot_m_l_c:
 				retval = suit_condition_component_slot(state, params);
 				break;
-			case _SUIT_Condition___suit_condition_check_content:
+			case SUIT_Condition_suit_condition_check_content_m_l_c:
 				retval = suit_condition_check_content(state, params);
 				break;
-			case _SUIT_Condition___suit_condition_abort:
+			case SUIT_Condition_suit_condition_abort_m_l_c:
 				retval = suit_condition_abort(state, params);
 				break;
-			case _SUIT_Condition___suit_condition_dependency_integrity:
+			case SUIT_Condition_suit_condition_dependency_integrity_m_l_c:
 				retval = suit_condition_dependency_integrity(state, params);
 				break;
-			case _SUIT_Condition___suit_condition_is_dependency:
+			case SUIT_Condition_suit_condition_is_dependency_m_l_c:
 				retval = suit_condition_is_dependency(state, params);
 				break;
 			default:
@@ -246,36 +246,36 @@ static int suit_run_single_command(struct suit_processor_state *state, suit_comm
 
 		else if (command->type == SUIT_COMMAND_DIRECTIVE) {
 			SUIT_DBG("Execute directive %d for component idx: %d (manifest: %p, handle: 0x%lx)\r\n",
-				command->directive._SUIT_Directive_choice, component_idx,
+				command->directive.SUIT_Directive_choice, component_idx,
 				seq_exec_state->manifest, params->component_handle);
 
-			switch (command->directive._SUIT_Directive_choice) {
-			case _SUIT_Directive___suit_directive_run_sequence:
+			switch (command->directive.SUIT_Directive_choice) {
+			case SUIT_Directive_suit_directive_run_sequence_m_l_c:
 				retval = suit_directive_run_sequence(state,
-					&command->directive._SUIT_Directive___suit_directive_run_sequence_SUIT_Command_Sequence_bstr);
+					&command->directive.SUIT_Directive_suit_directive_run_sequence_m_l_SUIT_Command_Sequence_bstr);
 				break;
-			case _SUIT_Directive___suit_directive_try_each:
-				retval = suit_directive_try_each(state, &command->directive._SUIT_Directive___suit_directive_try_each__SUIT_Directive_Try_Each_Argument, false);
+			case SUIT_Directive_suit_directive_try_each_m_l_c:
+				retval = suit_directive_try_each(state, &command->directive.SUIT_Directive_suit_directive_try_each_m_l_SUIT_Directive_Try_Each_Argument_m, false);
 				break;
-			case _SUIT_Directive___suit_directive_process_dependency:
+			case SUIT_Directive_suit_directive_process_dependency_m_l_c:
 				retval = suit_directive_process_dependency(state, params);
 				break;
-			case _SUIT_Directive___suit_directive_set_parameters:
+			case SUIT_Directive_suit_directive_set_parameters_m_l_c:
 				retval = suit_directive_set_parameters(state,
-					command->directive.___suit_directive_set_parameters_map__SUIT_Parameters,
-					command->directive.___suit_directive_set_parameters_map__SUIT_Parameters_count,
+					command->directive.suit_directive_set_parameters_m_l_map_SUIT_Parameters_m,
+					command->directive.suit_directive_set_parameters_m_l_map_SUIT_Parameters_m_count,
 					params);
 				break;
-			case _SUIT_Directive___suit_directive_copy:
+			case SUIT_Directive_suit_directive_copy_m_l_c:
 				retval = suit_directive_copy(state, params);
 				break;
-			case _SUIT_Directive___suit_directive_write:
+			case SUIT_Directive_suit_directive_write_m_l_c:
 				retval = suit_directive_write(state, params);
 				break;
-			case _SUIT_Directive___suit_directive_invoke:
+			case SUIT_Directive_suit_directive_invoke_m_l_c:
 				retval = suit_directive_invoke(state, params);
 				break;
-			case _SUIT_Directive___suit_directive_fetch:
+			case SUIT_Directive_suit_directive_fetch_m_l_c:
 				retval = suit_directive_fetch(state, params);
 				break;
 			default:
@@ -298,7 +298,7 @@ static int suit_run_single_command(struct suit_processor_state *state, suit_comm
 		}
 	}
 
-	SUIT_ERR("Single command (%d) executed (status: %d)\r\n", command->directive._SUIT_Directive_choice, retval);
+	SUIT_ERR("Single command (%d) executed (status: %d)\r\n", command->directive.SUIT_Directive_choice, retval);
 
 	return retval;
 }

@@ -161,6 +161,18 @@ static uint8_t minimal_decodable_envelope[] = {
 	0x40, /* bytes(0) */
 };
 
+static uint8_t cbor_envelope_with_invalid_manifest_length[] = {
+	0xd8, 0x6b, /* tag(107) : SUIT_Envelope */
+	0xa2, /* map (2 elements) */
+	0x02, /* suit-authentication-wrapper */
+		0x42, /* bytes(2) */
+		0x81, /* array (1 element) */
+			0x40, /* bytes(0) */
+	0x03, /* suit-manifest */
+	0x58, 0x08, /* bytes(8) */
+		'M', 'a', 'n', 'i', 'f', 'e', 's', 't',
+};
+
 static uint8_t minimal_decodable_envelope_ext[] = {
 	0xd8, 0x6b, /* tag(107) : SUIT_Envelope */
 	0xa2, /* map (2 elements) */
@@ -312,7 +324,7 @@ void test_decode_envelope_minimal(void)
 	TEST_ASSERT_EQUAL_MESSAGE(0, state.manifest_digest_bytes.len, "Decoding the manifest digest length failed");
 	TEST_ASSERT_EQUAL_MESSAGE(UNAVAILABLE, state.decoded_manifest->text_status, "Decoding the severable text field failed");
 
-	TEST_ASSERT_EQUAL_MESSAGE(minimal_decodable_envelope, state.decoded_manifest->envelope_str.value, "Invalid reference to the decoded envelope");
+	TEST_ASSERT_EQUAL_PTR_MESSAGE(minimal_decodable_envelope, state.decoded_manifest->envelope_str.value, "Invalid reference to the decoded envelope");
 	TEST_ASSERT_EQUAL_MESSAGE(sizeof(minimal_decodable_envelope), state.decoded_manifest->envelope_str.len, "Invalid length of the decoded envelope");
 
 	TEST_ASSERT_EQUAL_MESSAGE(0, state.decoded_manifest->integrated_payloads_count, "Decoding the number of integrated payloads failed");
@@ -341,7 +353,7 @@ void test_decode_envelope_minimal_incorrect_length(void)
 	ret = suit_decoder_decode_envelope(&state, minimal_decodable_envelope, sizeof(minimal_decodable_envelope) - 1);
 	TEST_ASSERT_EQUAL_MESSAGE(ZCBOR_ERR_TO_SUIT_ERR(ZCBOR_ERR_NO_PAYLOAD), ret, "Decoding of valid too short envelope did not fail");
 	TEST_ASSERT_EQUAL_MESSAGE(INVALID, state.step, "Invalid state transition after failed envelope decoding");
-	TEST_ASSERT_EQUAL_MESSAGE(NULL, state.decoded_manifest, "Manifest structure not freed after envelope decoding failure");
+	TEST_ASSERT_NULL_MESSAGE(state.decoded_manifest, "Manifest structure not freed after envelope decoding failure");
 }
 
 void test_decode_envelope_invalid_input_bytes(void)
@@ -406,6 +418,11 @@ void test_decode_envelope_invalid_input_bytes(void)
 			.envelope_size = too_many_payloads_envelope_len,
 			.exp_ret = ZCBOR_ERR_HIGH_ELEM_COUNT,
 		},
+		{
+			.envelope = cbor_envelope_with_invalid_manifest_length,
+			.envelope_size = sizeof(cbor_envelope_with_invalid_manifest_length),
+			.exp_ret = ZCBOR_ERR_INVALID_VALUE_ENCODING,
+		}
 	};
 
 	for (size_t i = 0; i < ZCBOR_ARRAY_SIZE(envelopes); i++) {
@@ -418,7 +435,7 @@ void test_decode_envelope_invalid_input_bytes(void)
 		ret = suit_decoder_decode_envelope(&state, envelopes[i].envelope, envelopes[i].envelope_size);
 		TEST_ASSERT_EQUAL_MESSAGE(ZCBOR_ERR_TO_SUIT_ERR(envelopes[i].exp_ret), ret, "Decoding of invalid envelope must fail");
 		TEST_ASSERT_EQUAL_MESSAGE(INVALID, state.step, "Invalid state transition after failed envelope decoding");
-		TEST_ASSERT_EQUAL_MESSAGE(NULL, state.decoded_manifest, "Manifest structure not freed after envelope decoding failure");
+		TEST_ASSERT_NULL_MESSAGE(state.decoded_manifest, "Manifest structure not freed after envelope decoding failure");
 	}
 }
 void test_deocde_envelope_several_auth_bstrs(void)
@@ -458,11 +475,11 @@ void test_deocde_envelope_several_auth_bstrs(void)
 
 		if (ret == SUIT_SUCCESS) {
 			/* Compare with the byte after the type & size tag. */
-			TEST_ASSERT_EQUAL_MESSAGE(&envelopes[i].envelope[7], state.manifest_digest_bytes.value, "Invalid manifest digest value");
+			TEST_ASSERT_EQUAL_PTR_MESSAGE(&envelopes[i].envelope[7], state.manifest_digest_bytes.value, "Invalid manifest digest value");
 			TEST_ASSERT_EQUAL_MESSAGE(ENVELOPE_DECODED, state.step, "Invalid state transition after envelope decoding");
 		} else {
 			TEST_ASSERT_EQUAL_MESSAGE(INVALID, state.step, "Invalid state transition after failed envelope decoding");
-			TEST_ASSERT_EQUAL_MESSAGE(NULL, state.decoded_manifest, "Manifest structure not freed after envelope decoding failure");
+			TEST_ASSERT_NULL_MESSAGE(state.decoded_manifest, "Manifest structure not freed after envelope decoding failure");
 		}
 	}
 }
@@ -481,7 +498,7 @@ void test_deocde_envelope_severed_text_field(void)
 
 	TEST_ASSERT_EQUAL_MESSAGE(0, state.authentication_bstr_count, "Decoding authentication block count failed");
 	TEST_ASSERT_EQUAL_MESSAGE(0, state.manifest_digest_bytes.len, "Decoding the manifest digest length failed");
-	TEST_ASSERT_EQUAL_MESSAGE(envelope_with_severable_text, state.decoded_manifest->envelope_str.value, "Invalid reference to the decoded envelope");
+	TEST_ASSERT_EQUAL_PTR_MESSAGE(envelope_with_severable_text, state.decoded_manifest->envelope_str.value, "Invalid reference to the decoded envelope");
 	TEST_ASSERT_EQUAL_MESSAGE(sizeof(envelope_with_severable_text), state.decoded_manifest->envelope_str.len, "Invalid length of the decoded envelope");
 	TEST_ASSERT_EQUAL_MESSAGE(0, state.decoded_manifest->integrated_payloads_count, "Decoding the number of integrated payloads failed");
 
@@ -501,7 +518,7 @@ void test_deocde_envelope_empty_text_field(void)
 	ret = suit_decoder_decode_envelope(&state, envelope_with_empty_severable_text, sizeof(envelope_with_empty_severable_text));
 	TEST_ASSERT_EQUAL_MESSAGE(SUIT_ERR_DECODING, ret, "Parsing envelope with severable text failed");
 	TEST_ASSERT_EQUAL_MESSAGE(INVALID, state.step, "Invalid state transition after failed envelope decoding");
-	TEST_ASSERT_EQUAL_MESSAGE(NULL, state.decoded_manifest, "Manifest structure not freed after envelope decoding failure");
+	TEST_ASSERT_NULL_MESSAGE(state.decoded_manifest, "Manifest structure not freed after envelope decoding failure");
 }
 
 void test_deocde_envelope_integrated_payload(void)
@@ -518,7 +535,7 @@ void test_deocde_envelope_integrated_payload(void)
 
 	TEST_ASSERT_EQUAL_MESSAGE(0, state.authentication_bstr_count, "Decoding authentication block count failed");
 	TEST_ASSERT_EQUAL_MESSAGE(0, state.manifest_digest_bytes.len, "Decoding the manifest digest length failed");
-	TEST_ASSERT_EQUAL_MESSAGE(envelope_with_integrated_payload, state.decoded_manifest->envelope_str.value, "Invalid reference to the decoded envelope");
+	TEST_ASSERT_EQUAL_PTR_MESSAGE(envelope_with_integrated_payload, state.decoded_manifest->envelope_str.value, "Invalid reference to the decoded envelope");
 	TEST_ASSERT_EQUAL_MESSAGE(sizeof(envelope_with_integrated_payload), state.decoded_manifest->envelope_str.len, "Invalid length of the decoded envelope");
 	TEST_ASSERT_EQUAL_MESSAGE(UNAVAILABLE, state.decoded_manifest->text_status, "Decoding the severable text field failed");
 
@@ -552,7 +569,7 @@ void test_deocde_envelope_integrated_payloads(void)
 
 		TEST_ASSERT_EQUAL_MESSAGE(0, state.authentication_bstr_count, "Decoding authentication block count failed");
 		TEST_ASSERT_EQUAL_MESSAGE(0, state.manifest_digest_bytes.len, "Decoding the manifest digest length failed");
-		TEST_ASSERT_EQUAL_MESSAGE(envelope, state.decoded_manifest->envelope_str.value, "Invalid reference to the decoded envelope");
+		TEST_ASSERT_EQUAL_PTR_MESSAGE(envelope, state.decoded_manifest->envelope_str.value, "Invalid reference to the decoded envelope");
 		TEST_ASSERT_EQUAL_MESSAGE(envelope_size, state.decoded_manifest->envelope_str.len, "Invalid length of the decoded envelope");
 		TEST_ASSERT_EQUAL_MESSAGE(UNAVAILABLE, state.decoded_manifest->text_status, "Decoding the severable text field failed");
 

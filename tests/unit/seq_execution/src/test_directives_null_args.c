@@ -12,8 +12,8 @@ extern struct suit_processor_state state;
 
 void test_set_current_components_null_args(void)
 {
-	struct IndexArg_ index_arg ={
-		._IndexArg_choice = _IndexArg_bool,
+	struct IndexArg_r index_arg = {
+		.IndexArg_choice = IndexArg_bool_c,
 	};
 
 	int retval = suit_directive_set_current_components(NULL, NULL);
@@ -41,12 +41,12 @@ void test_try_each_null_args(void)
 		.len = sizeof(cmd_seq),
 	};
 	struct SUIT_Directive_Try_Each_Argument try_each_arg = {
-		._SUIT_Directive_Try_Each_Argument_SUIT_Command_Sequence_bstr = {{
+		.SUIT_Directive_Try_Each_Argument_SUIT_Command_Sequence_bstr = {{
 			.value = NULL,
 			.len = 0,
 		}},
-		._SUIT_Directive_Try_Each_Argument_SUIT_Command_Sequence_bstr_count = 0,
-		._SUIT_Directive_Try_Each_Argument_nil_present = 1,
+		.SUIT_Directive_Try_Each_Argument_SUIT_Command_Sequence_bstr_count = 0,
+		.SUIT_Directive_Try_Each_Argument_nil_present = 1,
 	};
 
 	int retval = suit_directive_try_each(NULL, NULL, false);
@@ -61,10 +61,10 @@ void test_try_each_null_args(void)
 	retval = suit_directive_try_each(&state, &try_each_arg, false);
 	TEST_ASSERT_EQUAL_MESSAGE(SUIT_ERR_DECODING, retval, "NULL sequence was not detected");
 
-	try_each_arg._SUIT_Directive_Try_Each_Argument_SUIT_Command_Sequence_bstr[0] = sample_seq;
-	try_each_arg._SUIT_Directive_Try_Each_Argument_SUIT_Command_Sequence_bstr[1] = sample_seq;
-	try_each_arg._SUIT_Directive_Try_Each_Argument_SUIT_Command_Sequence_bstr[2] = sample_seq;
-	try_each_arg._SUIT_Directive_Try_Each_Argument_SUIT_Command_Sequence_bstr_count = 3;
+	try_each_arg.SUIT_Directive_Try_Each_Argument_SUIT_Command_Sequence_bstr[0] = sample_seq;
+	try_each_arg.SUIT_Directive_Try_Each_Argument_SUIT_Command_Sequence_bstr[1] = sample_seq;
+	try_each_arg.SUIT_Directive_Try_Each_Argument_SUIT_Command_Sequence_bstr[2] = sample_seq;
+	try_each_arg.SUIT_Directive_Try_Each_Argument_SUIT_Command_Sequence_bstr_count = 3;
 
 	retval = suit_directive_try_each(&state, &try_each_arg, false);
 	TEST_ASSERT_EQUAL_MESSAGE(SUIT_ERR_CRASH, retval, "Invalid execution state was not detected");
@@ -103,10 +103,10 @@ void test_run_sequence_null_args(void)
 
 void test_override_parameters_null_args(void)
 {
-	struct __suit_directive_override_parameters_map__SUIT_Parameters params = {
-		.___suit_directive_override_parameters_map__SUIT_Parameters = {
-			._SUIT_Parameters_choice = _SUIT_Parameters_suit_parameter_image_size,
-			._SUIT_Parameters_suit_parameter_image_size = 0x01020304,
+	struct suit_directive_override_parameters_m_l_map_SUIT_Parameters_m params = {
+		.suit_directive_override_parameters_m_l_map_SUIT_Parameters_m = {
+			.SUIT_Parameters_choice = SUIT_Parameters_suit_parameter_image_size_c,
+			.SUIT_Parameters_suit_parameter_image_size = 0x01020304,
 		},
 	};
 
@@ -126,10 +126,10 @@ void test_override_parameters_null_args(void)
 void test_set_parameters_null_args(void)
 {
 	struct suit_manifest_params component_params;
-	struct __suit_directive_set_parameters_map__SUIT_Parameters params = {
-		.___suit_directive_set_parameters_map__SUIT_Parameters = {
-			._SUIT_Parameters_choice = _SUIT_Parameters_suit_parameter_image_size,
-			._SUIT_Parameters_suit_parameter_image_size = 0x01020304,
+	struct suit_directive_set_parameters_m_l_map_SUIT_Parameters_m params = {
+		.suit_directive_set_parameters_m_l_map_SUIT_Parameters_m = {
+			.SUIT_Parameters_choice = SUIT_Parameters_suit_parameter_image_size_c,
+			.SUIT_Parameters_suit_parameter_image_size = 0x01020304,
 		},
 	};
 
