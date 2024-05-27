@@ -17,9 +17,9 @@ extern "C" {
 
 #define SUIT_MAX_NUM_SIGNERS 2  ///! The maximum number of signers.
 #define SUIT_MAX_NUM_COMPONENT_ID_PARTS 5  ///! The maximum number of bytestrings in a component ID.
-#define SUIT_MAX_NUM_COMPONENTS 5  ///! The maximum number of components referenced in the manifest.
+#define SUIT_MAX_NUM_COMPONENTS 12  ///! The maximum number of components referenced in the manifest.
 #define SUIT_MAX_NUM_COMPONENT_PARAMS (SUIT_MAX_NUM_COMPONENTS * SUIT_MANIFEST_STACK_MAX_ENTRIES) ///! The maximum number of active components during processing dependency manifests.
-#define SUIT_MAX_NUM_INTEGRATED_PAYLOADS 5  ///! The maximum number of integrated payloads in a single manifest.
+#define SUIT_MAX_NUM_INTEGRATED_PAYLOADS 6  ///! The maximum number of integrated payloads in a single manifest.
 #define SUIT_MAX_COMMAND_ARGS 3  ///! The maximum number of arguments consumed by a single command.
 #define SUIT_SUIT_SIG_STRUCTURE1_MAX_LENGTH 95  ///! The maximum length of the Sig_structure1 structure. Current value allows to store up to 512-bit long digests with 32-bit key id.
 #define SUIT_MAX_SEQ_DEPTH 5  ///! The maximum number of command sequences that may be encapsulated.

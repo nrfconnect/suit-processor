@@ -3,12 +3,12 @@
 ; For that reason it has been simplified for that use case:
 ;
 ; Removed unused extensions
-; Limited the number of possible integrated payloads to 5
+; Limited the number of possible integrated payloads to 6
 ; Limited the number of possible authentication blocks to 2
 ; Removed unused COSE types
 ; Removed COSE authentication block from manifest CDDL - defined and parsed by Cose CDDL
 ; Force making suit-text severable.
-; Limited the number of possible component identifiers to 5
+; Limited the number of possible component identifiers to 12
 ; Limited the length of component identifiers to 5 strings
 ; Remove all hash algs except sha256 and sha512
 ; Remove most of text comprehension since the firmware isn't supposed to understand the text.
@@ -26,7 +26,7 @@ SUIT_Envelope = {
   suit-authentication-wrapper => bstr .cbor SUIT_Authentication,
   suit-manifest  => bstr .cbor SUIT_Manifest,
   SUIT_Severable_Manifest_Members,
-  0*5 SUIT_Integrated_Payload,
+  0*6 SUIT_Integrated_Payload,
 ;  * $$SUIT_Envelope_Extensions,
 }
 
@@ -102,7 +102,7 @@ SUIT_Common = {
   0*1 $$SUIT_Common-extensions,
 }
 
-SUIT_Components           = [ 1*5 SUIT_Component_Identifier ]
+SUIT_Components           = [ 1*12 SUIT_Component_Identifier ]
 
 ;REQUIRED to implement:
 suit-cose-hash-algs /= cose-alg-sha-256

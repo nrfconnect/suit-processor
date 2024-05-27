@@ -174,6 +174,7 @@ void test_manifest_digest_minimal_platform_fail(void);
 void test_decode_manifest_invalid_input(void);
 void test_decode_manifest_invalid_state(void);
 void test_decode_manifest_minimal(void);
+void test_decode_manifest_max_components(void);
 void test_decode_manifest_invalid_input_bytes(void);
 void test_decode_manifest_with_component_id(void);
 

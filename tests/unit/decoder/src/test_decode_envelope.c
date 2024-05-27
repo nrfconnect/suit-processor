@@ -230,6 +230,9 @@ static uint8_t envelope_with_integrated_payload[] = {
 
 static size_t envelope_with_integrated_payload_gen(size_t n_payloads, uint8_t **envelope)
 {
+	/* Update this value when adding or removing payloads. */
+	const size_t max_payloads = 7;
+
 	static uint8_t envelope_with_integrated_payloads[] = {
 		0xd8, 0x6b, /* tag(107) : SUIT_Envelope */
 		0xa8, /* map (8 elements) */
@@ -263,9 +266,13 @@ static size_t envelope_with_integrated_payload_gen(size_t n_payloads, uint8_t **
 			'#', 'F', 'W', '5',
 		0x41, /* bytes(1) */
 			0x05, /* 5 */
+		0x64, /* text field (4 bytes) */
+			'#', 'F', 'W', '6',
+		0x41, /* bytes(1) */
+			0x05, /* 5 */
 	};
 
-	if (n_payloads > 6) {
+	if (n_payloads > max_payloads) {
 		*envelope = NULL;
 		return 0;
 	}
@@ -273,7 +280,7 @@ static size_t envelope_with_integrated_payload_gen(size_t n_payloads, uint8_t **
 	envelope_with_integrated_payloads[2] = 0xa2 + n_payloads;
 	*envelope = envelope_with_integrated_payloads;
 
-	return sizeof(envelope_with_integrated_payloads) - 7 * (6 - n_payloads);
+	return sizeof(envelope_with_integrated_payloads) - 7 * (max_payloads - n_payloads);
 }
 
 
