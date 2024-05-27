@@ -10,4 +10,4 @@ if [ -z "${ZEPHYR_BASE}" ]; then
        exit 1
 fi
 
-$ZEPHYR_BASE/scripts/twister -M -v -T . -W --platform native_posix --platform native_posix_64 $*
+$ZEPHYR_BASE/scripts/twister -M -v -T . -W --platform native_posix --platform native_posix/native/64 $*
