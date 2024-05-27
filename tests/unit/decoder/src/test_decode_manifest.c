@@ -355,7 +355,7 @@ static uint8_t cbor_envelope_with_single_null_component[] = {
 				0x80, /* array (0 elements) */
 };
 
-static uint8_t cbor_envelope_with_6_components[] = {
+static uint8_t cbor_envelope_with_12_components[] = {
 	0xd8, 0x6b, /* tag(107) : SUIT_Envelope */
 	0xa2, /* map (2 elements) */
 
@@ -365,15 +365,93 @@ static uint8_t cbor_envelope_with_6_components[] = {
 			0x40, /* bytes(0) */
 
 	0x03, /* suit-manifest */
-	0x58, 0x1c, /* bytes(28) */
+	0x58, 0x2f, /* bytes(47) */
 	0xa3, /* map (3 elements) */
 	0x01, /* suit-manifest-version */ 0x01,
 	0x02, /* suit-manifest-sequence-number */ 0x10,
 	0x03, /* suit-common */
-		0x55, /* bytes(21) */
+		0x58, 0x27, /* bytes(39) */
 		0xA1, /* map (1 element) */
 			0x02, /* suit-components */
-				0x86, /* array (6 elements) */
+				0x8c, /* array (12 elements) */
+				0x81, /* array (1 element) */
+					0x41, /* bytes(1) */
+					'M',
+				0x81, /* array (1 element) */
+					0x41, /* bytes(1) */
+					'M',
+				0x81, /* array (1 element) */
+					0x41, /* bytes(1) */
+					'M',
+				0x81, /* array (1 element) */
+					0x41, /* bytes(1) */
+					'M',
+				0x81, /* array (1 element) */
+					0x41, /* bytes(1) */
+					'M',
+				0x81, /* array (1 element) */
+					0x41, /* bytes(1) */
+					'M',
+				0x81, /* array (1 element) */
+					0x41, /* bytes(1) */
+					'M',
+				0x81, /* array (1 element) */
+					0x41, /* bytes(1) */
+					'M',
+				0x81, /* array (1 element) */
+					0x41, /* bytes(1) */
+					'M',
+				0x81, /* array (1 element) */
+					0x41, /* bytes(1) */
+					'M',
+				0x81, /* array (1 element) */
+					0x41, /* bytes(1) */
+					'M',
+				0x81, /* array (1 element) */
+					0x41, /* bytes(1) */
+					'M',
+};
+
+static uint8_t cbor_envelope_with_13_components[] = {
+	0xd8, 0x6b, /* tag(107) : SUIT_Envelope */
+	0xa2, /* map (2 elements) */
+
+	0x02, /* suit-authentication-wrapper */
+		0x42, /* bytes(2) */
+		0x81, /* array (1 element) */
+			0x40, /* bytes(0) */
+
+	0x03, /* suit-manifest */
+	0x58, 0x32, /* bytes(50) */
+	0xa3, /* map (3 elements) */
+	0x01, /* suit-manifest-version */ 0x01,
+	0x02, /* suit-manifest-sequence-number */ 0x10,
+	0x03, /* suit-common */
+		0x58, 0x2a, /* bytes(42) */
+		0xA1, /* map (1 element) */
+			0x02, /* suit-components */
+				0x8d, /* array (13 elements) */
+				0x81, /* array (1 element) */
+					0x41, /* bytes(1) */
+					'M',
+				0x81, /* array (1 element) */
+					0x41, /* bytes(1) */
+					'M',
+				0x81, /* array (1 element) */
+					0x41, /* bytes(1) */
+					'M',
+				0x81, /* array (1 element) */
+					0x41, /* bytes(1) */
+					'M',
+				0x81, /* array (1 element) */
+					0x41, /* bytes(1) */
+					'M',
+				0x81, /* array (1 element) */
+					0x41, /* bytes(1) */
+					'M',
+				0x81, /* array (1 element) */
+					0x41, /* bytes(1) */
+					'M',
 				0x81, /* array (1 element) */
 					0x41, /* bytes(1) */
 					'M',
@@ -422,7 +500,7 @@ static uint8_t cbor_envelope_with_single_dependency_with_empty_prefix[] = {
 					0x01, 0x80,
 };
 
-static uint8_t cbor_envelope_with_5_dependencies[] = {
+static uint8_t cbor_envelope_with_8_dependencies[] = {
 	0xd8, 0x6b, /* tag(107) : SUIT_Envelope */
 	0xa2, /* map (2 elements) */
 
@@ -432,15 +510,24 @@ static uint8_t cbor_envelope_with_5_dependencies[] = {
 			0x40, /* bytes(0) */
 
 	0x03, /* suit-manifest */
-	0x58, 0x2c, /* bytes(44) */
+	0x58, 0x3b, /* bytes(59) */
 	0xa3, /* map (3 elements) */
 	0x01, /* suit-manifest-version */ 0x01,
 	0x02, /* suit-manifest-sequence-number */ 0x10,
 	0x03, /* suit-common */
-		0x58, 0x24, /* bytes(36) */
+		0x58, 0x33, /* bytes(51) */
 		0xA2, /* map (2 elements) */
 			0x02, /* suit-components */
-				0x84, /* array (4 elements) */
+				0x87, /* array (7 elements) */
+				0x81, /* array (1 element) */
+					0x41, /* bytes(1) */
+					'M',
+				0x81, /* array (1 element) */
+					0x41, /* bytes(1) */
+					'M',
+				0x81, /* array (1 element) */
+					0x41, /* bytes(1) */
+					'M',
 				0x81, /* array (1 element) */
 					0x41, /* bytes(1) */
 					'M',
@@ -454,7 +541,10 @@ static uint8_t cbor_envelope_with_5_dependencies[] = {
 					0x41, /* bytes(1) */
 					'M',
 			0x01, /* suit-dependencies */
-				0xA5, /* map (5 elements) */
+				0xA8, /* map (8 elements) */
+				0x06, 0xA0, /* 4: {} */
+				0x04, 0xA0, /* 4: {} */
+				0x05, 0xA0, /* 5: {} */
 				0x03, 0xA0, /* 3: {} */
 				0x01, 0xA0, /* 1: {} */
 				0x02, 0xA0, /* 2: {} */
@@ -573,6 +663,21 @@ void test_decode_manifest_minimal(void)
 	TEST_ASSERT_EQUAL_MESSAGE(0x11, state.decoded_manifest->sequence_number, "Incorrect manifest sequence number value");
 }
 
+void test_decode_manifest_max_components(void)
+{
+	int ret = SUIT_SUCCESS;
+
+	init_decode_envelope(cbor_envelope_with_12_components, sizeof(cbor_envelope_with_12_components));
+	state.step = MANIFEST_DIGEST_VERIFIED;
+
+	ret = suit_decoder_decode_manifest(&state);
+	TEST_ASSERT_EQUAL_MESSAGE(SUIT_SUCCESS, ret, "The manifest decoding failed");
+	TEST_ASSERT_EQUAL_MESSAGE(MANIFEST_DECODED, state.step, "Invalid state transition after manifest decoding");
+	TEST_ASSERT_EQUAL_MESSAGE(0, state.decoded_manifest->manifest_component_id.len, "Invalid length of the manifest component ID");
+	TEST_ASSERT_NULL_MESSAGE(state.decoded_manifest->manifest_component_id.value, "Invalid value of the manifest component ID");
+	TEST_ASSERT_EQUAL_MESSAGE(0x10, state.decoded_manifest->sequence_number, "Incorrect manifest sequence number value");
+}
+
 void test_decode_manifest_invalid_input_bytes(void)
 {
 	int ret = SUIT_SUCCESS;
@@ -639,8 +744,8 @@ void test_decode_manifest_invalid_input_bytes(void)
 			.exp_ret = ZCBOR_ERR_TO_SUIT_ERR(ZCBOR_ERR_PAYLOAD_NOT_CONSUMED),
 		},
 		{
-			.envelope = cbor_envelope_with_6_components,
-			.envelope_size = sizeof(cbor_envelope_with_6_components),
+			.envelope = cbor_envelope_with_13_components,
+			.envelope_size = sizeof(cbor_envelope_with_13_components),
 			.exp_ret = ZCBOR_ERR_TO_SUIT_ERR(ZCBOR_ERR_PAYLOAD_NOT_CONSUMED),
 		},
 		{
@@ -649,8 +754,8 @@ void test_decode_manifest_invalid_input_bytes(void)
 			.exp_ret = ZCBOR_ERR_TO_SUIT_ERR(ZCBOR_ERR_PAYLOAD_NOT_CONSUMED),
 		},
 		{
-			.envelope = cbor_envelope_with_5_dependencies,
-			.envelope_size = sizeof(cbor_envelope_with_5_dependencies),
+			.envelope = cbor_envelope_with_8_dependencies,
+			.envelope_size = sizeof(cbor_envelope_with_8_dependencies),
 			.exp_ret = ZCBOR_ERR_TO_SUIT_ERR(ZCBOR_ERR_PAYLOAD_NOT_CONSUMED),
 		},
 		{

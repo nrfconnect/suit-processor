@@ -4,7 +4,7 @@
 ;
 ; Removed unused extensions
 ; Set the maximum number of parameters inside suit-directive-set-parameters to 6
-; Limited the number of possible dependency manifests to 4
+; Limited the number of possible dependency manifests to 7
 ; Remove suit-directive-unlink
 ; Remove suit-uninstall sequence support
 ; Remove delegation chains
@@ -49,7 +49,7 @@ $$SUIT_Common-extensions //= (
     suit-dependencies => SUIT_Dependencies
 )
 SUIT_Dependencies = {
-    1*4 uint => SUIT_Dependency_Metadata
+    1*7 uint => SUIT_Dependency_Metadata
 }
 SUIT_Dependency_Metadata = {
     ? suit-dependency-prefix => SUIT_Component_Identifier
