@@ -349,8 +349,8 @@ int suit_processor_get_manifest_metadata(const uint8_t *envelope_str, size_t env
 	}
 
 	if (ret == SUIT_SUCCESS) {
-		struct SUIT_Digest digest_cbor;
-		size_t bytes_processed;
+		struct SUIT_Digest digest_cbor = {0};
+		size_t bytes_processed = 0;
 		struct zcbor_string *digest_bstr = &decoder_state->manifest_digest_bytes;
 
 		ret = cbor_decode_SUIT_Digest(digest_bstr->value, digest_bstr->len, &digest_cbor,
