@@ -64,8 +64,8 @@ static int verify_suit_digest(struct SUIT_Digest *digest, struct zcbor_string *d
 
 static int cose_verify_digest(struct zcbor_string *digest_bstr, struct zcbor_string *data_bstr)
 {
-	struct SUIT_Digest digest;
-	size_t bytes_processed;
+	struct SUIT_Digest digest = {0};
+	size_t bytes_processed = 0;
 
 	int ret = cbor_decode_SUIT_Digest(digest_bstr->value, digest_bstr->len, &digest, &bytes_processed);
 
@@ -85,7 +85,7 @@ static int cose_sign1_authenticate_digest(struct zcbor_string *manifest_componen
 	size_t signed_data_size = 0;
 
 	/* Decode COSE_Sign1 structure */
-	struct COSE_Sign1 cose_sign1_struct;
+	struct COSE_Sign1 cose_sign1_struct = {0};
 	size_t cose_sign1_struct_size = 0;
 
 	int ret = cbor_decode_COSE_Sign1_Tagged(

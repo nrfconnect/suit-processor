@@ -187,7 +187,7 @@ int suit_seq_exec_schedule(struct suit_processor_state *state, struct suit_manif
 
 int suit_seq_exec_step(struct suit_processor_state *state)
 {
-	suit_command_t command;
+	suit_command_t command = {0};
 	size_t decoded_len = 0;
 	struct suit_seq_exec_state *seq_exec_state = NULL;
 
