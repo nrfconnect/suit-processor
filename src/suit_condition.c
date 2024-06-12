@@ -73,8 +73,8 @@ int suit_condition_device_identifier(struct suit_processor_state *state,
 int suit_condition_image_match(struct suit_processor_state *state,
 		struct suit_manifest_params *component_params)
 {
-	struct SUIT_Digest digest;
-	size_t bytes_processed;
+	struct SUIT_Digest digest = {0};
+	size_t bytes_processed = 0;
 
 	if (!component_params->image_digest_set) {
 		SUIT_ERR("Failed to check image digest: digest not set (handle: %p)\r\n", (void *)component_params->component_handle);
