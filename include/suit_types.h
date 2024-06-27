@@ -88,8 +88,8 @@ enum suit_cose_alg {
 };
 
 struct suit_arg {
-	union{struct zcbor_string *bstr; unsigned int uint; } arg;
-	enum{bstr, uint} arg_type;
+	union{struct zcbor_string *bstr; unsigned int num; } arg;
+	enum{bstr, num} arg_type;
 };
 
 struct suit_report {
