@@ -70,6 +70,11 @@ static uint8_t condition_device_identifier_cmd[] = {
 		0x18, 0x18, /* uint(suit-condition-device-identifier) */
 		0x00, /* uint(SUIT_Rep_Policy::None) */
 };
+static uint8_t condition_version_cmd[] = {
+	0x82, /* list (2 elements - 1 command) */
+		0x18, 0x1c, /* uint(suit-condition-version) */
+		0x00, /* uint(SUIT_Rep_Policy::None) */
+};
 
 static uint8_t condition_unsupported_cmd[] = {
 	0x82, /* list (2 elements - 1 command) */
@@ -175,6 +180,7 @@ struct cmd_support_matrix shared_support_matrix[] = {
 	{SUIT_SUCCESS, condition_is_dependency_cmd, sizeof(condition_is_dependency_cmd), "condition_is_dependency"},
 	{SUIT_SUCCESS, condition_abort_cmd, sizeof(condition_abort_cmd), "condition_abort"},
 	{SUIT_SUCCESS, condition_device_identifier_cmd, sizeof(condition_device_identifier_cmd), "condition_device_identifier"},
+	{SUIT_SUCCESS, condition_version_cmd, sizeof(condition_version_cmd), "condition_version"},
 	{SUIT_ERR_DECODING, condition_unsupported_cmd, sizeof(condition_unsupported_cmd), "Unsupported condition"},
 	{SUIT_ERR_DECODING, directive_process_dependency_cmd, sizeof(directive_process_dependency_cmd), "directive_process_dependency"},
 	{SUIT_SUCCESS, directive_set_component_index_cmd, sizeof(directive_set_component_index_cmd), "directive_set_component_index"},
@@ -202,6 +208,7 @@ struct cmd_support_matrix command_support_matrix[] = {
 	{SUIT_SUCCESS, condition_is_dependency_cmd, sizeof(condition_is_dependency_cmd), "condition_is_dependency"},
 	{SUIT_SUCCESS, condition_abort_cmd, sizeof(condition_abort_cmd), "condition_abort"},
 	{SUIT_SUCCESS, condition_device_identifier_cmd, sizeof(condition_device_identifier_cmd), "condition_device_identifier"},
+	{SUIT_SUCCESS, condition_version_cmd, sizeof(condition_version_cmd), "condition_version"},
 	{SUIT_ERR_DECODING, condition_unsupported_cmd, sizeof(condition_unsupported_cmd), "Unsupported condition"},
 	{SUIT_ERR_DECODING, directive_process_dependency_cmd, sizeof(directive_process_dependency_cmd), "directive_process_dependency"},
 	{SUIT_SUCCESS, directive_set_component_index_cmd, sizeof(directive_set_component_index_cmd), "directive_set_component_index"},

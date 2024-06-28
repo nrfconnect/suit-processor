@@ -12,6 +12,8 @@ project(unit_test_seq_execution)
 include(../../cmake/test_template.cmake)
 add_subdirectory("${CMAKE_CURRENT_LIST_DIR}/../common" "${PROJECT_BINARY_DIR}/test_common")
 
+zephyr_compile_definitions(CMOCK_MEM_SIZE=65536)
+
 # generate runner for the test
 test_runner_generate(src/main.c)
 
