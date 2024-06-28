@@ -218,6 +218,11 @@ static int suit_directive_override_parameter(struct SUIT_Parameters_r *param, st
 		memcpy(&dst->did, &param->SUIT_Parameters_suit_parameter_device_identifier, sizeof(dst->did));
 		dst->did_set = true;
 		break;
+	case SUIT_Parameters_suit_parameter_version_c:
+		SUIT_DBG("Override version (handle: 0x%lx)\r\n", dst->component_handle);
+		memcpy(&dst->version, &param->SUIT_Parameters_suit_parameter_version, sizeof(dst->version));
+		dst->version_set = true;
+		break;
 	default:
 		return SUIT_ERR_UNSUPPORTED_PARAMETER;
 	}
@@ -324,6 +329,9 @@ static int suit_directive_set_parameter(struct SUIT_Parameters_r *param, struct 
 		break;
 	case SUIT_Parameters_suit_parameter_device_identifier_c:
 		parameter_set = dst->did_set;
+		break;
+	case SUIT_Parameters_suit_parameter_version_c:
+		parameter_set = dst->version_set;
 		break;
 	default:
 		return SUIT_ERR_UNSUPPORTED_PARAMETER;

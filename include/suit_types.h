@@ -88,8 +88,8 @@ enum suit_cose_alg {
 };
 
 struct suit_arg {
-	union{struct zcbor_string *bstr; unsigned int uint; } arg;
-	enum{bstr, uint} arg_type;
+	union{struct zcbor_string *bstr; unsigned int num; } arg;
+	enum{bstr, num} arg_type;
 };
 
 struct suit_report {
@@ -100,7 +100,6 @@ struct suit_report {
 	size_t nargs;
 	struct zcbor_string *addititional_info;
 };
-
 
 static inline bool suit_compare_zcbor_strings(const struct zcbor_string *str1, const struct zcbor_string *str2)
 {

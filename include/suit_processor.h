@@ -45,6 +45,11 @@ enum suit_bool {
 	suit_bool_true = 0x713cf9c6, ///! 111 0001 0011 1100 1111 1001 1100 0110
 };
 
+struct suit_semver {
+	int32_t value[5];
+	uint_fast32_t count;
+};
+
 struct suit_manifest_params {
 	suit_component_t component_handle;
 	struct zcbor_string component_id;
@@ -60,6 +65,7 @@ struct suit_manifest_params {
 	unsigned int source_component;
 	struct zcbor_string invoke_args;
 	struct zcbor_string did;
+	struct zcbor_string version;
 
 	bool vid_set;
 	bool cid_set;
@@ -71,6 +77,7 @@ struct suit_manifest_params {
 	bool source_component_set;
 	bool invoke_args_set;
 	bool did_set;
+	bool version_set;
 
 	enum suit_bool is_dependency;
 	bool integrity_checked;
@@ -139,6 +146,7 @@ struct suit_integrated_payload {
 struct suit_manifest_state {
 	struct zcbor_string envelope_str;
 	struct zcbor_string manifest_component_id;
+	struct zcbor_string current_version;
 	uint32_t sequence_number;
 
 	struct suit_integrated_payload integrated_payloads[SUIT_MAX_NUM_INTEGRATED_PAYLOADS];

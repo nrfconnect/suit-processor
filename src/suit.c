@@ -310,7 +310,7 @@ int suit_process_sequence(const uint8_t *envelope_str, size_t envelope_len, enum
 	return ret;
 }
 
-int suit_processor_get_manifest_metadata(const uint8_t *envelope_str, size_t envelope_len, bool authenticate, struct zcbor_string *manifest_component_id, struct zcbor_string *digest, enum suit_cose_alg *alg, unsigned int *seq_num)
+int suit_processor_get_manifest_metadata(const uint8_t *envelope_str, size_t envelope_len, bool authenticate, struct zcbor_string *manifest_component_id, int *version, size_t *version_len, struct zcbor_string *digest, enum suit_cose_alg *alg, unsigned int *seq_num)
 {
 	int ret = SUIT_SUCCESS;
 	struct suit_decoder_state *decoder_state = &state->decoder_state;
@@ -392,6 +392,36 @@ int suit_processor_get_manifest_metadata(const uint8_t *envelope_str, size_t env
 
 		if (manifest_component_id != NULL) {
 			*manifest_component_id = decoder_state->decoded_manifest->manifest_component_id;
+		}
+
+		if ((version != NULL) && (version_len != NULL)) {
+			struct SUIT_Condition_Version_Comparison_Value cbor_version;
+			size_t cbor_version_len;
+
+			/* Initialize returned memory with zero. */
+			memset(version, 0, sizeof(*version) * (*version_len));
+
+			if (decoder_state->decoded_manifest->current_version.len > 0) {
+				ret = cbor_decode_SUIT_Condition_Version_Comparison_Value(
+					decoder_state->decoded_manifest->current_version.value,
+					decoder_state->decoded_manifest->current_version.len,
+					&cbor_version,
+					&cbor_version_len);
+				if ((ret != ZCBOR_SUCCESS) || (cbor_version_len != decoder_state->decoded_manifest->current_version.len)) {
+					ret = SUIT_ERR_DECODING;
+				} if (cbor_version.SUIT_Condition_Version_Comparison_Value_int_count > *version_len) {
+					ret = SUIT_ERR_DECODING;
+				} else {
+					*version_len = cbor_version.SUIT_Condition_Version_Comparison_Value_int_count;
+					for (size_t i = 0; i < *version_len; i++) {
+						version[i] = cbor_version.SUIT_Condition_Version_Comparison_Value_int[i];
+					}
+				}
+			} else {
+				*version_len = 0;
+			}
+		} else if ((version != NULL) || (version_len != NULL)) {
+			ret = SUIT_ERR_DECODING;
 		}
 	}
 
