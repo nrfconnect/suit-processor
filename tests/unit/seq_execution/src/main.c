@@ -54,6 +54,16 @@ void test_seq_execution_condition_component_slot(void);
 void test_seq_execution_condition_check_content_no_content(void);
 void test_seq_execution_condition_check_content(void);
 
+/* suit-condition-version tests */
+void test_seq_execution_condition_version_no_version(void);
+void test_seq_execution_condition_version_no_platform_version(void);
+void test_seq_execution_condition_version_unavailable_platform_version(void);
+void test_seq_execution_condition_version_invalid_comparison(void);
+void test_seq_execution_condition_version_invalid_version(void);
+void test_seq_execution_condition_version(void);
+void test_seq_execution_condition_version_semver_20(void);
+void test_seq_execution_condition_version_wildcard(void);
+
 /* suit-condition-abort tests */
 void test_seq_execution_condition_abort(void);
 
@@ -96,7 +106,7 @@ void test_seq_execution_process_dependency_lazy_component_release(void);
 void test_seq_execution_process_dependency_valid_dependency(void);
 
 /* suit-directive-override-parameters tests */
-void test_seq_execution_override_parameter_single_component_4params(void);
+void test_seq_execution_override_parameter_single_component_5params(void);
 void test_seq_execution_override_parameter_single_component_6params(void);
 void test_seq_execution_override_parameter_single_component_7params(void);
 void test_seq_execution_override_parameter_multiple_components_3params(void);
@@ -104,11 +114,11 @@ void test_seq_execution_override_parameter_soft_failure(void);
 void test_seq_execution_override_parameter_soft_failure_nested(void);
 
 /* suit-directive-set-parameters tests */
-void test_seq_execution_set_parameter_single_component_4params(void);
+void test_seq_execution_set_parameter_single_component_5params(void);
 void test_seq_execution_set_parameter_single_component_6params(void);
 void test_seq_execution_set_parameter_single_component_7params(void);
-void test_seq_execution_set_parameter_multiple_components_3params(void);
-void test_seq_execution_set_parameter_two_components_3params(void);
+void test_seq_execution_set_parameter_multiple_components_4params(void);
+void test_seq_execution_set_parameter_two_components_4params(void);
 void test_seq_execution_set_parameter_soft_failure(void);
 void test_seq_execution_set_parameter_multiple_components_image_size_failed(void);
 void test_seq_execution_set_parameter_several_components_with_invalid_index(void);

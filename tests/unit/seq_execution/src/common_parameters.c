@@ -150,6 +150,21 @@ struct zcbor_string exp_did = {
 	.len = 16,
 };
 
+static uint8_t version_cmd[] = {
+	0x18, 0x1c, /* uint(suit-parameter-version) */
+	0x44, /* bytes (4) */
+		0x82, /* list(2) */
+		/* suit-condition-version-comparison-type */
+		0x01, /* suit-condition-version-comparison-greater */
+		/* suit-condition-version-comparison-value */
+		0x81, 0x01, /* v1.*.* */
+};
+
+struct zcbor_string exp_version = {
+	.value = &version_cmd[3],
+	.len = 4,
+};
+
 static struct parameter_value *find_param(enum parameter_values param)
 {
 	static struct parameter_value parameter_values[] = {
@@ -164,6 +179,7 @@ static struct parameter_value *find_param(enum parameter_values param)
 		{SOURCE_COMPONENT, source_component_cmd, sizeof(source_component_cmd)},
 		{INVOKE_ARGS, invoke_args_cmd, sizeof(invoke_args_cmd)},
 		{DEVICE_ID, device_identifier_cmd, sizeof(device_identifier_cmd)},
+		{VERSION, version_cmd, sizeof(version_cmd)},
 	};
 
 	for (size_t i = 0; i < ZCBOR_ARRAY_SIZE(parameter_values); i++) {

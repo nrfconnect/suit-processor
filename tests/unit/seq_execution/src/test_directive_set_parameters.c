@@ -28,7 +28,7 @@ static int execute_command_sequence(struct suit_processor_state *state, struct z
 	return ret;
 }
 
-void test_seq_execution_set_parameter_single_component_4params(void)
+void test_seq_execution_set_parameter_single_component_5params(void)
 {
 	uint8_t seq_cmd[128];
 	struct zcbor_string seq = {
@@ -39,13 +39,14 @@ void test_seq_execution_set_parameter_single_component_4params(void)
 	/* Common header */
 	seq_cmd[0] = 0x82; /* list (2 elements - 1 command) */
 	seq_cmd[1] = 0x13; /* uint(suit-directive-set-parameters) */
-	seq_cmd[2] = 0xa4; /* map (4) */
+	seq_cmd[2] = 0xa5; /* map (5) */
 
 	enum parameter_values params[] = {
 		SOURCE_COMPONENT,
 		INVOKE_ARGS,
 		DEVICE_ID,
 		CONTENT,
+		VERSION,
 	};
 
 	seq.len = bootstrap_parameters(params, ZCBOR_ARRAY_SIZE(params), &seq_cmd[3], sizeof(seq_cmd) - 3) + 3;
@@ -78,6 +79,10 @@ void test_seq_execution_set_parameter_single_component_4params(void)
 	TEST_ASSERT_EQUAL_MESSAGE(true, state.components[0].content_set, "Content set, but flag is not updated");
 	TEST_ASSERT_EQUAL_MESSAGE(exp_content.len, state.components[0].content.len, "Content set with invalid length");
 	TEST_ASSERT_EQUAL_MEMORY_MESSAGE(exp_content.value, state.components[0].content.value, exp_content.len, "Content set with invalid value");
+
+	TEST_ASSERT_EQUAL_MESSAGE(true, state.components[0].version_set, "Version set, but flag is not updated");
+	TEST_ASSERT_EQUAL_MESSAGE(exp_version.len, state.components[0].version.len, "Version set with invalid length");
+	TEST_ASSERT_EQUAL_MEMORY_MESSAGE(exp_version.value, state.components[0].version.value, exp_version.len, "Version set with invalid value");
 }
 
 void test_seq_execution_set_parameter_single_component_6params(void)
@@ -139,6 +144,7 @@ void test_seq_execution_set_parameter_single_component_6params(void)
 	TEST_ASSERT_EQUAL_MESSAGE(false, state.components[0].invoke_args_set, "Invoke args not set, but flag was updated");
 	TEST_ASSERT_EQUAL_MESSAGE(false, state.components[0].did_set, "Device ID set, but flag was updated");
 	TEST_ASSERT_EQUAL_MESSAGE(false, state.components[0].content_set, "Content not set, but flag was updated");
+	TEST_ASSERT_EQUAL_MESSAGE(false, state.components[0].version_set, "Version not set, but flag was updated");
 }
 
 void test_seq_execution_set_parameter_single_component_7params(void)
@@ -183,9 +189,10 @@ void test_seq_execution_set_parameter_single_component_7params(void)
 	TEST_ASSERT_EQUAL_MESSAGE(false, state.components[0].source_component_set, "Source component not set, but flag was updated");
 	TEST_ASSERT_EQUAL_MESSAGE(false, state.components[0].invoke_args_set, "Invoke args not set, but flag was updated");
 	TEST_ASSERT_EQUAL_MESSAGE(false, state.components[0].did_set, "Device ID not set, but flag was updated");
+	TEST_ASSERT_EQUAL_MESSAGE(false, state.components[0].version_set, "Version not set, but flag was updated");
 }
 
-void test_seq_execution_set_parameter_multiple_components_3params(void)
+void test_seq_execution_set_parameter_multiple_components_4params(void)
 {
 	uint8_t seq_cmd[128];
 	struct zcbor_string seq = {
@@ -198,12 +205,13 @@ void test_seq_execution_set_parameter_multiple_components_3params(void)
 	seq_cmd[1] = 0x0c, /* uint(suit-directive-set-component-index) */
 	seq_cmd[2] = 0xf5, /* True */
 	seq_cmd[3] = 0x13; /* uint(suit-directive-set-parameters) */
-	seq_cmd[4] = 0xa3; /* map (3) */
+	seq_cmd[4] = 0xa4; /* map (4) */
 
 	enum parameter_values params[] = {
 		SOURCE_COMPONENT,
 		INVOKE_ARGS,
 		DEVICE_ID,
+		VERSION,
 	};
 
 	seq.len = bootstrap_parameters(params, ZCBOR_ARRAY_SIZE(params), &seq_cmd[5], sizeof(seq_cmd) - 5) + 5;
@@ -213,6 +221,7 @@ void test_seq_execution_set_parameter_multiple_components_3params(void)
 	state.components[0].source_component_set = true;
 	state.components[1].invoke_args_set = true;
 	state.components[2].did_set = true;
+	state.components[2].version_set = true;
 
 	int retval = execute_command_sequence(&state, &seq);
 
@@ -251,10 +260,19 @@ void test_seq_execution_set_parameter_multiple_components_3params(void)
 			TEST_ASSERT_EQUAL_MESSAGE(0, state.components[i].did.len, "Device ID length overwritten, but was set before sequence execution");
 			TEST_ASSERT_NULL_MESSAGE(state.components[i].did.value, "Device ID value overwritten, but was set before sequence execution");
 		}
+
+		TEST_ASSERT_EQUAL_MESSAGE(true, state.components[i].version_set, "Version set, but flag is not updated");
+		if (i != 2) {
+			TEST_ASSERT_EQUAL_MESSAGE(exp_version.len, state.components[i].version.len, "Version set with invalid length");
+			TEST_ASSERT_EQUAL_MEMORY_MESSAGE(exp_version.value, state.components[i].version.value, exp_version.len, "Version set with invalid value");
+		} else {
+			TEST_ASSERT_EQUAL_MESSAGE(0, state.components[i].version.len, "Version length overwritten, but was set before sequence execution");
+			TEST_ASSERT_NULL_MESSAGE(state.components[i].version.value, "Version value overwritten, but was set before sequence execution");
+		}
 	}
 }
 
-void test_seq_execution_set_parameter_two_components_3params(void)
+void test_seq_execution_set_parameter_two_components_4params(void)
 {
 	uint8_t seq_cmd[128];
 	struct zcbor_string seq = {
@@ -269,12 +287,13 @@ void test_seq_execution_set_parameter_two_components_3params(void)
 		seq_cmd[3] = 0x01; /* uint(2nd component) */
 		seq_cmd[4] = 0x02; /* uint(3rd component) */
 	seq_cmd[5] = 0x13; /* uint(suit-directive-set-parameters) */
-	seq_cmd[6] = 0xa3; /* map (3) */
+	seq_cmd[6] = 0xa4; /* map (4) */
 
 	enum parameter_values params[] = {
 		SOURCE_COMPONENT,
 		INVOKE_ARGS,
 		DEVICE_ID,
+		VERSION,
 	};
 
 	seq.len = bootstrap_parameters(params, ZCBOR_ARRAY_SIZE(params), &seq_cmd[7], sizeof(seq_cmd) - 7) + 7;
@@ -284,6 +303,7 @@ void test_seq_execution_set_parameter_two_components_3params(void)
 	state.components[0].source_component_set = true;
 	state.components[1].invoke_args_set = true;
 	state.components[2].did_set = true;
+	state.components[2].version_set = true;
 
 	int retval = execute_command_sequence(&state, &seq);
 
@@ -330,6 +350,18 @@ void test_seq_execution_set_parameter_two_components_3params(void)
 			TEST_ASSERT_EQUAL_MEMORY_MESSAGE(exp_did.value, state.components[i].did.value, exp_did.len, "Device ID set with invalid value");
 		} else {
 			TEST_ASSERT_EQUAL_MESSAGE(false, state.components[i].did_set, "Device ID set for unselected component");
+		}
+
+		if (i == 2) {
+			TEST_ASSERT_EQUAL_MESSAGE(true, state.components[i].version_set, "Version set, but flag is not updated");
+			TEST_ASSERT_EQUAL_MESSAGE(0, state.components[i].version.len, "Version length overwritten, but was set before sequence execution");
+			TEST_ASSERT_NULL_MESSAGE(state.components[i].version.value, "Version value overwritten, but was set before sequence execution");
+		} else if (i == 1) {
+			TEST_ASSERT_EQUAL_MESSAGE(true, state.components[i].version_set, "Version set, but flag is not updated");
+			TEST_ASSERT_EQUAL_MESSAGE(exp_version.len, state.components[i].version.len, "Version set with invalid length");
+			TEST_ASSERT_EQUAL_MEMORY_MESSAGE(exp_version.value, state.components[i].version.value, exp_version.len, "Version set with invalid value");
+		} else {
+			TEST_ASSERT_EQUAL_MESSAGE(false, state.components[i].version_set, "Version set for unselected component");
 		}
 	}
 }
@@ -402,7 +434,8 @@ void test_seq_execution_set_parameter_multiple_components_image_size_failed(void
 		TEST_ASSERT_EQUAL_MESSAGE(false, state.components[i].source_component_set, "Source component not set, but flag was updated");
 		TEST_ASSERT_EQUAL_MESSAGE(false, state.components[i].invoke_args_set, "Invoke args not set, but flag was updated");
 		TEST_ASSERT_EQUAL_MESSAGE(false, state.components[i].did_set, "Device ID not set, but flag was updated");
-		TEST_ASSERT_EQUAL_MESSAGE(false, state.components[0].content_set, "Content not set, but flag was updated");
+		TEST_ASSERT_EQUAL_MESSAGE(false, state.components[i].content_set, "Content not set, but flag was updated");
+		TEST_ASSERT_EQUAL_MESSAGE(false, state.components[i].version_set, "Version not set, but flag was updated");
 	}
 
 	TEST_ASSERT_EQUAL_MESSAGE(true, state.components[0].image_size_set, "Image size set before command execution, but flag was updated");
@@ -454,7 +487,8 @@ void test_seq_execution_set_parameter_several_components_with_invalid_index(void
 		TEST_ASSERT_EQUAL_MESSAGE(false, state.components[i].source_component_set, "Source component not set, but flag was updated");
 		TEST_ASSERT_EQUAL_MESSAGE(false, state.components[i].invoke_args_set, "Invoke args not set, but flag was updated");
 		TEST_ASSERT_EQUAL_MESSAGE(false, state.components[i].did_set, "Device ID not set, but flag was updated");
-		TEST_ASSERT_EQUAL_MESSAGE(false, state.components[0].content_set, "Content not set, but flag was updated");
+		TEST_ASSERT_EQUAL_MESSAGE(false, state.components[i].content_set, "Content not set, but flag was updated");
+		TEST_ASSERT_EQUAL_MESSAGE(false, state.components[i].version_set, "Version not set, but flag was updated");
 	}
 
 	TEST_ASSERT_EQUAL_MESSAGE(true, state.components[0].image_size_set, "Image size set before command execution, but flag was updated");
@@ -506,7 +540,8 @@ void test_seq_execution_set_parameter_lazy_platform_image_size_set(void)
 		TEST_ASSERT_EQUAL_MESSAGE(false, state.components[i].source_component_set, "Source component not set, but flag was updated");
 		TEST_ASSERT_EQUAL_MESSAGE(false, state.components[i].invoke_args_set, "Invoke args not set, but flag was updated");
 		TEST_ASSERT_EQUAL_MESSAGE(false, state.components[i].did_set, "Device ID not set, but flag was updated");
-		TEST_ASSERT_EQUAL_MESSAGE(false, state.components[0].content_set, "Content not set, but flag was updated");
+		TEST_ASSERT_EQUAL_MESSAGE(false, state.components[i].content_set, "Content not set, but flag was updated");
+		TEST_ASSERT_EQUAL_MESSAGE(false, state.components[i].version_set, "Version not set, but flag was updated");
 	}
 
 	TEST_ASSERT_EQUAL_MESSAGE(true, state.components[0].image_size_set, "Image size set before command execution, but flag was updated");
