@@ -28,7 +28,7 @@ static int execute_command_sequence(struct suit_processor_state *state, struct z
 	return ret;
 }
 
-void test_seq_execution_override_parameter_single_component_4params(void)
+void test_seq_execution_override_parameter_single_component_5params(void)
 {
 	uint8_t seq_cmd[128];
 	struct zcbor_string seq = {
@@ -39,13 +39,14 @@ void test_seq_execution_override_parameter_single_component_4params(void)
 	/* Common header */
 	seq_cmd[0] = 0x82; /* list (2 elements - 1 command) */
 	seq_cmd[1] = 0x14; /* uint(suit-directive-override-parameters) */
-	seq_cmd[2] = 0xa4; /* map (4) */
+	seq_cmd[2] = 0xa5; /* map (5) */
 
 	enum parameter_values params[] = {
 		SOURCE_COMPONENT,
 		INVOKE_ARGS,
 		DEVICE_ID,
-		CONTENT
+		CONTENT,
+		VERSION,
 	};
 
 	seq.len = bootstrap_parameters(params, ZCBOR_ARRAY_SIZE(params), &seq_cmd[3], sizeof(seq_cmd) - 3) + 3;
@@ -78,6 +79,10 @@ void test_seq_execution_override_parameter_single_component_4params(void)
 	TEST_ASSERT_EQUAL_MESSAGE(true, state.components[0].content_set, "Content set, but flag is not updated");
 	TEST_ASSERT_EQUAL_MESSAGE(exp_content.len, state.components[0].content.len, "Content set with invalid length");
 	TEST_ASSERT_EQUAL_MEMORY_MESSAGE(exp_content.value, state.components[0].content.value, exp_content.len, "Content set with invalid value");
+
+	TEST_ASSERT_EQUAL_MESSAGE(true, state.components[0].version_set, "Version set, but flag is not updated");
+	TEST_ASSERT_EQUAL_MESSAGE(exp_version.len, state.components[0].version.len, "Version set with invalid length");
+	TEST_ASSERT_EQUAL_MEMORY_MESSAGE(exp_version.value, state.components[0].version.value, exp_version.len, "Version set with invalid value");
 }
 
 void test_seq_execution_override_parameter_single_component_6params(void)
@@ -139,6 +144,7 @@ void test_seq_execution_override_parameter_single_component_6params(void)
 	TEST_ASSERT_EQUAL_MESSAGE(false, state.components[0].invoke_args_set, "Invoke args not set, but flag was updated");
 	TEST_ASSERT_EQUAL_MESSAGE(false, state.components[0].did_set, "Device ID set, but flag was updated");
 	TEST_ASSERT_EQUAL_MESSAGE(false, state.components[0].content_set, "Content not set, but flag was updated");
+	TEST_ASSERT_EQUAL_MESSAGE(false, state.components[0].version_set, "Version not set, but flag was updated");
 }
 
 void test_seq_execution_override_parameter_single_component_7params(void)
@@ -183,6 +189,7 @@ void test_seq_execution_override_parameter_single_component_7params(void)
 	TEST_ASSERT_EQUAL_MESSAGE(false, state.components[0].source_component_set, "Source component not set, but flag was updated");
 	TEST_ASSERT_EQUAL_MESSAGE(false, state.components[0].invoke_args_set, "Invoke args not set, but flag was updated");
 	TEST_ASSERT_EQUAL_MESSAGE(false, state.components[0].did_set, "Device ID not set, but flag was updated");
+	TEST_ASSERT_EQUAL_MESSAGE(false, state.components[0].version_set, "Version not set, but flag was updated");
 }
 
 void test_seq_execution_override_parameter_multiple_components_3params(void)
@@ -224,8 +231,9 @@ void test_seq_execution_override_parameter_multiple_components_3params(void)
 		TEST_ASSERT_EQUAL_MESSAGE(false, state.components[i].image_digest_set, "Image digest not set, but flag was updated");
 		TEST_ASSERT_EQUAL_MESSAGE(false, state.components[i].component_slot_set, "Component slot not set, but flag was updated");
 		TEST_ASSERT_EQUAL_MESSAGE(false, state.components[i].image_size_set, "Image size not set, but flag was updated");
-		TEST_ASSERT_EQUAL_MESSAGE(false, state.components[0].content_set, "Content not set, but flag was updated");
+		TEST_ASSERT_EQUAL_MESSAGE(false, state.components[i].content_set, "Content not set, but flag was updated");
 		TEST_ASSERT_EQUAL_MESSAGE(false, state.components[i].uri_set, "URI not set, but flag was updated");
+		TEST_ASSERT_EQUAL_MESSAGE(false, state.components[i].version_set, "Version not set, but flag was updated");
 
 		TEST_ASSERT_EQUAL_MESSAGE(true, state.components[i].source_component_set, "Source component set, but flag is not updated");
 		TEST_ASSERT_EQUAL_MESSAGE(exp_source_component, state.components[i].source_component, "Source component set with invalid value");
