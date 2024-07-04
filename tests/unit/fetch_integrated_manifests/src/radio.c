@@ -41,20 +41,21 @@ static struct zcbor_string signature = {
 	.len = 64,
 };
 static uint8_t signature1_cbor[] = {
-	0x84, // Sig_structure1: array(4)
-		0x6A, // context: text(10)
-			'S', 'i', 'g', 'n', 'a', 't', 'u', 'r', 'e', '1',
-		0x43, // body_protected: bytes(3)
-			0xA1, // header_map: map(1)
-				0x01, // alg_id: 1
-					0x26, // ES256: -7
-		0x40, // external_aad: bytes(0)
-		0x58, // payload: bytes(36)
-			0x24, 0x82, 0x2F, 0x58, 0x20,
-			0xE6, 0x34, 0x39, 0x3D, 0x82, 0x64, 0x93, 0xF4,
-			0x2C, 0x42, 0xCA, 0x81, 0x08, 0x82, 0x7E, 0xF6,
-			0x10, 0x31, 0x47, 0x85, 0xB0, 0xA0, 0xAF, 0xAE,
-			0xF4, 0x85, 0xA5, 0x05, 0x14, 0xE8, 0x38, 0x56,
+	0x58, 0x37, // bytes(55)
+		0x84, // Sig_structure1: array(4)
+			0x6A, // context: text(10)
+				'S', 'i', 'g', 'n', 'a', 't', 'u', 'r', 'e', '1',
+			0x43, // body_protected: bytes(3)
+				0xA1, // header_map: map(1)
+					0x01, // alg_id: 1
+						0x26, // ES256: -7
+			0x40, // external_aad: bytes(0)
+			0x58, // payload: bytes(36)
+				0x24, 0x82, 0x2F, 0x58, 0x20,
+				0xE6, 0x34, 0x39, 0x3D, 0x82, 0x64, 0x93, 0xF4,
+				0x2C, 0x42, 0xCA, 0x81, 0x08, 0x82, 0x7E, 0xF6,
+				0x10, 0x31, 0x47, 0x85, 0xB0, 0xA0, 0xAF, 0xAE,
+				0xF4, 0x85, 0xA5, 0x05, 0x14, 0xE8, 0x38, 0x56,
 };
 static struct zcbor_string exp_signature = {
 	.value = signature1_cbor,
@@ -134,7 +135,7 @@ void radio_assert_envelope_integrity(bool installed)
 {
 	suit_component_t checked_component = installed ? radio_component_handle : candidate_component_handle;
 
-	TEST_ASSERT_EQUAL_MEMORY_MESSAGE(&(signature1_cbor[23]), manifest_digest, sizeof(manifest_digest), "Please fix the test: radio manifest digest inside signature structure is incorrect");
+	TEST_ASSERT_EQUAL_MEMORY_MESSAGE(&(signature1_cbor[25]), manifest_digest, sizeof(manifest_digest), "Please fix the test: radio manifest digest inside signature structure is incorrect");
 
 	/* read manifest from the candidate component data */
 	__cmock_suit_plat_retrieve_manifest_ExpectAndReturn(checked_component, NULL, NULL, SUIT_SUCCESS);

@@ -53,3 +53,5 @@ Sig_structure1 = [
 	external_aad : '',
 	payload : bstr
 ]
+
+Sig_structure1_ToBeSigned = bstr .cbor Sig_structure1

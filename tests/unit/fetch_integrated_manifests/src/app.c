@@ -41,20 +41,21 @@ static struct zcbor_string signature = {
 	.len = 64,
 };
 static uint8_t signature1_cbor[] = {
-	0x84, // Sig_structure1: array(4)
-		0x6A, // context: text(10)
-			'S', 'i', 'g', 'n', 'a', 't', 'u', 'r', 'e', '1',
-		0x43, // body_protected: bytes(3)
-			0xA1, // header_map: map(1)
-				0x01, // alg_id: 1
-					0x26, // ES256: -7
-		0x40, // external_aad: bytes(0)
-		0x58, // payload: bytes(36)
-			0x24, 0x82, 0x2F, 0x58, 0x20,
-			0x3E, 0xC1, 0x59, 0x55, 0x7F, 0x09, 0x37, 0xFE,
-			0x12, 0x6E, 0x02, 0x8A, 0x99, 0xFA, 0x51, 0x20,
-			0x60, 0x2B, 0xDD, 0xC5, 0x2A, 0xBE, 0x32, 0x70,
-			0x57, 0x37, 0xF9, 0x26, 0x36, 0x6A, 0xA6, 0x05,
+	0x58, 0x37, /* bytes(55) */
+		0x84, // Sig_structure1: array(4)
+			0x6A, // context: text(10)
+				'S', 'i', 'g', 'n', 'a', 't', 'u', 'r', 'e', '1',
+			0x43, // body_protected: bytes(3)
+				0xA1, // header_map: map(1)
+					0x01, // alg_id: 1
+						0x26, // ES256: -7
+			0x40, // external_aad: bytes(0)
+			0x58, // payload: bytes(36)
+				0x24, 0x82, 0x2F, 0x58, 0x20,
+				0x3E, 0xC1, 0x59, 0x55, 0x7F, 0x09, 0x37, 0xFE,
+				0x12, 0x6E, 0x02, 0x8A, 0x99, 0xFA, 0x51, 0x20,
+				0x60, 0x2B, 0xDD, 0xC5, 0x2A, 0xBE, 0x32, 0x70,
+				0x57, 0x37, 0xF9, 0x26, 0x36, 0x6A, 0xA6, 0x05,
 };
 static struct zcbor_string exp_signature = {
 	.value = signature1_cbor,
@@ -134,7 +135,7 @@ void app_assert_envelope_integrity(bool installed)
 {
 	suit_component_t checked_component = installed ? app_component_handle : candidate_component_handle;
 
-	TEST_ASSERT_EQUAL_MEMORY_MESSAGE(&(signature1_cbor[23]), manifest_digest, sizeof(manifest_digest), "Please fix the test: application manifest digest inside signature structure is incorrect");
+	TEST_ASSERT_EQUAL_MEMORY_MESSAGE(&(signature1_cbor[25]), manifest_digest, sizeof(manifest_digest), "Please fix the test: application manifest digest inside signature structure is incorrect");
 
 	/* read manifest from the candidate component data */
 	__cmock_suit_plat_retrieve_manifest_ExpectAndReturn(checked_component, NULL, NULL, SUIT_SUCCESS);

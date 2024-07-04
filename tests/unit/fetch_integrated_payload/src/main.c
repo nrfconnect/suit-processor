@@ -22,20 +22,21 @@ static struct zcbor_string signature = {
 	.len = 64,
 };
 static uint8_t signature1_cbor[] = {
-	0x84, // Sig_structure1: array(4)
-		0x6A, // context: text(10)
-			'S', 'i', 'g', 'n', 'a', 't', 'u', 'r', 'e', '1',
-		0x43, // body_protected: bytes(3)
-			0xA1, // header_map: map(1)
-				0x01, // alg_id: 1
-					0x26, // ES256: -7
-		0x40, // external_aad: bytes(0)
-		0x58, // payload: bytes(36)
-			0x24, 0x82, 0x2F, 0x58, 0x20,
-			0xAD, 0xD7, 0xDD, 0x3E, 0x37, 0x4D, 0x38, 0xF3,
-			0x8A, 0x7E, 0x4F, 0xF2, 0x60, 0x12, 0x42, 0xAA,
-			0x2D, 0xF2, 0x46, 0x3B, 0x8F, 0xEC, 0xA3, 0x60,
-			0xEA, 0x37, 0x5F, 0x50, 0xEA, 0xB3, 0xBF, 0x7D,
+	0x58, 0x37, /* bytes(55) */
+		0x84, // Sig_structure1: array(4)
+			0x6A, // context: text(10)
+				'S', 'i', 'g', 'n', 'a', 't', 'u', 'r', 'e', '1',
+			0x43, // body_protected: bytes(3)
+				0xA1, // header_map: map(1)
+					0x01, // alg_id: 1
+						0x26, // ES256: -7
+			0x40, // external_aad: bytes(0)
+			0x58, // payload: bytes(36)
+				0x24, 0x82, 0x2F, 0x58, 0x20,
+				0xAD, 0xD7, 0xDD, 0x3E, 0x37, 0x4D, 0x38, 0xF3,
+				0x8A, 0x7E, 0x4F, 0xF2, 0x60, 0x12, 0x42, 0xAA,
+				0x2D, 0xF2, 0x46, 0x3B, 0x8F, 0xEC, 0xA3, 0x60,
+				0xEA, 0x37, 0x5F, 0x50, 0xEA, 0xB3, 0xBF, 0x7D,
 };
 static struct zcbor_string exp_signature = {
 	.value = signature1_cbor,
@@ -162,7 +163,7 @@ void setUp(void)
 	int ret = suit_processor_init();
 	TEST_ASSERT_EQUAL_MESSAGE(SUIT_SUCCESS, ret, "Unable to initialize SUIT processor");
 
-	TEST_ASSERT_EQUAL_MEMORY_MESSAGE(&(signature1_cbor[23]), manifest_digest, sizeof(manifest_digest), "Please fix the test: manifest digest inside signature structure is incorrect");
+	TEST_ASSERT_EQUAL_MEMORY_MESSAGE(&(signature1_cbor[25]), manifest_digest, sizeof(manifest_digest), "Please fix the test: manifest digest inside signature structure is incorrect");
 }
 
 void test_suit_decode_envelope(void)

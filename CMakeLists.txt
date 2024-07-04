@@ -20,7 +20,7 @@ set(ZCBOR_COMMAND_COSE
     code
     -c "${CMAKE_CURRENT_LIST_DIR}/cddl/cose_sign.cddl"
     -d -e
-    -t COSE_Sign1_Tagged Sig_structure1
+    -t COSE_Sign1_Tagged Sig_structure1_ToBeSigned
     --output-cmake cose.cmake
     --copy-sources
 )

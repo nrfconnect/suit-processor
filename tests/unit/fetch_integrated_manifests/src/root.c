@@ -22,20 +22,21 @@ static struct zcbor_string signature = {
 	.len = 64,
 };
 static uint8_t signature1_cbor[] = {
-	0x84, // Sig_structure1: array(4)
-		0x6A, // context: text(10)
-			'S', 'i', 'g', 'n', 'a', 't', 'u', 'r', 'e', '1',
-		0x43, // body_protected: bytes(3)
-			0xA1, // header_map: map(1)
-				0x01, // alg_id: 1
-					0x26, // ES256: -7
-		0x40, // external_aad: bytes(0)
-		0x58, // payload: bytes(36)
-			0x24, 0x82, 0x2F, 0x58, 0x20,
-			0xD6, 0x8D, 0x7E, 0x78, 0xE5, 0xD6, 0xC2, 0xE2,
-			0x46, 0x80, 0x84, 0x29, 0xB1, 0xA2, 0xC7, 0x9D,
-			0xA7, 0x52, 0xB3, 0x5C, 0x3E, 0x84, 0x1F, 0xBE,
-			0x47, 0x60, 0xA5, 0xC2, 0x7D, 0xE2, 0xE1, 0xD7,
+	0x58, 0x37, /* bytes(55) */
+		0x84, // Sig_structure1: array(4)
+			0x6A, // context: text(10)
+				'S', 'i', 'g', 'n', 'a', 't', 'u', 'r', 'e', '1',
+			0x43, // body_protected: bytes(3)
+				0xA1, // header_map: map(1)
+					0x01, // alg_id: 1
+						0x26, // ES256: -7
+			0x40, // external_aad: bytes(0)
+			0x58, // payload: bytes(36)
+				0x24, 0x82, 0x2F, 0x58, 0x20,
+				0xD6, 0x8D, 0x7E, 0x78, 0xE5, 0xD6, 0xC2, 0xE2,
+				0x46, 0x80, 0x84, 0x29, 0xB1, 0xA2, 0xC7, 0x9D,
+				0xA7, 0x52, 0xB3, 0x5C, 0x3E, 0x84, 0x1F, 0xBE,
+				0x47, 0x60, 0xA5, 0xC2, 0x7D, 0xE2, 0xE1, 0xD7,
 };
 static struct zcbor_string exp_signature = {
 	.value = signature1_cbor,
@@ -71,7 +72,7 @@ struct zcbor_string exp_root_manifest_id = {
 
 void root_assert_envelope_authorization(void)
 {
-	TEST_ASSERT_EQUAL_MEMORY_MESSAGE(&(signature1_cbor[23]), manifest_digest, sizeof(manifest_digest), "Please fix the test: root manifest digest inside signature structure is incorrect");
+	TEST_ASSERT_EQUAL_MEMORY_MESSAGE(&(signature1_cbor[25]), manifest_digest, sizeof(manifest_digest), "Please fix the test: root manifest digest inside signature structure is incorrect");
 
 	/* The envelope authorization should:
 	 * - Verify that the manifest digest matches with the manifest contents

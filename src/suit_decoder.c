@@ -81,7 +81,7 @@ static int cose_verify_digest(struct zcbor_string *digest_bstr, struct zcbor_str
 
 static int cose_sign1_authenticate_digest(struct zcbor_string *manifest_component_id, struct zcbor_string *COSE_Sign1_bstr, struct zcbor_string *digest_bstr)
 {
-	uint8_t signed_data[SUIT_SUIT_SIG_STRUCTURE1_MAX_LENGTH];
+	uint8_t signed_data[SUIT_SUIT_SIG_STRUCTURE1_TOBESIGNED_MAX_LENGTH];
 	size_t signed_data_size = 0;
 
 	/* Decode COSE_Sign1 structure */
@@ -104,15 +104,15 @@ static int cose_sign1_authenticate_digest(struct zcbor_string *manifest_componen
 	}
 
 	/* Construct Sig_structure1 structure */
-	struct Sig_structure1 signature;
+	struct Sig_structure1_ToBeSigned signature;
 
 	memset(&signature, 0, sizeof(signature));
-	signature.Sig_structure1_body_protected_cbor = cose_sign1_struct.COSE_Sign1_Headers_m.Headers_protected_cbor;
-	signature.Sig_structure1_payload = *digest_bstr;
+	signature.Sig_structure1_ToBeSigned_cbor.Sig_structure1_body_protected_cbor = cose_sign1_struct.COSE_Sign1_Headers_m.Headers_protected_cbor;
+	signature.Sig_structure1_ToBeSigned_cbor.Sig_structure1_payload = *digest_bstr;
 
 	/* Encode Sig_structure1 structure as byte string */
 	memset(signed_data, 0, sizeof(signed_data));
-	ret = cbor_encode_Sig_structure1(
+	ret = cbor_encode_Sig_structure1_ToBeSigned(
 		signed_data, sizeof(signed_data),
 		&signature,
 		&signed_data_size);
