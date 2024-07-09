@@ -552,6 +552,7 @@ int suit_directive_process_dependency(struct suit_processor_state *state, struct
 
 int suit_directive_fetch(struct suit_processor_state *state, struct suit_manifest_params *component_params)
 {
+	struct suit_encryption_info enc_info_struct = {0};
 	struct suit_encryption_info *enc_info = NULL;
 	struct suit_seq_exec_state *seq_exec_state;
 	bool integrated = false;
@@ -568,7 +569,6 @@ int suit_directive_fetch(struct suit_processor_state *state, struct suit_manifes
 	}
 
 	if (component_params->encryption_info_set) {
-		struct suit_encryption_info enc_info_struct = {0};
 		int ret = decode_encryption_info(component_params->encryption_info, &enc_info_struct);
 
 		if (ret != SUIT_SUCCESS) {
@@ -576,10 +576,6 @@ int suit_directive_fetch(struct suit_processor_state *state, struct suit_manifes
 		}
 
 		enc_info = &enc_info_struct;
-
-		/* TODO: NCSDK-28262: Add support for encryption info in platform APIs. */
-		(void)enc_info;
-		return SUIT_ERR_UNSUPPORTED_PARAMETER;
 	}
 
 	ret = suit_seq_exec_state_get(state, &seq_exec_state);
@@ -595,26 +591,26 @@ int suit_directive_fetch(struct suit_processor_state *state, struct suit_manifes
 	if (!integrated) {
 #ifdef SUIT_PLATFORM_DRY_RUN_SUPPORT
 		if (state->dry_run != suit_bool_false) {
-			ret = suit_plat_check_fetch(component_params->component_handle, &component_params->uri);
+			ret = suit_plat_check_fetch(component_params->component_handle, &component_params->uri, enc_info);
 		} else {
 			component_modified(component_params);
-			ret = suit_plat_fetch(component_params->component_handle, &component_params->uri);
+			ret = suit_plat_fetch(component_params->component_handle, &component_params->uri, enc_info);
 		}
 #else /* SUIT_PLATFORM_DRY_RUN_SUPPORT */
 		component_modified(component_params);
-		ret = suit_plat_fetch(component_params->component_handle, &component_params->uri);
+		ret = suit_plat_fetch(component_params->component_handle, &component_params->uri, enc_info);
 #endif /* SUIT_PLATFORM_DRY_RUN_SUPPORT */
 	} else {
 #ifdef SUIT_PLATFORM_DRY_RUN_SUPPORT
 		if (state->dry_run != suit_bool_false) {
-			ret = suit_plat_check_fetch_integrated(component_params->component_handle, &integrated_payload);
+			ret = suit_plat_check_fetch_integrated(component_params->component_handle, &integrated_payload, enc_info);
 		} else {
 			component_modified(component_params);
-			ret = suit_plat_fetch_integrated(component_params->component_handle, &integrated_payload);
+			ret = suit_plat_fetch_integrated(component_params->component_handle, &integrated_payload, enc_info);
 		}
 #else /* SUIT_PLATFORM_DRY_RUN_SUPPORT */
 		component_modified(component_params);
-		ret = suit_plat_fetch_integrated(component_params->component_handle, &integrated_payload);
+		ret = suit_plat_fetch_integrated(component_params->component_handle, &integrated_payload, enc_info);
 #endif /* SUIT_PLATFORM_DRY_RUN_SUPPORT */
 	}
 
@@ -623,6 +619,7 @@ int suit_directive_fetch(struct suit_processor_state *state, struct suit_manifes
 
 int suit_directive_copy(struct suit_processor_state *state, struct suit_manifest_params *component_params)
 {
+	struct suit_encryption_info enc_info_struct = {0};
 	struct suit_encryption_info *enc_info = NULL;
 	struct suit_seq_exec_state *seq_exec_state;
 	suit_component_t dst_handle;
@@ -645,7 +642,6 @@ int suit_directive_copy(struct suit_processor_state *state, struct suit_manifest
 	}
 
 	if (component_params->encryption_info_set) {
-		struct suit_encryption_info enc_info_struct = {0};
 		int ret = decode_encryption_info(component_params->encryption_info, &enc_info_struct);
 
 		if (ret != SUIT_SUCCESS) {
@@ -653,10 +649,6 @@ int suit_directive_copy(struct suit_processor_state *state, struct suit_manifest
 		}
 
 		enc_info = &enc_info_struct;
-
-		/* TODO: NCSDK-28262: Add support for encryption info in platform APIs. */
-		(void)enc_info;
-		return SUIT_ERR_UNSUPPORTED_PARAMETER;
 	}
 
 	ret = suit_exec_component_handle_from_idx(seq_exec_state, component_params->source_component, &src_handle);
@@ -666,19 +658,20 @@ int suit_directive_copy(struct suit_processor_state *state, struct suit_manifest
 
 #ifdef SUIT_PLATFORM_DRY_RUN_SUPPORT
 	if (state->dry_run != suit_bool_false) {
-		return suit_plat_check_copy(dst_handle, src_handle);
+		return suit_plat_check_copy(dst_handle, src_handle, enc_info);
 	} else {
 		component_modified(component_params);
-		return suit_plat_copy(dst_handle, src_handle);
+		return suit_plat_copy(dst_handle, src_handle, enc_info);
 	}
 #else /* SUIT_PLATFORM_DRY_RUN_SUPPORT */
 	component_modified(component_params);
-	return suit_plat_copy(dst_handle, src_handle);
+	return suit_plat_copy(dst_handle, src_handle, enc_info);
 #endif /* SUIT_PLATFORM_DRY_RUN_SUPPORT */
 }
 
 int suit_directive_write(struct suit_processor_state *state, struct suit_manifest_params *component_params)
 {
+	struct suit_encryption_info enc_info_struct = {0};
 	struct suit_encryption_info *enc_info = NULL;
 
 	if ((state == NULL) || (component_params == NULL)) {
@@ -691,7 +684,6 @@ int suit_directive_write(struct suit_processor_state *state, struct suit_manifes
 	}
 
 	if (component_params->encryption_info_set) {
-		struct suit_encryption_info enc_info_struct = {0};
 		int ret = decode_encryption_info(component_params->encryption_info, &enc_info_struct);
 
 		if (ret != SUIT_SUCCESS) {
@@ -699,22 +691,18 @@ int suit_directive_write(struct suit_processor_state *state, struct suit_manifes
 		}
 
 		enc_info = &enc_info_struct;
-
-		/* TODO: NCSDK-28262: Add support for encryption info in platform APIs. */
-		(void)enc_info;
-		return SUIT_ERR_UNSUPPORTED_PARAMETER;
 	}
 
 #ifdef SUIT_PLATFORM_DRY_RUN_SUPPORT
 		if (state->dry_run != suit_bool_false) {
-			return suit_plat_check_write(component_params->component_handle, &component_params->content);
+			return suit_plat_check_write(component_params->component_handle, &component_params->content, enc_info);
 		} else {
 			component_modified(component_params);
-			return suit_plat_write(component_params->component_handle, &component_params->content);
+			return suit_plat_write(component_params->component_handle, &component_params->content, enc_info);
 		}
 #else /* SUIT_PLATFORM_DRY_RUN_SUPPORT */
 		component_modified(component_params);
-		return suit_plat_write(component_params->component_handle, &component_params->content);
+		return suit_plat_write(component_params->component_handle, &component_params->content, enc_info);
 #endif /* SUIT_PLATFORM_DRY_RUN_SUPPORT */
 }
 

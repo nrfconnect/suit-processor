@@ -119,7 +119,7 @@ void test_seq_execution_copy_ok(void)
 	bootstrap_envelope_empty(&state);
 	bootstrap_envelope_components(&state, 2);
 
-	__cmock_suit_plat_copy_ExpectAndReturn(ASSIGNED_COMPONENT_HANDLE, exp_src_handle, SUIT_SUCCESS);
+	__cmock_suit_plat_copy_ExpectAndReturn(ASSIGNED_COMPONENT_HANDLE, exp_src_handle, NULL, SUIT_SUCCESS);
 
 	int retval = execute_command_sequence(&state, &seq);
 

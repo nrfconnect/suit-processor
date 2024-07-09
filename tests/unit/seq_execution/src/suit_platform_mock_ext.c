@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Nordic Semiconductor ASA
+ * Copyright (c) 2022 Nordic Semiconductor ASA
  *
  * SPDX-License-Identifier: LicenseRef-Nordic-5-Clause
  */
@@ -59,7 +59,7 @@ int __check_image_match_callback(suit_component_t image_handle, enum suit_cose_a
 }
 
 COMPLEX_ARG_Q_DEFINE(__check_content_callback_queue);
-int __check_content_callback(suit_component_t component_handle, struct zcbor_string* content, int cmock_num_calls)
+int __check_content_callback(suit_component_t component_handle, struct zcbor_string *content, int cmock_num_calls)
 {
 	(void)assert_complex_arg(&__check_content_callback_queue, content);
 	return assert_complex_arg(&__check_content_callback_queue, NULL);
@@ -102,28 +102,28 @@ int __authorize_component_id_callback(struct zcbor_string *manifest_component_id
 }
 
 COMPLEX_ARG_Q_DEFINE(__check_fetch_callback_queue);
-int __check_fetch_callback(suit_component_t dst_handle, struct zcbor_string *uri, int cmock_num_calls)
+int __check_fetch_callback(suit_component_t dst_handle, struct zcbor_string *uri, struct suit_encryption_info *enc_info, int cmock_num_calls)
 {
 	(void)assert_complex_arg(&__check_fetch_callback_queue, uri);
 	return assert_complex_arg(&__check_fetch_callback_queue, NULL);
 }
 
 COMPLEX_ARG_Q_DEFINE(__fetch_callback_queue);
-int __fetch_callback(suit_component_t dst_handle, struct zcbor_string *uri, int cmock_num_calls)
+int __fetch_callback(suit_component_t dst_handle, struct zcbor_string *uri, struct suit_encryption_info *enc_info, int cmock_num_calls)
 {
 	(void)assert_complex_arg(&__fetch_callback_queue, uri);
 	return assert_complex_arg(&__fetch_callback_queue, NULL);
 }
 
 COMPLEX_ARG_Q_DEFINE(__check_fetch_integrated_callback_queue);
-int __check_fetch_integrated_callback(suit_component_t dst_handle, struct zcbor_string *payload, int cmock_num_calls)
+int __check_fetch_integrated_callback(suit_component_t dst_handle, struct zcbor_string *payload, struct suit_encryption_info *enc_info, int cmock_num_calls)
 {
 	(void)assert_complex_arg(&__check_fetch_integrated_callback_queue, payload);
 	return assert_complex_arg(&__check_fetch_integrated_callback_queue, NULL);
 }
 
 COMPLEX_ARG_Q_DEFINE(__fetch_integrated_callback_queue);
-int __fetch_integrated_callback(suit_component_t dst_handle, struct zcbor_string *payload, int cmock_num_calls)
+int __fetch_integrated_callback(suit_component_t dst_handle, struct zcbor_string *payload, struct suit_encryption_info *enc_info, int cmock_num_calls)
 {
 	(void)assert_complex_arg(&__fetch_integrated_callback_queue, payload);
 	return assert_complex_arg(&__fetch_integrated_callback_queue, NULL);
@@ -137,14 +137,14 @@ int __sequence_completed_callback(enum suit_command_sequence seq_name, struct zc
 }
 
 COMPLEX_ARG_Q_DEFINE(__check_write_callback_queue);
-int __check_write_callback(suit_component_t dst_handle, struct zcbor_string *content, int cmock_num_calls)
+int __check_write_callback(suit_component_t dst_handle, struct zcbor_string *content, struct suit_encryption_info *enc_info, int cmock_num_calls)
 {
 	(void)assert_complex_arg(&__check_write_callback_queue, content);
 	return assert_complex_arg(&__check_write_callback_queue, NULL);
 }
 
 COMPLEX_ARG_Q_DEFINE(__write_callback_queue);
-int __write_callback(suit_component_t dst_handle, struct zcbor_string *content, int cmock_num_calls)
+int __write_callback(suit_component_t dst_handle, struct zcbor_string *content, struct suit_encryption_info *enc_info, int cmock_num_calls)
 {
 	(void)assert_complex_arg(&__write_callback_queue, content);
 	return assert_complex_arg(&__write_callback_queue, NULL);

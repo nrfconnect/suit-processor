@@ -73,7 +73,7 @@ void test_seq_execution_fetch_external_uri(void)
 	bootstrap_envelope_empty(&state);
 	bootstrap_envelope_components(&state, 1);
 
-	__cmock_suit_plat_fetch_ExpectComplexArgsAndReturn(ASSIGNED_COMPONENT_HANDLE, &exp_uri, SUIT_SUCCESS);
+	__cmock_suit_plat_fetch_ExpectComplexArgsAndReturn(ASSIGNED_COMPONENT_HANDLE, &exp_uri, NULL, SUIT_SUCCESS);
 
 	int retval = execute_command_sequence(&state, &seq);
 
@@ -113,7 +113,7 @@ void test_seq_execution_fetch_internal_uri(void)
 	state.manifest_stack[0].integrated_payloads[0].key = exp_uri;
 	state.manifest_stack[0].integrated_payloads[0].payload = exp_payload;
 
-	__cmock_suit_plat_fetch_integrated_ExpectComplexArgsAndReturn(ASSIGNED_COMPONENT_HANDLE, &exp_payload, SUIT_SUCCESS);
+	__cmock_suit_plat_fetch_integrated_ExpectComplexArgsAndReturn(ASSIGNED_COMPONENT_HANDLE, &exp_payload, NULL, SUIT_SUCCESS);
 
 	int retval = execute_command_sequence(&state, &seq);
 
