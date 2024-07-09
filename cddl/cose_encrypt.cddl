@@ -1,0 +1,38 @@
+; Adapted from the CDDL fragments in RFC 8152 (https://datatracker.ietf.org/doc/html/rfc8152)
+
+; Enforce the usage of AES-256-GCM
+protected_enc_header_map = {
+  alg_id: 1 => A256GCM: 3,
+}
+
+enc_header_map = {
+  IV: 5 => bstr,
+}
+
+; Enforce the usage of AES-Key-Wrap
+rec_header_map = {
+  alg_id: 1 => A256KW: -5,
+  key_id: 4 => bstr,
+}
+
+COSE_Encrypt_Tagged = #6.96(COSE_Encrypt)
+
+COSE_Encrypt = [
+  protected   : bstr .cbor protected_enc_header_map,
+  unprotected : enc_header_map,
+  ciphertext : nil, ; Currently, only nil (detached) ciphertext is used in SUIT
+  recipients : COSE_recipients,
+]
+
+COSE_recipients = [[
+  protected   : bstr .size 0,
+  unprotected : rec_header_map,
+  ciphertext  : bstr, ; CEK encrypted with KEK
+]]
+
+Enc_structure = [
+  context : "Encrypt",
+  protected : bstr .cbor protected_enc_header_map,
+  external_aad : bstr .size 0,
+]
+

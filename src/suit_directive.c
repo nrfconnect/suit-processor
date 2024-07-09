@@ -10,7 +10,45 @@
 #include <suit_manifest.h>
 #include <suit_seq_exec.h>
 #include <suit_schedule_seq.h>
+#include <cose_encode.h>
+#include <cose_decode.h>
 
+
+static const uint8_t suit_aad_aes256_gcm[] = {
+	0x83, /* array (3 elements) */
+		0x67, /* context: text (7 characters) */
+			'E', 'n', 'c', 'r', 'y', 'p', 't',
+		0xA1, /* protected: map (1 element) */
+			0x01, 0x03, /* alg_id: A256GCM */
+		0x40 /* external_aad: h'' */
+};
+
+static int decode_encryption_info(struct zcbor_string enc_info_bstr, struct suit_encryption_info *enc_info)
+{
+	struct COSE_Encrypt enc_info_cbor = { 0 };
+	size_t enc_info_size = 0;
+
+	int ret = cbor_decode_COSE_Encrypt_Tagged(
+			enc_info_bstr.value,
+			enc_info_bstr.len,
+			&enc_info_cbor,
+			&enc_info_size
+		);
+
+	if ((ret != ZCBOR_SUCCESS) || (enc_info_size != enc_info_bstr.len)) {
+		return SUIT_ERR_DECODING;
+	}
+
+	enc_info->enc_alg_id = suit_cose_aes256_gcm;
+	enc_info->kw_alg_id = suit_cose_aes256_kw;
+	enc_info->kw_key.aes.key_id = enc_info_cbor.COSE_Encrypt_recipients.COSE_recipients_protected_l_unprotected.rec_header_map_key_id;
+	enc_info->kw_key.aes.IV = enc_info_cbor.COSE_Encrypt_unprotected.enc_header_map_IV;
+	enc_info->kw_key.aes.ciphertext = enc_info_cbor.COSE_Encrypt_recipients.COSE_recipients_protected_l_ciphertext;
+	enc_info->kw_key.aes.aad.value = suit_aad_aes256_gcm;
+	enc_info->kw_key.aes.aad.len = sizeof(suit_aad_aes256_gcm);
+
+	return SUIT_SUCCESS;
+}
 
 static void component_modified(struct suit_manifest_params *component_params)
 {
@@ -223,6 +261,11 @@ static int suit_directive_override_parameter(struct SUIT_Parameters_r *param, st
 		memcpy(&dst->version, &param->SUIT_Parameters_suit_parameter_version, sizeof(dst->version));
 		dst->version_set = true;
 		break;
+	case SUIT_Parameters_suit_parameter_encryption_info_c:
+		SUIT_DBG("Override encryption info (handle: 0x%lx)\r\n", dst->component_handle);
+		dst->encryption_info = param->SUIT_Parameters_suit_parameter_encryption_info;
+		dst->encryption_info_set = true;
+		break;
 	default:
 		return SUIT_ERR_UNSUPPORTED_PARAMETER;
 	}
@@ -332,6 +375,9 @@ static int suit_directive_set_parameter(struct SUIT_Parameters_r *param, struct 
 		break;
 	case SUIT_Parameters_suit_parameter_version_c:
 		parameter_set = dst->version_set;
+		break;
+	case SUIT_Parameters_suit_parameter_encryption_info_c:
+		parameter_set = dst->encryption_info_set;
 		break;
 	default:
 		return SUIT_ERR_UNSUPPORTED_PARAMETER;
@@ -506,6 +552,7 @@ int suit_directive_process_dependency(struct suit_processor_state *state, struct
 
 int suit_directive_fetch(struct suit_processor_state *state, struct suit_manifest_params *component_params)
 {
+	struct suit_encryption_info *enc_info = NULL;
 	struct suit_seq_exec_state *seq_exec_state;
 	bool integrated = false;
 	struct zcbor_string integrated_payload;
@@ -518,6 +565,21 @@ int suit_directive_fetch(struct suit_processor_state *state, struct suit_manifes
 
 	if (!component_params->uri_set) {
 		return SUIT_ERR_UNAVAILABLE_PAYLOAD;
+	}
+
+	if (component_params->encryption_info_set) {
+		struct suit_encryption_info enc_info_struct = {0};
+		int ret = decode_encryption_info(component_params->encryption_info, &enc_info_struct);
+
+		if (ret != SUIT_SUCCESS) {
+			return ret;
+		}
+
+		enc_info = &enc_info_struct;
+
+		/* TODO: NCSDK-28262: Add support for encryption info in platform APIs. */
+		(void)enc_info;
+		return SUIT_ERR_UNSUPPORTED_PARAMETER;
 	}
 
 	ret = suit_seq_exec_state_get(state, &seq_exec_state);
@@ -561,6 +623,7 @@ int suit_directive_fetch(struct suit_processor_state *state, struct suit_manifes
 
 int suit_directive_copy(struct suit_processor_state *state, struct suit_manifest_params *component_params)
 {
+	struct suit_encryption_info *enc_info = NULL;
 	struct suit_seq_exec_state *seq_exec_state;
 	suit_component_t dst_handle;
 	suit_component_t src_handle;
@@ -579,6 +642,21 @@ int suit_directive_copy(struct suit_processor_state *state, struct suit_manifest
 
 	if (!component_params->source_component_set) {
 		return SUIT_ERR_UNAVAILABLE_PARAMETER;
+	}
+
+	if (component_params->encryption_info_set) {
+		struct suit_encryption_info enc_info_struct = {0};
+		int ret = decode_encryption_info(component_params->encryption_info, &enc_info_struct);
+
+		if (ret != SUIT_SUCCESS) {
+			return ret;
+		}
+
+		enc_info = &enc_info_struct;
+
+		/* TODO: NCSDK-28262: Add support for encryption info in platform APIs. */
+		(void)enc_info;
+		return SUIT_ERR_UNSUPPORTED_PARAMETER;
 	}
 
 	ret = suit_exec_component_handle_from_idx(seq_exec_state, component_params->source_component, &src_handle);
@@ -601,6 +679,8 @@ int suit_directive_copy(struct suit_processor_state *state, struct suit_manifest
 
 int suit_directive_write(struct suit_processor_state *state, struct suit_manifest_params *component_params)
 {
+	struct suit_encryption_info *enc_info = NULL;
+
 	if ((state == NULL) || (component_params == NULL)) {
 		SUIT_ERR("Unable to execute write directive: invalid argument\r\n");
 		return SUIT_ERR_DECODING;
@@ -608,6 +688,21 @@ int suit_directive_write(struct suit_processor_state *state, struct suit_manifes
 
 	if (!component_params->content_set) {
 		return SUIT_ERR_UNAVAILABLE_PAYLOAD;
+	}
+
+	if (component_params->encryption_info_set) {
+		struct suit_encryption_info enc_info_struct = {0};
+		int ret = decode_encryption_info(component_params->encryption_info, &enc_info_struct);
+
+		if (ret != SUIT_SUCCESS) {
+			return ret;
+		}
+
+		enc_info = &enc_info_struct;
+
+		/* TODO: NCSDK-28262: Add support for encryption info in platform APIs. */
+		(void)enc_info;
+		return SUIT_ERR_UNSUPPORTED_PARAMETER;
 	}
 
 #ifdef SUIT_PLATFORM_DRY_RUN_SUPPORT

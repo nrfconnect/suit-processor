@@ -85,6 +85,8 @@ enum suit_cose_alg {
 	suit_cose_sha256 = -16,
 	suit_cose_es256 = -7,
 	suit_cose_EdDSA = -8,
+	suit_cose_aes256_gcm = 3,
+	suit_cose_aes256_kw = -5,
 };
 
 struct suit_arg {
@@ -99,6 +101,36 @@ struct suit_report {
 	struct suit_arg argv[SUIT_MAX_COMMAND_ARGS];
 	size_t nargs;
 	struct zcbor_string *addititional_info;
+};
+
+struct suit_aes_kw_data {
+	/** @brief The key encryption key identifier. */
+	struct zcbor_string key_id;
+	/** @brief The Initialization Vector (IV) value.
+	 *
+	 * For some symmetric encryption algorithms, this may be referred to as a nonce.
+	 * The IV can be placed in the unprotected bucket, since for AE and AEAD algorithms,
+	 * modifying the IV will cause the decryption to fail.
+	 */
+	struct zcbor_string IV;
+	/** @brief The encrypted encryption key. */
+	struct zcbor_string ciphertext;
+	/** @brief A byte string to be used as the authenticated data structure. */
+	struct zcbor_string aad;
+};
+
+union suit_key_encryption_data {
+	/** @brief AES Key Wrap. */
+	struct suit_aes_kw_data aes;
+};
+
+struct suit_encryption_info {
+	/** @brief COSE algorithm ID for the content encryption method. */
+	enum suit_cose_alg enc_alg_id;
+	/** @brief COSE algorithm ID for the key wrap method. */
+	enum suit_cose_alg kw_alg_id;
+	/** @brief Wrapped key. */
+	union suit_key_encryption_data kw_key;
 };
 
 static inline bool suit_compare_zcbor_strings(const struct zcbor_string *str1, const struct zcbor_string *str2)

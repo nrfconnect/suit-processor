@@ -1,0 +1,9 @@
+; Copied from draft-ietf-suit-firmware-encryption-19 (https://datatracker.ietf.org/doc/html/draft-ietf-suit-firmware-encryption-19)
+
+; SUIT_Encryption_Info = #6.96(COSE_Encrypt)
+
+$$SUIT_Parameters //= (suit-parameter-encryption-info =>
+  bstr ; .cbor SUIT_Encryption_Info
+)
+
+suit-parameter-encryption-info = 19

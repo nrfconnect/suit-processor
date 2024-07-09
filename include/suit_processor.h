@@ -66,6 +66,7 @@ struct suit_manifest_params {
 	struct zcbor_string invoke_args;
 	struct zcbor_string did;
 	struct zcbor_string version;
+	struct zcbor_string encryption_info;
 
 	bool vid_set;
 	bool cid_set;
@@ -78,6 +79,7 @@ struct suit_manifest_params {
 	bool invoke_args_set;
 	bool did_set;
 	bool version_set;
+	bool encryption_info_set;
 
 	enum suit_bool is_dependency;
 	bool integrity_checked;
