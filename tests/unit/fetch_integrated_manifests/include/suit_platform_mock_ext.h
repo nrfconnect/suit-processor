@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Nordic Semiconductor ASA
+ * Copyright (c) 2022 Nordic Semiconductor ASA
  *
  * SPDX-License-Identifier: LicenseRef-Nordic-5-Clause
  */
@@ -44,7 +44,7 @@
  *  - A callback for running queue-based assertions is registered
  *  - The return value, expected to be returned by callback is added to the queue
  *
- * The implementation for for those extensions should:
+ * The implementation for those extensions should:
  * - Define queues for storing complex arguments, one for each mock using COMPLEX_ARG_Q_DEFINE(..) API.
  * - Implement the registered callbacks.
  *
@@ -56,7 +56,7 @@
 /** @brief assert if length and values of two ZCBOR string differ.
  *
  * @param p1  Pointer to the first ZCBOR string.
- * @param p1  Pointer to the second ZCBOR string.
+ * @param p2  Pointer to the second ZCBOR string.
  */
 void assert_zcbor_string(void *p1, void *p2);
 
@@ -70,7 +70,7 @@ void assert_zcbor_string(void *p1, void *p2);
 	__cmock_suit_plat_check_digest_IgnoreArg_digest(); \
 	__cmock_suit_plat_check_digest_IgnoreArg_payload(); \
 }
-int __check_digest_callback(enum suit_cose_alg alg_id, struct zcbor_string* digest, struct zcbor_string* payload, int cmock_num_calls);
+int __check_digest_callback(enum suit_cose_alg alg_id, struct zcbor_string *digest, struct zcbor_string *payload, int cmock_num_calls);
 
 #define __cmock_suit_plat_authenticate_manifest_ExpectComplexArgsAndReturn(manifest_component_id, alg_id, key_id, signature, data, cmock_retval) { \
 	extern complex_arg_q_t __authenticate_manifest_callback_queue; \
@@ -86,7 +86,7 @@ int __check_digest_callback(enum suit_cose_alg alg_id, struct zcbor_string* dige
 	__cmock_suit_plat_authenticate_manifest_IgnoreArg_data(); \
 	__cmock_suit_plat_authenticate_manifest_IgnoreArg_manifest_component_id(); \
 }
-int __authenticate_manifest_callback(struct zcbor_string* manifest_component_id, enum suit_cose_alg alg_id, struct zcbor_string* key_id, struct zcbor_string* signature, struct zcbor_string* data, int cmock_num_calls);
+int __authenticate_manifest_callback(struct zcbor_string *manifest_component_id, enum suit_cose_alg alg_id, struct zcbor_string *key_id, struct zcbor_string *signature, struct zcbor_string *data, int cmock_num_calls);
 
 #define __cmock_suit_plat_create_component_handle_ExpectComplexArgsAndReturn(component_id, handle, cmock_retval) { \
 	extern complex_arg_q_t __get_component_handle_callback_queue; \
@@ -96,7 +96,7 @@ int __authenticate_manifest_callback(struct zcbor_string* manifest_component_id,
 	__cmock_suit_plat_create_component_handle_ExpectAndReturn(component_id, handle, cmock_retval); \
 	__cmock_suit_plat_create_component_handle_IgnoreArg_component_id(); \
 }
-int __get_component_handle_callback(struct zcbor_string* component_id, suit_component_t* handle, int cmock_num_calls);
+int __get_component_handle_callback(struct zcbor_string *component_id, suit_component_t *handle, int cmock_num_calls);
 
 #define __cmock_suit_plat_check_image_match_ExpectComplexArgsAndReturn(image_handle, alg_id, digest, cmock_retval) { \
 	extern complex_arg_q_t __check_image_match_callback_queue; \
@@ -106,7 +106,17 @@ int __get_component_handle_callback(struct zcbor_string* component_id, suit_comp
 	__cmock_suit_plat_check_image_match_ExpectAndReturn(image_handle, alg_id, digest, cmock_retval); \
 	__cmock_suit_plat_check_image_match_IgnoreArg_digest(); \
 }
-int __check_image_match_callback(suit_component_t image_handle, enum suit_cose_alg alg_id, struct zcbor_string* digest, int cmock_num_calls);
+int __check_image_match_callback(suit_component_t image_handle, enum suit_cose_alg alg_id, struct zcbor_string *digest, int cmock_num_calls);
+
+#define __cmock_suit_plat_check_content_ExpectComplexArgsAndReturn(component_handle, content, cmock_retval) { \
+	extern complex_arg_q_t __check_content_callback_queue; \
+	push_complex_arg(content, assert_zcbor_string, __check_content_callback_queue); \
+	push_retval_arg(cmock_retval, __check_content_callback_queue); \
+	__cmock_suit_plat_check_content_AddCallback(__check_content_callback); \
+	__cmock_suit_plat_check_content_ExpectAndReturn(component_handle, content, cmock_retval); \
+	__cmock_suit_plat_check_content_IgnoreArg_content(); \
+}
+int __check_content_callback(suit_component_t component_handle, struct zcbor_string *content, int cmock_num_calls);
 
 #define __cmock_suit_plat_check_vid_ExpectComplexArgsAndReturn(component_handle, vid_uuid, cmock_retval) { \
 	extern complex_arg_q_t __check_vid_callback_queue; \
@@ -116,7 +126,7 @@ int __check_image_match_callback(suit_component_t image_handle, enum suit_cose_a
 	__cmock_suit_plat_check_vid_ExpectAndReturn(component_handle, vid_uuid, cmock_retval); \
 	__cmock_suit_plat_check_vid_IgnoreArg_vid_uuid(); \
 }
-int __check_vid_callback(suit_component_t component_handle, struct zcbor_string* vid_uuid, int cmock_num_calls);
+int __check_vid_callback(suit_component_t component_handle, struct zcbor_string *vid_uuid, int cmock_num_calls);
 
 #define __cmock_suit_plat_check_cid_ExpectComplexArgsAndReturn(component_handle, cid_uuid, cmock_retval) { \
 	extern complex_arg_q_t __check_cid_callback_queue; \
@@ -126,7 +136,7 @@ int __check_vid_callback(suit_component_t component_handle, struct zcbor_string*
 	__cmock_suit_plat_check_cid_ExpectAndReturn(component_handle, cid_uuid, cmock_retval); \
 	__cmock_suit_plat_check_cid_IgnoreArg_cid_uuid(); \
 }
-int __check_cid_callback(suit_component_t component_handle, struct zcbor_string* cid_uuid, int cmock_num_calls);
+int __check_cid_callback(suit_component_t component_handle, struct zcbor_string *cid_uuid, int cmock_num_calls);
 
 #define __cmock_suit_plat_check_did_ExpectComplexArgsAndReturn(component_handle, did_uuid, cmock_retval) { \
 	extern complex_arg_q_t __check_did_callback_queue; \
@@ -136,7 +146,7 @@ int __check_cid_callback(suit_component_t component_handle, struct zcbor_string*
 	__cmock_suit_plat_check_did_ExpectAndReturn(component_handle, did_uuid, cmock_retval); \
 	__cmock_suit_plat_check_did_IgnoreArg_did_uuid(); \
 }
-int __check_did_callback(suit_component_t component_handle, struct zcbor_string* did_uuid, int cmock_num_calls);
+int __check_did_callback(suit_component_t component_handle, struct zcbor_string *did_uuid, int cmock_num_calls);
 
 #define __cmock_suit_plat_authorize_sequence_num_ExpectComplexArgsAndReturn(seq_name, manifest_component_id, seq_num, cmock_retval) { \
 	extern complex_arg_q_t __authorize_sequence_num_callback_queue; \
@@ -160,45 +170,45 @@ int __authorize_sequence_num_callback(enum suit_command_sequence seq_name, struc
 }
 int __authorize_component_id_callback(struct zcbor_string *manifest_component_id, struct zcbor_string *component_id, int cmock_num_calls);
 
-#define __cmock_suit_plat_check_fetch_ExpectComplexArgsAndReturn(dst_handle, uri, cmock_retval) { \
+#define __cmock_suit_plat_check_fetch_ExpectComplexArgsAndReturn(dst_handle, uri, enc_info, cmock_retval) { \
 	extern complex_arg_q_t __check_fetch_callback_queue; \
 	push_complex_arg(uri, assert_zcbor_string, __check_fetch_callback_queue); \
 	push_retval_arg(cmock_retval, __check_fetch_callback_queue); \
 	__cmock_suit_plat_check_fetch_AddCallback(__check_fetch_callback); \
-	__cmock_suit_plat_check_fetch_ExpectAndReturn(dst_handle, uri, cmock_retval); \
+	__cmock_suit_plat_check_fetch_ExpectAndReturn(dst_handle, uri, enc_info, cmock_retval); \
 	__cmock_suit_plat_check_fetch_IgnoreArg_uri(); \
 }
-int __check_fetch_callback(suit_component_t dst_handle, struct zcbor_string* uri, int cmock_num_calls);
+int __check_fetch_callback(suit_component_t dst_handle, struct zcbor_string *uri, struct suit_encryption_info *enc_info, int cmock_num_calls);
 
-#define __cmock_suit_plat_fetch_ExpectComplexArgsAndReturn(dst_handle, uri, cmock_retval) { \
+#define __cmock_suit_plat_fetch_ExpectComplexArgsAndReturn(dst_handle, uri, enc_info, cmock_retval) { \
 	extern complex_arg_q_t __fetch_callback_queue; \
 	push_complex_arg(uri, assert_zcbor_string, __fetch_callback_queue); \
 	push_retval_arg(cmock_retval, __fetch_callback_queue); \
 	__cmock_suit_plat_fetch_AddCallback(__fetch_callback); \
-	__cmock_suit_plat_fetch_ExpectAndReturn(dst_handle, uri, cmock_retval); \
+	__cmock_suit_plat_fetch_ExpectAndReturn(dst_handle, uri, enc_info, cmock_retval); \
 	__cmock_suit_plat_fetch_IgnoreArg_uri(); \
 }
-int __fetch_callback(suit_component_t dst_handle, struct zcbor_string* uri, int cmock_num_calls);
+int __fetch_callback(suit_component_t dst_handle, struct zcbor_string *uri, struct suit_encryption_info *enc_info, int cmock_num_calls);
 
-#define __cmock_suit_plat_check_fetch_integrated_ExpectComplexArgsAndReturn(dst_handle, payload, cmock_retval) { \
+#define __cmock_suit_plat_check_fetch_integrated_ExpectComplexArgsAndReturn(dst_handle, payload, enc_info, cmock_retval) { \
 	extern complex_arg_q_t __check_fetch_integrated_callback_queue; \
 	push_complex_arg(payload, assert_zcbor_string, __check_fetch_integrated_callback_queue); \
 	push_retval_arg(cmock_retval, __check_fetch_integrated_callback_queue); \
 	__cmock_suit_plat_check_fetch_integrated_AddCallback(__check_fetch_integrated_callback); \
-	__cmock_suit_plat_check_fetch_integrated_ExpectAndReturn(dst_handle, payload, cmock_retval); \
+	__cmock_suit_plat_check_fetch_integrated_ExpectAndReturn(dst_handle, payload, enc_info, cmock_retval); \
 	__cmock_suit_plat_check_fetch_integrated_IgnoreArg_payload(); \
 }
-int __check_fetch_integrated_callback(suit_component_t dst_handle, struct zcbor_string* payload, int cmock_num_calls);
+int __check_fetch_integrated_callback(suit_component_t dst_handle, struct zcbor_string *payload, struct suit_encryption_info *enc_info, int cmock_num_calls);
 
-#define __cmock_suit_plat_fetch_integrated_ExpectComplexArgsAndReturn(dst_handle, payload, cmock_retval) { \
+#define __cmock_suit_plat_fetch_integrated_ExpectComplexArgsAndReturn(dst_handle, payload, enc_info, cmock_retval) { \
 	extern complex_arg_q_t __fetch_integrated_callback_queue; \
 	push_complex_arg(payload, assert_zcbor_string, __fetch_integrated_callback_queue); \
 	push_retval_arg(cmock_retval, __fetch_integrated_callback_queue); \
 	__cmock_suit_plat_fetch_integrated_AddCallback(__fetch_integrated_callback); \
-	__cmock_suit_plat_fetch_integrated_ExpectAndReturn(dst_handle, payload, cmock_retval); \
+	__cmock_suit_plat_fetch_integrated_ExpectAndReturn(dst_handle, payload, enc_info, cmock_retval); \
 	__cmock_suit_plat_fetch_integrated_IgnoreArg_payload(); \
 }
-int __fetch_integrated_callback(suit_component_t dst_handle, struct zcbor_string* payload, int cmock_num_calls);
+int __fetch_integrated_callback(suit_component_t dst_handle, struct zcbor_string *payload, struct suit_encryption_info *enc_info, int cmock_num_calls);
 
 
 #define __cmock_suit_plat_sequence_completed_ExpectComplexArgsAndReturn(seq_name, manifest_component_id, envelope_str, envelope_len, cmock_retval) { \
@@ -210,6 +220,26 @@ int __fetch_integrated_callback(suit_component_t dst_handle, struct zcbor_string
 	__cmock_suit_plat_sequence_completed_IgnoreArg_manifest_component_id(); \
 }
 int __sequence_completed_callback(enum suit_command_sequence seq_name, struct zcbor_string *manifest_component_id, const uint8_t *envelope_str, size_t envelope_len, int cmock_num_calls);
+
+#define __cmock_suit_plat_check_write_ExpectComplexArgsAndReturn(dst_handle, content, enc_info, cmock_retval) { \
+	extern complex_arg_q_t __check_write_callback_queue; \
+	push_complex_arg(content, assert_zcbor_string, __check_write_callback_queue); \
+	push_retval_arg(cmock_retval, __check_write_callback_queue); \
+	__cmock_suit_plat_check_write_AddCallback(__check_write_callback); \
+	__cmock_suit_plat_check_write_ExpectAndReturn(dst_handle, content, enc_info, cmock_retval); \
+	__cmock_suit_plat_check_write_IgnoreArg_content(); \
+}
+int __check_write_callback(suit_component_t dst_handle, struct zcbor_string *content, struct suit_encryption_info *enc_info, int cmock_num_calls);
+
+#define __cmock_suit_plat_write_ExpectComplexArgsAndReturn(dst_handle, content, enc_info, cmock_retval) { \
+	extern complex_arg_q_t __write_callback_queue; \
+	push_complex_arg(content, assert_zcbor_string, __write_callback_queue); \
+	push_retval_arg(cmock_retval, __write_callback_queue); \
+	__cmock_suit_plat_write_AddCallback(__write_callback); \
+	__cmock_suit_plat_write_ExpectAndReturn(dst_handle, content, enc_info, cmock_retval); \
+	__cmock_suit_plat_write_IgnoreArg_content(); \
+}
+int __write_callback(suit_component_t dst_handle, struct zcbor_string *content, struct suit_encryption_info *enc_info, int cmock_num_calls);
 
 #define __cmock_suit_plat_authorize_process_dependency_ExpectComplexArgsAndReturn(parent_component_id, child_component_id, seq_name, cmock_retval) { \
 	extern complex_arg_q_t __dependency_seq_authorize_callback_queue; \

@@ -485,7 +485,7 @@ void test_seq_execution_condition_dependency_integrity_integrity_lost_fetch(void
 		.len = strlen("http://example.com/app.bin"),
 	};
 
-	__cmock_suit_plat_fetch_ExpectComplexArgsAndReturn(ASSIGNED_COMPONENT_HANDLE, &exp_uri, SUIT_SUCCESS);
+	__cmock_suit_plat_fetch_ExpectComplexArgsAndReturn(ASSIGNED_COMPONENT_HANDLE, &exp_uri, NULL, SUIT_SUCCESS);
 
 	bootstrap_envelope_empty(&state);
 	bootstrap_envelope_dependency_components(&state, 1);
@@ -547,7 +547,7 @@ void test_seq_execution_condition_dependency_integrity_integrity_lost_fetch_inte
 		.len = sizeof("My application"),
 	};
 
-	__cmock_suit_plat_fetch_integrated_ExpectComplexArgsAndReturn(ASSIGNED_COMPONENT_HANDLE, &exp_payload, SUIT_SUCCESS);
+	__cmock_suit_plat_fetch_integrated_ExpectComplexArgsAndReturn(ASSIGNED_COMPONENT_HANDLE, &exp_payload, NULL, SUIT_SUCCESS);
 
 	bootstrap_envelope_empty(&state);
 	bootstrap_envelope_dependency_components(&state, 1);
@@ -604,7 +604,7 @@ void test_seq_execution_condition_dependency_integrity_integrity_lost_copy(void)
 	__cmock_suit_plat_release_component_handle_ExpectAndReturn(exp_component_id_handle, SUIT_SUCCESS);
 
 	uint32_t exp_src_handle = ASSIGNED_COMPONENT_HANDLE + 1;
-	__cmock_suit_plat_copy_ExpectAndReturn(ASSIGNED_COMPONENT_HANDLE, exp_src_handle, SUIT_SUCCESS);
+	__cmock_suit_plat_copy_ExpectAndReturn(ASSIGNED_COMPONENT_HANDLE, exp_src_handle, NULL, SUIT_SUCCESS);
 
 	bootstrap_envelope_empty(&state);
 	bootstrap_envelope_dependency_components(&state, 2);
@@ -659,7 +659,7 @@ void test_seq_execution_condition_dependency_integrity_integrity_lost_write(void
 		.value = "test_data",
 		.len = strlen("test_data"),
 	};
-	__cmock_suit_plat_write_ExpectComplexArgsAndReturn(ASSIGNED_COMPONENT_HANDLE, &exp_content, SUIT_SUCCESS);
+	__cmock_suit_plat_write_ExpectComplexArgsAndReturn(ASSIGNED_COMPONENT_HANDLE, &exp_content, NULL, SUIT_SUCCESS);
 
 	bootstrap_envelope_empty(&state);
 	bootstrap_envelope_dependency_components(&state, 1);

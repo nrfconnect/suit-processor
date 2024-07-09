@@ -71,7 +71,7 @@ void test_seq_execution_write_content(void)
 	bootstrap_envelope_empty(&state);
 	bootstrap_envelope_components(&state, 1);
 
-	__cmock_suit_plat_write_ExpectComplexArgsAndReturn(ASSIGNED_COMPONENT_HANDLE, &exp_content, SUIT_SUCCESS);
+	__cmock_suit_plat_write_ExpectComplexArgsAndReturn(ASSIGNED_COMPONENT_HANDLE, &exp_content, NULL, SUIT_SUCCESS);
 
 	int retval = execute_command_sequence(&state, &seq);
 
