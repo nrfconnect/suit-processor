@@ -64,6 +64,7 @@ void test_seq_execution_set_parameter_single_component_5params(void)
 	TEST_ASSERT_EQUAL_MESSAGE(false, state.components[0].component_slot_set, "Component slot not set, but flag was updated");
 	TEST_ASSERT_EQUAL_MESSAGE(false, state.components[0].image_size_set, "Image size not set, but flag was updated");
 	TEST_ASSERT_EQUAL_MESSAGE(false, state.components[0].uri_set, "URI not set, but flag was updated");
+	TEST_ASSERT_EQUAL_MESSAGE(false, state.components[0].encryption_info_set, "Encryption info not set, but flag was updated");
 
 	TEST_ASSERT_EQUAL_MESSAGE(true, state.components[0].source_component_set, "Source component set, but flag is not updated");
 	TEST_ASSERT_EQUAL_MESSAGE(exp_source_component, state.components[0].source_component, "Source component set with invalid value");
@@ -145,6 +146,7 @@ void test_seq_execution_set_parameter_single_component_6params(void)
 	TEST_ASSERT_EQUAL_MESSAGE(false, state.components[0].did_set, "Device ID set, but flag was updated");
 	TEST_ASSERT_EQUAL_MESSAGE(false, state.components[0].content_set, "Content not set, but flag was updated");
 	TEST_ASSERT_EQUAL_MESSAGE(false, state.components[0].version_set, "Version not set, but flag was updated");
+	TEST_ASSERT_EQUAL_MESSAGE(false, state.components[0].encryption_info_set, "Encryption info not set, but flag was updated");
 }
 
 void test_seq_execution_set_parameter_single_component_7params(void)
@@ -190,6 +192,7 @@ void test_seq_execution_set_parameter_single_component_7params(void)
 	TEST_ASSERT_EQUAL_MESSAGE(false, state.components[0].invoke_args_set, "Invoke args not set, but flag was updated");
 	TEST_ASSERT_EQUAL_MESSAGE(false, state.components[0].did_set, "Device ID not set, but flag was updated");
 	TEST_ASSERT_EQUAL_MESSAGE(false, state.components[0].version_set, "Version not set, but flag was updated");
+	TEST_ASSERT_EQUAL_MESSAGE(false, state.components[0].encryption_info_set, "Encryption info not set, but flag was updated");
 }
 
 void test_seq_execution_set_parameter_multiple_components_4params(void)
@@ -235,6 +238,7 @@ void test_seq_execution_set_parameter_multiple_components_4params(void)
 		TEST_ASSERT_EQUAL_MESSAGE(false, state.components[i].image_size_set, "Image size not set, but flag was updated");
 		TEST_ASSERT_EQUAL_MESSAGE(false, state.components[i].content_set, "Content not set, but flag was updated");
 		TEST_ASSERT_EQUAL_MESSAGE(false, state.components[i].uri_set, "URI not set, but flag was updated");
+		TEST_ASSERT_EQUAL_MESSAGE(false, state.components[i].encryption_info_set, "Encryption info not set, but flag was updated");
 
 		TEST_ASSERT_EQUAL_MESSAGE(true, state.components[i].source_component_set, "Source component set, but flag is not updated");
 		if (i != 0) {
@@ -317,6 +321,7 @@ void test_seq_execution_set_parameter_two_components_4params(void)
 		TEST_ASSERT_EQUAL_MESSAGE(false, state.components[i].image_size_set, "Image size not set, but flag was updated");
 		TEST_ASSERT_EQUAL_MESSAGE(false, state.components[i].content_set, "Content not set, but flag was updated");
 		TEST_ASSERT_EQUAL_MESSAGE(false, state.components[i].uri_set, "URI not set, but flag was updated");
+		TEST_ASSERT_EQUAL_MESSAGE(false, state.components[i].encryption_info_set, "Encryption info not set, but flag was updated");
 
 		if (i == 3) {
 			TEST_ASSERT_EQUAL_MESSAGE(false, state.components[i].source_component_set, "Source component set for unselected component");
@@ -436,6 +441,7 @@ void test_seq_execution_set_parameter_multiple_components_image_size_failed(void
 		TEST_ASSERT_EQUAL_MESSAGE(false, state.components[i].did_set, "Device ID not set, but flag was updated");
 		TEST_ASSERT_EQUAL_MESSAGE(false, state.components[i].content_set, "Content not set, but flag was updated");
 		TEST_ASSERT_EQUAL_MESSAGE(false, state.components[i].version_set, "Version not set, but flag was updated");
+		TEST_ASSERT_EQUAL_MESSAGE(false, state.components[i].encryption_info_set, "Encryption info not set, but flag was updated");
 	}
 
 	TEST_ASSERT_EQUAL_MESSAGE(true, state.components[0].image_size_set, "Image size set before command execution, but flag was updated");
@@ -489,6 +495,7 @@ void test_seq_execution_set_parameter_several_components_with_invalid_index(void
 		TEST_ASSERT_EQUAL_MESSAGE(false, state.components[i].did_set, "Device ID not set, but flag was updated");
 		TEST_ASSERT_EQUAL_MESSAGE(false, state.components[i].content_set, "Content not set, but flag was updated");
 		TEST_ASSERT_EQUAL_MESSAGE(false, state.components[i].version_set, "Version not set, but flag was updated");
+		TEST_ASSERT_EQUAL_MESSAGE(false, state.components[i].encryption_info_set, "Encryption info not set, but flag was updated");
 	}
 
 	TEST_ASSERT_EQUAL_MESSAGE(true, state.components[0].image_size_set, "Image size set before command execution, but flag was updated");
@@ -542,6 +549,7 @@ void test_seq_execution_set_parameter_lazy_platform_image_size_set(void)
 		TEST_ASSERT_EQUAL_MESSAGE(false, state.components[i].did_set, "Device ID not set, but flag was updated");
 		TEST_ASSERT_EQUAL_MESSAGE(false, state.components[i].content_set, "Content not set, but flag was updated");
 		TEST_ASSERT_EQUAL_MESSAGE(false, state.components[i].version_set, "Version not set, but flag was updated");
+		TEST_ASSERT_EQUAL_MESSAGE(false, state.components[i].encryption_info_set, "Encryption info not set, but flag was updated");
 	}
 
 	TEST_ASSERT_EQUAL_MESSAGE(true, state.components[0].image_size_set, "Image size set before command execution, but flag was updated");

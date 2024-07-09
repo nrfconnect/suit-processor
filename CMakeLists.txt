@@ -19,8 +19,10 @@ set(ZCBOR_COMMAND_COSE
   ${ZCBOR_COMMAND}
     code
     -c "${CMAKE_CURRENT_LIST_DIR}/cddl/cose_sign.cddl"
+    -c "${CMAKE_CURRENT_LIST_DIR}/cddl/cose_encrypt.cddl"
     -d -e
     -t COSE_Sign1_Tagged Sig_structure1
+       COSE_Encrypt_Tagged Enc_structure
     --output-cmake cose.cmake
     --copy-sources
 )
@@ -58,6 +60,7 @@ set(ZCBOR_COMMAND_MANIFEST
     -c "${CMAKE_CURRENT_LIST_DIR}/cddl/manifest.cddl"
     -c "${CMAKE_CURRENT_LIST_DIR}/cddl/trust_domains.cddl"
     -c "${CMAKE_CURRENT_LIST_DIR}/cddl/update_management.cddl"
+    -c "${CMAKE_CURRENT_LIST_DIR}/cddl/firmware_encryption.cddl"
     -d
     -t SUIT_Envelope_Tagged SUIT_Manifest SUIT_Shared_Sequence SUIT_Command_Sequence
        SUIT_Condition SUIT_Directive SUIT_Shared_Commands SUIT_Text_Map SUIT_Digest
