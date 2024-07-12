@@ -26,6 +26,7 @@ enum parameter_values {
 	INVOKE_ARGS,
 	DEVICE_ID,
 	VERSION,
+	ENCRYPTION_INFO,
 };
 
 /** @brief Expected vendor identifier, embedded inside VENDOR_ID sequence. */
@@ -63,6 +64,9 @@ extern struct zcbor_string exp_did;
 
 /** @brief Expected version comparison, embedded inside VERSION sequence. */
 extern struct zcbor_string exp_version;
+
+/** @brief Expected encryption info, embedded inside ENCRYPTION_INFO sequence. */
+extern struct zcbor_string exp_encryption_info;
 
 /** @brief Generate sequence with parameter and a sample value.
  *

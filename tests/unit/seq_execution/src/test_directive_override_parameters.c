@@ -192,7 +192,7 @@ void test_seq_execution_override_parameter_single_component_7params(void)
 	TEST_ASSERT_EQUAL_MESSAGE(false, state.components[0].version_set, "Version not set, but flag was updated");
 }
 
-void test_seq_execution_override_parameter_multiple_components_3params(void)
+void test_seq_execution_override_parameter_multiple_components_4params(void)
 {
 	uint8_t seq_cmd[128];
 	struct zcbor_string seq = {
@@ -205,12 +205,13 @@ void test_seq_execution_override_parameter_multiple_components_3params(void)
 	seq_cmd[1] = 0x0c, /* uint(suit-directive-set-component-index) */
 	seq_cmd[2] = 0xf5, /* True */
 	seq_cmd[3] = 0x14; /* uint(suit-directive-override-parameters) */
-	seq_cmd[4] = 0xa3; /* map (3) */
+	seq_cmd[4] = 0xa4; /* map (4) */
 
 	enum parameter_values params[] = {
 		SOURCE_COMPONENT,
 		INVOKE_ARGS,
 		DEVICE_ID,
+		ENCRYPTION_INFO,
 	};
 
 	seq.len = bootstrap_parameters(params, ZCBOR_ARRAY_SIZE(params), &seq_cmd[5], sizeof(seq_cmd) - 5) + 5;
@@ -220,6 +221,7 @@ void test_seq_execution_override_parameter_multiple_components_3params(void)
 	state.components[0].source_component_set = true;
 	state.components[1].invoke_args_set = true;
 	state.components[2].did_set = true;
+	state.components[3].encryption_info_set = true;
 
 	int retval = execute_command_sequence(&state, &seq);
 
@@ -245,6 +247,10 @@ void test_seq_execution_override_parameter_multiple_components_3params(void)
 		TEST_ASSERT_EQUAL_MESSAGE(true, state.components[i].did_set, "Device ID set, but flag is not updated");
 		TEST_ASSERT_EQUAL_MESSAGE(exp_did.len, state.components[i].did.len, "Device ID set with invalid length");
 		TEST_ASSERT_EQUAL_MEMORY_MESSAGE(exp_did.value, state.components[i].did.value, exp_did.len, "Device ID set with invalid value");
+
+		TEST_ASSERT_EQUAL_MESSAGE(true, state.components[i].encryption_info_set, "Encryption info set, but flag is not updated");
+		TEST_ASSERT_EQUAL_MESSAGE(exp_encryption_info.len, state.components[i].encryption_info.len, "Encryption info set with invalid length");
+		TEST_ASSERT_EQUAL_MEMORY_MESSAGE(exp_encryption_info.value, state.components[i].encryption_info.value, exp_encryption_info.len, "Encryption info set with invalid value");
 	}
 }
 

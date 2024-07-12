@@ -165,6 +165,37 @@ struct zcbor_string exp_version = {
 	.len = 4,
 };
 
+static uint8_t encryption_info_cmd[] = {
+	0x13, /* uint(suit-parameter-encryption-info) */
+	0x58, 0x42, /* bytes (66) */
+		0xd8, 0x60, /* COSE_Encrypt_Tag(96)*/
+		0x84, /* list(4) */
+		0x43, /* protected: bytes(3) */
+			0xa1, /* map(1) */
+			0x01, 0x03, /* alg_id: A256GCM */
+		0xa1, /* unprotected: map(1) */
+			0x05, 0x50, /* IV: bytes(16) */
+			0xf1, 0x4a, 0xab, 0x9d, 0x81, 0xd5, 0x1f, 0x7a,
+			0xd9, 0x43, 0xfe, 0x87, 0xaf, 0x4f, 0x70, 0xcd,
+		0xf6, /* ciphertext: null */
+		0x81, /* recipients: list(1) */
+			0x83, /* COSE_recipient (list with 3 elements) */
+			0x40, /* protected: bytes(0) */
+			0xa2, /* unprotected: map(2) */
+				0x01, 0x24, /* alg_id: A256KW */
+			0x04, 0x45, /* key_id: bytes(5) */
+				'k', 'i', 'd', '-', '1',
+			0x58, 0x18, /* ciphertext: bytes(24) */
+				0x75, 0x60, 0x3f, 0xfc, 0x95, 0x18, 0xd7, 0x94,
+				0x71, 0x3c, 0x8c, 0xa8, 0xa1, 0x15, 0xa7, 0xfb,
+				0x32, 0x56, 0x5a, 0x6d, 0x59, 0x53, 0x4d, 0x62,
+};
+
+struct zcbor_string exp_encryption_info = {
+	.value = &encryption_info_cmd[3],
+	.len = 66,
+};
+
 static struct parameter_value *find_param(enum parameter_values param)
 {
 	static struct parameter_value parameter_values[] = {
@@ -180,6 +211,7 @@ static struct parameter_value *find_param(enum parameter_values param)
 		{INVOKE_ARGS, invoke_args_cmd, sizeof(invoke_args_cmd)},
 		{DEVICE_ID, device_identifier_cmd, sizeof(device_identifier_cmd)},
 		{VERSION, version_cmd, sizeof(version_cmd)},
+		{ENCRYPTION_INFO, encryption_info_cmd, sizeof(encryption_info_cmd)},
 	};
 
 	for (size_t i = 0; i < ZCBOR_ARRAY_SIZE(parameter_values); i++) {
