@@ -40,12 +40,13 @@ static int decode_encryption_info(struct zcbor_string enc_info_bstr, struct suit
 	}
 
 	enc_info->enc_alg_id = suit_cose_aes256_gcm;
+	enc_info->IV = enc_info_cbor.COSE_Encrypt_unprotected.enc_header_map_IV;
+	enc_info->aad.value = suit_aad_aes256_gcm;
+	enc_info->aad.len = sizeof(suit_aad_aes256_gcm);
+
 	enc_info->kw_alg_id = suit_cose_aes256_kw;
 	enc_info->kw_key.aes.key_id = enc_info_cbor.COSE_Encrypt_recipients.COSE_recipients_protected_l_unprotected.rec_header_map_key_id;
-	enc_info->kw_key.aes.IV = enc_info_cbor.COSE_Encrypt_unprotected.enc_header_map_IV;
 	enc_info->kw_key.aes.ciphertext = enc_info_cbor.COSE_Encrypt_recipients.COSE_recipients_protected_l_ciphertext;
-	enc_info->kw_key.aes.aad.value = suit_aad_aes256_gcm;
-	enc_info->kw_key.aes.aad.len = sizeof(suit_aad_aes256_gcm);
 
 	return SUIT_SUCCESS;
 }
