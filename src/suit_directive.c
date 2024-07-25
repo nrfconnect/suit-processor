@@ -18,8 +18,9 @@ static const uint8_t suit_aad_aes256_gcm[] = {
 	0x83, /* array (3 elements) */
 		0x67, /* context: text (7 characters) */
 			'E', 'n', 'c', 'r', 'y', 'p', 't',
-		0xA1, /* protected: map (1 element) */
-			0x01, 0x03, /* alg_id: A256GCM */
+		0x43, /* protected: bstr encoded map (3 elements) */
+			0xA1, /* map (1 element) */
+				0x01, 0x03, /* alg_id: A256GCM */
 		0x40 /* external_aad: h'' */
 };
 
