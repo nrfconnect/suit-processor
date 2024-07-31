@@ -159,7 +159,7 @@ static uint8_t minimal_with_shared_and_install[] = {
 		0xA1, /* map (1 element) */
 			0x04, /* suit-shared-sequence */
 			0x40, /* bytes(0) */
-	0x11, /* suit-install */
+	0x14, /* suit-install */
 		0x40, /* bytes(0) */
 };
 
@@ -299,7 +299,7 @@ static uint8_t envelope_with_all_sequences[] = {
 	0x10, /* suit-payload-fetch */
 		0x41, /* bytes(1) */
 			'P',
-	0x11, /* suit-install */
+	0x14, /* suit-install */
 		0x41, /* bytes(1) */
 			'I',
 	0x17, /* suit-text (severed - digest) */
@@ -359,7 +359,7 @@ static uint8_t envelope_with_severed_sequences[] = {
 		0x71, 0x1c, 0xcc, 0xd5, 0xa7, 0xc4, 0x4b, 0x59,
 		0xa4, 0x75, 0xe4, 0x44, 0x29, 0xab, 0x0f, 0x8a,
 		0x27, 0xec, 0x18, 0xe1, 0x75, 0x81, 0x74, 0x36,
-	0x11, /* suit-install (severed - digest) */
+	0x14, /* suit-install (severed - digest) */
 		0x82, /* array (2 elements) */
 		0x2f, /* suit-digest-algorithm-id: cose-alg-sha-256 */
 		0x58, 0x20, /* suit-digest-bytes: bytes(32) */
@@ -396,7 +396,7 @@ static uint8_t envelope_with_severed_sequences[] = {
 		0x41, /* bytes(1) */
 			'P',
 
-	0x11, /* suit-install (severed - value) */
+	0x14, /* suit-install (severed - value) */
 		0x41, /* bytes(1) */
 			'I',
 
