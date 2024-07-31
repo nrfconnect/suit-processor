@@ -1,61 +1,35 @@
-; Adapted from draft-ietf-suit-manifest-27 (https://datatracker.ietf.org/doc/html/draft-ietf-suit-manifest-27)
-; This is meant to be used in the firmware implementation.
-; For that reason it has been simplified for that use case:
-;
-; Removed unused extensions
-; Limited the number of possible integrated payloads to 6
-; Limited the number of possible authentication blocks to 2
-; Removed unused COSE types
-; Removed COSE authentication block from manifest CDDL - defined and parsed by Cose CDDL
-; Force making suit-text severable.
-; Limited the number of possible component identifiers to 12
-; Limited the length of component identifiers to 5 strings
-; Remove all hash algs except sha256 and sha512
-; Remove most of text comprehension since the firmware isn't supposed to understand the text.
-; Remove strict-order parameter as parallel execution is not supported.
-; Remove custom command sequence extensions.
-; Remove suit-directive-swap
-; Remove cbor-pen support
-; Set the maximum number of parameters inside suit-directive-override-parameters to 6
-; Set the maximum number of try-each cases 5
-; Set the maximum number of language tags to 2
-; Allow to use both 17 and 20 as suit-install sequence key
-;
+; Copied from draft-ietf-suit-manifest-27 (https://datatracker.ietf.org/doc/html/draft-ietf-suit-manifest-27)
 
 SUIT_Envelope_Tagged = #6.107(SUIT_Envelope)
 SUIT_Envelope = {
   suit-authentication-wrapper => bstr .cbor SUIT_Authentication,
   suit-manifest  => bstr .cbor SUIT_Manifest,
   SUIT_Severable_Manifest_Members,
-  0*6 SUIT_Integrated_Payload,
-;  * $$SUIT_Envelope_Extensions,
+  * SUIT_Integrated_Payload,
+  * $$SUIT_Envelope_Extensions,
 }
 
 SUIT_Authentication = [
   bstr .cbor SUIT_Digest,
-  0*2 bstr ; .cbor SUIT_Authentication_Block
+  * bstr .cbor SUIT_Authentication_Block
 ]
 
 SUIT_Digest = [
   suit-digest-algorithm-id : suit-cose-hash-algs,
   suit-digest-bytes : bstr,
-;  * $$SUIT_Digest-extensions
+  * $$SUIT_Digest-extensions
 ]
 
-; Multiple signers should be implemented via multiple auth blocks rather than multi-signature COSE_Sign blocks.
-; SUIT_Authentication_Block /= COSE_Mac_Tagged
-; SUIT_Authentication_Block /= COSE_Sign_Tagged
-; SUIT_Authentication_Block /= COSE_Mac0_Tagged
-; SUIT_Authentication_Block /= COSE_Sign1_Tagged
+SUIT_Authentication_Block /= COSE_Mac_Tagged
+SUIT_Authentication_Block /= COSE_Sign_Tagged
+SUIT_Authentication_Block /= COSE_Mac0_Tagged
+SUIT_Authentication_Block /= COSE_Sign1_Tagged
 
 SUIT_Severable_Manifest_Members = (
   ? suit-payload-fetch => bstr .cbor SUIT_Command_Sequence,
   ? suit-install => bstr .cbor SUIT_Command_Sequence,
   ? suit-text => bstr .cbor SUIT_Text_Map,
-; Reserve slots for:
-; - suit-dependency-resolution
-; - suit-candidate-verification
- 0*2 $$SUIT_severable-members-extensions,
+  * $$SUIT_severable-members-extensions,
 )
 
 SUIT_Integrated_Payload = (suit-integrated-payload-key => bstr)
@@ -70,51 +44,42 @@ SUIT_Manifest = {
   ? suit-reference-uri          => tstr,
   SUIT_Unseverable_Members,
   SUIT_Severable_Members_Choice,
-; Reserve slot for:
-; - suit-manifest-component-id
-  0*1 $$SUIT_Manifest_Extensions,
+  * $$SUIT_Manifest_Extensions,
 }
 
 SUIT_Unseverable_Members = (
   ? suit-validate => bstr .cbor SUIT_Command_Sequence,
   ? suit-load => bstr .cbor SUIT_Command_Sequence,
   ? suit-invoke => bstr .cbor SUIT_Command_Sequence,
-; Reserve slot for:
-; - suit-current-version
-  0*1 $$unseverable-manifest-member-extensions,
+  * $$unseverable-manifest-member-extensions,
 )
 
 SUIT_Severable_Members_Choice = (
   ? suit-payload-fetch => SUIT_Digest /
       bstr .cbor SUIT_Command_Sequence,
   ? suit-install => SUIT_Digest / bstr .cbor SUIT_Command_Sequence,
-  ? suit-text => SUIT_Digest, ; / bstr .cbor SUIT_Text_Map,
-; Reserve slots for:
-; - suit-dependency-resolution
-; - suit-candidate-verification
-  0*2 $$severable-manifest-members-choice-extensions,
+  ? suit-text => SUIT_Digest / bstr .cbor SUIT_Text_Map,
+  * $$severable-manifest-members-choice-extensions
 )
 
 SUIT_Common = {
   ? suit-components             => SUIT_Components,
   ? suit-shared-sequence        => bstr .cbor SUIT_Shared_Sequence,
-; Reserve slot for:
-; - suit-dependencies
-  0*1 $$SUIT_Common-extensions,
+  * $$SUIT_Common-extensions,
 }
 
-SUIT_Components           = [ 1*12 SUIT_Component_Identifier ]
+SUIT_Components           = [ + SUIT_Component_Identifier ]
 
 ;REQUIRED to implement:
 suit-cose-hash-algs /= cose-alg-sha-256
 
 ;OPTIONAL to implement:
-; suit-cose-hash-algs /= cose-alg-shake128
-; suit-cose-hash-algs /= cose-alg-sha-384
+suit-cose-hash-algs /= cose-alg-shake128
+suit-cose-hash-algs /= cose-alg-sha-384
 suit-cose-hash-algs /= cose-alg-sha-512
-; suit-cose-hash-algs /= cose-alg-shake256
+suit-cose-hash-algs /= cose-alg-shake256
 
-SUIT_Component_Identifier =  [ 1*5 bstr]
+SUIT_Component_Identifier =  [* bstr]
 
 SUIT_Shared_Sequence = [
   + ( SUIT_Condition // SUIT_Shared_Commands )
@@ -126,7 +91,7 @@ SUIT_Shared_Commands //= (suit-directive-run-sequence,
 SUIT_Shared_Commands //= (suit-directive-try-each,
   SUIT_Directive_Try_Each_Argument_Shared)
 SUIT_Shared_Commands //= (suit-directive-override-parameters,
-  { 1*6 $$SUIT_Parameters})
+  {+ $$SUIT_Parameters})
 
 IndexArg /= uint
 IndexArg /= true
@@ -134,15 +99,15 @@ IndexArg /= [+uint]
 
 
 SUIT_Directive_Try_Each_Argument_Shared = [
-    2*5 bstr .cbor SUIT_Shared_Sequence,
+    2* bstr .cbor SUIT_Shared_Sequence,
     ?nil
 ]
 
 SUIT_Command_Sequence = [ + (
-  SUIT_Condition // SUIT_Directive ; // SUIT_Command_Custom
+  SUIT_Condition // SUIT_Directive // SUIT_Command_Custom
 ) ]
 
-; SUIT_Command_Custom = (suit-command-custom, bstr/tstr/int/nil)
+SUIT_Command_Custom = (suit-command-custom, bstr/tstr/int/nil)
 SUIT_Condition //= (suit-condition-vendor-identifier, SUIT_Rep_Policy)
 SUIT_Condition //= (suit-condition-class-identifier,  SUIT_Rep_Policy)
 SUIT_Condition //= (suit-condition-device-identifier, SUIT_Rep_Policy)
@@ -158,14 +123,14 @@ SUIT_Directive //= (suit-directive-run-sequence,
 SUIT_Directive //= (suit-directive-try-each,
     SUIT_Directive_Try_Each_Argument)
 SUIT_Directive //= (suit-directive-override-parameters,
-    { 1*6 $$SUIT_Parameters})
+    {+ $$SUIT_Parameters})
 SUIT_Directive //= (suit-directive-fetch,             SUIT_Rep_Policy)
 SUIT_Directive //= (suit-directive-copy,              SUIT_Rep_Policy)
-; SUIT_Directive //= (suit-directive-swap,              SUIT_Rep_Policy)
+SUIT_Directive //= (suit-directive-swap,              SUIT_Rep_Policy)
 SUIT_Directive //= (suit-directive-invoke,            SUIT_Rep_Policy)
 
 SUIT_Directive_Try_Each_Argument = [
-  2*5 bstr .cbor SUIT_Command_Sequence,
+  2* bstr .cbor SUIT_Command_Sequence,
   ?nil
 ]
 
@@ -179,9 +144,9 @@ suit-reporting-bits = &(
 )
 
 $$SUIT_Parameters //= (suit-parameter-vendor-identifier =>
-    (RFC4122_UUID)) ; / cbor-pen))
+    (RFC4122_UUID / cbor-pen))
 
-; cbor-pen = #6.112(bstr)
+cbor-pen = #6.112(bstr)
 
 $$SUIT_Parameters //= (suit-parameter-class-identifier => RFC4122_UUID)
 $$SUIT_Parameters //= (suit-parameter-image-digest
@@ -195,21 +160,20 @@ $$SUIT_Parameters //= (suit-parameter-invoke-args => bstr)
 
 $$SUIT_Parameters //= (suit-parameter-device-identifier => RFC4122_UUID)
 
-; $$SUIT_Parameters //= (suit-parameter-custom => int/bool/tstr/bstr)
+$$SUIT_Parameters //= (suit-parameter-custom => int/bool/tstr/bstr)
 
 $$SUIT_Parameters //= (suit-parameter-content => bstr)
-; $$SUIT_Parameters //= (suit-parameter-strict-order => bool)
+$$SUIT_Parameters //= (suit-parameter-strict-order => bool)
 $$SUIT_Parameters //= (suit-parameter-soft-failure => bool)
 
 RFC4122_UUID = bstr .size 16
 
-; The .regexp is currently not supported by ZCBOR.
-tag38-ltag = text .size (1..17) ; .regexp "[a-zA-Z]{1,8}(-[a-zA-Z0-9]{1,8})*"
+tag38-ltag = text .regexp "[a-zA-Z]{1,8}(-[a-zA-Z0-9]{1,8})*"
 SUIT_Text_Map = {
   + tag38-ltag => SUIT_Text_LMap
 }
 SUIT_Text_LMap = {
-;   SUIT_Text_Keys,
+  SUIT_Text_Keys,
   * SUIT_Component_Identifier => {
           SUIT_Text_Component_Keys
   }
@@ -222,19 +186,16 @@ SUIT_Text_Component_Keys = (
   ? suit-text-model-info            => tstr,
   ? suit-text-component-description => tstr,
   ? suit-text-component-version     => tstr,
-; Reserve slots for:
-; - suit-text-version-required
-; - suit-text-current-version
-  0*2 $$suit-text-component-key-extensions,
+  * $$suit-text-component-key-extensions
 )
 
-; SUIT_Text_Keys = (
-;   ? suit-text-manifest-description => tstr,
-;   ? suit-text-update-description   => tstr,
-;   ? suit-text-manifest-json-source => tstr,
-;   ? suit-text-manifest-yaml-source => tstr,
-;   * $$suit-text-key-extensions
-; )
+SUIT_Text_Keys = (
+  ? suit-text-manifest-description => tstr,
+  ? suit-text-update-description   => tstr,
+  ? suit-text-manifest-json-source => tstr,
+  ? suit-text-manifest-yaml-source => tstr,
+  * $$suit-text-key-extensions
+)
 
 suit-authentication-wrapper = 2
 suit-manifest = 3
@@ -243,10 +204,10 @@ suit-manifest = 3
 cose-alg-sha-256 = -16
 
 ;OPTIONAL to implement:
-; cose-alg-shake128 = -18
-; cose-alg-sha-384 = -43
+cose-alg-shake128 = -18
+cose-alg-sha-384 = -43
 cose-alg-sha-512 = -44
-; cose-alg-shake256 = -45
+cose-alg-shake256 = -45
 
 ;Unseverable, recipient-necessary
 suit-manifest-version = 1
@@ -258,15 +219,14 @@ suit-load = 8
 suit-invoke = 9
 ;Severable, recipient-necessary
 suit-payload-fetch = 16
-suit-install //= 17
-suit-install //= 20
+suit-install = 20
 ;Severable, recipient-unnecessary
 suit-text = 23
 
 suit-components = 2
 suit-shared-sequence = 4
 
-; suit-command-custom = nint
+suit-command-custom = nint
 
 suit-condition-vendor-identifier = 1
 suit-condition-class-identifier  = 2
@@ -285,7 +245,7 @@ suit-directive-fetch                    = 21
 suit-directive-copy                     = 22
 suit-directive-invoke                   = 23
 
-; suit-directive-swap                     = 31
+suit-directive-swap                     = 31
 suit-directive-run-sequence             = 32
 
 suit-parameter-vendor-identifier = 1
@@ -293,7 +253,7 @@ suit-parameter-class-identifier  = 2
 suit-parameter-image-digest      = 3
 suit-parameter-component-slot    = 5
 
-; suit-parameter-strict-order      = 12
+suit-parameter-strict-order      = 12
 suit-parameter-soft-failure      = 13
 suit-parameter-image-size        = 14
 suit-parameter-content           = 18
@@ -304,12 +264,12 @@ suit-parameter-invoke-args       = 23
 
 suit-parameter-device-identifier = 24
 
-; suit-parameter-custom = nint
+suit-parameter-custom = nint
 
-; suit-text-manifest-description  = 1
-; suit-text-update-description    = 2
-; suit-text-manifest-json-source  = 3
-; suit-text-manifest-yaml-source  = 4
+suit-text-manifest-description  = 1
+suit-text-update-description    = 2
+suit-text-manifest-json-source  = 3
+suit-text-manifest-yaml-source  = 4
 
 suit-text-vendor-name           = 1
 suit-text-model-name            = 2
