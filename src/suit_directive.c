@@ -45,9 +45,26 @@ static int decode_encryption_info(struct zcbor_string enc_info_bstr, struct suit
 	enc_info->aad.value = suit_aad_aes256_gcm;
 	enc_info->aad.len = sizeof(suit_aad_aes256_gcm);
 
-	enc_info->kw_alg_id = suit_cose_aes256_kw;
-	enc_info->kw_key.aes.key_id = enc_info_cbor.COSE_Encrypt_recipients.COSE_recipients_protected_l_unprotected.rec_header_map_key_id;
-	enc_info->kw_key.aes.ciphertext = enc_info_cbor.COSE_Encrypt_recipients.COSE_recipients_protected_l_ciphertext;
+	enc_info->kw_alg_id = enc_info_cbor.COSE_Encrypt_recipients.COSE_recipients_protected_l_unprotected.rec_header_map_alg_id.supported_kdf_algs_choice;
+
+	switch (enc_info->kw_alg_id) {
+		case suit_cose_aes256_kw:
+			enc_info->kw_key.aes.key_id = enc_info_cbor.COSE_Encrypt_recipients.COSE_recipients_protected_l_unprotected.rec_header_map_key_id;
+			if (enc_info_cbor.COSE_Encrypt_recipients.COSE_recipients_protected_l_ciphertext_choice
+				== COSE_recipients_protected_l_ciphertext_bstr_c) {
+				enc_info->kw_key.aes.ciphertext = enc_info_cbor.COSE_Encrypt_recipients.COSE_recipients_protected_l_ciphertext_bstr;
+			}
+			else
+			{
+				return SUIT_ERR_UNAVAILABLE_PAYLOAD;
+			}
+			break;
+		case suit_cose_direct:
+			enc_info->kw_key.direct.key_id = enc_info_cbor.COSE_Encrypt_recipients.COSE_recipients_protected_l_unprotected.rec_header_map_key_id;
+			break;
+		default:
+			return SUIT_ERR_UNSUPPORTED_ALG;
+	}
 
 	return SUIT_SUCCESS;
 }

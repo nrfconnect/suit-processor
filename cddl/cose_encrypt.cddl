@@ -11,9 +11,12 @@ enc_header_map = {
 
 ; Enforce the usage of AES-Key-Wrap
 rec_header_map = {
-  alg_id: 1 => A256KW: -5,
+  alg_id: 1 => supported_kdf_algs,
   key_id: 4 => bstr,
 }
+
+supported_kdf_algs //= (A256KW: -5)
+supported_kdf_algs //= (direct: -6)
 
 COSE_Encrypt_Tagged = #6.96(COSE_Encrypt)
 
@@ -27,7 +30,7 @@ COSE_Encrypt = [
 COSE_recipients = [[
   protected   : bstr .size 0,
   unprotected : rec_header_map,
-  ciphertext  : bstr, ; CEK encrypted with KEK
+  ciphertext  : bstr / nil, ; CEK encrypted with KEK if using KW
 ]]
 
 Enc_structure = [
