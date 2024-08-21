@@ -87,6 +87,7 @@ enum suit_cose_alg {
 	suit_cose_EdDSA = -8,
 	suit_cose_aes256_gcm = 3,
 	suit_cose_aes256_kw = -5,
+	suit_cose_direct = -6,
 };
 
 struct suit_arg {
@@ -110,9 +111,15 @@ struct suit_aes_kw_data {
 	struct zcbor_string ciphertext;
 };
 
+struct suit_direct_kw_data {
+	/** @brief The content encryption key identifier. */
+	struct zcbor_string key_id;
+};
+
 union suit_key_encryption_data {
 	/** @brief AES Key Wrap. */
 	struct suit_aes_kw_data aes;
+	struct suit_direct_kw_data direct;
 };
 
 struct suit_encryption_info {
