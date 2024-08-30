@@ -102,31 +102,49 @@ int __authorize_component_id_callback(struct zcbor_string *manifest_component_id
 }
 
 COMPLEX_ARG_Q_DEFINE(__check_fetch_callback_queue);
-int __check_fetch_callback(suit_component_t dst_handle, struct zcbor_string *uri, struct suit_encryption_info *enc_info, int cmock_num_calls)
+int __check_fetch_callback(suit_component_t dst_handle, struct zcbor_string *uri, struct zcbor_string *manifest_component_id, struct suit_encryption_info *enc_info, int cmock_num_calls)
 {
 	(void)assert_complex_arg(&__check_fetch_callback_queue, uri);
+	(void)assert_complex_arg(&__check_fetch_callback_queue, manifest_component_id);
 	return assert_complex_arg(&__check_fetch_callback_queue, NULL);
 }
 
 COMPLEX_ARG_Q_DEFINE(__fetch_callback_queue);
-int __fetch_callback(suit_component_t dst_handle, struct zcbor_string *uri, struct suit_encryption_info *enc_info, int cmock_num_calls)
+int __fetch_callback(suit_component_t dst_handle, struct zcbor_string *uri, struct zcbor_string *manifest_component_id, struct suit_encryption_info *enc_info, int cmock_num_calls)
 {
 	(void)assert_complex_arg(&__fetch_callback_queue, uri);
+	(void)assert_complex_arg(&__fetch_callback_queue, manifest_component_id);
 	return assert_complex_arg(&__fetch_callback_queue, NULL);
 }
 
 COMPLEX_ARG_Q_DEFINE(__check_fetch_integrated_callback_queue);
-int __check_fetch_integrated_callback(suit_component_t dst_handle, struct zcbor_string *payload, struct suit_encryption_info *enc_info, int cmock_num_calls)
+int __check_fetch_integrated_callback(suit_component_t dst_handle, struct zcbor_string *payload, struct zcbor_string *manifest_component_id, struct suit_encryption_info *enc_info, int cmock_num_calls)
 {
 	(void)assert_complex_arg(&__check_fetch_integrated_callback_queue, payload);
+	(void)assert_complex_arg(&__check_fetch_integrated_callback_queue, manifest_component_id);
 	return assert_complex_arg(&__check_fetch_integrated_callback_queue, NULL);
 }
 
 COMPLEX_ARG_Q_DEFINE(__fetch_integrated_callback_queue);
-int __fetch_integrated_callback(suit_component_t dst_handle, struct zcbor_string *payload, struct suit_encryption_info *enc_info, int cmock_num_calls)
+int __fetch_integrated_callback(suit_component_t dst_handle, struct zcbor_string *payload, struct zcbor_string *manifest_component_id, struct suit_encryption_info *enc_info, int cmock_num_calls)
 {
 	(void)assert_complex_arg(&__fetch_integrated_callback_queue, payload);
+	(void)assert_complex_arg(&__fetch_integrated_callback_queue, manifest_component_id);
 	return assert_complex_arg(&__fetch_integrated_callback_queue, NULL);
+}
+
+COMPLEX_ARG_Q_DEFINE(__check_copy_callback_queue);
+int __check_copy_callback(suit_component_t dst_handle, suit_component_t src_handle, struct zcbor_string *manifest_component_id, struct suit_encryption_info *enc_info, int cmock_num_calls)
+{
+	(void)assert_complex_arg(&__check_copy_callback_queue, manifest_component_id);
+	return assert_complex_arg(&__check_copy_callback_queue, NULL);
+}
+
+COMPLEX_ARG_Q_DEFINE(__copy_callback_queue);
+int __copy_callback(suit_component_t dst_handle, suit_component_t src_handle, struct zcbor_string *manifest_component_id, struct suit_encryption_info *enc_info, int cmock_num_calls)
+{
+	(void)assert_complex_arg(&__copy_callback_queue, manifest_component_id);
+	return assert_complex_arg(&__copy_callback_queue, NULL);
 }
 
 COMPLEX_ARG_Q_DEFINE(__sequence_completed_callback_queue);
@@ -137,16 +155,18 @@ int __sequence_completed_callback(enum suit_command_sequence seq_name, struct zc
 }
 
 COMPLEX_ARG_Q_DEFINE(__check_write_callback_queue);
-int __check_write_callback(suit_component_t dst_handle, struct zcbor_string *content, struct suit_encryption_info *enc_info, int cmock_num_calls)
+int __check_write_callback(suit_component_t dst_handle, struct zcbor_string *content, struct zcbor_string *manifest_component_id, struct suit_encryption_info *enc_info, int cmock_num_calls)
 {
 	(void)assert_complex_arg(&__check_write_callback_queue, content);
+	(void)assert_complex_arg(&__check_write_callback_queue, manifest_component_id);
 	return assert_complex_arg(&__check_write_callback_queue, NULL);
 }
 
 COMPLEX_ARG_Q_DEFINE(__write_callback_queue);
-int __write_callback(suit_component_t dst_handle, struct zcbor_string *content, struct suit_encryption_info *enc_info, int cmock_num_calls)
+int __write_callback(suit_component_t dst_handle, struct zcbor_string *content, struct zcbor_string *manifest_component_id, struct suit_encryption_info *enc_info, int cmock_num_calls)
 {
 	(void)assert_complex_arg(&__write_callback_queue, content);
+	(void)assert_complex_arg(&__write_callback_queue, manifest_component_id);
 	return assert_complex_arg(&__write_callback_queue, NULL);
 }
 
