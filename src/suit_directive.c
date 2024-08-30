@@ -624,26 +624,32 @@ int suit_directive_fetch(struct suit_processor_state *state, struct suit_manifes
 	if (!integrated) {
 #ifdef SUIT_PLATFORM_DRY_RUN_SUPPORT
 		if (state->dry_run != suit_bool_false) {
-			ret = suit_plat_check_fetch(component_params->component_handle, &component_params->uri, enc_info);
+			ret = suit_plat_check_fetch(component_params->component_handle, &component_params->uri,
+						    &seq_exec_state->manifest->manifest_component_id, enc_info);
 		} else {
 			component_modified(component_params);
-			ret = suit_plat_fetch(component_params->component_handle, &component_params->uri, enc_info);
+			ret = suit_plat_fetch(component_params->component_handle, &component_params->uri,
+					      &seq_exec_state->manifest->manifest_component_id, enc_info);
 		}
 #else /* SUIT_PLATFORM_DRY_RUN_SUPPORT */
 		component_modified(component_params);
-		ret = suit_plat_fetch(component_params->component_handle, &component_params->uri, enc_info);
+		ret = suit_plat_fetch(component_params->component_handle, &component_params->uri,
+				      &seq_exec_state->manifest->manifest_component_id, enc_info);
 #endif /* SUIT_PLATFORM_DRY_RUN_SUPPORT */
 	} else {
 #ifdef SUIT_PLATFORM_DRY_RUN_SUPPORT
 		if (state->dry_run != suit_bool_false) {
-			ret = suit_plat_check_fetch_integrated(component_params->component_handle, &integrated_payload, enc_info);
+			ret = suit_plat_check_fetch_integrated(component_params->component_handle, &integrated_payload,
+							       &seq_exec_state->manifest->manifest_component_id, enc_info);
 		} else {
 			component_modified(component_params);
-			ret = suit_plat_fetch_integrated(component_params->component_handle, &integrated_payload, enc_info);
+			ret = suit_plat_fetch_integrated(component_params->component_handle, &integrated_payload,
+							 &seq_exec_state->manifest->manifest_component_id, enc_info);
 		}
 #else /* SUIT_PLATFORM_DRY_RUN_SUPPORT */
 		component_modified(component_params);
-		ret = suit_plat_fetch_integrated(component_params->component_handle, &integrated_payload, enc_info);
+		ret = suit_plat_fetch_integrated(component_params->component_handle, &integrated_payload,
+						 &seq_exec_state->manifest->manifest_component_id, enc_info);
 #endif /* SUIT_PLATFORM_DRY_RUN_SUPPORT */
 	}
 
@@ -691,14 +697,19 @@ int suit_directive_copy(struct suit_processor_state *state, struct suit_manifest
 
 #ifdef SUIT_PLATFORM_DRY_RUN_SUPPORT
 	if (state->dry_run != suit_bool_false) {
-		return suit_plat_check_copy(dst_handle, src_handle, enc_info);
+		return suit_plat_check_copy(dst_handle, src_handle,
+					    &seq_exec_state->manifest->manifest_component_id,
+					    enc_info);
 	} else {
 		component_modified(component_params);
-		return suit_plat_copy(dst_handle, src_handle, enc_info);
+		return suit_plat_copy(dst_handle, src_handle,
+				      &seq_exec_state->manifest->manifest_component_id,
+				      enc_info);
 	}
 #else /* SUIT_PLATFORM_DRY_RUN_SUPPORT */
 	component_modified(component_params);
-	return suit_plat_copy(dst_handle, src_handle, enc_info);
+	return suit_plat_copy(dst_handle, src_handle,
+			      &seq_exec_state->manifest->manifest_component_id, enc_info);
 #endif /* SUIT_PLATFORM_DRY_RUN_SUPPORT */
 }
 
@@ -706,6 +717,8 @@ int suit_directive_write(struct suit_processor_state *state, struct suit_manifes
 {
 	struct suit_encryption_info enc_info_struct = {0};
 	struct suit_encryption_info *enc_info = NULL;
+	struct suit_seq_exec_state *seq_exec_state;
+	int ret = SUIT_SUCCESS;
 
 	if ((state == NULL) || (component_params == NULL)) {
 		SUIT_ERR("Unable to execute write directive: invalid argument\r\n");
@@ -717,7 +730,7 @@ int suit_directive_write(struct suit_processor_state *state, struct suit_manifes
 	}
 
 	if (component_params->encryption_info_set) {
-		int ret = decode_encryption_info(component_params->encryption_info, &enc_info_struct);
+		ret = decode_encryption_info(component_params->encryption_info, &enc_info_struct);
 
 		if (ret != SUIT_SUCCESS) {
 			return ret;
@@ -726,16 +739,24 @@ int suit_directive_write(struct suit_processor_state *state, struct suit_manifes
 		enc_info = &enc_info_struct;
 	}
 
+	ret = suit_seq_exec_state_get(state, &seq_exec_state);
+	if (ret != SUIT_SUCCESS) {
+		return ret;
+	}
+
 #ifdef SUIT_PLATFORM_DRY_RUN_SUPPORT
 		if (state->dry_run != suit_bool_false) {
-			return suit_plat_check_write(component_params->component_handle, &component_params->content, enc_info);
+			return suit_plat_check_write(component_params->component_handle, &component_params->content,
+						     &seq_exec_state->manifest->manifest_component_id, enc_info);
 		} else {
 			component_modified(component_params);
-			return suit_plat_write(component_params->component_handle, &component_params->content, enc_info);
+			return suit_plat_write(component_params->component_handle, &component_params->content,
+					       &seq_exec_state->manifest->manifest_component_id, enc_info);
 		}
 #else /* SUIT_PLATFORM_DRY_RUN_SUPPORT */
 		component_modified(component_params);
-		return suit_plat_write(component_params->component_handle, &component_params->content, enc_info);
+		return suit_plat_write(component_params->component_handle, &component_params->content,
+				       &seq_exec_state->manifest->manifest_component_id, enc_info);
 #endif /* SUIT_PLATFORM_DRY_RUN_SUPPORT */
 }
 

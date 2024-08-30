@@ -13,6 +13,11 @@
 
 extern struct suit_processor_state state;
 
+static struct zcbor_string unknown_manifest_component_id = {
+	.value = NULL,
+	.len = 0,
+};
+
 static int execute_command_sequence(struct suit_processor_state *state, struct zcbor_string *cmd_seq_str)
 {
 	enum suit_command_sequence seq = SUIT_SEQ_PAYLOAD_FETCH;
@@ -119,7 +124,9 @@ void test_seq_execution_copy_ok(void)
 	bootstrap_envelope_empty(&state);
 	bootstrap_envelope_components(&state, 2);
 
-	__cmock_suit_plat_copy_ExpectAndReturn(ASSIGNED_COMPONENT_HANDLE, exp_src_handle, NULL, SUIT_SUCCESS);
+	__cmock_suit_plat_copy_ExpectAndReturn(ASSIGNED_COMPONENT_HANDLE, exp_src_handle,
+					       &unknown_manifest_component_id, NULL, SUIT_SUCCESS);
+	__cmock_suit_plat_copy_IgnoreArg_manifest_component_id();
 
 	int retval = execute_command_sequence(&state, &seq);
 

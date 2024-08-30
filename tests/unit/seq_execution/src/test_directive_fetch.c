@@ -13,6 +13,11 @@
 
 extern struct suit_processor_state state;
 
+static struct zcbor_string unknown_manifest_component_id = {
+	.value = NULL,
+	.len = 0,
+};
+
 static int execute_command_sequence(struct suit_processor_state *state, struct zcbor_string *cmd_seq_str)
 {
 	enum suit_command_sequence seq = SUIT_SEQ_PAYLOAD_FETCH;
@@ -73,7 +78,8 @@ void test_seq_execution_fetch_external_uri(void)
 	bootstrap_envelope_empty(&state);
 	bootstrap_envelope_components(&state, 1);
 
-	__cmock_suit_plat_fetch_ExpectComplexArgsAndReturn(ASSIGNED_COMPONENT_HANDLE, &exp_uri, NULL, SUIT_SUCCESS);
+	__cmock_suit_plat_fetch_ExpectComplexArgsAndReturn(ASSIGNED_COMPONENT_HANDLE, &exp_uri, &unknown_manifest_component_id, NULL, SUIT_SUCCESS);
+	__cmock_suit_plat_fetch_IgnoreArg_manifest_component_id();
 
 	int retval = execute_command_sequence(&state, &seq);
 
@@ -113,7 +119,8 @@ void test_seq_execution_fetch_internal_uri(void)
 	state.manifest_stack[0].integrated_payloads[0].key = exp_uri;
 	state.manifest_stack[0].integrated_payloads[0].payload = exp_payload;
 
-	__cmock_suit_plat_fetch_integrated_ExpectComplexArgsAndReturn(ASSIGNED_COMPONENT_HANDLE, &exp_payload, NULL, SUIT_SUCCESS);
+	__cmock_suit_plat_fetch_integrated_ExpectComplexArgsAndReturn(ASSIGNED_COMPONENT_HANDLE, &exp_payload, &unknown_manifest_component_id, NULL, SUIT_SUCCESS);
+	__cmock_suit_plat_fetch_integrated_IgnoreArg_manifest_component_id();
 
 	int retval = execute_command_sequence(&state, &seq);
 

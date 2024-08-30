@@ -173,7 +173,7 @@ int suit_plat_authorize_component_id(struct zcbor_string *manifest_component_id,
  *
  * @returns SUIT_SUCCESS if the operation succeeds, error code otherwise.
  */
-int suit_plat_fetch(suit_component_t dst_handle, struct zcbor_string *uri, struct suit_encryption_info *enc_info);
+int suit_plat_fetch(suit_component_t dst_handle, struct zcbor_string *uri, struct zcbor_string *manifest_component_id, struct suit_encryption_info *enc_info);
 
 /** @brief Fetch the given integrated payload into @p dst.
  *
@@ -182,7 +182,7 @@ int suit_plat_fetch(suit_component_t dst_handle, struct zcbor_string *uri, struc
  *
  * @returns SUIT_SUCCESS if the operation succeeds, error code otherwise.
  */
-int suit_plat_fetch_integrated(suit_component_t dst_handle, struct zcbor_string *payload, struct suit_encryption_info *enc_info);
+int suit_plat_fetch_integrated(suit_component_t dst_handle, struct zcbor_string *payload, struct zcbor_string *manifest_component_id, struct suit_encryption_info *enc_info);
 
 /** @brief Copy a payload from @p src_handle to @p dst_handle.
  *
@@ -191,7 +191,7 @@ int suit_plat_fetch_integrated(suit_component_t dst_handle, struct zcbor_string 
  *
  * @returns SUIT_SUCCESS if the operation succeeds, error code otherwise.
  */
-int suit_plat_copy(suit_component_t dst_handle, suit_component_t src_handle, struct suit_encryption_info *enc_info);
+int suit_plat_copy(suit_component_t dst_handle, suit_component_t src_handle, struct zcbor_string *manifest_component_id, struct suit_encryption_info *enc_info);
 
 /** @brief Swap a payload from @p src_handle to @p dst_handle.
  *
@@ -200,7 +200,7 @@ int suit_plat_copy(suit_component_t dst_handle, suit_component_t src_handle, str
  *
  * @returns SUIT_SUCCESS if the operation succeeds, error code otherwise.
  */
-int suit_plat_swap(suit_component_t dst_handle, suit_component_t src_handle, struct suit_encryption_info *enc_info);
+int suit_plat_swap(suit_component_t dst_handle, suit_component_t src_handle, struct zcbor_string *manifest_component_id, struct suit_encryption_info *enc_info);
 
 /** @brief Write a payload from @p content to @p dst_handle.
  *
@@ -209,7 +209,7 @@ int suit_plat_swap(suit_component_t dst_handle, suit_component_t src_handle, str
  *
  * @returns SUIT_SUCCESS if the operation succeeds, error code otherwise.
  */
-int suit_plat_write(suit_component_t dst_handle, struct zcbor_string *content, struct suit_encryption_info *enc_info);
+int suit_plat_write(suit_component_t dst_handle, struct zcbor_string *content, struct zcbor_string *manifest_component_id, struct suit_encryption_info *enc_info);
 
 /** @brief Invoke the given image.
  *
@@ -296,7 +296,7 @@ int suit_plat_component_version_get(suit_component_t handle, int *version, size_
  *
  * @returns SUIT_SUCCESS if the operation succeeds, error code otherwise.
  */
-int suit_plat_check_fetch(suit_component_t dst_handle, struct zcbor_string *uri, struct suit_encryption_info *enc_info);
+int suit_plat_check_fetch(suit_component_t dst_handle, struct zcbor_string *uri, struct zcbor_string *manifest_component_id, struct suit_encryption_info *enc_info);
 
 /** @brief Check that the given fetch of integrated payload can be performed.
  *
@@ -305,7 +305,7 @@ int suit_plat_check_fetch(suit_component_t dst_handle, struct zcbor_string *uri,
  *
  * @returns SUIT_SUCCESS if the operation succeeds, error code otherwise.
  */
-int suit_plat_check_fetch_integrated(suit_component_t dst_handle, struct zcbor_string *payload, struct suit_encryption_info *enc_info);
+int suit_plat_check_fetch_integrated(suit_component_t dst_handle, struct zcbor_string *payload, struct zcbor_string *manifest_component_id, struct suit_encryption_info *enc_info);
 
 /** @brief Check that the given copy operation can be performed.
  *
@@ -314,7 +314,7 @@ int suit_plat_check_fetch_integrated(suit_component_t dst_handle, struct zcbor_s
  *
  * @returns SUIT_SUCCESS if the operation succeeds, error code otherwise.
  */
-int suit_plat_check_copy(suit_component_t dst_handle, suit_component_t src_handle, struct suit_encryption_info *enc_info);
+int suit_plat_check_copy(suit_component_t dst_handle, suit_component_t src_handle, struct zcbor_string *manifest_component_id, struct suit_encryption_info *enc_info);
 
 /** @brief Check that the given swap operation can be performed.
  *
@@ -323,7 +323,7 @@ int suit_plat_check_copy(suit_component_t dst_handle, suit_component_t src_handl
  *
  * @returns SUIT_SUCCESS if the operation succeeds, error code otherwise.
  */
-int suit_plat_check_swap(suit_component_t dst_handle, suit_component_t src_handle, struct suit_encryption_info *enc_info);
+int suit_plat_check_swap(suit_component_t dst_handle, suit_component_t src_handle, struct zcbor_string *manifest_component_id, struct suit_encryption_info *enc_info);
 
 /** @brief Check that the given invoke operation can be performed.
  *
@@ -332,7 +332,7 @@ int suit_plat_check_swap(suit_component_t dst_handle, suit_component_t src_handl
  *
  * @returns SUIT_SUCCESS if the operation succeeds, error code otherwise.
  */
-int suit_plat_check_write(suit_component_t dst_handle, struct zcbor_string *content, struct suit_encryption_info *enc_info);
+int suit_plat_check_write(suit_component_t dst_handle, struct zcbor_string *content, struct zcbor_string *manifest_component_id, struct suit_encryption_info *enc_info);
 
 /** @brief Check that the given invoke operation can be performed.
  *
