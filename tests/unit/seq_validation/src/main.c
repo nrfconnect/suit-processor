@@ -353,7 +353,7 @@ void test_seq_validation_shared_infinite_length_command_list(void)
 
 	int retval = validate_shared_sequence(&state, &seq);
 
-	TEST_ASSERT_EQUAL(ZCBOR_ERR_TO_SUIT_ERR(ZCBOR_ERR_ADDITIONAL_INVAL), retval);
+	TEST_ASSERT_EQUAL(ZCBOR_ERR_TO_SUIT_ERR(ZCBOR_ERR_INVALID_VALUE_ENCODING), retval);
 }
 
 void test_seq_validation_shared_odd_number_of_commands(void)
