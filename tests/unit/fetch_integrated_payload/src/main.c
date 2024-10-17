@@ -140,7 +140,7 @@ static void assert_component_creation(void)
 	};
 
 	__cmock_suit_plat_authorize_component_id_ExpectComplexArgsAndReturn(&exp_manifest_id, &exp_component_id, SUIT_SUCCESS);
-	__cmock_suit_plat_create_component_handle_ExpectComplexArgsAndReturn(&exp_component_id, NULL, SUIT_SUCCESS);
+	__cmock_suit_plat_create_component_handle_ExpectComplexArgsAndReturn(&exp_component_id, false, NULL, SUIT_SUCCESS);
 	__cmock_suit_plat_create_component_handle_IgnoreArg_handle();
 	__cmock_suit_plat_create_component_handle_ReturnThruPtr_handle(&component_handle);
 

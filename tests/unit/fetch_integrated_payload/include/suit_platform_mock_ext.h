@@ -88,15 +88,15 @@ int __check_digest_callback(enum suit_cose_alg alg_id, struct zcbor_string *dige
 }
 int __authenticate_manifest_callback(struct zcbor_string *manifest_component_id, enum suit_cose_alg alg_id, struct zcbor_string *key_id, struct zcbor_string *signature, struct zcbor_string *data, int cmock_num_calls);
 
-#define __cmock_suit_plat_create_component_handle_ExpectComplexArgsAndReturn(component_id, handle, cmock_retval) { \
+#define __cmock_suit_plat_create_component_handle_ExpectComplexArgsAndReturn(component_id, dependency, handle, cmock_retval) { \
 	extern complex_arg_q_t __get_component_handle_callback_queue; \
 	push_complex_arg(component_id, assert_zcbor_string, __get_component_handle_callback_queue); \
 	push_retval_arg(cmock_retval, __get_component_handle_callback_queue); \
 	__cmock_suit_plat_create_component_handle_AddCallback(__get_component_handle_callback); \
-	__cmock_suit_plat_create_component_handle_ExpectAndReturn(component_id, handle, cmock_retval); \
+	__cmock_suit_plat_create_component_handle_ExpectAndReturn(component_id, dependency, handle, cmock_retval); \
 	__cmock_suit_plat_create_component_handle_IgnoreArg_component_id(); \
 }
-int __get_component_handle_callback(struct zcbor_string *component_id, suit_component_t *handle, int cmock_num_calls);
+int __get_component_handle_callback(struct zcbor_string *component_id, bool dependency, suit_component_t *handle, int cmock_num_calls);
 
 #define __cmock_suit_plat_check_image_match_ExpectComplexArgsAndReturn(image_handle, alg_id, digest, cmock_retval) { \
 	extern complex_arg_q_t __check_image_match_callback_queue; \

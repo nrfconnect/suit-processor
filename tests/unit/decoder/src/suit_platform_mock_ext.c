@@ -45,7 +45,7 @@ int __authenticate_manifest_callback(struct zcbor_string *manifest_component_id,
 }
 
 COMPLEX_ARG_Q_DEFINE(__get_component_handle_callback_queue);
-int __get_component_handle_callback(struct zcbor_string *component_id, suit_component_t *component_handle, int cmock_num_calls)
+int __get_component_handle_callback(struct zcbor_string *component_id, bool dependency, suit_component_t *component_handle, int cmock_num_calls)
 {
 	(void)assert_complex_arg(&__get_component_handle_callback_queue, component_id);
 	return assert_complex_arg(&__get_component_handle_callback_queue, NULL);

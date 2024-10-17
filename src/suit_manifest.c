@@ -12,7 +12,7 @@ static struct suit_manifest_params *components;
 static size_t components_count;
 
 
-static int assign_component_index(struct zcbor_string *component_id, size_t *assigned_index)
+static int assign_component_index(struct zcbor_string *component_id, size_t *assigned_index, bool dependency)
 {
 	int ret = SUIT_ERR_OVERFLOW;
 
@@ -34,7 +34,7 @@ static int assign_component_index(struct zcbor_string *component_id, size_t *ass
 			components[i].component_id = *component_id;
 			*assigned_index = i;
 
-			ret = suit_plat_create_component_handle(component_id, &components[i].component_handle);
+			ret = suit_plat_create_component_handle(component_id, dependency, &components[i].component_handle);
 
 			if (ret == SUIT_SUCCESS) {
 				components[*assigned_index].ref_count++;
@@ -115,7 +115,7 @@ int suit_manifest_append_dependency(struct suit_manifest_state *manifest, struct
 		return SUIT_ERR_MANIFEST_VALIDATION;
 	}
 
-	int ret = assign_component_index(component_id, &index);
+	int ret = assign_component_index(component_id, &index, true);
 
 	if (ret == SUIT_SUCCESS) {
 		if (components[index].is_dependency == suit_bool_false) {
@@ -158,7 +158,7 @@ int suit_manifest_append_component(struct suit_manifest_state *manifest, struct 
 		return SUIT_ERR_MANIFEST_VALIDATION;
 	}
 
-	int ret = assign_component_index(component_id, &index);
+	int ret = assign_component_index(component_id, &index, false);
 
 	if (ret == SUIT_SUCCESS) {
 		if (components[index].is_dependency == suit_bool_true) {

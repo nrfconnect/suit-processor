@@ -135,7 +135,7 @@ void test_append_component_unsupported_id(void)
 		.len = sizeof("TEST_COMPONENT_0"),
 	};
 
-	__cmock_suit_plat_create_component_handle_ExpectAndReturn(&sample_component_0, NULL, SUIT_ERR_UNSUPPORTED_COMPONENT_ID);
+	__cmock_suit_plat_create_component_handle_ExpectAndReturn(&sample_component_0, false, NULL, SUIT_ERR_UNSUPPORTED_COMPONENT_ID);
 	__cmock_suit_plat_create_component_handle_IgnoreArg_handle();
 
 	ret = suit_manifest_append_component(&manifest, &sample_component_0);
@@ -191,7 +191,7 @@ void test_append_component_fill_array(void)
 		component_handle = i;
 		sample_component_0.len = strlen("TEST_COMPONENT_0") + i;
 
-		__cmock_suit_plat_create_component_handle_ExpectAndReturn(&sample_component_0, NULL, SUIT_SUCCESS);
+		__cmock_suit_plat_create_component_handle_ExpectAndReturn(&sample_component_0, false, NULL, SUIT_SUCCESS);
 		__cmock_suit_plat_create_component_handle_IgnoreArg_handle();
 		__cmock_suit_plat_create_component_handle_ReturnThruPtr_handle(&component_handle);
 
@@ -260,7 +260,7 @@ void test_append_component_fill_array(void)
 		component_handle = i;
 		sample_component_0.len = strlen("TEST_COMPONENT_0") + i;
 
-		__cmock_suit_plat_create_component_handle_ExpectAndReturn(&sample_component_0, NULL, SUIT_SUCCESS);
+		__cmock_suit_plat_create_component_handle_ExpectAndReturn(&sample_component_0, false, NULL, SUIT_SUCCESS);
 		__cmock_suit_plat_create_component_handle_IgnoreArg_handle();
 		__cmock_suit_plat_create_component_handle_ReturnThruPtr_handle(&component_handle);
 
@@ -445,7 +445,7 @@ void test_append_dependency_unsupported_id(void)
 		.len = 0,
 	};
 
-	__cmock_suit_plat_create_component_handle_ExpectAndReturn(&sample_component_0, NULL, SUIT_ERR_UNSUPPORTED_COMPONENT_ID);
+	__cmock_suit_plat_create_component_handle_ExpectAndReturn(&sample_component_0, true, NULL, SUIT_ERR_UNSUPPORTED_COMPONENT_ID);
 	__cmock_suit_plat_create_component_handle_IgnoreArg_handle();
 
 	ret = suit_manifest_append_dependency(&manifest, &sample_component_0, &prefix);
@@ -496,7 +496,7 @@ void test_append_dependency_fill_array(void)
 		component_handle = i;
 		sample_component_0.len = strlen("TEST_COMPONENT_0") + i;
 
-		__cmock_suit_plat_create_component_handle_ExpectAndReturn(&sample_component_0, NULL, SUIT_SUCCESS);
+		__cmock_suit_plat_create_component_handle_ExpectAndReturn(&sample_component_0, true, NULL, SUIT_SUCCESS);
 		__cmock_suit_plat_create_component_handle_IgnoreArg_handle();
 		__cmock_suit_plat_create_component_handle_ReturnThruPtr_handle(&component_handle);
 
@@ -636,7 +636,7 @@ void test_release_appended_components(void)
 	component_handle = 0;
 	sample_component_0.len = strlen("TEST_COMPONENT_0") + 0;
 
-	__cmock_suit_plat_create_component_handle_ExpectAndReturn(&sample_component_0, NULL, SUIT_SUCCESS);
+	__cmock_suit_plat_create_component_handle_ExpectAndReturn(&sample_component_0, false, NULL, SUIT_SUCCESS);
 	__cmock_suit_plat_create_component_handle_IgnoreArg_handle();
 	__cmock_suit_plat_create_component_handle_ReturnThruPtr_handle(&component_handle);
 
@@ -646,7 +646,7 @@ void test_release_appended_components(void)
 	component_handle = 1;
 	sample_component_0.len = strlen("TEST_COMPONENT_0") + 1;
 
-	__cmock_suit_plat_create_component_handle_ExpectAndReturn(&sample_component_0, NULL, SUIT_SUCCESS);
+	__cmock_suit_plat_create_component_handle_ExpectAndReturn(&sample_component_0, false, NULL, SUIT_SUCCESS);
 	__cmock_suit_plat_create_component_handle_IgnoreArg_handle();
 	__cmock_suit_plat_create_component_handle_ReturnThruPtr_handle(&component_handle);
 
@@ -659,7 +659,7 @@ void test_release_appended_components(void)
 	component_handle = 2;
 	sample_component_0.len = strlen("TEST_COMPONENT_0") + 2;
 
-	__cmock_suit_plat_create_component_handle_ExpectAndReturn(&sample_component_0, NULL, SUIT_SUCCESS);
+	__cmock_suit_plat_create_component_handle_ExpectAndReturn(&sample_component_0, true, NULL, SUIT_SUCCESS);
 	__cmock_suit_plat_create_component_handle_IgnoreArg_handle();
 	__cmock_suit_plat_create_component_handle_ReturnThruPtr_handle(&component_handle);
 
@@ -672,7 +672,7 @@ void test_release_appended_components(void)
 	component_handle = 3;
 	sample_component_0.len = strlen("TEST_COMPONENT_0") + 3;
 
-	__cmock_suit_plat_create_component_handle_ExpectAndReturn(&sample_component_0, NULL, SUIT_SUCCESS);
+	__cmock_suit_plat_create_component_handle_ExpectAndReturn(&sample_component_0, true, NULL, SUIT_SUCCESS);
 	__cmock_suit_plat_create_component_handle_IgnoreArg_handle();
 	__cmock_suit_plat_create_component_handle_ReturnThruPtr_handle(&component_handle);
 

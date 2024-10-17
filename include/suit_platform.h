@@ -70,14 +70,14 @@ int suit_plat_authorize_unsigned_manifest(struct zcbor_string *manifest_componen
  *         If so, create and return a component handle for it.
  *
  * @param[in]  component_id      The CBOR-encoded component identifier.
+ * @param[in]  dependency        True if a component is a dependency component.
  * @param[out] component_handle  A reference for use with other functions in
  *                               this API, instead of always passing the
  *                               @p parts.
  *
  * @returns SUIT_SUCCESS if the component handle was created, error code otherwise.
  */
-int suit_plat_create_component_handle(struct zcbor_string *component_id,
-		suit_component_t *handle);
+int suit_plat_create_component_handle(struct zcbor_string *component_id, bool dependency, suit_component_t *handle);
 
 /** @brief Release loaded component properties and handles assigned to them.
  *
