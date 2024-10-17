@@ -149,12 +149,12 @@ void radio_assert_envelope_integrity(bool installed)
 
 	/* component creation */
 	__cmock_suit_plat_authorize_component_id_ExpectComplexArgsAndReturn(&exp_radio_manifest_id, &exp_radio_fw_id, SUIT_SUCCESS);
-	__cmock_suit_plat_create_component_handle_ExpectComplexArgsAndReturn(&exp_radio_fw_id, NULL, SUIT_SUCCESS);
+	__cmock_suit_plat_create_component_handle_ExpectComplexArgsAndReturn(&exp_radio_fw_id, false, NULL, SUIT_SUCCESS);
 	__cmock_suit_plat_create_component_handle_IgnoreArg_handle();
 	__cmock_suit_plat_create_component_handle_ReturnThruPtr_handle(&radio_fw_component_handle);
 
 	__cmock_suit_plat_authorize_component_id_ExpectComplexArgsAndReturn(&exp_radio_manifest_id, &exp_fw_memptr_id, SUIT_SUCCESS);
-	__cmock_suit_plat_create_component_handle_ExpectComplexArgsAndReturn(&exp_fw_memptr_id, NULL, SUIT_SUCCESS);
+	__cmock_suit_plat_create_component_handle_ExpectComplexArgsAndReturn(&exp_fw_memptr_id, false, NULL, SUIT_SUCCESS);
 	__cmock_suit_plat_create_component_handle_IgnoreArg_handle();
 	__cmock_suit_plat_create_component_handle_ReturnThruPtr_handle(&radio_fw_memptr_component_handle);
 
@@ -181,12 +181,12 @@ void radio_assert_envelope_authorization(bool installed)
 void radio_assert_component_creation(void)
 {
 	__cmock_suit_plat_authorize_component_id_ExpectComplexArgsAndReturn(&exp_radio_manifest_id, &exp_radio_fw_id, SUIT_SUCCESS);
-	__cmock_suit_plat_create_component_handle_ExpectComplexArgsAndReturn(&exp_radio_fw_id, NULL, SUIT_SUCCESS);
+	__cmock_suit_plat_create_component_handle_ExpectComplexArgsAndReturn(&exp_radio_fw_id, false, NULL, SUIT_SUCCESS);
 	__cmock_suit_plat_create_component_handle_IgnoreArg_handle();
 	__cmock_suit_plat_create_component_handle_ReturnThruPtr_handle(&radio_fw_component_handle);
 
 	__cmock_suit_plat_authorize_component_id_ExpectComplexArgsAndReturn(&exp_radio_manifest_id, &exp_fw_memptr_id, SUIT_SUCCESS);
-	__cmock_suit_plat_create_component_handle_ExpectComplexArgsAndReturn(&exp_fw_memptr_id, NULL, SUIT_SUCCESS);
+	__cmock_suit_plat_create_component_handle_ExpectComplexArgsAndReturn(&exp_fw_memptr_id, false, NULL, SUIT_SUCCESS);
 	__cmock_suit_plat_create_component_handle_IgnoreArg_handle();
 	__cmock_suit_plat_create_component_handle_ReturnThruPtr_handle(&radio_fw_memptr_component_handle);
 }
