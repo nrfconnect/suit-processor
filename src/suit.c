@@ -231,7 +231,12 @@ int suit_process_sequence(const uint8_t *envelope_str, size_t envelope_len, enum
 		/* Verify manifest members */
 		for (enum suit_command_sequence seq = SUIT_SEQ_SHARED; seq < SUIT_SEQ_MAX; seq++) {
 			int ret = suit_schedule_validation(state, manifest_state, seq);
-			if (ret == SUIT_ERR_UNAVAILABLE_COMMAND_SEQ) {
+			if ((ret == SUIT_ERR_UNAUTHORIZED_COMMAND_SEQ) && (seq != seq_name)) {
+				/* Since this loop goes through all possible sequences, mask error that indicates missing,
+				 * severed sequence if the sequence is not the one that is curreclty executed.
+				 */
+				ret = SUIT_SUCCESS;
+			} else if (ret == SUIT_ERR_UNAVAILABLE_COMMAND_SEQ) {
 				ret = SUIT_SUCCESS;
 			} else if (ret == SUIT_ERR_AGAIN) {
 				ret = suit_process_scheduled(state);

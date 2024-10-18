@@ -55,6 +55,7 @@ extern "C" {
 #define SUIT_ERR_UNSUPPORTED_COSE         20 // Unsupported type of COSE structure encountered.
 #define SUIT_ERR_UNSUPPORTED_ALG          21 // Unsupported COSE algorithm encountered.
 #define SUIT_ERR_UNAUTHORIZED_COMPONENT   22 // Unauthorized component ID.
+#define SUIT_ERR_UNAUTHORIZED_COMMAND_SEQ 23 // Severed command sequence not authorized.
 #define SUIT_ERR_AGAIN                    100 // The execution has not yet finished. Call the API again.
 #define SUIT_ERR_OVERFLOW                 101 // The execution context is too small to handle the command sequence.
 #define SUIT_FAIL_SOFT_CONDITION          102 // Test failed (e.g. Vendor ID/Class ID) and soft-failure parameter was set to true.

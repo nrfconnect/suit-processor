@@ -304,7 +304,7 @@ int suit_manifest_get_command_seq(struct suit_manifest_state *manifest, enum sui
 		return SUIT_ERR_UNAVAILABLE_COMMAND_SEQ;
 	}
 
-	return SUIT_ERR_CRASH;
+	return SUIT_ERR_UNAUTHORIZED_COMMAND_SEQ;
 }
 
 int suit_manifest_get_integrated_payload(struct suit_manifest_state *manifest, struct zcbor_string *uri, struct zcbor_string *payload)

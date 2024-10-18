@@ -337,10 +337,7 @@ int suit_schedule_validation(struct suit_processor_state *state, struct suit_man
 
 	ret = suit_manifest_get_command_seq(manifest, seq_name, &cmd_seq_str);
 	if (ret != SUIT_SUCCESS) {
-		/* No matter of the reason of failure when getting the command sequence suit_schedule_validation
-		   should simply return that the command is unavailable. The dry run will verify if some error
-		   has occurred. */
-		return SUIT_ERR_UNAVAILABLE_COMMAND_SEQ;
+		return ret;
 	}
 
 	if (seq_name == SUIT_SEQ_SHARED) {
