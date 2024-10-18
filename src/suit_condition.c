@@ -318,6 +318,9 @@ int suit_condition_dependency_integrity(struct suit_processor_state *state,
 	} else {
 		if (seq_exec_state->retval == SUIT_SUCCESS) {
 			component_params->integrity_checked = true;
+		} else {
+			/* Any issue in validation of the manifest should fail the condition, not the processing. */
+			seq_exec_state->retval = SUIT_FAIL_CONDITION;
 		}
 
 		retval = seq_exec_state->retval;
