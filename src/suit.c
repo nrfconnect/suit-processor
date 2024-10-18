@@ -253,8 +253,18 @@ int suit_process_sequence(const uint8_t *envelope_str, size_t envelope_len, enum
 		SUIT_DBG("Manifest validation finished\r\n");
 
 #ifdef SUIT_PLATFORM_DRY_RUN_SUPPORT
-		if (ret == SUIT_SUCCESS) {
+		/* Do not execute dry run while booting.
+		 * The main purpose for dry run is to prevalidate manifest before it is installed.
+		 * Dry run expects all install sequences to be available, so if the sequence
+		 * is severed and dropped during the install process, the dry run will fail
+		 * during boot.
+		 */
+		if ((ret == SUIT_SUCCESS) && (seq_name != SUIT_SEQ_VALIDATE) &&
+		    (seq_name != SUIT_SEQ_LOAD) && (seq_name != SUIT_SEQ_INVOKE)) {
 			ret = suit_dry_run_manifest(manifest_state, seq_name);
+		} else {
+			/* Make sure that the dry run is not enabled. */
+			state->dry_run = suit_bool_false;
 		}
 #endif /* SUIT_PLATFORM_DRY_RUN_SUPPORT */
 	} else {

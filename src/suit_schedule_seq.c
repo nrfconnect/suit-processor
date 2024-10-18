@@ -302,7 +302,11 @@ static int suit_run_single_command(struct suit_processor_state *state, suit_comm
 		}
 	}
 
-	SUIT_ERR("Single command (%d) executed (status: %d)\r\n", command->directive.SUIT_Directive_choice, retval);
+	if (command->type == SUIT_COMMAND_CONDITION) {
+		SUIT_ERR("Single condition (%d) executed (status: %d)\r\n", command->condition.SUIT_Condition_choice, retval);
+	} else {
+		SUIT_ERR("Single directive (%d) executed (status: %d)\r\n", command->directive.SUIT_Directive_choice, retval);
+	}
 
 	return retval;
 }
