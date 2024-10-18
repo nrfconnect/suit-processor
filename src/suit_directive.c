@@ -509,7 +509,12 @@ int suit_directive_process_dependency(struct suit_processor_state *state, struct
 
 	} else if ((seq_exec_state->cmd_exec_state >= SUIT_SEQ_SHARED) && (seq_exec_state->cmd_exec_state < SUIT_SEQ_MAX)) {
 		seq_exec_state->retval = suit_schedule_validation(state, manifest_state, seq_exec_state->cmd_exec_state);
-		if (seq_exec_state->retval == SUIT_ERR_UNAVAILABLE_COMMAND_SEQ) {
+		if ((seq_exec_state->retval == SUIT_ERR_UNAUTHORIZED_COMMAND_SEQ) && (seq_exec_state->cmd_exec_state != state->current_seq)) {
+			/* Since this loop goes through all possible sequences, mask error that indicates missing,
+			 * severed sequence if the sequence is not the one that is curreclty executed.
+			 */
+			seq_exec_state->retval = SUIT_SUCCESS;
+		} else if (seq_exec_state->retval == SUIT_ERR_UNAVAILABLE_COMMAND_SEQ) {
 			seq_exec_state->retval = SUIT_SUCCESS;
 		}
 

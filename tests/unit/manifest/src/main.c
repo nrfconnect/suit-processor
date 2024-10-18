@@ -837,7 +837,20 @@ void test_get_command_seq_severed(void)
 
 	for (seq_name = SUIT_SEQ_INVALID; seq_name <= SUIT_SEQ_MAX; seq_name++) {
 		ret = suit_manifest_get_command_seq(&manifest, seq_name, &seq);
-		TEST_ASSERT_EQUAL_MESSAGE(SUIT_ERR_CRASH, ret, "Incorrect error code returned");
+
+		switch(seq_name) {
+			case SUIT_SEQ_INVALID:
+			case SUIT_SEQ_PARSE:
+			case SUIT_SEQ_MAX:
+				TEST_ASSERT_EQUAL_MESSAGE(SUIT_ERR_CRASH, ret,
+					"Incorrect error code for unsupported sequence returned");
+				break;
+
+			default:
+				TEST_ASSERT_EQUAL_MESSAGE(SUIT_ERR_UNAUTHORIZED_COMMAND_SEQ, ret,
+					"Incorrect error code for evered sequence returned");
+				break;
+		}
 	}
 }
 
