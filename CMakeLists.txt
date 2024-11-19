@@ -12,88 +12,57 @@ else()
   set(ZCBOR_COMMAND ${PYTHON_EXECUTABLE} ${ZEPHYR_ZCBOR_MODULE_DIR}/zcbor/zcbor.py)
 endif()
 
-set(ZCBOR_DIR "${CMAKE_CURRENT_BINARY_DIR}")
+function(zcbor_generate_library name)
+  cmake_parse_arguments(arg "DECODE;ENCODE" "" "CDDL_FILES;ENTRY_TYPES" ${ARGN})
+
+  # Setup zcbor command arguments
+  list(TRANSFORM arg_CDDL_FILES PREPEND "--cddl;" OUTPUT_VARIABLE zcbor_code_args)
+  if(arg_DECODE)
+    list(APPEND zcbor_code_args --decode)
+  endif()
+  if(arg_ENCODE)
+    list(APPEND zcbor_code_args --encode)
+  endif()
+  list(APPEND zcbor_code_args
+    --entry-types ${arg_ENTRY_TYPES}
+    --output-cmake ${name}.cmake
+    --copy-sources
+  )
+  execute_process(
+    COMMAND ${ZCBOR_COMMAND} code ${zcbor_code_args}
+    WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
+    COMMAND_ERROR_IS_FATAL ANY
+  )
+  include(${CMAKE_CURRENT_BINARY_DIR}/${name}.cmake)
+
+  # Track changes to input cddl files
+  set_property(DIRECTORY APPEND PROPERTY CMAKE_CONFIGURE_DEPENDS ${arg_CDDL_FILES})
+endfunction()
 
 # Generate and add COSE parser code
-set(ZCBOR_COMMAND_COSE
-  ${ZCBOR_COMMAND}
-    code
-    -c "${CMAKE_CURRENT_LIST_DIR}/cddl/cose_sign.cddl"
-    -c "${CMAKE_CURRENT_LIST_DIR}/cddl/cose_encrypt.cddl"
-    -d -e
-    -t COSE_Sign1_Tagged Sig_structure1
-       COSE_Encrypt_Tagged Enc_structure
-    --output-cmake cose.cmake
-    --copy-sources
+zcbor_generate_library(cose
+  CDDL_FILES
+    ${CMAKE_CURRENT_LIST_DIR}/cddl/cose_sign.cddl
+    ${CMAKE_CURRENT_LIST_DIR}/cddl/cose_encrypt.cddl
+  DECODE ENCODE
+  ENTRY_TYPES
+    COSE_Sign1_Tagged Sig_structure1
+    COSE_Encrypt_Tagged Enc_structure
 )
-
-if(NOT EXISTS "${ZCBOR_DIR}/cose.cmake")
-execute_process(
-  COMMAND ${ZCBOR_COMMAND_COSE}
-  WORKING_DIRECTORY ${ZCBOR_DIR}
-  COMMAND_ERROR_IS_FATAL ANY
-)
-endif()
-
-# Create cmake target to track changes in the input cddl file
-add_custom_command(
-  OUTPUT "${ZCBOR_DIR}/cose.cmake"
-  DEPENDS "${CMAKE_CURRENT_LIST_DIR}/cddl/cose_sign.cddl"
-  COMMAND ${ZCBOR_COMMAND_COSE}
-  WORKING_DIRECTORY "${ZCBOR_DIR}"
-  )
-add_custom_target(zcbor_cose ALL
-  DEPENDS "${ZCBOR_DIR}/cose.cmake"
-  COMMENT "Generate cose encode/decode sources for parsing CBOR"
-  )
-
-include("${ZCBOR_DIR}/cose.cmake")
-# Specify the absolute path for ZCBOR-generated code include directory
-target_include_directories(cose PUBLIC
-    ${ZCBOR_DIR}/include
-    )
 
 # Generate and add SUIT envelope parser code
-set(ZCBOR_COMMAND_MANIFEST
-  ${ZCBOR_COMMAND}
-    code
-    -c "${CMAKE_CURRENT_LIST_DIR}/cddl/manifest.cddl"
-    -c "${CMAKE_CURRENT_LIST_DIR}/cddl/trust_domains.cddl"
-    -c "${CMAKE_CURRENT_LIST_DIR}/cddl/update_management.cddl"
-    -c "${CMAKE_CURRENT_LIST_DIR}/cddl/firmware_encryption.cddl"
-    -d
-    -t SUIT_Envelope_Tagged SUIT_Manifest SUIT_Shared_Sequence SUIT_Command_Sequence
-       SUIT_Condition SUIT_Directive SUIT_Shared_Commands SUIT_Text_Map SUIT_Digest
-       SUIT_Condition_Version_Comparison_Value SUIT_Parameter_Version_Match
-    --output-cmake manifest.cmake
-    --copy-sources
+zcbor_generate_library(manifest
+  CDDL_FILES
+    ${CMAKE_CURRENT_LIST_DIR}/cddl/manifest.cddl
+    ${CMAKE_CURRENT_LIST_DIR}/cddl/trust_domains.cddl
+    ${CMAKE_CURRENT_LIST_DIR}/cddl/update_management.cddl
+    ${CMAKE_CURRENT_LIST_DIR}/cddl/firmware_encryption.cddl
+  DECODE
+  ENTRY_TYPES
+    SUIT_Envelope_Tagged SUIT_Manifest SUIT_Shared_Sequence SUIT_Command_Sequence
+    SUIT_Condition SUIT_Directive SUIT_Shared_Commands SUIT_Text_Map SUIT_Digest
+    SUIT_Condition_Version_Comparison_Value SUIT_Parameter_Version_Match
 )
-if(NOT EXISTS "${ZCBOR_DIR}/manifest.cmake")
-execute_process(
-  COMMAND ${ZCBOR_COMMAND_MANIFEST}
-  WORKING_DIRECTORY ${ZCBOR_DIR}
-  COMMAND_ERROR_IS_FATAL ANY
-)
-endif()
-
-# Create cmake target to track changes in the input cddl file
-add_custom_command(
-  OUTPUT "${ZCBOR_DIR}/manifest.cmake"
-  DEPENDS "${CMAKE_CURRENT_LIST_DIR}/cddl/manifest.cddl"
-  DEPENDS "${CMAKE_CURRENT_LIST_DIR}/cddl/trust_domains.cddl"
-  COMMAND ${ZCBOR_COMMAND_MANIFEST}
-  WORKING_DIRECTORY "${ZCBOR_DIR}"
-  )
-add_custom_target(zcbor_manifest ALL
-  DEPENDS "${ZCBOR_DIR}/manifest.cmake"
-  COMMENT "Generate manifest encode/decode sources for parsing CBOR"
-  )
-
-include("${ZCBOR_DIR}/manifest.cmake")
-# Specify the absolute path for ZCBOR-generated code include directory
-target_include_directories(manifest PUBLIC
-    ${ZCBOR_DIR}/include
-    )
 
 # Define SUIT library
 add_library(suit)
