@@ -838,22 +838,6 @@ int suit_decoder_decode_sequences(struct suit_decoder_state *state)
 		}
 	}
 
-	if ((state->decoded_manifest->dependency_resolution_seq_status != AUTHENTICATED) &&
-	    (state->decoded_manifest->dependency_resolution_seq_status != UNAVAILABLE)) {
-		state->decoded_manifest->dependency_resolution_seq_status = UNAVAILABLE;
-		if (ret == SUIT_SUCCESS) {
-			ret = SUIT_ERR_MANIFEST_VALIDATION;
-		}
-	}
-
-	if ((state->decoded_manifest->candidate_verification_seq_status != AUTHENTICATED) &&
-	    (state->decoded_manifest->candidate_verification_seq_status != UNAVAILABLE)) {
-		state->decoded_manifest->candidate_verification_seq_status = UNAVAILABLE;
-		if (ret == SUIT_SUCCESS) {
-			ret = SUIT_ERR_MANIFEST_VALIDATION;
-		}
-	}
-
 	if (ret == SUIT_SUCCESS) {
 		state->step = SEQUENCES_DECODED;
 	} else  {
