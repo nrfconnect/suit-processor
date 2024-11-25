@@ -476,7 +476,16 @@ int suit_directive_process_dependency(struct suit_processor_state *state, struct
 	manifest_state = &state->manifest_stack[state->manifest_stack_height - 1];
 
 	if (seq_exec_state->retval != SUIT_SUCCESS) {
-		retval = seq_exec_state->retval;
+		if (seq_exec_state->cmd_exec_state == SUIT_SEQ_MAX + 2) {
+			/** Failure of processing a dependency should not lead to a hard failure.
+			 *  The higher level manifest might need to implement a fallback mechanism
+			 *  if memory was damaged by the dependency.
+			 */
+			retval = SUIT_FAIL_CONDITION;
+		} else {
+			retval = seq_exec_state->retval;
+		}
+
 	} else if (seq_exec_state->cmd_exec_state == SUIT_SEQ_EXEC_DEFAULT_STATE) {
 		/** Return a pointer to the manifest contents, stored inside the component. */
 		retval = suit_plat_retrieve_manifest(component_params->component_handle, &envelope_str, &envelope_len);
