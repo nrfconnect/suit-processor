@@ -86,6 +86,7 @@ enum suit_cose_alg {
 	suit_cose_sha256 = -16,
 	suit_cose_es256 = -7,
 	suit_cose_EdDSA = -8,
+	suit_cose_VS_HashEdDSA = -65537,
 	suit_cose_aes256_gcm = 3,
 	suit_cose_aes256_kw = -5,
 	suit_cose_direct = -6,
