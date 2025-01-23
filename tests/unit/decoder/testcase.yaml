@@ -1,4 +1,7 @@
 tests:
   suit-processor.unit.decoder:
-    platform_allow: native_sim native_sim/native/64 mps2_an521
+    platform_allow:
+      - native_sim
+      - native_sim/native/64
+      - mps2/an521/cpu0
     tags: suit-processor suit-decoder
