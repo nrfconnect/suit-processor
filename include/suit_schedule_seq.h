@@ -19,9 +19,12 @@ extern "C" {
  * @param[in]  manifest  Manifest structure that holds the command sequence.
  * @param[in]  seq_name  Name of the command sequence to execute.
  *
- * @returns SUIT_ERR_AGAIN if the sequence execution was successfully scheduled, error code otherwise.
+ * @returns SUIT_ERR_AGAIN if the sequence execution was successfully scheduled, error code
+ *                         otherwise.
  */
-int suit_schedule_execution(struct suit_processor_state *state, struct suit_manifest_state *manifest, enum suit_command_sequence seq_name);
+int suit_schedule_execution(struct suit_processor_state *state,
+			    struct suit_manifest_state *manifest,
+			    enum suit_command_sequence seq_name);
 
 /** Schedule validation of all commands in the sequence from the current manifest.
  *
@@ -32,9 +35,12 @@ int suit_schedule_execution(struct suit_processor_state *state, struct suit_mani
  * @param[in]  manifest  Manifest structure that holds the command sequence.
  * @param[in]  seq_name  Name of the command sequence to validate.
  *
- * @returns SUIT_ERR_AGAIN if the sequence validation was successfully scheduled, error code otherwise.
+ * @returns SUIT_ERR_AGAIN if the sequence validation was successfully scheduled, error code
+ *                         otherwise.
  */
-int suit_schedule_validation(struct suit_processor_state *state, struct suit_manifest_state *manifest, enum suit_command_sequence seq_name);
+int suit_schedule_validation(struct suit_processor_state *state,
+			     struct suit_manifest_state *manifest,
+			     enum suit_command_sequence seq_name);
 
 /** Process all operations scheduled.
  *

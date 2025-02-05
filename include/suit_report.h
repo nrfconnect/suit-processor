@@ -14,16 +14,15 @@
 extern "C" {
 #endif /* __cplusplus */
 
-/** Construct a report for the given command.
+/** @brief Construct a report for the given command.
  *
- *  @param[in]  command  The command that was executed.
- *  @param[in]  result  The result of the command.
+ *  @param[in]  command     The command that was executed.
+ *  @param[in]  result      The result of the command.
  *  @param[in]  parameters  The current parameters.
- *  @param[out] report  The constructed report.
+ *  @param[out] report      The constructed report.
  */
-int suit_construct_report(unsigned int command, int result,
-		struct suit_manifest_params *parameters,
-		struct suit_report *report);
+int suit_construct_report(unsigned int command, int result, struct suit_manifest_params *parameters,
+			  struct suit_report *report);
 
 #ifdef __cplusplus
 }
