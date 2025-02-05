@@ -255,12 +255,13 @@ int suit_plat_retrieve_manifest(suit_component_t component_handle, const uint8_t
 
 /** @brief Set the current image size value, stored inside the platform component metadata.
  *
- * @param[in]  handle  A reference to the component, describing the SUIT envelope.
- * @param[in]  size    The component size, set by the manifest command.
+ * @param[in] handle                 A reference to the component, describing the SUIT envelope.
+ * @param[in] size                   The component size, set by the manifest command.
+ * @param[in] manifest_component_id  The manifest component ID, identifying the type of manifest in the system.
  *
  * @returns SUIT_SUCCESS if the size was set, error code otherwise.
  */
-int suit_plat_override_image_size(suit_component_t handle, size_t size);
+int suit_plat_override_image_size(suit_component_t handle, size_t size, struct zcbor_string *manifest_component_id);
 
 /** @brief Authorize execution of the given sequence of the dependency manifest.
  *
