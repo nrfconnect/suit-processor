@@ -215,7 +215,7 @@ int suit_directive_run_sequence(struct suit_processor_state *state, struct zcbor
 	return seq_exec_state->retval;
 }
 
-static int suit_directive_override_parameter(struct SUIT_Parameters_r *param, struct suit_manifest_params *dst)
+static int suit_directive_override_parameter(struct SUIT_Parameters_r *param, struct suit_manifest_params *dst, struct zcbor_string *manifest_component_id)
 {
 	switch (param->SUIT_Parameters_choice) {
 	case SUIT_Parameters_suit_parameter_vendor_identifier_c:
@@ -234,7 +234,7 @@ static int suit_directive_override_parameter(struct SUIT_Parameters_r *param, st
 		dst->image_digest_set = true;
 		break;
 	case SUIT_Parameters_suit_parameter_image_size_c: {
-		int ret = suit_plat_override_image_size(dst->component_handle, param->SUIT_Parameters_suit_parameter_image_size);
+		int ret = suit_plat_override_image_size(dst->component_handle, param->SUIT_Parameters_suit_parameter_image_size, manifest_component_id);
 		if (ret == SUIT_SUCCESS) {
 			SUIT_DBG("Override image size (handle: 0x%lx)\r\n", dst->component_handle);
 			dst->image_size = param->SUIT_Parameters_suit_parameter_image_size;
@@ -336,7 +336,7 @@ int suit_directive_override_parameters(struct suit_processor_state *state,
 				return retval;
 			}
 
-			retval = suit_directive_override_parameter(param, component_params);
+			retval = suit_directive_override_parameter(param, component_params, &seq_exec_state->manifest->manifest_component_id);
 			/* Command finished - execute it for the next component. */
 			if (retval != SUIT_ERR_AGAIN) {
 				int ret = suit_seq_exec_component_idx_next(seq_exec_state, &component_idx);
@@ -357,7 +357,7 @@ int suit_directive_override_parameters(struct suit_processor_state *state,
 	return retval;
 }
 
-static int suit_directive_set_parameter(struct SUIT_Parameters_r *param, struct suit_manifest_params *dst)
+static int suit_directive_set_parameter(struct SUIT_Parameters_r *param, struct suit_manifest_params *dst, struct zcbor_string *manifest_component_id)
 {
 	bool parameter_set = false;
 
@@ -403,7 +403,7 @@ static int suit_directive_set_parameter(struct SUIT_Parameters_r *param, struct 
 	}
 
 	if (parameter_set == false) {
-		return suit_directive_override_parameter(param, dst);
+		return suit_directive_override_parameter(param, dst, manifest_component_id);
 	}
 
 	return SUIT_SUCCESS;
@@ -413,6 +413,7 @@ int suit_directive_set_parameters(struct suit_processor_state *state,
 		struct suit_directive_set_parameters_m_l_map_SUIT_Parameters_m *params, uint_fast32_t param_count,
 		struct suit_manifest_params *component_params)
 {
+	struct suit_seq_exec_state *seq_exec_state;
 	int retval = SUIT_ERR_DECODING;
 
 	if ((state == NULL) || (params == NULL) || (component_params == NULL)) {
@@ -420,11 +421,16 @@ int suit_directive_set_parameters(struct suit_processor_state *state,
 		return SUIT_ERR_DECODING;
 	}
 
+	retval = suit_seq_exec_state_get(state, &seq_exec_state);
+	if (retval != SUIT_SUCCESS) {
+		return retval;
+	}
+
 	for (int j = 0; j < param_count; j++) {
 		struct SUIT_Parameters_r *param = &params[j].suit_directive_set_parameters_m_l_map_SUIT_Parameters_m;
 		SUIT_DBG("Set parameter %d (handle: 0x%lx)\r\n", param->SUIT_Parameters_choice, component_params->component_handle);
 
-		retval = suit_directive_set_parameter(param, component_params);
+		retval = suit_directive_set_parameter(param, component_params, &seq_exec_state->manifest->manifest_component_id);
 		if (retval == SUIT_ERR_AGAIN) {
 			/* Setting parameters must not use execution stack to take place. */
 			retval = SUIT_ERR_TAMP;
