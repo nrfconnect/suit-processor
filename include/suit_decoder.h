@@ -15,7 +15,8 @@ extern "C" {
 
 /** @brief Initialize the decoder context.
  *
- * @details The decoder output will be incrementally stored inside the provided manifest context structure.
+ * @details The decoder output will be incrementally stored inside the provided manifest context
+ *          structure.
  *
  * @param[in] state     Manifest decoder state to use.
  * @param[in] manifest  Manifest structure to use during decoder operation.
@@ -37,16 +38,18 @@ int suit_decoder_init(struct suit_decoder_state *state, struct suit_manifest_sta
  *
  * @returns SUIT_SUCCESS if the operation succeeds, error code otherwise.
  */
-int suit_decoder_decode_envelope(struct suit_decoder_state *state, const uint8_t *envelope_str, size_t envelope_len);
+int suit_decoder_decode_envelope(struct suit_decoder_state *state, const uint8_t *envelope_str,
+				 size_t envelope_len);
 
 /** @brief Verify the SUIT manifest digest.
  *
- * @details In this step the manifest payload will be checked against the digest, stored inside the authentication wrapper.
- *          This step does not decode the manifest payload contents.
+ * @details In this step the manifest payload will be checked against the digest, stored inside the
+ *          authentication wrapper. This step does not decode the manifest payload contents.
  *
  * @note This function checks the integrity of the manifest structure.
  *       It does not authenticate the manifest.
- *       The manifest authentication is postponed, since it requires the manifest component ID to be decoded.
+ *       The manifest authentication is postponed, since it requires the manifest component ID to be
+ *       decoded.
  *
  * @param[in] state  Manifest decoder state to use.
  *
@@ -57,9 +60,9 @@ int suit_decoder_check_manifest_digest(struct suit_decoder_state *state);
 /** @brief Decode the SUIT manifest.
  *
  * @details In this step the manifest structure, fetched from the decoded envelope will be parsed.
- *          The internal ZCBOR structure will be filled with pointers and the input data will be validated
- *          against the CDDL by the ZCBOR library.
- *          Due to the nested character of the sequences, only the first level of nesting is checked by this function.
+ *          The internal ZCBOR structure will be filled with pointers and the input data will be
+ *          validated against the CDDL by the ZCBOR library. Due to the nested character of
+ *          the sequences, only the first level of nesting is checked by this function.
  *
  * @note This function does not authenticate the manifest.
  *
@@ -72,9 +75,9 @@ int suit_decoder_decode_manifest(struct suit_decoder_state *state);
 /** @brief Authenticate the SUIT manifest.
  *
  * @details In this step the manifest digest will be checked against all of the signatures present
- *          inside the authentication wrappers.
- *          If the envelope does not contain signatures, the @p suit_plat_authorize_unsigned_manifest
- *          platform API will be used to authorize the manifest.
+ *          inside the authentication wrappers. If the envelope does not contain signatures, the
+ *          @p suit_plat_authorize_unsigned_manifest platform API will be used to authorize
+ *          the manifest.
  *
  * @note Delegation chains are not supported.
  *

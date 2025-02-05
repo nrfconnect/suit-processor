@@ -38,14 +38,13 @@ extern "C" {
  *
  * @returns SUIT_SUCCESS if the digest matches, error code otherwise.
  */
-int suit_plat_check_digest(enum suit_cose_alg alg_id,
-		struct zcbor_string *digest,
-		struct zcbor_string *payload);
+int suit_plat_check_digest(enum suit_cose_alg alg_id, struct zcbor_string *digest,
+			   struct zcbor_string *payload);
 
 /** @brief Authenticate the given manifest against the given signature.
  *
- * @param[in] manifest_component_id  The manifest component ID, identifying
- *                                   the type of manifest in the system.
+ * @param[in] manifest_component_id  The manifest component ID, identifying the type of manifest
+ *                                   in the system.
  * @param[in] alg_id                 The signature verification algorithm to use.
  * @param[in] key_id                 The key to check the signature with.
  * @param[in] signature              The signature to check.
@@ -54,13 +53,13 @@ int suit_plat_check_digest(enum suit_cose_alg alg_id,
  * @returns SUIT_SUCCESS if the signature is correct, error code otherwise.
  */
 int suit_plat_authenticate_manifest(struct zcbor_string *manifest_component_id,
-		enum suit_cose_alg alg_id, struct zcbor_string *key_id,
-		struct zcbor_string *signature, struct zcbor_string *data);
+				    enum suit_cose_alg alg_id, struct zcbor_string *key_id,
+				    struct zcbor_string *signature, struct zcbor_string *data);
 
 /** @brief Check that the provided manifest is allowed to be unsigned.
  *
- * @param[in] manifest_component_id  The manifest component ID, identifying
- *                                   the type of manifest in the system.
+ * @param[in] manifest_component_id  The manifest component ID, identifying the type of manifest
+ *                                   in the system.
  *
  * @returns SUIT_SUCCESS if the manifest can be processed, error code otherwise.
  */
@@ -69,19 +68,18 @@ int suit_plat_authorize_unsigned_manifest(struct zcbor_string *manifest_componen
 /** @brief Check that the given component ID exists, is valid, and is authorized.
  *         If so, create and return a component handle for it.
  *
- * @param[in]  component_id      The CBOR-encoded component identifier.
- * @param[in]  dependency        True if a component is a dependency component.
- * @param[out] component_handle  A reference for use with other functions in
- *                               this API, instead of always passing the
- *                               @p parts.
+ * @param[in]  component_id  The CBOR-encoded component identifier.
+ * @param[in]  dependency    True if a component is a dependency component.
+ * @param[out] handle        A reference for use with other functions in this API.
  *
  * @returns SUIT_SUCCESS if the component handle was created, error code otherwise.
  */
-int suit_plat_create_component_handle(struct zcbor_string *component_id, bool dependency, suit_component_t *handle);
+int suit_plat_create_component_handle(struct zcbor_string *component_id, bool dependency,
+				      suit_component_t *handle);
 
 /** @brief Release loaded component properties and handles assigned to them.
  *
- * @param[in] component_handle  The platform-specific component handle value.
+ * @param[in] handle  The platform-specific component handle value.
  *
  * @returns SUIT_SUCCESS if the component handle was released, error code otherwise.
  */
@@ -89,14 +87,14 @@ int suit_plat_release_component_handle(suit_component_t handle);
 
 /** @brief Check the provided payload against the provided digest.
  *
- * @param[in] handle      A reference to the checked component.
- * @param[in] alg_id      The digest verification algorithm to use.
- * @param[in] digest      Expected diest value.
+ * @param[in] handle  A reference to the checked component.
+ * @param[in] alg_id  The digest verification algorithm to use.
+ * @param[in] digest  Expected diest value.
  *
  * @returns SUIT_SUCCESS if the image digest matches, error code otherwise.
  */
-int suit_plat_check_image_match(suit_component_t handle,
-		enum suit_cose_alg alg_id, struct zcbor_string *digest);
+int suit_plat_check_image_match(suit_component_t handle, enum suit_cose_alg alg_id,
+				struct zcbor_string *digest);
 
 /** @brief Check the provided payload against the component value.
  *
@@ -145,76 +143,107 @@ int suit_plat_check_cid(suit_component_t handle, struct zcbor_string *cid_uuid);
  */
 int suit_plat_check_did(suit_component_t handle, struct zcbor_string *did_uuid);
 
-/** @brief Check that the provided sequence number for a given manifest is recent enough.
+/** @brief Check that the provided sequence number for a given manifest is
+ *         recent enough.
  *
  * @param[in] seq_name               The currently processed SUIT manifest sequence.
- * @param[in] manifest_component_id  The manifest component ID, identifying
- *                                   the type of manifest in the system.
+ * @param[in] manifest_component_id  The manifest component ID, identifying the type of manifest
+ *                                   in the system.
  * @param[in] seq_num                The manifest sequence number value.
  *
- * @returns SUIT_SUCCESS if the sequence is allowed to be executed with a given sequence number, error code otherwise.
+ * @returns SUIT_SUCCESS if the sequence is allowed to be executed with a given sequence number,
+ *                       error code otherwise.
  */
-int suit_plat_authorize_sequence_num(enum suit_command_sequence seq_name, struct zcbor_string *manifest_component_id, unsigned int seq_num);
+int suit_plat_authorize_sequence_num(enum suit_command_sequence seq_name,
+				     struct zcbor_string *manifest_component_id,
+				     unsigned int seq_num);
 
 /** Check that the provided component ID is supported by the given manifest.
  *
- * @param[in] manifest_component_id  The manifest component ID, identifying
- *                                   the type of manifest in the system.
+ * @param[in] manifest_component_id  The manifest component ID, identifying the type of manifest
+ *                                   in the system.
  * @param[in] component_id           The CBOR-encoded component identifier to verify.
  *
  * @returns SUIT_SUCCESS if the component ID is allowed, error code otherwise.
  */
-int suit_plat_authorize_component_id(struct zcbor_string *manifest_component_id, struct zcbor_string *component_id);
+int suit_plat_authorize_component_id(struct zcbor_string *manifest_component_id,
+				     struct zcbor_string *component_id);
 
-/** @brief Fetch the payload from the given @p uri into @p dst.
+/** @brief Fetch the payload from the given @p uri into @p dst_handle.
  *
- * @param[in] dst_handle  A reference to the destination component.
- * @param[in] uri         A reference to the buffer, containing the URI to be fetched.
+ * @param[in] dst_handle             A reference to the destination component.
+ * @param[in] uri                    A reference to the buffer, containing the URI to be fetched.
+ * @param[in] manifest_component_id  The manifest component ID, identifying the type of manifest
+ *                                   in the system.
+ * @param[in] enc_info               A reference to the structure, containing encryption info.
  *
  * @returns SUIT_SUCCESS if the operation succeeds, error code otherwise.
  */
-int suit_plat_fetch(suit_component_t dst_handle, struct zcbor_string *uri, struct zcbor_string *manifest_component_id, struct suit_encryption_info *enc_info);
+int suit_plat_fetch(suit_component_t dst_handle, struct zcbor_string *uri,
+		    struct zcbor_string *manifest_component_id,
+		    struct suit_encryption_info *enc_info);
 
-/** @brief Fetch the given integrated payload into @p dst.
+/** @brief Fetch the given integrated payload into @p dst_handle.
  *
- * @param[in] dst_handle  A reference to the destination component.
- * @param[in] payload     A reference to the buffer, describing the fetched content.
+ * @param[in] dst_handle             A reference to the destination component.
+ * @param[in] payload                A reference to the buffer, describing the URI to be fetched.
+ * @param[in] manifest_component_id  The manifest component ID, identifying the type of manifest
+ *                                   in the system.
+ * @param[in] enc_info               A reference to the structure, containing encryption info.
  *
  * @returns SUIT_SUCCESS if the operation succeeds, error code otherwise.
  */
-int suit_plat_fetch_integrated(suit_component_t dst_handle, struct zcbor_string *payload, struct zcbor_string *manifest_component_id, struct suit_encryption_info *enc_info);
+int suit_plat_fetch_integrated(suit_component_t dst_handle, struct zcbor_string *payload,
+			       struct zcbor_string *manifest_component_id,
+			       struct suit_encryption_info *enc_info);
 
 /** @brief Copy a payload from @p src_handle to @p dst_handle.
  *
- * @param[in] dst_handle  A reference to the destination component.
- * @param[in] src_handle  A reference to the source component.
+ * @param[in] dst_handle             A reference to the destination component.
+ * @param[in] src_handle             A reference to the source component.
+ * @param[in] manifest_component_id  The manifest component ID, identifying the type of manifest
+ *                                   in the system.
+ * @param[in] enc_info               A reference to the structure, containing encryption info.
  *
  * @returns SUIT_SUCCESS if the operation succeeds, error code otherwise.
  */
-int suit_plat_copy(suit_component_t dst_handle, suit_component_t src_handle, struct zcbor_string *manifest_component_id, struct suit_encryption_info *enc_info);
+int suit_plat_copy(suit_component_t dst_handle, suit_component_t src_handle,
+		   struct zcbor_string *manifest_component_id,
+		   struct suit_encryption_info *enc_info);
 
 /** @brief Swap a payload from @p src_handle to @p dst_handle.
  *
- * @param[in] dst_handle  A reference to the destination component.
- * @param[in] src_handle  A reference to the source component.
+ * @param[in] dst_handle             A reference to the destination component.
+ * @param[in] src_handle             A reference to the source component.
+ * @param[in] manifest_component_id  The manifest component ID, identifying the type of manifest
+ *                                   in the system.
+ * @param[in] enc_info               A reference to the structure, containing encryption info.
  *
  * @returns SUIT_SUCCESS if the operation succeeds, error code otherwise.
  */
-int suit_plat_swap(suit_component_t dst_handle, suit_component_t src_handle, struct zcbor_string *manifest_component_id, struct suit_encryption_info *enc_info);
+int suit_plat_swap(suit_component_t dst_handle, suit_component_t src_handle,
+		   struct zcbor_string *manifest_component_id,
+		   struct suit_encryption_info *enc_info);
 
 /** @brief Write a payload from @p content to @p dst_handle.
  *
- * @param[in] dst_handle  A reference to the destination component.
- * @param[in] content     A reference to the buffer, describing the content.
+ * @param[in] dst_handle             A reference to the destination component.
+ * @param[in] content                A reference to the buffer, describing the content.
+ * @param[in] manifest_component_id  The manifest component ID, identifying the type of manifest
+ *                                   in the system.
+ * @param[in] enc_info               A reference to the structure, containing encryption info.
  *
  * @returns SUIT_SUCCESS if the operation succeeds, error code otherwise.
  */
-int suit_plat_write(suit_component_t dst_handle, struct zcbor_string *content, struct zcbor_string *manifest_component_id, struct suit_encryption_info *enc_info);
+int suit_plat_write(suit_component_t dst_handle, struct zcbor_string *content,
+		    struct zcbor_string *manifest_component_id,
+		    struct suit_encryption_info *enc_info);
 
 /** @brief Invoke the given image.
  *
  * @param[in] image_handle  A reference to the invoked component.
- * @param[in] invoke_args   A reference to the buffer with platform-specific invoke arguments.
+ * @param[in] invoke_args   A reference to the buffer with platform-specific
+ *                          invoke arguments.
  *
  * @returns SUIT_SUCCESS if the operation succeeds, error code otherwise.
  */
@@ -234,14 +263,16 @@ int suit_plat_report(unsigned int rep_policy, struct suit_report *report);
 /** @brief A callback function, informing about the sequence completion.
  *
  * @param[in] seq_name               The finished SUIT manifest sequence.
- * @param[in] manifest_component_id  The manifest component ID, identifying
- *                                   the type of manifest in the system.
+ * @param[in] manifest_component_id  The manifest component ID, identifying the type of manifest
+ *                                   in the system.
  * @param[in] envelope_str           A reference to the SUIT envelope that was processed.
  * @param[in] envelope_len           The length of the processed envelope.
  *
  * @returns SUIT_SUCCESS if the callback succeeds, error code otherwise.
  */
-int suit_plat_sequence_completed(enum suit_command_sequence seq_name, struct zcbor_string *manifest_component_id, const uint8_t *envelope_str, size_t envelope_len);
+int suit_plat_sequence_completed(enum suit_command_sequence seq_name,
+				 struct zcbor_string *manifest_component_id,
+				 const uint8_t *envelope_str, size_t envelope_len);
 
 /** @brief Return a pointer to the SUIT envelope, stored inside the component.
  *
@@ -251,23 +282,28 @@ int suit_plat_sequence_completed(enum suit_command_sequence seq_name, struct zcb
  *
  * @returns SUIT_SUCCESS if the manifest was returned, error code otherwise.
  */
-int suit_plat_retrieve_manifest(suit_component_t component_handle, const uint8_t **envelope_str, size_t *envelope_len);
+int suit_plat_retrieve_manifest(suit_component_t component_handle, const uint8_t **envelope_str,
+				size_t *envelope_len);
 
-/** @brief Set the current image size value, stored inside the platform component metadata.
+/** @brief Set the current image size value, stored inside the platform
+ * component metadata.
  *
  * @param[in] handle                 A reference to the component, describing the SUIT envelope.
  * @param[in] size                   The component size, set by the manifest command.
- * @param[in] manifest_component_id  The manifest component ID, identifying the type of manifest in the system.
+ * @param[in] manifest_component_id  The manifest component ID, identifying the type of manifest
+ *                                   in the system.
  *
  * @returns SUIT_SUCCESS if the size was set, error code otherwise.
  */
-int suit_plat_override_image_size(suit_component_t handle, size_t size, struct zcbor_string *manifest_component_id);
+int suit_plat_override_image_size(suit_component_t handle, size_t size,
+				  struct zcbor_string *manifest_component_id);
 
 /** @brief Authorize execution of the given sequence of the dependency manifest.
  *
- * @details This function allow to restrict different manifest topologies, depending on the execution context.
- *          For example, it may be allowed to include a manifest as dependency for the update procedure, but prohibited
- *          to boot it's components.
+ * @details This function allow to restrict different manifest topologies,
+ *          depending on the execution context.
+ *          For example, it may be allowed to include a manifest as dependency for the update
+ *          procedure, but prohibited to boot it's components.
  *
  * @param[in]  parent_component_id  Parent manifest component ID.
  * @param[in]  child_component_id   Child manifest component ID.
@@ -275,13 +311,15 @@ int suit_plat_override_image_size(suit_component_t handle, size_t size, struct z
  *
  * @returns SUIT_SUCCESS if the manifest was returned, error code otherwise.
  */
-int suit_plat_authorize_process_dependency(struct zcbor_string *parent_component_id, struct zcbor_string *child_component_id, enum suit_command_sequence seq_name);
+int suit_plat_authorize_process_dependency(struct zcbor_string *parent_component_id,
+					   struct zcbor_string *child_component_id,
+					   enum suit_command_sequence seq_name);
 
 /** @brief Read the current version of the component.
  *
  * @param[in]     handle       A reference to the component.
- * @param[out]    version      Pointer to an array that should be filled with the manifest version (semantic)
- *                             value.
+ * @param[out]    version      Pointer to an array that should be filled with the manifest version
+ *                             (semantic) value.
  * @param[inout]  version_len  As input - maximum length of the version array.
  *                             As output - length of the manifest version.
  *
@@ -292,48 +330,73 @@ int suit_plat_component_version_get(suit_component_t handle, int *version, size_
 #ifdef SUIT_PLATFORM_DRY_RUN_SUPPORT
 /** @brief Check that the given fetch operation can be performed.
  *
- * @param[in] dst_handle  A reference to the destination component.
- * @param[in] uri         A reference to the buffer, containing the URI to be fetched.
+ * @param[in] dst_handle             A reference to the destination component.
+ * @param[in] uri                    A reference to the buffer, containing the URI to be fetched.
+ * @param[in] manifest_component_id  The manifest component ID, identifying the type of manifest
+ *                                   in the system.
+ * @param[in] enc_info               A reference to the structure, containing encryption info.
  *
  * @returns SUIT_SUCCESS if the operation succeeds, error code otherwise.
  */
-int suit_plat_check_fetch(suit_component_t dst_handle, struct zcbor_string *uri, struct zcbor_string *manifest_component_id, struct suit_encryption_info *enc_info);
+int suit_plat_check_fetch(suit_component_t dst_handle, struct zcbor_string *uri,
+			  struct zcbor_string *manifest_component_id,
+			  struct suit_encryption_info *enc_info);
 
 /** @brief Check that the given fetch of integrated payload can be performed.
  *
- * @param[in] dst_handle  A reference to the destination component.
- * @param[in] payload     A reference to the buffer, describing the fetched content.
+ * @param[in] dst_handle             A reference to the destination component.
+ * @param[in] payload                A reference to the buffer, describing the URI to be fetched.
+ * @param[in] manifest_component_id  The manifest component ID, identifying the type of manifest
+ *                                   in the system.
+ * @param[in] enc_info               A reference to the structure, containing encryption info.
  *
  * @returns SUIT_SUCCESS if the operation succeeds, error code otherwise.
  */
-int suit_plat_check_fetch_integrated(suit_component_t dst_handle, struct zcbor_string *payload, struct zcbor_string *manifest_component_id, struct suit_encryption_info *enc_info);
+int suit_plat_check_fetch_integrated(suit_component_t dst_handle, struct zcbor_string *payload,
+				     struct zcbor_string *manifest_component_id,
+				     struct suit_encryption_info *enc_info);
 
 /** @brief Check that the given copy operation can be performed.
  *
- * @param[in] dst_handle  A reference to the destination component.
- * @param[in] src_handle  A reference to the source component.
+ * @param[in] dst_handle             A reference to the destination component.
+ * @param[in] src_handle             A reference to the source component.
+ * @param[in] manifest_component_id  The manifest component ID, identifying the type of manifest
+ *                                   in the system.
+ * @param[in] enc_info               A reference to the structure, containing encryption info.
  *
  * @returns SUIT_SUCCESS if the operation succeeds, error code otherwise.
  */
-int suit_plat_check_copy(suit_component_t dst_handle, suit_component_t src_handle, struct zcbor_string *manifest_component_id, struct suit_encryption_info *enc_info);
+int suit_plat_check_copy(suit_component_t dst_handle, suit_component_t src_handle,
+			 struct zcbor_string *manifest_component_id,
+			 struct suit_encryption_info *enc_info);
 
 /** @brief Check that the given swap operation can be performed.
  *
- * @param[in] dst_handle  A reference to the destination component.
- * @param[in] src_handle  A reference to the source component.
+ * @param[in] dst_handle             A reference to the destination component.
+ * @param[in] src_handle             A reference to the source component.
+ * @param[in] manifest_component_id  The manifest component ID, identifying the type of manifest
+ *                                   in the system.
+ * @param[in] enc_info               A reference to the structure, containing encryption info.
  *
  * @returns SUIT_SUCCESS if the operation succeeds, error code otherwise.
  */
-int suit_plat_check_swap(suit_component_t dst_handle, suit_component_t src_handle, struct zcbor_string *manifest_component_id, struct suit_encryption_info *enc_info);
+int suit_plat_check_swap(suit_component_t dst_handle, suit_component_t src_handle,
+			 struct zcbor_string *manifest_component_id,
+			 struct suit_encryption_info *enc_info);
 
 /** @brief Check that the given invoke operation can be performed.
  *
- * @param[in] dst_handle  A reference to the destination component.
- * @param[in] content     A reference to the buffer, describing the content.
+ * @param[in] dst_handle             A reference to the destination component.
+ * @param[in] content                A reference to the buffer, describing the content.
+ * @param[in] manifest_component_id  The manifest component ID, identifying the type of manifest
+ *                                   in the system.
+ * @param[in] enc_info               A reference to the structure, containing encryption info.
  *
  * @returns SUIT_SUCCESS if the operation succeeds, error code otherwise.
  */
-int suit_plat_check_write(suit_component_t dst_handle, struct zcbor_string *content, struct zcbor_string *manifest_component_id, struct suit_encryption_info *enc_info);
+int suit_plat_check_write(suit_component_t dst_handle, struct zcbor_string *content,
+			  struct zcbor_string *manifest_component_id,
+			  struct suit_encryption_info *enc_info);
 
 /** @brief Check that the given invoke operation can be performed.
  *

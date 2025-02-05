@@ -42,7 +42,7 @@ typedef int (*seq_exec_processor_t)(struct suit_processor_state *state, suit_com
 
 enum suit_bool {
 	suit_bool_false = 0x2a17644c, ///! 10 1010 0001 0111 0110 0100 0100 1100
-	suit_bool_true = 0x713cf9c6, ///! 111 0001 0011 1100 1111 1001 1100 0110
+	suit_bool_true = 0x713cf9c6,  ///! 111 0001 0011 1100 1111 1001 1100 0110
 };
 
 struct suit_semver {
@@ -194,18 +194,26 @@ struct suit_manifest_state {
  *       directive to select the correct command block.
  */
 struct suit_seq_exec_state {
-	struct zcbor_string cmd_seq_str; ///! Structure describing the currently executed command sequence.
-	size_t n_commands; ///! The number of commands expected inside the currently executed command sequence.
-	size_t current_command; ///! The index of currently executed command within the executed command sequence.
-	int cmd_exec_state; ///! Optional current command execution state.
+	struct zcbor_string
+		cmd_seq_str;	///! Structure describing the currently executed command sequence.
+	size_t n_commands;	///! The number of commands expected inside the currently executed
+				/// command sequence.
+	size_t current_command; ///! The index of currently executed command within the executed
+				/// command sequence.
+	int cmd_exec_state;	///! Optional current command execution state.
 	enum suit_bool soft_failure; ///! suit-parameter-soft-failure
-	int retval; ///! Value returned by the nested command sequence execution.
-	seq_exec_processor_t cmd_processor; ///! The command processor to use to process the sequence.
+	int retval;		     ///! Value returned by the nested command sequence execution.
+	seq_exec_processor_t
+		cmd_processor; ///! The command processor to use to process the sequence.
 	struct suit_manifest_state *manifest; ///! The reference to the current manifest structure.
-	const uint8_t *exec_ptr; ///! The pointer within the currently executed command sequence, pointing to the current command in the sequence.
-	size_t current_component_idx; ///! In case of nested command execution - the currently selected component from the component list.
+	const uint8_t *exec_ptr; ///! The pointer within the currently executed command sequence,
+				 /// pointing to the current command in the sequence.
+	size_t current_component_idx; ///! In case of nested command execution - the currently
+				      /// selected component from the component list.
 	bool current_components[SUIT_MAX_NUM_COMPONENTS];
-	bool current_components_backup[SUIT_MAX_NUM_COMPONENTS]; //! List of components, selected before the execution of command sequences.
+	bool current_components_backup[SUIT_MAX_NUM_COMPONENTS]; //! List of components, selected
+								 //! before the execution of command
+								 //! sequences.
 };
 
 struct suit_processor_state {
@@ -224,7 +232,6 @@ struct suit_processor_state {
 	size_t seq_stack_height;
 	struct suit_seq_exec_state seq_stack[SUIT_MAX_SEQ_DEPTH];
 };
-
 
 /** @brief Populate the manifest stack by loading a new envelope.
  *
@@ -246,7 +253,8 @@ struct suit_processor_state {
  *
  * @returns SUIT_SUCCESS if the operation succeeds, error code otherwise.
  */
-int suit_processor_load_envelope(struct suit_processor_state *state, const uint8_t *envelope_str, size_t envelope_len);
+int suit_processor_load_envelope(struct suit_processor_state *state, const uint8_t *envelope_str,
+				 size_t envelope_len);
 
 #ifdef CONFIG_UNITY
 /** @brief Override the internal state variable with a pointer to the external memory.
