@@ -177,3 +177,10 @@ int __dependency_seq_authorize_callback(struct zcbor_string *parent_component_id
 	(void)assert_complex_arg(&__dependency_seq_authorize_callback_queue, child_component_id);
 	return assert_complex_arg(&__dependency_seq_authorize_callback_queue, NULL);
 }
+
+COMPLEX_ARG_Q_DEFINE(__override_image_size_callback_queue);
+int __override_image_size_callback(suit_component_t handle, size_t size, struct zcbor_string *manifest_component_id, int cmock_num_calls)
+{
+	(void)assert_complex_arg(&__override_image_size_callback_queue, manifest_component_id);
+	return assert_complex_arg(&__override_image_size_callback_queue, NULL);
+}

@@ -284,4 +284,14 @@ int __write_callback(suit_component_t dst_handle, struct zcbor_string *content, 
 }
 int __dependency_seq_authorize_callback(struct zcbor_string *parent_component_id, struct zcbor_string *child_component_id, enum suit_command_sequence seq_name, int cmock_num_calls);
 
+#define __cmock_suit_plat_override_image_size_ExpectComplexArgsAndReturn(handle, size, manifest_component_id, cmock_retval) { \
+	extern complex_arg_q_t __override_image_size_callback_queue; \
+	push_complex_arg(manifest_component_id, assert_zcbor_string, __override_image_size_callback_queue); \
+	push_retval_arg(cmock_retval, __override_image_size_callback_queue); \
+	__cmock_suit_plat_override_image_size_AddCallback(__override_image_size_callback); \
+	__cmock_suit_plat_override_image_size_ExpectAndReturn(handle, size, manifest_component_id, cmock_retval); \
+	__cmock_suit_plat_override_image_size_IgnoreArg_manifest_component_id(); \
+}
+int __override_image_size_callback(suit_component_t handle, size_t size, struct zcbor_string *manifest_component_id, int cmock_num_calls);
+
 #endif /* _SUIT_PLATFORM_MOCK_EXT_H */
