@@ -13,6 +13,11 @@
 
 extern struct suit_processor_state state;
 
+static struct zcbor_string exp_manifest_id = {
+	.value = NULL,
+	.len = 0,
+};
+
 static int execute_command_sequence(struct suit_processor_state *state, struct zcbor_string *cmd_seq_str)
 {
 	enum suit_command_sequence seq = SUIT_SEQ_PAYLOAD_FETCH;
@@ -113,7 +118,7 @@ void test_seq_execution_set_parameter_single_component_6params(void)
 	bootstrap_envelope_empty(&state);
 	bootstrap_envelope_components(&state, 1);
 
-	__cmock_suit_plat_override_image_size_ExpectAndReturn(ASSIGNED_COMPONENT_HANDLE, exp_image_size, SUIT_SUCCESS);
+	__cmock_suit_plat_override_image_size_ExpectAndReturn(ASSIGNED_COMPONENT_HANDLE, exp_image_size, &exp_manifest_id, SUIT_SUCCESS);
 
 	int retval = execute_command_sequence(&state, &seq);
 
@@ -424,7 +429,7 @@ void test_seq_execution_set_parameter_multiple_components_image_size_failed(void
 	state.components[2].image_size_set = true;
 	state.components[3].image_size_set = false;
 
-	__cmock_suit_plat_override_image_size_ExpectAndReturn(ASSIGNED_COMPONENT_HANDLE + 1, exp_image_size, SUIT_ERR_CRASH);
+	__cmock_suit_plat_override_image_size_ExpectAndReturn(ASSIGNED_COMPONENT_HANDLE + 1, exp_image_size, &exp_manifest_id, SUIT_ERR_CRASH);
 
 	int retval = execute_command_sequence(&state, &seq);
 
@@ -532,7 +537,7 @@ void test_seq_execution_set_parameter_lazy_platform_image_size_set(void)
 	state.components[2].image_size_set = true;
 	state.components[3].image_size_set = false;
 
-	__cmock_suit_plat_override_image_size_ExpectAndReturn(ASSIGNED_COMPONENT_HANDLE + 1, exp_image_size, SUIT_ERR_AGAIN);
+	__cmock_suit_plat_override_image_size_ExpectAndReturn(ASSIGNED_COMPONENT_HANDLE + 1, exp_image_size, &exp_manifest_id, SUIT_ERR_AGAIN);
 
 	int retval = execute_command_sequence(&state, &seq);
 
