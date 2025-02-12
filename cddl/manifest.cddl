@@ -8,7 +8,7 @@
 ; Removed unused COSE types
 ; Removed COSE authentication block from manifest CDDL - defined and parsed by Cose CDDL
 ; Force making suit-text severable.
-; Limited the number of possible component identifiers to 12
+; Limited the number of possible component identifiers to 16
 ; Limited the length of component identifiers to 5 strings
 ; Remove all hash algs except sha256 and sha512
 ; Remove most of text comprehension since the firmware isn't supposed to understand the text.
@@ -20,6 +20,7 @@
 ; Set the maximum number of try-each cases 5
 ; Set the maximum number of language tags to 2
 ; Allow to use both 17 and 20 as suit-install sequence key
+; Specify the maximum length of active components indexes to 16
 ;
 
 SUIT_Envelope_Tagged = #6.107(SUIT_Envelope)
@@ -103,7 +104,7 @@ SUIT_Common = {
   0*1 $$SUIT_Common-extensions,
 }
 
-SUIT_Components           = [ 1*12 SUIT_Component_Identifier ]
+SUIT_Components           = [ 1*16 SUIT_Component_Identifier ]
 
 ;REQUIRED to implement:
 suit-cose-hash-algs /= cose-alg-sha-256
@@ -130,7 +131,7 @@ SUIT_Shared_Commands //= (suit-directive-override-parameters,
 
 IndexArg /= uint
 IndexArg /= true
-IndexArg /= [+uint]
+IndexArg /= [ 1*16 uint ]
 
 
 SUIT_Directive_Try_Each_Argument_Shared = [
