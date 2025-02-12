@@ -20,9 +20,9 @@ extern "C" {
 /** The maximum number of bytestrings in a component ID. */
 #define SUIT_MAX_NUM_COMPONENT_ID_PARTS	    5
 /** The maximum number of components referenced in the manifest. */
-#define SUIT_MAX_NUM_COMPONENTS		    12
+#define SUIT_MAX_NUM_COMPONENTS		    16
 /** The maximum number of active components during processing dependency manifests. */
-#define SUIT_MAX_NUM_COMPONENT_PARAMS	    (SUIT_MAX_NUM_COMPONENTS * SUIT_MANIFEST_STACK_MAX_ENTRIES)
+#define SUIT_MAX_NUM_COMPONENT_PARAMS	    48
 /** The maximum number of integrated payloads in a single manifest. */
 #define SUIT_MAX_NUM_INTEGRATED_PAYLOADS    6
 /** The maximum number of arguments consumed by a single command. */
