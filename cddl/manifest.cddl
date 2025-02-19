@@ -17,7 +17,7 @@
 ; Remove suit-directive-swap
 ; Remove cbor-pen support
 ; Set the maximum number of parameters inside suit-directive-override-parameters to 6
-; Set the maximum number of try-each cases 5
+; Set the maximum number of try-each cases 32
 ; Set the maximum number of language tags to 2
 ; Allow to use both 17 and 20 as suit-install sequence key
 ; Specify the maximum length of active components indexes to 16
@@ -135,7 +135,7 @@ IndexArg /= [ 1*16 uint ]
 
 
 SUIT_Directive_Try_Each_Argument_Shared = [
-    2*5 bstr .cbor SUIT_Shared_Sequence,
+    2*32 bstr .cbor SUIT_Shared_Sequence,
     ?nil
 ]
 
