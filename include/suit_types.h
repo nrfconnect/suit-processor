@@ -135,6 +135,10 @@ enum suit_cose_alg {
 	suit_cose_direct = -6,
 };
 
+enum suit_compression_alg {
+	suit_lzma2 = 1,
+};
+
 struct suit_arg {
 	union {
 		struct zcbor_string *bstr;
@@ -189,6 +193,12 @@ struct suit_encryption_info {
 	enum suit_cose_alg kw_alg_id;
 	/** @brief Wrapped key. */
 	union suit_key_encryption_data kw_key;
+};
+
+struct suit_compression_info {
+	enum suit_compression_alg compression_alg_id;
+	bool arm_thumb_filter;
+	size_t decompressed_image_size;
 };
 
 static inline bool suit_compare_zcbor_strings(const struct zcbor_string *str1,
