@@ -166,7 +166,7 @@ SUIT_Directive //= (suit-directive-copy,              SUIT_Rep_Policy)
 SUIT_Directive //= (suit-directive-invoke,            SUIT_Rep_Policy)
 
 SUIT_Directive_Try_Each_Argument = [
-  2*5 bstr .cbor SUIT_Command_Sequence,
+  2*32 bstr .cbor SUIT_Command_Sequence,
   ?nil
 ]
 
